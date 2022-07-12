@@ -24,6 +24,7 @@
 
 // camera popup menu actions
 #define ACTION_MODE_MANUAL      12
+#define ACTION_MODE_MANUAL      12
 #define ACTION_MODE_ASSISTED    13
 #define ACTION_MODE_AUTO        14
 #define ACTION_MODE_ITERATE     15
