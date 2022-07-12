@@ -39,6 +39,7 @@ void screen_init();
 
 uint8_t screen_show_picture(uint8_t n);
 uint8_t screen_show_tumbnails(uint8_t start);
-void screen_text_out(uint8_t x, uint8_t y, const uint8_t * text);
+uint8_t screen_text_render(uint8_t x, uint8_t y, const uint8_t * text);
+uint8_t screen_text_out(uint8_t x, uint8_t y, const uint8_t * text);
 
 #endif

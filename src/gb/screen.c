@@ -114,6 +114,12 @@ uint8_t screen_show_tumbnails(uint8_t start) {
     return TRUE;
 }
 
-void screen_text_out(uint8_t x, uint8_t y, const uint8_t * text) {
-    screen_restore_rect(x, y, vwf_draw_text(screen_tile_addresses[y] + (x << 4), text), 1);
+uint8_t screen_text_render(uint8_t x, uint8_t y, const uint8_t * text) {
+    return vwf_draw_text(screen_tile_addresses[y] + (x << 4), text);
+}
+
+uint8_t screen_text_out(uint8_t x, uint8_t y, const uint8_t * text) {
+    uint8_t len = vwf_draw_text(screen_tile_addresses[y] + (x << 4), text);
+    screen_restore_rect(x, y, len, 1);
+    return len;
 }

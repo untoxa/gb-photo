@@ -12,10 +12,11 @@
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text
 
 #define STATES \
+_STATE(state_logo)\
 _STATE(state_gallery)\
 _STATE(state_thumbnails)\
 STATE_DEF_END
 
-#define DEFAULT_STATE state_gallery 
+#define DEFAULT_STATE state_logo 
 
 #endif
