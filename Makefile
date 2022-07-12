@@ -3,7 +3,10 @@ SHELL := /bin/bash
 # If you move this project you can change the directory
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 
+ifndef GBDK_HOME
 GBDK_HOME = ../../../gbdk-2020/build/gbdk/
+endif
+
 GBCPU = sm83
 
 LCC = $(GBDK_HOME)bin/lcc
