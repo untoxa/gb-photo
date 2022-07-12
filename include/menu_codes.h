@@ -20,6 +20,9 @@
 
 #define ACTION_THUMBNAILS       9
 #define ACTION_GALLERY          10
+#define ACTION_MANUAL           11
+#define ACTION_ASSISTED         12
+#define ACTION_BURST            13
 
 #define MENU_RESULT_YES         254
 #define MENU_RESULT_NO          253

@@ -22,6 +22,11 @@
 
 BANKREF(state_logo)
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
+static const uint8_t version_string[] = "\x03\xff Version " QUOTE(VERSION) " (" QUOTE(BRANCH) ")";
+
 void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
     static uint8_t **addr, i, j;
     static const uint8_t *data;
@@ -34,11 +39,6 @@ void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8
         }
     }
 }
-
-#define Q(x) #x
-#define QUOTE(x) Q(x)
-
-static const uint8_t version_string[] = "\x03\xff Version " QUOTE(VERSION) " (" QUOTE(BRANCH) ")";
 
 static void refresh_screen() {
     wait_vbl_done();

@@ -29,7 +29,7 @@ const menu_t DebugMenu = {
 };
 
 static uint8_t *render_array(uint8_t * dest, uint8_t * sour, uint8_t sour_size) {
-    static uint8_t digits[] = "0123456789ABCDEF";
+    static const uint8_t digits[] = "0123456789ABCDEF";
     for (uint8_t i = 0; i != sour_size; i++) {
         *dest++ = digits[(*sour) >> 4];
         *dest++ = digits[(*sour++) & 0x0f];
