@@ -17,19 +17,19 @@
 #include "menu_codes.h"
 #include "menu_main.h"
 
-BANKREF(state_shoot_assisted)
+BANKREF(state_camera)
 
 static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
-    screen_text_out(0, 0, "\x03\xff Assisted mode");
+    screen_text_out(0, 0, "\x03\xff Camera");
 }
 
-uint8_t ENTER_state_shoot_assisted() BANKED {
+uint8_t ENTER_state_camera() BANKED {
     refresh_screen();
     return 0;     
 }
 
-uint8_t UPDATE_state_shoot_assisted() BANKED {
+uint8_t UPDATE_state_camera() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_START)) {
         // run Main Menu
@@ -38,6 +38,6 @@ uint8_t UPDATE_state_shoot_assisted() BANKED {
     return 0;
 }
 
-uint8_t LEAVE_state_shoot_assisted() BANKED {
+uint8_t LEAVE_state_camera() BANKED {
     return 0;     
 }

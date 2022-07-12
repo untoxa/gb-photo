@@ -20,41 +20,25 @@
 
 #if (DEBUG_ENABLED==1)
     #define MENUITEM_DEBUG &MainMenuItemDebug
-    #define MAINMENU_HEIGHT 8
+    #define MAINMENU_HEIGHT 6
 #else 
     #define MENUITEM_DEBUG NULL
-    #define MAINMENU_HEIGHT 7
+    #define MAINMENU_HEIGHT 5
 #endif
 
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-const menu_item_t MainMenuItemManual = {
-    .prev = NULL,                   .next = &MainMenuItemBurst, 
+const menu_item_t MainMenuItemCamera = {
+    .prev = NULL,                   .next = &MainMenuItemGallery, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 1, .ofs_y = 1, .width = 10, 
-    .caption = " Manual mode",
+    .caption = " Camera",
     .onPaint = NULL,
-    .result = ACTION_MANUAL
-};
-const menu_item_t MainMenuItemBurst = {
-    .prev = &MainMenuItemManual,    .next = &MainMenuItemAssisted,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 10, 
-    .caption = " Burst mode",
-    .onPaint = NULL,
-    .result = ACTION_BURST
-};
-const menu_item_t MainMenuItemAssisted = {
-    .prev = &MainMenuItemBurst,     .next = &MainMenuItemGallery,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 10, 
-    .caption = " Assisted mode",
-    .onPaint = NULL,
-    .result = ACTION_ASSISTED
+    .result = ACTION_CAMERA
 };
 const menu_item_t MainMenuItemGallery = {
-    .prev = &MainMenuItemAssisted,  .next = &MainMenuItemAbout,
+    .prev = &MainMenuItemCamera,    .next = &MainMenuItemAbout,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 10,
+    .ofs_x = 1, .ofs_y = 2, .width = 10,
     .caption = " Image gallery",
     .onPaint = NULL,
     .result = ACTION_GALLERY
@@ -62,7 +46,7 @@ const menu_item_t MainMenuItemGallery = {
 const menu_item_t MainMenuItemAbout = {
     .prev = &MainMenuItemGallery,   .next = MENUITEM_DEBUG,
     .sub = &AboutMenu, .sub_params = NULL, 
-    .ofs_x = 1, .ofs_y = 5, .width = 10,
+    .ofs_x = 1, .ofs_y = 3, .width = 10,
     .caption = " About",
     .onPaint = NULL,
     .result = 6
@@ -71,7 +55,7 @@ const menu_item_t MainMenuItemAbout = {
 const menu_item_t MainMenuItemDebug = {
     .prev = &MainMenuItemAbout,     .next = NULL,
     .sub = &DebugMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 6, .width = 10,
+    .ofs_x = 1, .ofs_y = 4, .width = 10,
     .caption = " Debug",
     .onPaint = NULL,
     .result = MENU_RESULT_CLOSE
@@ -80,7 +64,7 @@ const menu_item_t MainMenuItemDebug = {
 const menu_t MainMenu = {
     .x = 1, .y = 3, .width = 12, .height = MAINMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &MainMenuItemManual, 
+    .items = &MainMenuItemCamera, 
     .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultMainMenu
 };
 
@@ -97,14 +81,8 @@ uint8_t MainMenuDispatch(uint8_t menu_result) {
         case MENU_RESULT_CLOSE:
             // close menu: do nothing
             return FALSE;
-        case ACTION_MANUAL:
-            CHANGE_STATE(state_shoot_manual);
-            return STATE_CHANGED();
-        case ACTION_BURST:
-            CHANGE_STATE(state_shoot_burst);
-            return STATE_CHANGED();
-        case ACTION_ASSISTED:
-            CHANGE_STATE(state_shoot_assisted);
+        case ACTION_CAMERA:
+            CHANGE_STATE(state_camera);
             return STATE_CHANGED();
         case ACTION_GALLERY:
             CHANGE_STATE(state_gallery);

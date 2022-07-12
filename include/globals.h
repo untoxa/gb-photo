@@ -15,9 +15,7 @@ extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rend
 _STATE(state_logo)\
 _STATE(state_gallery)\
 _STATE(state_thumbnails)\
-_STATE(state_shoot_manual)\
-_STATE(state_shoot_assisted)\
-_STATE(state_shoot_burst)\
+_STATE(state_camera)\
 STATE_DEF_END
 
 #define DEFAULT_STATE state_logo 
