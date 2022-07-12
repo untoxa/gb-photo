@@ -1,0 +1,9 @@
+.vscode
+/obj/*
+*.map
+*.sym
+*.ihx
+*.noi
+*.cdb
+unused
+*.bat

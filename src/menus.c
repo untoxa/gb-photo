@@ -1,0 +1,80 @@
+#include <gbdk/platform.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include "screen.h"
+#include "vwf.h"
+#include "joy.h"
+
+#include "menus.h"
+
+void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text) {
+    uint8_t len;
+    if (text) {
+        vwf_set_mask((c == SOLID_BLACK) ? 0xff : 0);
+        len = vwf_draw_text(screen_tile_addresses[y] + (x << 4), text);
+        screen_restore_rect(x, y, len, 1);
+    } else len = 0;
+    if (len < w) screen_clear_rect(x + len, y, w - len, 1, c);
+}
+
+const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t * selection, const menu_item_t * new_selection) {
+    if (selection) 
+        menu_text_out(menu->x + selection->ofs_x, menu->y + selection->ofs_y, selection->width, 
+                    SOLID_WHITE, 
+                    (selection->onPaint) ? selection->onPaint(menu, selection) : (uint8_t *)selection->caption);
+    if (new_selection)
+        menu_text_out(menu->x + new_selection->ofs_x, menu->y + new_selection->ofs_y, new_selection->width, 
+                      SOLID_BLACK, 
+                      (new_selection->onPaint) ? new_selection->onPaint(menu, new_selection) : (uint8_t *)new_selection->caption);
+    return (new_selection) ? new_selection : selection;
+}
+
+uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
+    const menu_item_t * selection;
+    uint8_t result = 0;
+
+    selection = menu->items;
+
+    if (menu->width) {
+        // zero menu frame width == not draw menu frame
+        screen_clear_rect(menu->x, menu->y, menu->width, menu->height, SOLID_WHITE);
+        set_bkg_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
+        set_bkg_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
+        set_bkg_tile_xy(menu->x,                   menu->y + menu->height - 1, CORNER_DL);
+        set_bkg_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
+    }
+
+    // draw menu items
+    for (const menu_item_t * current_item = selection; (current_item); current_item = current_item->next) {
+        menu_text_out(menu->x + current_item->ofs_x, menu->y + current_item->ofs_y, current_item->width, 
+                      ((current_item == selection) ? SOLID_BLACK : SOLID_WHITE), 
+                      (current_item->onPaint) ? current_item->onPaint(menu, current_item) : (uint8_t *)current_item->caption);
+    }
+
+    if (menu->onShow) menu->onShow(menu, param);
+
+    do {
+        PROCESS_INPUT();
+        if (menu->onTranslateKey) joy = menu->onTranslateKey(menu, selection, joy);
+        if (KEY_PRESSED(J_UP)) {
+            if (selection->prev) {
+                selection = menu_move_selection(menu, selection, selection->prev);
+            }
+        } else if (KEY_PRESSED(J_DOWN)) {
+            if (selection->next) {
+                selection = menu_move_selection(menu, selection, selection->next);
+            }
+        } else if (KEY_PRESSED(J_A)) {
+            if (selection->sub) {
+                result = menu_execute(selection->sub, selection->sub_params);
+                if (menu->onTranslateSubResult) result = menu->onTranslateSubResult(menu, selection, result);
+            } else result = selection->result;
+        } else if (KEY_PRESSED(menu->cancel_mask)) {
+            return menu->cancel_result;
+        }
+        wait_vbl_done();
+    } while (result == 0);
+
+    return result;
+}
