@@ -54,7 +54,7 @@ inline void image_capture(uint8_t capture) {
     old_capture_reg = CAM_REG_CAPTURE = capture;
 }
 
-inline uint16_t exposition_time(uint32_t us) {
+inline uint16_t exposure_time(uint32_t us) {
     uint16_t v = us >> 4;
     return ((v & 0xff) << 8) | (v >> 8);
 }
@@ -67,7 +67,7 @@ void camera_load_settings() {
     };
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     CAM_REG_EDEXOPGAIN  = 0xe0;
-    CAM_REG_EXPTIME     = exposition_time(6000);
+    CAM_REG_EXPTIME     = exposure_time(6000);
     CAM_REG_EDRAINVVREF = 0x03;
     CAM_REG_ZEROVOUT    = 0xa6;
     memcpy(CAM_REG_DITHERPATTERN, pattern, sizeof(CAM_REG_DITHERPATTERN));
