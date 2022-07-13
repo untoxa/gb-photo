@@ -6,7 +6,7 @@
 typedef struct menu_t;
 typedef struct menu_item_t;
 
-typedef void menu_handler_t (const struct menu_t * self, uint8_t * param);
+typedef uint8_t menu_handler_t (const struct menu_t * self, uint8_t * param);
 typedef uint8_t menu_translate_t (const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 typedef uint8_t * item_handler_t (const struct menu_t * menu, const struct menu_item_t * self);
 
@@ -32,6 +32,7 @@ typedef struct menu_t {
     uint8_t cancel_result; 
     menu_item_t * items;
     menu_handler_t * onShow;
+    menu_handler_t * onIdle;
     menu_translate_t * onTranslateKey;
     menu_translate_t * onTranslateSubResult;
 } menu_t;

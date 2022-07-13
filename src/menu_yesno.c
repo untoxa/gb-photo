@@ -6,7 +6,7 @@
 #include "menu_codes.h"
 #include "screen.h"
 
-void onShowYesNo(const struct menu_t * self, uint8_t * param);
+uint8_t onShowYesNo(const struct menu_t * self, uint8_t * param);
 uint8_t onTranslateKeyYesNo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t YesNoMenuItems[] = {
     {
@@ -31,8 +31,9 @@ const menu_t YesNoMenu = {
     .onShow = onShowYesNo, .onTranslateKey = onTranslateKeyYesNo, .onTranslateSubResult = NULL
 };
 
-void onShowYesNo(const menu_t * self, uint8_t * param) {
-    menu_text_out(self->x + 1, self->y + 1, 0, SOLID_WHITE, param); 
+uint8_t onShowYesNo(const menu_t * self, uint8_t * param) {
+    menu_text_out(self->x + 1, self->y + 1, 0, SOLID_WHITE, param);
+    return 0; 
 }
 
 uint8_t onTranslateKeyYesNo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {

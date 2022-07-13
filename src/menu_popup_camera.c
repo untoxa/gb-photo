@@ -116,13 +116,13 @@ const menu_t ActionSubMenu = {
     .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
-uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t CameraMenuItemMode = {
     .prev = NULL,                   .next = &CameraMenuItemTrigger, 
     .sub = &CameraModeSubMenu, .sub_params = NULL,        
     .ofs_x = 1, .ofs_y = 1, .width = 11, 
     .caption = " Mode\t\t%s",
-    .onPaint = onCameraMenuItemPaint,
+    .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemTrigger = {
@@ -130,7 +130,7 @@ const menu_item_t CameraMenuItemTrigger = {
     .sub = &TriggerSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 11, 
     .caption = " Trigger\t%s",
-    .onPaint = onCameraMenuItemPaint,
+    .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAction = {
@@ -138,7 +138,7 @@ const menu_item_t CameraMenuItemAction = {
     .sub = &ActionSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 11, 
     .caption = " Action\t\t%s",
-    .onPaint = onCameraMenuItemPaint,
+    .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_t CameraPopupMenu = {
@@ -147,7 +147,7 @@ const menu_t CameraPopupMenu = {
     .items = &CameraMenuItemMode, 
     .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
-uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     if (self == &CameraMenuItemMode) {
         sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
     } else if (self == &CameraMenuItemTrigger) {

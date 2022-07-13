@@ -11,7 +11,7 @@
 
 #include "globals.h"
 
-void onShowDebug(const struct menu_t * self, uint8_t * param);
+uint8_t onShowDebug(const struct menu_t * self, uint8_t * param);
 const menu_item_t DebugMenuItems[] = {
     {
         .prev = NULL, .next = NULL,
@@ -57,9 +57,10 @@ static void render_cam_game_data(uint8_t * data_ptr, uint8_t x, uint8_t y) {
     menu_text_out(x + 6, y, 0, SOLID_WHITE, text_buffer);
 }
 
-void onShowDebug(const menu_t * self, uint8_t * param) {
+uint8_t onShowDebug(const menu_t * self, uint8_t * param) {
     param;
     vwf_set_tab_size(2);
     render_cam_game_data((uint8_t *)&cam_game_data, self->x + 1, self->y + 1);
     render_cam_game_data((uint8_t *)&cam_game_data_echo, self->x + 1, self->y + 7);
+    return 0;
 }

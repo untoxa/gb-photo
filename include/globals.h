@@ -21,4 +21,6 @@ STATE_DEF_END
 #define DEFAULT_STATE state_logo
 #define MAIN_STATE state_camera
 
+#define LENGTH(A) (sizeof(A)/sizeof((A)[0]))
+
 #endif
