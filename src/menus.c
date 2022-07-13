@@ -87,7 +87,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
         }
         if (menu->onIdle) {
             uint8_t res;
-            if (res = menu->onIdle(menu, param)) return res; 
+            if (res = menu->onIdle(menu, selection)) return res; 
         } else wait_vbl_done();
     } while (result == 0);
 

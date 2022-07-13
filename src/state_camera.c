@@ -3,6 +3,7 @@
 #include <gbdk/platform.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "gbcamera.h"
 #include "musicmanager.h"
@@ -33,6 +34,7 @@ trigger_mode_e trigger_mode = trigger_mode_abutton;
 after_action_e after_action = after_action_save;
 
 uint8_t image_live_preview = TRUE;
+uint8_t current_exposure = 14;
 
 static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(200),    US_TO_EXPOSURE_VALUE(300),     US_TO_EXPOSURE_VALUE(400),    US_TO_EXPOSURE_VALUE(500),
@@ -100,14 +102,14 @@ uint8_t ENTER_state_camera() BANKED {
 }
 
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-uint8_t onIdleCameraMenu(const struct menu_t * self, uint8_t * param);
+uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t CameraMenuItems[] = {
     {
         .prev = NULL,                   .next = CameraMenuItems + 1, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 0, .ofs_y = 0, .width = 5, 
-        .caption = " %s",
+        .caption = " %sms",
         .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }, {
@@ -140,21 +142,55 @@ const menu_t CameraMenu = {
 };
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
+    // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons
     return (value & 0b11110000) | ((value << 1) & 0b00000100) | ((value >> 1) & 0b00000010) | ((value << 3) & 0b00001000) | ((value >> 3) & 0b00000001);
 }
-uint8_t onIdleCameraMenu(const struct menu_t * self, uint8_t * param) {
-    self; param;
+uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu; selection;
     if (image_captured()) {
         display_last_seen(TRUE);
-//        if (image_live_preview) image_capture(CAPT_POSITIVE);
+        if (image_live_preview) image_capture(CAPT_POSITIVE);
     } else if (KEY_PRESSED(J_SELECT)) {
         return ACTION_CAMERA_SUBMENU;
-    } else wait_vbl_done();
+    }
+    // !!! d-pad keys are translated
+    if (selection == (CameraMenuItems + 0)) {
+        SWITCH_RAM(CAMERA_BANK_REGISTERS);
+        if (KEY_PRESSED(J_LEFT)) {
+            if (current_exposure) {
+                current_exposure--;
+                CAM_REG_EXPTIME = exposures[current_exposure];
+                menu_move_selection(menu, NULL, selection);
+            }
+        } else if (KEY_PRESSED(J_RIGHT)) {
+            if (++current_exposure < LENGTH(exposures)) {
+                menu_move_selection(menu, NULL, selection);
+                CAM_REG_EXPTIME = exposures[current_exposure];
+            } else current_exposure = LENGTH(exposures) - 1;
+        } 
+    } 
+    wait_vbl_done();
     return 0;
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
     if (self == (CameraMenuItems + 0)) {
-        sprintf(text_buffer, self->caption, "1048ms");
+        uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
+        uint8_t * buf = text_buffer + 100;
+        uint8_t len = strlen(uitoa(value, buf, 10));
+        if (len == 1) {
+            *--buf = ',';
+            *--buf = '0';
+        } else {
+            uint8_t * tail = buf + len - 1;
+            len = *tail;
+            if (len != '0') {
+                *tail++ = ',';
+                *tail++ = len;
+            }
+            *tail = 0;
+        }
+        sprintf(text_buffer, self->caption, buf);
     } else *text_buffer = 0;
     return text_buffer;
 }
