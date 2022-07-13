@@ -156,13 +156,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // !!! d-pad keys are translated
     if (selection == (CameraMenuItems + 0)) {
         SWITCH_RAM(CAMERA_BANK_REGISTERS);
-        if (KEY_PRESSED(J_LEFT)) {
+        if (KEY_PRESSED(J_RIGHT)) {
             if (current_exposure) {
                 current_exposure--;
                 CAM_REG_EXPTIME = exposures[current_exposure];
                 menu_move_selection(menu, NULL, selection);
             }
-        } else if (KEY_PRESSED(J_RIGHT)) {
+        } else if (KEY_PRESSED(J_LEFT)) {
             if (++current_exposure < LENGTH(exposures)) {
                 menu_move_selection(menu, NULL, selection);
                 CAM_REG_EXPTIME = exposures[current_exposure];
