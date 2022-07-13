@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <string.h>
 
 #include "gbcamera.h"
 #include "musicmanager.h"
@@ -28,6 +29,8 @@ camera_mode_e camera_mode = camera_mode_manual;
 trigger_mode_e trigger_mode = trigger_mode_abutton;
 after_action_e after_action = after_action_save;
 
+uint8_t image_live_preview = TRUE;
+
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
@@ -51,6 +54,20 @@ inline void image_capture(uint8_t capture) {
     old_capture_reg = CAM_REG_CAPTURE = capture;
 }
 
+void camera_load_settings() {
+    static const uint8_t pattern[] = { 
+        0x8C, 0x98, 0xAC, 0x95, 0xA7, 0xDB, 0x8E, 0x9B, 0xB7, 0x97, 0xAA, 0xE7, 0x92, 0xA2, 0xCB, 0x8F, 
+        0x9D, 0xBB, 0x94, 0xA5, 0xD7, 0x91, 0xA0, 0xC7, 0x8D, 0x9A, 0xB3, 0x96, 0xA9, 0xE3, 0x8C, 0x99, 
+        0xAF, 0x95, 0xA8, 0xDF, 0x93, 0xA4, 0xD3, 0x90, 0x9F, 0xC3, 0x92, 0xA3, 0xCF, 0x8F, 0x9E, 0xBF
+    };
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAM_REG_EDEXOPGAIN  = 0xe0;
+    CAM_REG_EXPTIME     = 0x7701;
+    CAM_REG_EDRAINVVREF = 0x03;
+    CAM_REG_ZEROVOUT    = 0xa6;
+    memcpy(CAM_REG_DITHERPATTERN, pattern, sizeof(CAM_REG_DITHERPATTERN));
+}
+
 static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
     display_last_seen(TRUE);
@@ -58,6 +75,11 @@ static void refresh_screen() {
 
 uint8_t ENTER_state_camera() BANKED {
     refresh_screen();
+
+    // load some initial settings
+    camera_load_settings();
+    if (image_live_preview) image_capture(CAPT_POSITIVE);
+
     return 0;     
 }
 
@@ -67,6 +89,7 @@ uint8_t UPDATE_state_camera() BANKED {
     // process capturing
     if (image_captured()) {
         display_last_seen(TRUE);
+        if (image_live_preview) image_capture(CAPT_POSITIVE);
     }
 
     // process key input
@@ -74,12 +97,12 @@ uint8_t UPDATE_state_camera() BANKED {
     if (KEY_PRESSED(J_A)) {
         if (!is_capturing()) {
             music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
-            image_capture(CAPT_POSITIVE);
+//            image_capture(CAPT_POSITIVE);
         }
     } else if (KEY_PRESSED(J_B)) {
         if (!is_capturing()) {
             music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
-            image_capture(CAPT_NEGATIVE);
+//            image_capture(CAPT_NEGATIVE);
         }
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
