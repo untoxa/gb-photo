@@ -29,9 +29,26 @@ trigger_mode_e trigger_mode = trigger_mode_abutton;
 after_action_e after_action = after_action_save;
 
 void display_last_seen(uint8_t restore) {
-    SWITCH_RAM(0);
+    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
+}
+
+uint8_t old_capture_reg = 0;
+inline uint8_t is_capturing() {
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    return (CAM_REG_CAPTURE & CAPTF_CAPTURING);
+}
+inline uint8_t image_captured() {
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    uint8_t v = CAM_REG_CAPTURE;
+    uint8_t r = (((v ^ old_capture_reg) & CAPTF_CAPTURING) && !(v & CAPTF_CAPTURING));
+    old_capture_reg = v;
+    return r;
+}
+inline void image_capture(uint8_t capture) {
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    old_capture_reg = CAM_REG_CAPTURE = capture;
 }
 
 static void refresh_screen() {
@@ -46,11 +63,24 @@ uint8_t ENTER_state_camera() BANKED {
 
 uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
+
+    // process capturing
+    if (image_captured()) {
+        display_last_seen(TRUE);
+    }
+
+    // process key input
     PROCESS_INPUT();
     if (KEY_PRESSED(J_A)) {
-        music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
+        if (!is_capturing()) {
+            music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
+            image_capture(CAPT_POSITIVE);
+        }
     } else if (KEY_PRESSED(J_B)) {
-        music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+        if (!is_capturing()) {
+            music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+            image_capture(CAPT_NEGATIVE);
+        }
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
         if (!MainMenuDispatch(menu_execute(&MainMenu, NULL))) refresh_screen();

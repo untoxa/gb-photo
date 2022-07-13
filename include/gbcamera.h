@@ -29,6 +29,7 @@ typedef struct cam_game_data_t {
  * Using RAM Bank 0
  * Containing Last seen image, gameface data etc.
  */
+#define CAMERA_BANK_LAST_SEEN 0
 
 //static uint8_t AT(0xA000) last_seen_upper_unused[256];
 static uint8_t AT(0xA100) last_seen[CAMERA_IMAGE_SIZE];
@@ -72,16 +73,27 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
  * Must be written to RAM bank 16 to control the camera's sensor
  */
 
+#define CAMERA_BANK_REGISTERS 16
+
 // Camera hardware register: Capture
+#define CAPT_POSITIVE   0b00000011
+#define CAPT_NEGATIVE   0b00000001
+#define CAPTF_CAPTURING 0b00000001
+
 static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
+
 // Camera hardware register: EdgeExclusive, EdgeOperation, Gain
 static uint8_t AT(0xA001) CAM_REG_EDEXOPGAIN;
+
 // Camera hardware register: Exposure Time
 static uint16_t AT(0xA002) CAM_REG_EXPTIME;
+
 // Camera hardware register: Edge Ratio, Invert Output, Voltage Ref
 static uint8_t AT(0xA004) CAM_REG_EDRAINVVREF;
+
 // Camera hardware register: Zero Points, Voltage Out
 static uint8_t AT(0xA005) CAM_REG_ZEROVOUT;
+
 // Camera hardware register: Dither Pattern (48 bytes)
 static uint8_t AT(0xA006) CAM_REG_DITHERPATTERN[48];
 
