@@ -1,10 +1,20 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdio.h>
+
+#include "globals.h"
+
+// camera state
+#include "state_camera.h"
 
 // menus
 #include "menus.h"
 #include "menu_codes.h"
+
+const uint8_t * const camera_modes[] =  {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
+const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
+const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
 
 const menu_item_t ModeSubMenuItemManual = {
     .prev = NULL,                       .next = &ModeSubMenuItemAssisted, 
@@ -65,7 +75,7 @@ const menu_item_t TriggerSubMenuItemInterval = {
     .prev = &TriggerSubMenuItemTimer,   .next = NULL, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 1, .ofs_y = 3, .width = 8, 
-    .caption = " Interval",
+    .caption = " Repeat",
     .onPaint = NULL,
     .result = ACTION_TRIGGER_INTERVAL
 };
@@ -106,37 +116,53 @@ const menu_t ActionSubMenu = {
     .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
-
+uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t CameraMenuItemMode = {
     .prev = NULL,                   .next = &CameraMenuItemTrigger, 
     .sub = &CameraModeSubMenu, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 1, .width = 8, 
-    .caption = " Mode",
-    .onPaint = NULL,
+    .ofs_x = 1, .ofs_y = 1, .width = 11, 
+    .caption = " Mode\t\t%s",
+    .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemTrigger = {
     .prev = &CameraMenuItemMode,  .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 8, 
-    .caption = " Trigger",
-    .onPaint = NULL,
+    .ofs_x = 1, .ofs_y = 2, .width = 11, 
+    .caption = " Trigger\t%s",
+    .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAction = {
     .prev = &CameraMenuItemTrigger, .next = NULL,
     .sub = &ActionSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8, 
-    .caption = " Action",
-    .onPaint = NULL,
+    .ofs_x = 1, .ofs_y = 3, .width = 11, 
+    .caption = " Action\t\t%s",
+    .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_t CameraPopupMenu = {
-    .x = 1, .y = 3, .width = 10, .height = 5, 
+    .x = 1, .y = 3, .width = 13, .height = 5, 
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &CameraMenuItemMode, 
     .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
+uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+    if (self == &CameraMenuItemMode) {
+        sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
+    } else if (self == &CameraMenuItemTrigger) {
+        sprintf(text_buffer, self->caption, trigger_modes[trigger_mode]);
+    } else if (self == &CameraMenuItemAction) {
+        sprintf(text_buffer, self->caption, after_actions[after_action]);
+    } else *text_buffer = 0;
+    return text_buffer;
+}
+/*
+    menu_text_out( 0, 0, 5, SOLID_WHITE, camera_modes[camera_mode]);
+    menu_text_out( 5, 0, 5, SOLID_WHITE, trigger_modes[trigger_mode]);
+    menu_text_out(10, 0, 5, SOLID_WHITE, after_actions[after_action]);
+*/
+
 
 uint8_t menu_popup_camera_execute() BANKED {
     return menu_execute(&CameraPopupMenu, NULL);

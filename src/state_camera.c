@@ -2,6 +2,7 @@
 
 #include <gbdk/platform.h>
 
+#include "gbcamera.h"
 #include "musicmanager.h"
 #include "joy.h"
 #include "screen.h"
@@ -25,15 +26,15 @@ camera_mode_e camera_mode = camera_mode_manual;
 trigger_mode_e trigger_mode = trigger_mode_abutton;
 after_action_e after_action = after_action_save;
 
-const uint8_t * const camera_modes[] = {" Manual", " Assist", " Auto", " Iterate"};
-const uint8_t * const trigger_modes[] = {" Btn: [A]", " Timer", " Interval"};
-const uint8_t * const after_actions[] = {" Save", " Print", " S & P"};
+void display_last_seen(uint8_t restore) {
+    SWITCH_RAM(0);
+    screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
+    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
+}
 
 static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
-    menu_text_out( 0, 0, 5, SOLID_WHITE, camera_modes[camera_mode]);
-    menu_text_out( 5, 0, 5, SOLID_WHITE, trigger_modes[trigger_mode]);
-    menu_text_out(10, 0, 5, SOLID_WHITE, after_actions[after_action]);
+    display_last_seen(TRUE);
 }
 
 uint8_t ENTER_state_camera() BANKED {

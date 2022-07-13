@@ -37,6 +37,8 @@ inline void screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 
 void screen_init();
 
+void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture);
+
 uint8_t screen_show_picture(uint8_t n);
 uint8_t screen_show_tumbnails(uint8_t start);
 uint8_t screen_text_render(uint8_t x, uint8_t y, const uint8_t * text);

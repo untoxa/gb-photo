@@ -18,6 +18,7 @@ _STATE(state_thumbnails)\
 _STATE(state_camera)\
 STATE_DEF_END
 
-#define DEFAULT_STATE state_logo 
+#define DEFAULT_STATE state_logo
+#define MAIN_STATE state_camera
 
 #endif

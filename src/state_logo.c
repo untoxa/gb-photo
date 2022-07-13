@@ -59,7 +59,7 @@ uint8_t UPDATE_state_logo() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(~J_START)) {
         // any key but start enters the default state
-        CHANGE_STATE(state_gallery);
+        CHANGE_STATE(MAIN_STATE);
         return 0;
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu

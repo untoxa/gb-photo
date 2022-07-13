@@ -97,12 +97,16 @@ uint8_t vwf_draw_text(uint8_t * base_tile, const unsigned char * str) {
                 vwf_inverse_map = *++ui_text_ptr;
                 break;
             case '\t':
-                vwf_print_reset(vwf_next_tile());
+                if (!vwf_current_offset) {
+                    set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
+                    vwf_current_tile += VWF_TILE_SIZE;
+                    vwf_swap_tiles();
+                } else vwf_print_reset(vwf_next_tile()); 
                 while ((uint8_t)((uint16_t)(vwf_current_tile - base_tile) >> VWF_TILE_SIZE_BITS) % vwf_tab_size) {
                     set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                     vwf_current_tile += VWF_TILE_SIZE;
                     vwf_swap_tiles();
-                }
+                } 
                 break;
             default:
                 vwf_print_render(*ui_text_ptr);

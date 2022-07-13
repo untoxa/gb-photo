@@ -20,4 +20,8 @@ typedef enum {
     after_action_printsave
 } after_action_e;
 
+extern camera_mode_e camera_mode;
+extern trigger_mode_e trigger_mode;
+extern after_action_e after_action;
+
 #endif
