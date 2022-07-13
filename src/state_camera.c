@@ -13,6 +13,8 @@
 // audio assets
 #include "sound_ok.h" 
 #include "sound_error.h"
+#include "shutter01.h"
+#include "shutter02.h"
 
 // menus
 #include "menus.h"
@@ -45,41 +47,37 @@ uint8_t ENTER_state_camera() BANKED {
 uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
     PROCESS_INPUT();
-    if (KEY_PRESSED(J_START)) {
+    if (KEY_PRESSED(J_A)) {
+        music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
+    } else if (KEY_PRESSED(J_B)) {
+        music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+    } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
         if (!MainMenuDispatch(menu_execute(&MainMenu, NULL))) refresh_screen();
     } else if (KEY_PRESSED(J_SELECT)) {
         switch (menu_result = menu_popup_camera_execute()) {
             case ACTION_MODE_MANUAL:
-                camera_mode = camera_mode_manual;
-                break;            
             case ACTION_MODE_ASSISTED:
-                camera_mode = camera_mode_assisted;
-                break;            
             case ACTION_MODE_AUTO:
-                camera_mode = camera_mode_auto;
+            case ACTION_MODE_ITERATE: {
+                static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_iterate};
+                camera_mode = cmodes[menu_result - ACTION_MODE_MANUAL];
                 break;            
-            case ACTION_MODE_ITERATE:
-                camera_mode = camera_mode_iterate;
-                break;            
+            }
             case ACTION_TRIGGER_ABUTTON:
-                trigger_mode = trigger_mode_abutton;
-                break;
             case ACTION_TRIGGER_TIMER:
-                trigger_mode = trigger_mode_timer;
+            case ACTION_TRIGGER_INTERVAL: {
+                static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval};
+                trigger_mode = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                 break;
-            case ACTION_TRIGGER_INTERVAL:
-                trigger_mode = trigger_mode_interval;
-                break;
+            }
             case ACTION_ACTION_SAVE:
-                after_action = after_action_save;
-                break;
             case ACTION_ACTION_PRINT:
-                after_action = after_action_print;
+            case ACTION_ACTION_SAVEPRINT: {
+                static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave};
+                after_action = aactions[menu_result - ACTION_ACTION_SAVE];
                 break;
-            case ACTION_ACTION_SAVEPRINT:
-                after_action = after_action_printsave;
-                break;
+            }
             default:
                 // error, must not get here
                 music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));

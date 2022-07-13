@@ -19,7 +19,7 @@ const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
 const menu_item_t ModeSubMenuItemManual = {
     .prev = NULL,                       .next = &ModeSubMenuItemAssisted, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 1, .width = 11, 
+    .ofs_x = 1, .ofs_y = 1, .width = 9, 
     .caption = " Manual",
     .onPaint = NULL,
     .result = ACTION_MODE_MANUAL
@@ -27,7 +27,7 @@ const menu_item_t ModeSubMenuItemManual = {
 const menu_item_t ModeSubMenuItemAssisted = {
     .prev = &ModeSubMenuItemManual,     .next = &ModeSubMenuItemAuto, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 2, .width = 11, 
+    .ofs_x = 1, .ofs_y = 2, .width = 9, 
     .caption = " Assisted",
     .onPaint = NULL,
     .result = ACTION_MODE_ASSISTED
@@ -35,7 +35,7 @@ const menu_item_t ModeSubMenuItemAssisted = {
 const menu_item_t ModeSubMenuItemAuto = {
     .prev = &ModeSubMenuItemAssisted,   .next = &ModeSubMenuItemIterate, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 3, .width = 11, 
+    .ofs_x = 1, .ofs_y = 3, .width = 9, 
     .caption = " Auto",
     .onPaint = NULL,
     .result = ACTION_MODE_AUTO
@@ -43,13 +43,13 @@ const menu_item_t ModeSubMenuItemAuto = {
 const menu_item_t ModeSubMenuItemIterate = {
     .prev = &ModeSubMenuItemAuto,       .next = NULL, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 4, .width = 11, 
-    .caption = " Iterate (Bracket)",
+    .ofs_x = 1, .ofs_y = 4, .width = 9, 
+    .caption = " Iterate",
     .onPaint = NULL,
     .result = ACTION_MODE_ITERATE
 };
 const menu_t CameraModeSubMenu = {
-    .x = 5, .y = 4, .width = 13, .height = 6, 
+    .x = 5, .y = 4, .width = 11, .height = 6, 
     .items = &ModeSubMenuItemManual, 
     .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
@@ -59,7 +59,7 @@ const menu_item_t TriggerSubMenuItemAButton = {
     .prev = NULL,                       .next = &TriggerSubMenuItemTimer, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 1, .ofs_y = 1, .width = 8, 
-    .caption = " [A] Button",
+    .caption = " A Button",
     .onPaint = NULL,
     .result = ACTION_TRIGGER_ABUTTON
 };
@@ -157,12 +157,6 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
     } else *text_buffer = 0;
     return text_buffer;
 }
-/*
-    menu_text_out( 0, 0, 5, SOLID_WHITE, camera_modes[camera_mode]);
-    menu_text_out( 5, 0, 5, SOLID_WHITE, trigger_modes[trigger_mode]);
-    menu_text_out(10, 0, 5, SOLID_WHITE, after_actions[after_action]);
-*/
-
 
 uint8_t menu_popup_camera_execute() BANKED {
     return menu_execute(&CameraPopupMenu, NULL);
