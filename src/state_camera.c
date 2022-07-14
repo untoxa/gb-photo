@@ -269,9 +269,10 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     static change_direction_e change_direction;
+    static uint8_t skip_wait_vblank;
 
-    if (image_captured()) {
-        display_last_seen(TRUE);
+    if (skip_wait_vblank = image_captured()) {
+        display_last_seen(FALSE);
         if (image_live_preview) image_capture(CAPT_POSITIVE);
     }
     // select opens popup-menu
@@ -323,7 +324,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     }
-    wait_vbl_done();
+    if (!skip_wait_vblank) wait_vbl_done();
     return 0;
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
