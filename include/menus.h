@@ -19,6 +19,7 @@ typedef struct menu_item_t {
     uint8_t ofs_x;
     uint8_t ofs_y;
     uint8_t width;
+    uint8_t id;
     const uint8_t * caption;
     const uint8_t * helpcontext;
     item_handler_t * onPaint;

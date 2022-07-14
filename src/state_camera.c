@@ -37,6 +37,7 @@ after_action_e after_action = after_action_save;
 uint8_t image_live_preview = TRUE;
 uint8_t current_exposure = 14;
 int16_t voltage_out = 192;
+uint8_t dithering = TRUE;
 
 static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(200),    US_TO_EXPOSURE_VALUE(300),     US_TO_EXPOSURE_VALUE(400),    US_TO_EXPOSURE_VALUE(500),
@@ -104,14 +105,57 @@ uint8_t ENTER_state_camera() BANKED {
     return 0;     
 }
 
+// callback forward declarations
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
+
+// --- Assisted menu ---------------------------------
+const menu_item_t CameraMenuItemAssistedExposure = {
+    .prev = NULL,                               .next = &CameraMenuItemAssistedContrast, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 0, .ofs_y = 0, .width = 5,
+    .id = idExposure, 
+    .caption = " %sms",
+    .helpcontext = " Exposure time",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+}; 
+const menu_item_t CameraMenuItemAssistedContrast = {
+    .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 5, .ofs_y = 0, .width = 5,
+    .id = idContrast, 
+    .caption = " %s",
+    .helpcontext = " Contrast value",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+}; 
+const menu_item_t CameraMenuItemAssistedDither = {
+    .prev = &CameraMenuItemAssistedContrast,    .next = NULL, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 10, .ofs_y = 0, .width = 5,
+    .id = idDither, 
+    .caption = " %s",
+    .helpcontext = " Dithering on/off",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+}; 
+const menu_t CameraMenuAssisted = {
+    .x = 0, .y = 0, .width = 0, .height = 0, 
+    .items = &CameraMenuItemAssistedExposure, 
+    .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
+    .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
+};
+
+
+// --- Manual menu -----------------------------------
 const menu_item_t CameraMenuItemManualExposure = {
     .prev = NULL,                               .next = &CameraMenuItemManualGain, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 0, .ofs_y = 0, .width = 5, 
+    .id = idExposure, 
     .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
@@ -121,6 +165,7 @@ const menu_item_t CameraMenuItemManualGain = {
     .prev = &CameraMenuItemManualExposure,  .next = &CameraMenuItemManualVOut, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 5, .ofs_y = 0, .width = 5, 
+    .id = idGain, 
     .caption = " %s",
     .helpcontext = " Sensor gain",
     .onPaint = onCameraMenuItemPaint,
@@ -130,6 +175,7 @@ const menu_item_t CameraMenuItemManualVOut = {
     .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemManualItem3, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 10, .ofs_y = 0, .width = 5, 
+    .id = idVOut, 
     .caption = " %dmv",
     .helpcontext = " Sensor voltage out",
     .onPaint = onCameraMenuItemPaint,
@@ -145,7 +191,7 @@ const menu_item_t CameraMenuItemManualItem3 = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem4 = {
-    .prev = &CameraMenuItemManualItem3,     .next = &CameraMenuItemManualItem5, 
+    .prev = &CameraMenuItemManualItem3,     .next = &CameraMenuItemManualDither, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 0, .ofs_y = 1, .width = 5, 
     .caption = " Item 4",
@@ -153,17 +199,18 @@ const menu_item_t CameraMenuItemManualItem4 = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem5 = {
+const menu_item_t CameraMenuItemManualDither = {
     .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemManualItem6, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 5, .ofs_y = 1, .width = 5, 
-    .caption = " Item 5",
-    .helpcontext = " Some item 5",
+    .id = idDither, 
+    .caption = " %s",
+    .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem6 = {
-    .prev = &CameraMenuItemManualItem5,     .next = &CameraMenuItemManualItem7, 
+    .prev = &CameraMenuItemManualDither,    .next = &CameraMenuItemManualItem7, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 10, .ofs_y = 1, .width = 5, 
     .caption = " Item 6",
@@ -207,12 +254,13 @@ const menu_item_t CameraMenuItemManualItem10 = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_t CameraMenu = {
+const menu_t CameraMenuManual = {
     .x = 0, .y = 0, .width = 0, .height = 0, 
     .items = &CameraMenuItemManualExposure, 
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
+
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons
@@ -220,74 +268,103 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 }
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
+    static change_direction_e change_direction;
+
     if (image_captured()) {
         display_last_seen(TRUE);
         if (image_live_preview) image_capture(CAPT_POSITIVE);
-    } else if (KEY_PRESSED(J_SELECT)) {
+    }
+    // select opens popup-menu
+    if (KEY_PRESSED(J_SELECT)) {
         return ACTION_CAMERA_SUBMENU;
     }
     // !!! d-pad keys are translated
+    if (KEY_PRESSED(J_RIGHT)) change_direction = changeDecrease;
+    else if (KEY_PRESSED(J_LEFT)) change_direction = changeIncrease;
+    else change_direction = changeNone;
+
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    if (selection == &CameraMenuItemManualExposure) {
-        if (KEY_PRESSED(J_RIGHT)) {
-            if (current_exposure) {
-                current_exposure--;
-                CAM_REG_EXPTIME = exposures[current_exposure];
+    if (change_direction != changeNone) {
+        switch (selection->id) {
+            case idExposure:
+                if (change_direction == changeDecrease) {
+                    if (current_exposure) {
+                        current_exposure--;
+                        CAM_REG_EXPTIME = exposures[current_exposure];
+                        menu_move_selection(menu, NULL, selection);
+                    }
+                } else {
+                    if (++current_exposure < LENGTH(exposures)) {
+                        menu_move_selection(menu, NULL, selection);
+                        CAM_REG_EXPTIME = exposures[current_exposure];
+                    } else current_exposure = LENGTH(exposures) - 1;
+                }
+                break;
+            case idVOut:
+                if (change_direction == changeDecrease) {
+                    if (voltage_out > MIN_VOLTAGE_OUT) {
+                        voltage_out -= VOLTAGE_OUT_STEP;
+                        menu_move_selection(menu, NULL, selection);
+                        CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
+                    }
+                } else {
+                    if (voltage_out < MAX_VOLTAGE_OUT) {
+                        voltage_out += VOLTAGE_OUT_STEP;
+                        menu_move_selection(menu, NULL, selection);
+                        CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
+                    } else current_exposure = LENGTH(exposures) - 1;
+                } 
+                break;
+            case idDither:
+                dithering = !dithering;
                 menu_move_selection(menu, NULL, selection);
-            }
-        } else if (KEY_PRESSED(J_LEFT)) {
-            if (++current_exposure < LENGTH(exposures)) {
-                menu_move_selection(menu, NULL, selection);
-                CAM_REG_EXPTIME = exposures[current_exposure];
-            } else current_exposure = LENGTH(exposures) - 1;
-        } 
-    } else if (selection == &CameraMenuItemManualVOut) {
-        if (KEY_PRESSED(J_RIGHT)) {
-            if (voltage_out > MIN_VOLTAGE_OUT) {
-                voltage_out -= VOLTAGE_OUT_STEP;
-                menu_move_selection(menu, NULL, selection);
-                CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
-            }
-        } else if (KEY_PRESSED(J_LEFT)) {
-            if (voltage_out < MAX_VOLTAGE_OUT) {
-                voltage_out += VOLTAGE_OUT_STEP;
-                menu_move_selection(menu, NULL, selection);
-                CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
-            } else current_exposure = LENGTH(exposures) - 1;
-        } 
-    } 
+                // TODO: modify camera register
+            default:
+                break;
+        }
+    }
     wait_vbl_done();
     return 0;
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    if (self == &CameraMenuItemManualExposure) {
-        // exposure
-        uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
-        uint8_t * buf = text_buffer + 100;
-        uint8_t len = strlen(uitoa(value, buf, 10));
-        if (len == 1) {
-            *--buf = ',';
-            *--buf = '0';
-        } else {
-            uint8_t * tail = buf + len - 1;
-            len = *tail;
-            if (len != '0') {
-                *tail++ = ',';
-                *tail++ = len;
+    static const uint8_t * const onoff[] = {"Off", "On"};
+    switch (self->id) {
+        case idExposure: {
+            uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
+            uint8_t * buf = text_buffer + 100;
+            uint8_t len = strlen(uitoa(value, buf, 10));
+            if (len == 1) {
+                *--buf = ',';
+                *--buf = '0';
+            } else {
+                uint8_t * tail = buf + len - 1;
+                len = *tail;
+                if (len != '0') {
+                    *tail++ = ',';
+                    *tail++ = len;
+                }
+                *tail = 0;
             }
-            *tail = 0;
+            sprintf(text_buffer, self->caption, buf);
+            break;
         }
-        sprintf(text_buffer, self->caption, buf);
-    } else if (self == &CameraMenuItemManualGain) {
-        // gain
-        sprintf(text_buffer, self->caption, "20.0");
-    } else if (self == &CameraMenuItemManualVOut) {
-        // voltage
-        sprintf(text_buffer, self->caption, voltage_out);
-    } else {
-        if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
-    }
+        case idGain:
+            sprintf(text_buffer, self->caption, "20.0");
+            break;
+        case idVOut:
+            sprintf(text_buffer, self->caption, voltage_out);
+            break;
+        case idContrast:
+            sprintf(text_buffer, self->caption, "9");
+            break;
+        case idDither:
+            sprintf(text_buffer, self->caption, onoff[dithering]);
+            break;
+        default:
+            if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
+
+    } 
     return text_buffer;
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
@@ -301,11 +378,12 @@ uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
     switch (camera_mode) {
         case camera_mode_manual:
+            menu_result = menu_execute(&CameraMenuManual, NULL);
+            break;
         case camera_mode_assisted:
         case camera_mode_auto:
         case camera_mode_iterate:
-            // all modes show the same menu for now, but may show different
-            menu_result = menu_execute(&CameraMenu, NULL);
+            menu_result = menu_execute(&CameraMenuAssisted, NULL);
             break;
         default:
             // error, must not get here

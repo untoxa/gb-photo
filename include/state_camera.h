@@ -20,6 +20,21 @@ typedef enum {
     after_action_printsave
 } after_action_e;
 
+typedef enum {
+    idNone = 0, 
+    idExposure,
+    idGain,
+    idVOut,
+    idContrast,
+    idDither
+} camera_menu_e;
+
+typedef enum {
+    changeNone = 0,
+    changeDecrease,
+    changeIncrease
+} change_direction_e;
+
 extern camera_mode_e camera_mode;
 extern trigger_mode_e trigger_mode;
 extern after_action_e after_action;
