@@ -181,7 +181,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 }
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
-    // enter halt state only when camera is capturing
+    // wait for VBlank if not capturing (avoid HALT CPU state) 
     if (!is_capturing()) wait_vbl_done();
     return 0;
 }

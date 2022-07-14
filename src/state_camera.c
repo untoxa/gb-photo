@@ -278,18 +278,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
+        static uint8_t redraw_selection;
+        redraw_selection = FALSE;
         switch (selection->id) {
             case idExposure:
                 if (change_direction == changeDecrease) {
                     if (current_exposure) {
                         current_exposure--;
                         RENDER_CAM_REG_EXPTIME();
-                        menu_move_selection(menu, NULL, selection);
+                        redraw_selection = TRUE;
                     }
                 } else {
                     if (++current_exposure < LENGTH(exposures)) {
-                        menu_move_selection(menu, NULL, selection);
                         RENDER_CAM_REG_EXPTIME();
+                        redraw_selection = TRUE;
                     } else current_exposure = LENGTH(exposures) - 1;
                 }
                 break;
@@ -297,29 +299,32 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (change_direction == changeDecrease) {
                     if (voltage_out > MIN_VOLTAGE_OUT) {
                         voltage_out -= VOLTAGE_OUT_STEP;
-                        menu_move_selection(menu, NULL, selection);
                         RENDER_CAM_REG_ZEROVOUT();
+                        redraw_selection = TRUE;
                     }
                 } else {
                     if (voltage_out < MAX_VOLTAGE_OUT) {
                         voltage_out += VOLTAGE_OUT_STEP;
-                        menu_move_selection(menu, NULL, selection);
                         RENDER_CAM_REG_ZEROVOUT();
+                        redraw_selection = TRUE;
                     } else current_exposure = LENGTH(exposures) - 1;
                 } 
                 break;
             case idDither:
                 dithering = !dithering;
-                menu_move_selection(menu, NULL, selection);
                 // TODO: modify dithering array
+                redraw_selection = TRUE;
             case idInvOutput:
                 positive = !positive;
-                menu_move_selection(menu, NULL, selection);
                 RENDER_CAM_REG_EDRAINVVREF();
+                redraw_selection = TRUE;
             default:
                 break;
         }
+        // redraw selection if requested
+        if (redraw_selection) menu_move_selection(menu, NULL, selection);
     }
+    // wait for VBlank if not capturing (avoid HALT CPU state) 
     if (!is_capturing()) wait_vbl_done();
     return 0;
 }
