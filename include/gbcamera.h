@@ -76,8 +76,9 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
 #define CAMERA_BANK_REGISTERS 16
 
 // Camera hardware register: Capture
-#define CAPT_POSITIVE   0b00000011
-#define CAPT_NEGATIVE   0b00000001
+#define CAPT_POSITIVE   0b00000010
+#define CAPT_NEGATIVE   0b00000000
+
 #define CAPTF_CAPTURING 0b00000001
 
 static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;

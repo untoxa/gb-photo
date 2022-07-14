@@ -39,6 +39,7 @@ uint8_t image_live_preview = TRUE;
 uint8_t current_exposure = 14;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
+uint8_t positive = TRUE;
 
 static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(200),    US_TO_EXPOSURE_VALUE(300),     US_TO_EXPOSURE_VALUE(400),    US_TO_EXPOSURE_VALUE(500),
@@ -86,7 +87,7 @@ uint8_t ENTER_state_camera() BANKED {
 
     // load some initial settings
     camera_load_settings();
-    if (image_live_preview) image_capture(CAPT_POSITIVE);
+    if (image_live_preview) image_capture(positive);
 
     return 0;     
 }
@@ -214,7 +215,7 @@ const menu_item_t CameraMenuItemManualItem7 = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem8 = {
-    .prev = &CameraMenuItemManualItem7,     .next = &CameraMenuItemManualItem9, 
+    .prev = &CameraMenuItemManualItem7,     .next = &CameraMenuItemInvertedOutput, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 0, .ofs_y = 2, .width = 5, 
     .caption = " Item 8",
@@ -222,17 +223,18 @@ const menu_item_t CameraMenuItemManualItem8 = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem9 = {
+const menu_item_t CameraMenuItemInvertedOutput = {
     .prev = &CameraMenuItemManualItem8,     .next = &CameraMenuItemManualItem10, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 5, .ofs_y = 2, .width = 5, 
-    .caption = " Item 9",
-    .helpcontext = " Some item 9",
+    .ofs_x = 5, .ofs_y = 2, .width = 5,
+    .id = idInvOutput, 
+    .caption = " %s",
+    .helpcontext = " Inverted output",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem10 = {
-    .prev = &CameraMenuItemManualItem9,     .next = NULL, 
+    .prev = &CameraMenuItemInvertedOutput,  .next = NULL, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 10, .ofs_y = 2, .width = 5, 
     .caption = " Item 10",
@@ -258,7 +260,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     if (image_captured()) {
         display_last_seen(FALSE);
-        if (image_live_preview) image_capture(CAPT_POSITIVE);
+        if (image_live_preview) image_capture(positive);
     }
     // select opens popup-menu
     if (KEY_PRESSED(J_SELECT)) {
@@ -305,6 +307,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 dithering = !dithering;
                 menu_move_selection(menu, NULL, selection);
                 // TODO: modify camera register
+            case idInvOutput:
+                positive = !positive;
+                menu_move_selection(menu, NULL, selection);
             default:
                 break;
         }
@@ -315,6 +320,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     static const uint8_t * const onoff[] = {"Off", "On"};
+    static const uint8_t * const posit[] = {"Inverted", "Normal"};
     switch (self->id) {
         case idExposure: {
             uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
@@ -346,6 +352,9 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         case idDither:
             sprintf(text_buffer, self->caption, onoff[((dithering) ? 1 : 0)]);
+            break;
+        case idInvOutput:
+            sprintf(text_buffer, self->caption, posit[((positive) ? 1 : 0)]);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;

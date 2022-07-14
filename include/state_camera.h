@@ -31,7 +31,8 @@ typedef enum {
     idGain,
     idVOut,
     idContrast,
-    idDither
+    idDither,
+    idInvOutput
 } camera_menu_e;
 
 typedef enum {
@@ -60,12 +61,12 @@ inline uint8_t image_captured() {
 #endif
     return r;
 }
-inline void image_capture(uint8_t capture) {
+inline void image_capture(uint8_t positive) {
 #if (USE_CGB_DOUBLE_SPEED==1)    
     if (_is_COLOR) cpu_slow();      // slowdown before capturing image
 #endif
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    old_capture_reg = CAM_REG_CAPTURE = capture;
+    old_capture_reg = CAM_REG_CAPTURE = ((positive) ? CAPT_POSITIVE : CAPT_NEGATIVE) | CAPTF_CAPTURING;
 }
 
 
