@@ -60,21 +60,6 @@ void display_last_seen(uint8_t restore) {
 }
 
 uint8_t old_capture_reg = 0;
-inline uint8_t is_capturing() {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    return (CAM_REG_CAPTURE & CAPTF_CAPTURING);
-}
-inline uint8_t image_captured() {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    uint8_t v = CAM_REG_CAPTURE;
-    uint8_t r = (((v ^ old_capture_reg) & CAPTF_CAPTURING) && !(v & CAPTF_CAPTURING));
-    old_capture_reg = v;
-    return r;
-}
-inline void image_capture(uint8_t capture) {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    old_capture_reg = CAM_REG_CAPTURE = capture;
-}
 
 void camera_load_settings() {
     static const uint8_t pattern[] = { 
@@ -269,9 +254,8 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     static change_direction_e change_direction;
-    static uint8_t skip_wait_vblank;
 
-    if (skip_wait_vblank = image_captured()) {
+    if (image_captured()) {
         display_last_seen(FALSE);
         if (image_live_preview) image_capture(CAPT_POSITIVE);
     }
@@ -324,7 +308,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     }
-    if (!skip_wait_vblank) wait_vbl_done();
+    if (!is_capturing()) wait_vbl_done();
     return 0;
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {

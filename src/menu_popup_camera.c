@@ -16,6 +16,7 @@ const uint8_t * const camera_modes[] =  {"[Manual]", "[Assist]", "[Auto]", "[Ite
 const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
 const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
 
+uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t ModeSubMenuItemManual = {
     .prev = NULL,                       .next = &ModeSubMenuItemAssisted, 
     .sub = NULL, .sub_params = NULL,        
@@ -51,7 +52,7 @@ const menu_item_t ModeSubMenuItemIterate = {
 const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = 6, 
     .items = &ModeSubMenuItemManual, 
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 
@@ -82,7 +83,7 @@ const menu_item_t TriggerSubMenuItemInterval = {
 const menu_t TriggerSubMenu = {
     .x = 5, .y = 5, .width = 10, .height = 5, 
     .items = &TriggerSubMenuItemAButton, 
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 
@@ -113,7 +114,7 @@ const menu_item_t ActionSubMenuSaveAndPrint = {
 const menu_t ActionSubMenu = {
     .x = 5, .y = 6, .width = 10, .height = 5, 
     .items = &ActionSubMenuSave, 
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
@@ -145,7 +146,7 @@ const menu_t CameraPopupMenu = {
     .x = 1, .y = 3, .width = 13, .height = 5, 
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &CameraMenuItemMode, 
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     if (self == &CameraMenuItemMode) {
@@ -157,7 +158,14 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     } else *text_buffer = 0;
     return text_buffer;
 }
+uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu; selection;
+    // enter halt state only when camera is capturing
+    if (!is_capturing()) wait_vbl_done();
+    return 0;
+}
 
 uint8_t menu_popup_camera_execute() BANKED {
     return menu_execute(&CameraPopupMenu, NULL);
 }
+
