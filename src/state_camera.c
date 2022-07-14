@@ -36,6 +36,7 @@ after_action_e after_action = after_action_save;
 
 uint8_t image_live_preview = TRUE;
 uint8_t current_exposure = 14;
+int16_t voltage_out = 192;
 
 static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(200),    US_TO_EXPOSURE_VALUE(300),     US_TO_EXPOSURE_VALUE(400),    US_TO_EXPOSURE_VALUE(500),
@@ -83,7 +84,7 @@ void camera_load_settings() {
     CAM_REG_EDEXOPGAIN  = 0xe0;
     CAM_REG_EXPTIME     = US_TO_EXPOSURE_VALUE(6000);
     CAM_REG_EDRAINVVREF = 0x03;
-    CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(192);
+    CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
     memcpy(CAM_REG_DITHERPATTERN, pattern, sizeof(CAM_REG_DITHERPATTERN));
 }
 
@@ -105,33 +106,38 @@ uint8_t ENTER_state_camera() BANKED {
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t CameraMenuItems[] = {
     {
         .prev = NULL,                   .next = CameraMenuItems + 1, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 0, .ofs_y = 0, .width = 5, 
         .caption = " %sms",
+        .helpcontext = " Exposure time",
         .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }, {
         .prev = CameraMenuItems + 0,    .next = CameraMenuItems + 2, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 5, .ofs_y = 0, .width = 5, 
-        .caption = NULL,
+        .caption = " %s",
+        .helpcontext = " Sensor gain",
         .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }, {
         .prev = CameraMenuItems + 1,    .next = CameraMenuItems + 3, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 10, .ofs_y = 0, .width = 5, 
-        .caption = NULL,
+        .caption = " %dmv",
+        .helpcontext = " Sensor voltage out",
         .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }, {
         .prev = CameraMenuItems + 2,    .next = NULL, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 15, .ofs_y = 0, .width = 5, 
-        .caption = NULL,
+        .caption = " %s",
+        .helpcontext = "",
         .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }
@@ -139,7 +145,8 @@ const menu_item_t CameraMenuItems[] = {
 const menu_t CameraMenu = {
     .x = 0, .y = 0, .width = 0, .height = 0, 
     .items = CameraMenuItems, 
-    .onShow = NULL, .onIdle = onIdleCameraMenu, .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
+    .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
@@ -155,8 +162,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         return ACTION_CAMERA_SUBMENU;
     }
     // !!! d-pad keys are translated
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (selection == (CameraMenuItems + 0)) {
-        SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (KEY_PRESSED(J_RIGHT)) {
             if (current_exposure) {
                 current_exposure--;
@@ -169,6 +176,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 CAM_REG_EXPTIME = exposures[current_exposure];
             } else current_exposure = LENGTH(exposures) - 1;
         } 
+    } else if (selection == (CameraMenuItems + 2)) {
+        if (KEY_PRESSED(J_RIGHT)) {
+            if (voltage_out > MIN_VOLTAGE_OUT) {
+                voltage_out -= VOLTAGE_OUT_STEP;
+                menu_move_selection(menu, NULL, selection);
+                CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
+            }
+        } else if (KEY_PRESSED(J_LEFT)) {
+            if (voltage_out < MAX_VOLTAGE_OUT) {
+                voltage_out += VOLTAGE_OUT_STEP;
+                menu_move_selection(menu, NULL, selection);
+                CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
+            } else current_exposure = LENGTH(exposures) - 1;
+        } 
     } 
     wait_vbl_done();
     return 0;
@@ -176,6 +197,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     if (self == (CameraMenuItems + 0)) {
+        // exposure
         uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
         uint8_t * buf = text_buffer + 100;
         uint8_t len = strlen(uitoa(value, buf, 10));
@@ -192,8 +214,19 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             *tail = 0;
         }
         sprintf(text_buffer, self->caption, buf);
+    } else if (self == (CameraMenuItems + 1)) {
+        // gain
+        sprintf(text_buffer, self->caption, "20.0");
+    } else if (self == (CameraMenuItems + 2)) {
+        // voltage
+        sprintf(text_buffer, self->caption, voltage_out);
     } else *text_buffer = 0;
     return text_buffer;
+}
+uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
+    return 0;
 }
 
 uint8_t UPDATE_state_camera() BANKED {

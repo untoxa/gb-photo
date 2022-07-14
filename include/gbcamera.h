@@ -100,6 +100,9 @@ static uint8_t AT(0xA004) CAM_REG_EDRAINVVREF;
 #define ZERO_POSITIVE   0b10000000
 #define ZERO_NEGATIVE   0b01000000
 
+#define MIN_VOLTAGE_OUT -992
+#define MAX_VOLTAGE_OUT 992
+#define VOLTAGE_OUT_STEP 32
 #define TO_VOLTAGE_OUT(V) (((V) < 0)?((~((int8_t)((V) >> 5)) + 1) & 0x1f) : (((int8_t)((V) >> 5) & 0x1f) | 0x20))
 
 static uint8_t AT(0xA005) CAM_REG_ZEROVOUT;

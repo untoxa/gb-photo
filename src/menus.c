@@ -59,6 +59,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
         menu_text_out(menu->x + current_item->ofs_x, menu->y + current_item->ofs_y, current_item->width, 
                       ((current_item == selection) ? SOLID_BLACK : SOLID_WHITE), 
                       (current_item->onPaint) ? current_item->onPaint(menu, current_item) : (uint8_t *)current_item->caption);
+        if ((current_item == selection) && (menu->onHelpContext)) menu->onHelpContext(menu, selection);
     }
 
     if (menu->onShow) menu->onShow(menu, param);
@@ -72,10 +73,12 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
         if (KEY_PRESSED(J_UP)) {
             if (selection->prev) {
                 selection = menu_move_selection(menu, selection, selection->prev);
+                if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_DOWN)) {
             if (selection->next) {
                 selection = menu_move_selection(menu, selection, selection->next);
+                if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_A)) {
             if (selection->sub) {

@@ -20,6 +20,7 @@ typedef struct menu_item_t {
     uint8_t ofs_y;
     uint8_t width;
     const uint8_t * caption;
+    const uint8_t * helpcontext;
     item_handler_t * onPaint;
     uint8_t result;
 } menu_item_t;
@@ -34,6 +35,7 @@ typedef struct menu_t {
     menu_item_t * items;
     menu_handler_t * onShow;
     idle_handler_t * onIdle;
+    idle_handler_t * onHelpContext;
     menu_translate_t * onTranslateKey;
     menu_translate_t * onTranslateSubResult;
 } menu_t;
