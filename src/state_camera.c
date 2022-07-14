@@ -87,7 +87,7 @@ uint8_t ENTER_state_camera() BANKED {
 
     // load some initial settings
     camera_load_settings();
-    if (image_live_preview) image_capture(positive);
+    if (image_live_preview) image_capture();
 
     return 0;     
 }
@@ -260,7 +260,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     if (image_captured()) {
         display_last_seen(FALSE);
-        if (image_live_preview) image_capture(positive);
+        if (image_live_preview) image_capture();
     }
     // select opens popup-menu
     if (KEY_PRESSED(J_SELECT)) {
@@ -391,7 +391,7 @@ uint8_t UPDATE_state_camera() BANKED {
             if (!is_capturing()) {
                 music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
 //                music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
-                image_capture(CAPT_POSITIVE);
+                image_capture();
             }
             break;
         case ACTION_CAMERA_SUBMENU: {

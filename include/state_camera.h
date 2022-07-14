@@ -61,12 +61,12 @@ inline uint8_t image_captured() {
 #endif
     return r;
 }
-inline void image_capture(uint8_t positive) {
+inline void image_capture() {
 #if (USE_CGB_DOUBLE_SPEED==1)    
     if (_is_COLOR) cpu_slow();      // slowdown before capturing image
 #endif
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    old_capture_reg = CAM_REG_CAPTURE = ((positive) ? CAPT_POSITIVE : CAPT_NEGATIVE) | CAPTF_CAPTURING;
+    old_capture_reg = CAM_REG_CAPTURE = (CAPT_POSITIVE | CAPTF_CAPTURING);
 }
 
 
