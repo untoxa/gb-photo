@@ -8,15 +8,6 @@
 
 #include "menus.h"
 
-inline void MENU_PROCESS_INPUT() {
-    old_joy = ((sys_time - joy_ts) > AUTOREPEAT_RATE) ? 0 : joy;
-    joy = (joypad() | remote_joypad());
-}
-inline void MENU_PROCESS_AUTOREPEAT() {
-    if (old_joy ^ joy) joy_ts = sys_time; 
-}
-
-
 void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text) {
     uint8_t len;
     if (text) {
@@ -66,9 +57,9 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
 
     do {
         // process input
-        MENU_PROCESS_INPUT();
+        JOYPAD_INPUT();
         if (menu->onTranslateKey) joy = menu->onTranslateKey(menu, selection, joy);
-        MENU_PROCESS_AUTOREPEAT();
+        JOYPAD_AUTOREPEAT();
         // process menu keys
         if (KEY_PRESSED(J_UP)) {
             if (selection->prev) {
