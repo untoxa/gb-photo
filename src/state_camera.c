@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -344,7 +345,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             sprintf(text_buffer, self->caption, "9");
             break;
         case idDither:
-            sprintf(text_buffer, self->caption, onoff[dithering]);
+            sprintf(text_buffer, self->caption, onoff[((dithering) ? 1 : 0)]);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
