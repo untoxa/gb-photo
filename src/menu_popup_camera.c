@@ -149,6 +149,7 @@ const menu_t CameraPopupMenu = {
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
     if (self == &CameraMenuItemMode) {
         sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
     } else if (self == &CameraMenuItemTrigger) {

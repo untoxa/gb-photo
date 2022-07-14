@@ -1,7 +1,10 @@
 #ifndef __STATE_CAMERA_H_INCLUDE__
 #define __STATE_CAMERA_H_INCLUDE__
 
+#include <gbdk/platform.h>
 #include "gbcamera.h"
+#include "globals.h"
+#include "systemdetect.h"
 
 typedef enum {
     camera_mode_manual,
@@ -52,9 +55,15 @@ inline uint8_t image_captured() {
     uint8_t v = CAM_REG_CAPTURE;
     uint8_t r = (((v ^ old_capture_reg) & CAPTF_CAPTURING) && !(v & CAPTF_CAPTURING));
     old_capture_reg = v;
+#if (USE_CGB_DOUBLE_SPEED==1)    
+    if (r) cpu_fast();              // speed up when captured
+#endif
     return r;
 }
 inline void image_capture(uint8_t capture) {
+#if (USE_CGB_DOUBLE_SPEED==1)    
+    if (_is_COLOR) cpu_slow();      // slowdown before capturing image
+#endif
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     old_capture_reg = CAM_REG_CAPTURE = capture;
 }

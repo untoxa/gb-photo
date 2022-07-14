@@ -8,6 +8,7 @@
 
 #include "systemdetect.h"
 #include "systemhelpers.h"
+#include "joy.h"
 #include "musicmanager.h"
 #include "bankdata.h"
 #include "screen.h"
@@ -20,6 +21,7 @@
 
 // audio assets
 #include "music.h"
+
 
 #define _STATE(STATE_ID) DECLARE_STATE(STATE_ID) 
 STATES
@@ -74,7 +76,9 @@ void main() {
 
     detect_system();    // detect system compatibility
     if (_is_COLOR) {
+#if (USE_CGB_DOUBLE_SPEED==1)    
         cpu_fast();
+#endif
         cgb_compatibility();
     }
 
@@ -93,6 +97,8 @@ void main() {
     set_interrupts(VBL_IFLAG | TIM_IFLAG);
 #endif
     music_load(BANK(music_ingame), &music_ingame), music_pause(music_paused = TRUE);
+
+    JOYPAD_INIT;
 
     remote_init();
     remote_activate(REMOTE_ENABLED);
