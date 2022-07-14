@@ -49,12 +49,12 @@ extern uint8_t old_capture_reg;
 
 inline uint8_t is_capturing() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    return (CAM_REG_CAPTURE & CAPTF_CAPTURING);
+    return (CAM_REG_CAPTURE & CAM00F_CAPTURING);
 }
 inline uint8_t image_captured() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     uint8_t v = CAM_REG_CAPTURE;
-    uint8_t r = (((v ^ old_capture_reg) & CAPTF_CAPTURING) && !(v & CAPTF_CAPTURING));
+    uint8_t r = (((v ^ old_capture_reg) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
     old_capture_reg = v;
 #if (USE_CGB_DOUBLE_SPEED==1)    
     if (r) cpu_fast();              // speed up when captured
@@ -66,7 +66,7 @@ inline void image_capture() {
     if (_is_COLOR) cpu_slow();      // slowdown before capturing image
 #endif
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    old_capture_reg = CAM_REG_CAPTURE = (CAPT_POSITIVE | CAPTF_CAPTURING);
+    old_capture_reg = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
 }
 
 

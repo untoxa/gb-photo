@@ -41,6 +41,8 @@ int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t positive = TRUE;
 
+uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
+
 static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(200),    US_TO_EXPOSURE_VALUE(300),     US_TO_EXPOSURE_VALUE(400),    US_TO_EXPOSURE_VALUE(500),
     US_TO_EXPOSURE_VALUE(600),    US_TO_EXPOSURE_VALUE(800),     US_TO_EXPOSURE_VALUE(1000),   US_TO_EXPOSURE_VALUE(1250),
@@ -61,7 +63,10 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-uint8_t old_capture_reg = 0;
+inline void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0; }
+inline void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
+inline void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = ((positive) ? CAM04F_POS : CAM04F_INV) | 0x03; }
+inline void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = CAM05_ZERO_POS | TO_VOLTAGE_OUT(voltage_out); }
 
 void camera_load_settings() {
     static const uint8_t pattern[] = { 
@@ -70,11 +75,11 @@ void camera_load_settings() {
         0xAF, 0x95, 0xA8, 0xDF, 0x93, 0xA4, 0xD3, 0x90, 0x9F, 0xC3, 0x92, 0xA3, 0xCF, 0x8F, 0x9E, 0xBF
     };
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    CAM_REG_EDEXOPGAIN  = 0xe0;
-    CAM_REG_EXPTIME     = US_TO_EXPOSURE_VALUE(6000);
-    CAM_REG_EDRAINVVREF = 0x03;
-    CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
-    memcpy(CAM_REG_DITHERPATTERN, pattern, sizeof(CAM_REG_DITHERPATTERN));
+    RENDER_CAM_REG_EDEXOPGAIN();
+    RENDER_CAM_REG_EXPTIME();
+    RENDER_CAM_REG_EDRAINVVREF();
+    RENDER_CAM_REG_ZEROVOUT();
+    memcpy(CAM_DITHERPATTERN, pattern, sizeof(CAM_DITHERPATTERN));
 }
 
 static void refresh_screen() {
@@ -278,13 +283,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (change_direction == changeDecrease) {
                     if (current_exposure) {
                         current_exposure--;
-                        CAM_REG_EXPTIME = exposures[current_exposure];
+                        RENDER_CAM_REG_EXPTIME();
                         menu_move_selection(menu, NULL, selection);
                     }
                 } else {
                     if (++current_exposure < LENGTH(exposures)) {
                         menu_move_selection(menu, NULL, selection);
-                        CAM_REG_EXPTIME = exposures[current_exposure];
+                        RENDER_CAM_REG_EXPTIME();
                     } else current_exposure = LENGTH(exposures) - 1;
                 }
                 break;
@@ -293,23 +298,24 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     if (voltage_out > MIN_VOLTAGE_OUT) {
                         voltage_out -= VOLTAGE_OUT_STEP;
                         menu_move_selection(menu, NULL, selection);
-                        CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
+                        RENDER_CAM_REG_ZEROVOUT();
                     }
                 } else {
                     if (voltage_out < MAX_VOLTAGE_OUT) {
                         voltage_out += VOLTAGE_OUT_STEP;
                         menu_move_selection(menu, NULL, selection);
-                        CAM_REG_ZEROVOUT    = ZERO_POSITIVE | TO_VOLTAGE_OUT(voltage_out);
+                        RENDER_CAM_REG_ZEROVOUT();
                     } else current_exposure = LENGTH(exposures) - 1;
                 } 
                 break;
             case idDither:
                 dithering = !dithering;
                 menu_move_selection(menu, NULL, selection);
-                // TODO: modify camera register
+                // TODO: modify dithering array
             case idInvOutput:
                 positive = !positive;
                 menu_move_selection(menu, NULL, selection);
+                RENDER_CAM_REG_EDRAINVVREF();
             default:
                 break;
         }

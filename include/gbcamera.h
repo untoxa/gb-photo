@@ -76,39 +76,46 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
 #define CAMERA_BANK_REGISTERS 16
 
 // Camera hardware register: Capture
-#define CAPT_POSITIVE   0b00000010
-#define CAPT_NEGATIVE   0b00000000
+#define CAM00F_POSITIVE     0b00000010
+#define CAM00F_NEGATIVE     0b00000000
+#define CAM00F_CAPTURING    0b00000001
 
-#define CAPTF_CAPTURING 0b00000001
-
+static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 
 // Camera hardware register: EdgeExclusive, EdgeOperation, Gain
-static uint8_t AT(0xA001) CAM_REG_EDEXOPGAIN;
+static volatile uint8_t AT(0xA001) CAM01_REG;
+static volatile uint8_t AT(0xA001) CAM_REG_EDEXOPGAIN;
 
 // Camera hardware register: Exposure Time
 
 #define US_TO_EXPOSURE_VALUE(A) ((uint16_t)((((A) >> 4) >> 8) | ((((A) >> 4) & 0xFF) << 8)))
 #define EXPOSURE_VALUE_TO_US(A) ((uint32_t)(((A) >> 8) | (((A) & 0xFF) << 8)) << 4)
 
-static uint16_t AT(0xA002) CAM_REG_EXPTIME;
+static volatile uint16_t AT(0xA002) CAM02_REG;
+static volatile uint16_t AT(0xA002) CAM_REG_EXPTIME;
 
 // Camera hardware register: Edge Ratio, Invert Output, Voltage Ref
-static uint8_t AT(0xA004) CAM_REG_EDRAINVVREF;
+#define CAM04F_INV  0b00001000
+#define CAM04F_POS  0b00000000
+
+static volatile uint8_t AT(0xA004) CAM04_REG;
+static volatile uint8_t AT(0xA004) CAM_REG_EDRAINVVREF;
 
 // Camera hardware register: Zero Points, Voltage Out
-#define ZERO_DISABLED   0b00000000
-#define ZERO_POSITIVE   0b10000000
-#define ZERO_NEGATIVE   0b01000000
+#define CAM05_ZERO_DIS  0b00000000
+#define CAM05_ZERO_POS  0b10000000
+#define CAM05_ZERO_NEG  0b01000000
 
 #define MIN_VOLTAGE_OUT -992
 #define MAX_VOLTAGE_OUT 992
 #define VOLTAGE_OUT_STEP 32
 #define TO_VOLTAGE_OUT(V) (((V) < 0)?((~((int8_t)((V) >> 5)) + 1) & 0x1f) : (((int8_t)((V) >> 5) & 0x1f) | 0x20))
 
-static uint8_t AT(0xA005) CAM_REG_ZEROVOUT;
+static volatile uint8_t AT(0xA005) CAM05_REG;
+static volatile uint8_t AT(0xA005) CAM_REG_ZEROVOUT;
 
 // Camera hardware register: Dither Pattern (48 bytes)
-static uint8_t AT(0xA006) CAM_REG_DITHERPATTERN[48];
+static uint8_t AT(0xA006) CAM_DITHERPATTERN[48];
 
 #endif
