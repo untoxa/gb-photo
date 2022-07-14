@@ -28,11 +28,11 @@ extern uint8_t * const screen_tile_addresses[18];
 extern const uint8_t screen_tile_map[360];
 
 inline void screen_clear_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color) {
-    fill_bkg_rect(x, y, w, h, color);
+    if (w) fill_bkg_rect(x, y, w, h, color);
 }
 
 inline void screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-    set_bkg_submap(x, y, w, h, screen_tile_map, 20);
+    if (w) set_bkg_submap(x, y, w, h, screen_tile_map, 20);
 }
 
 void screen_init();

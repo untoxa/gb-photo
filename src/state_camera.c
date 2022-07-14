@@ -7,6 +7,7 @@
 
 #include "gbcamera.h"
 #include "musicmanager.h"
+#include "systemhelpers.h"
 #include "joy.h"
 #include "screen.h"
 #include "states.h"
@@ -117,21 +118,21 @@ const menu_item_t CameraMenuItems[] = {
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 5, .ofs_y = 0, .width = 5, 
         .caption = NULL,
-        .onPaint = NULL,
+        .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }, {
         .prev = CameraMenuItems + 1,    .next = CameraMenuItems + 3, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 10, .ofs_y = 0, .width = 5, 
         .caption = NULL,
-        .onPaint = NULL,
+        .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }, {
         .prev = CameraMenuItems + 2,    .next = NULL, 
         .sub = NULL, .sub_params = NULL,        
         .ofs_x = 15, .ofs_y = 0, .width = 5, 
         .caption = NULL,
-        .onPaint = NULL,
+        .onPaint = onCameraMenuItemPaint,
         .result = ACTION_SHUTTER
     }
 };
@@ -197,7 +198,20 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
 
 uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
-    switch (menu_result = menu_execute(&CameraMenu, NULL)) {
+    switch (camera_mode) {
+        case camera_mode_manual:
+        case camera_mode_assisted:
+        case camera_mode_auto:
+        case camera_mode_iterate:
+            // all modes show the same menu for now, but may show different
+            menu_result = menu_execute(&CameraMenu, NULL);
+            break;
+        default:
+            // error, must not get here
+            menu_result = ACTION_CAMERA_SUBMENU;
+            break; 
+    }
+    switch (menu_result) {
         case ACTION_SHUTTER:
             if (!is_capturing()) {
                 music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
