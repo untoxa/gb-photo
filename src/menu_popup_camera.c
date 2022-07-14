@@ -12,9 +12,13 @@
 #include "menus.h"
 #include "menu_codes.h"
 
-const uint8_t * const camera_modes[] =  {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
-const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
-const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
+typedef enum {
+    idPopupNone = 0, 
+    idPopupCameraMode,
+    idPopupCameraTrigger,
+    idPopupCameraAction
+} camera_popup_menu_e;
+
 
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t ModeSubMenuItemManual = {
@@ -124,7 +128,8 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 const menu_item_t CameraMenuItemMode = {
     .prev = NULL,                   .next = &CameraMenuItemTrigger, 
     .sub = &CameraModeSubMenu, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 1, .width = 11, 
+    .ofs_x = 1, .ofs_y = 1, .width = 11,
+    .id = idPopupCameraMode, 
     .caption = " Mode\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -133,6 +138,7 @@ const menu_item_t CameraMenuItemTrigger = {
     .prev = &CameraMenuItemMode,  .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 11, 
+    .id = idPopupCameraTrigger, 
     .caption = " Trigger\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -141,6 +147,7 @@ const menu_item_t CameraMenuItemAction = {
     .prev = &CameraMenuItemTrigger, .next = NULL,
     .sub = &ActionSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 11, 
+    .id = idPopupCameraAction, 
     .caption = " Action\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -153,13 +160,23 @@ const menu_t CameraPopupMenu = {
 };
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    if (self == &CameraMenuItemMode) {
-        sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
-    } else if (self == &CameraMenuItemTrigger) {
-        sprintf(text_buffer, self->caption, trigger_modes[trigger_mode]);
-    } else if (self == &CameraMenuItemAction) {
-        sprintf(text_buffer, self->caption, after_actions[after_action]);
-    } else *text_buffer = 0;
+    static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
+    static const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
+    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
+    switch (self->id) {
+        case idPopupCameraMode: 
+            sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
+            break;
+        case idPopupCameraTrigger: 
+            sprintf(text_buffer, self->caption, trigger_modes[trigger_mode]);
+            break;
+        case idPopupCameraAction: 
+            sprintf(text_buffer, self->caption, after_actions[after_action]);
+            break;
+        default: 
+            *text_buffer = 0;
+            break;
+    }
     return text_buffer;
 }
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {

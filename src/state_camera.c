@@ -361,6 +361,7 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
 uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
+    JOYPAD_RESET();
     switch (camera_mode) {
         case camera_mode_manual:
             menu_result = menu_execute(&CameraMenuManual, NULL);
