@@ -53,8 +53,9 @@ static const uint16_t exposures[] = {
 
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
-    screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
-    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
+    uint8_t ypos = (camera_mode == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
+    screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
+    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
 uint8_t old_capture_reg = 0;
@@ -107,44 +108,108 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
-const menu_item_t CameraMenuItems[] = {
-    {
-        .prev = NULL,                   .next = CameraMenuItems + 1, 
-        .sub = NULL, .sub_params = NULL,        
-        .ofs_x = 0, .ofs_y = 0, .width = 5, 
-        .caption = " %sms",
-        .helpcontext = " Exposure time",
-        .onPaint = onCameraMenuItemPaint,
-        .result = ACTION_SHUTTER
-    }, {
-        .prev = CameraMenuItems + 0,    .next = CameraMenuItems + 2, 
-        .sub = NULL, .sub_params = NULL,        
-        .ofs_x = 5, .ofs_y = 0, .width = 5, 
-        .caption = " %s",
-        .helpcontext = " Sensor gain",
-        .onPaint = onCameraMenuItemPaint,
-        .result = ACTION_SHUTTER
-    }, {
-        .prev = CameraMenuItems + 1,    .next = CameraMenuItems + 3, 
-        .sub = NULL, .sub_params = NULL,        
-        .ofs_x = 10, .ofs_y = 0, .width = 5, 
-        .caption = " %dmv",
-        .helpcontext = " Sensor voltage out",
-        .onPaint = onCameraMenuItemPaint,
-        .result = ACTION_SHUTTER
-    }, {
-        .prev = CameraMenuItems + 2,    .next = NULL, 
-        .sub = NULL, .sub_params = NULL,        
-        .ofs_x = 15, .ofs_y = 0, .width = 5, 
-        .caption = " %s",
-        .helpcontext = "",
-        .onPaint = onCameraMenuItemPaint,
-        .result = ACTION_SHUTTER
-    }
+const menu_item_t CameraMenuItemManualExposure = {
+    .prev = NULL,                               .next = &CameraMenuItemManualGain, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 0, .ofs_y = 0, .width = 5, 
+    .caption = " %sms",
+    .helpcontext = " Exposure time",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+}; 
+const menu_item_t CameraMenuItemManualGain = {
+    .prev = &CameraMenuItemManualExposure,  .next = &CameraMenuItemManualVOut, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 5, .ofs_y = 0, .width = 5, 
+    .caption = " %s",
+    .helpcontext = " Sensor gain",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualVOut = {
+    .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemManualItem3, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 10, .ofs_y = 0, .width = 5, 
+    .caption = " %dmv",
+    .helpcontext = " Sensor voltage out",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem3 = {
+    .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualItem4, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 15, .ofs_y = 0, .width = 5, 
+    .caption = " Item 3",
+    .helpcontext = " Some item 3",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem4 = {
+    .prev = &CameraMenuItemManualItem3,     .next = &CameraMenuItemManualItem5, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 0, .ofs_y = 1, .width = 5, 
+    .caption = " Item 4",
+    .helpcontext = " Some item 4",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem5 = {
+    .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemManualItem6, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 5, .ofs_y = 1, .width = 5, 
+    .caption = " Item 5",
+    .helpcontext = " Some item 5",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem6 = {
+    .prev = &CameraMenuItemManualItem5,     .next = &CameraMenuItemManualItem7, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 10, .ofs_y = 1, .width = 5, 
+    .caption = " Item 6",
+    .helpcontext = " Some item 6",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem7 = {
+    .prev = &CameraMenuItemManualItem6,     .next = &CameraMenuItemManualItem8, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 15, .ofs_y = 1, .width = 5, 
+    .caption = " Item 7",
+    .helpcontext = " Some item 7",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem8 = {
+    .prev = &CameraMenuItemManualItem7,     .next = &CameraMenuItemManualItem9, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 0, .ofs_y = 2, .width = 5, 
+    .caption = " Item 8",
+    .helpcontext = " Some item 8",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem9 = {
+    .prev = &CameraMenuItemManualItem8,     .next = &CameraMenuItemManualItem10, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 5, .ofs_y = 2, .width = 5, 
+    .caption = " Item 9",
+    .helpcontext = " Some item 9",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualItem10 = {
+    .prev = &CameraMenuItemManualItem9,     .next = NULL, 
+    .sub = NULL, .sub_params = NULL,        
+    .ofs_x = 10, .ofs_y = 2, .width = 5, 
+    .caption = " Item 10",
+    .helpcontext = "Some item 10",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
 };
 const menu_t CameraMenu = {
     .x = 0, .y = 0, .width = 0, .height = 0, 
-    .items = CameraMenuItems, 
+    .items = &CameraMenuItemManualExposure, 
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
@@ -163,7 +228,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     }
     // !!! d-pad keys are translated
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    if (selection == (CameraMenuItems + 0)) {
+    if (selection == &CameraMenuItemManualExposure) {
         if (KEY_PRESSED(J_RIGHT)) {
             if (current_exposure) {
                 current_exposure--;
@@ -176,7 +241,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 CAM_REG_EXPTIME = exposures[current_exposure];
             } else current_exposure = LENGTH(exposures) - 1;
         } 
-    } else if (selection == (CameraMenuItems + 2)) {
+    } else if (selection == &CameraMenuItemManualVOut) {
         if (KEY_PRESSED(J_RIGHT)) {
             if (voltage_out > MIN_VOLTAGE_OUT) {
                 voltage_out -= VOLTAGE_OUT_STEP;
@@ -196,7 +261,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    if (self == (CameraMenuItems + 0)) {
+    if (self == &CameraMenuItemManualExposure) {
         // exposure
         uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
         uint8_t * buf = text_buffer + 100;
@@ -214,17 +279,20 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             *tail = 0;
         }
         sprintf(text_buffer, self->caption, buf);
-    } else if (self == (CameraMenuItems + 1)) {
+    } else if (self == &CameraMenuItemManualGain) {
         // gain
         sprintf(text_buffer, self->caption, "20.0");
-    } else if (self == (CameraMenuItems + 2)) {
+    } else if (self == &CameraMenuItemManualVOut) {
         // voltage
         sprintf(text_buffer, self->caption, voltage_out);
-    } else *text_buffer = 0;
+    } else {
+        if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
+    }
     return text_buffer;
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
+    // we draw help context here
     menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
     return 0;
 }
