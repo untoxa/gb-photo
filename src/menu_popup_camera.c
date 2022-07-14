@@ -51,6 +51,7 @@ const menu_item_t ModeSubMenuItemIterate = {
 };
 const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = 6, 
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ModeSubMenuItemManual, 
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
@@ -82,6 +83,7 @@ const menu_item_t TriggerSubMenuItemInterval = {
 };
 const menu_t TriggerSubMenu = {
     .x = 5, .y = 5, .width = 10, .height = 5, 
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &TriggerSubMenuItemAButton, 
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
@@ -113,6 +115,7 @@ const menu_item_t ActionSubMenuSaveAndPrint = {
 };
 const menu_t ActionSubMenu = {
     .x = 5, .y = 6, .width = 10, .height = 5, 
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ActionSubMenuSave, 
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
