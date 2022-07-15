@@ -1,3 +1,5 @@
+#pragma bank 255
+
 #include <gbdk/platform.h>
 #include <stdint.h>
 #include <string.h>
