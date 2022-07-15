@@ -1,5 +1,9 @@
-#ifndef _DITHERPATTERNS_H_INCLUDE
-#define _DITHERPATTERNS_H_INCLUDE
+#pragma bank 255
+
+#include <gbdk/platform.h>
+#include <string.h>
+
+#include "gbcamera.h"
 
 #define NUM_ONOFF_SETS 2
 #define NUM_LIGHT_SETS 2
@@ -89,5 +93,6 @@ static const uint8_t ditherPatterns[NUM_ONOFF_SETS][NUM_LIGHT_SETS][NUM_CONTRAST
     },
 };
 
-
-#endif
+void dither_pattern_apply(uint8_t dithering, uint8_t ditheringHighLight, uint8_t current_contrast) BANKED {
+    memcpy(CAM_DITHERPATTERN, &ditherPatterns[dithering ? 0 : 1][ditheringHighLight ? 0 : 1][current_contrast], sizeof(CAM_DITHERPATTERN));
+}

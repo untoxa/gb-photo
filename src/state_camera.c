@@ -1,5 +1,3 @@
-#pragma bank 255
-
 #include <gbdk/platform.h>
 #include <stdint.h>
 #include <string.h>
@@ -30,7 +28,7 @@
 #include "menu_popup_camera.h"
 
 // dither patterns
-#include "ditherPatterns.h"
+#include "dither_patterns.h"
 
 BANKREF(state_camera)
 
@@ -98,10 +96,7 @@ void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((edge_exclusive) ? CA
 void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
 void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((invertOutput) ? CAM04F_INV : CAM04F_POS) | voltage_refs[current_voltage_ref].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
-
-void RENDER_CAM_REG_DITHERPATTERN() {
-  memcpy(CAM_DITHERPATTERN, &ditherPatterns[dithering ? 0 : 1][ditheringHighLight ? 0 : 1][current_contrast - 1], NUM_CONTRAST_SIZE);
-}
+inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(dithering, ditheringHighLight, current_contrast - 1); }
 
 void camera_load_settings() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
