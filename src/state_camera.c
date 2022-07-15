@@ -41,6 +41,7 @@ int8_t current_exposure = 14;
 int8_t current_gain = 0;
 int8_t current_zero_point = 1;
 int8_t current_edge_mode = 0;
+int8_t current_voltage_ref = 3;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t positive = TRUE;
@@ -74,6 +75,10 @@ static const table_value_t edge_modes[] = {
     { CAM04_EDGE_RATIO_050, "50%" }, { CAM04_EDGE_RATIO_075, "75%" }, { CAM04_EDGE_RATIO_100, "100%" },{ CAM04_EDGE_RATIO_125, "125%" },
     { CAM04_EDGE_RATIO_200, "200%" },{ CAM04_EDGE_RATIO_300, "300%" },{ CAM04_EDGE_RATIO_400, "400%" },{ CAM04_EDGE_RATIO_500, "500%" },
 };
+static const table_value_t voltage_refs[] = {
+    { CAM04_VOLTAGE_REF_00, "0.0" }, { CAM04_VOLTAGE_REF_05, "0.5" }, { CAM04_VOLTAGE_REF_10, "1.0" }, { CAM04_VOLTAGE_REF_15, "1.5" },
+    { CAM04_VOLTAGE_REF_20, "2.0" }, { CAM04_VOLTAGE_REF_25, "2.5" }, { CAM04_VOLTAGE_REF_30, "3.0" }, { CAM04_VOLTAGE_REF_35, "3.5" },
+};
 
 
 void display_last_seen(uint8_t restore) {
@@ -83,10 +88,10 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-inline void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0 | gains[current_gain].value; }
-inline void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
-inline void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((positive) ? CAM04F_POS : CAM04F_INV) | 0x03; }
-inline void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
+void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0 | gains[current_gain].value; }
+void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
+void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((positive) ? CAM04F_POS : CAM04F_INV) | voltage_refs[current_voltage_ref].value; }
+void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
 
 void camera_load_settings() {
     static const uint8_t pattern[] = { 
@@ -232,27 +237,27 @@ const menu_item_t CameraMenuItemInvertedOutput = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualZeroPoint = {
-    .prev = &CameraMenuItemInvertedOutput,  .next = &CameraMenuItemManualItem8, 
+    .prev = &CameraMenuItemInvertedOutput,  .next = &CameraMenuItemManualVoltRef, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 15, .ofs_y = 1, .width = 5, 
     .id = idZeroPoint, 
     .caption = " %s",
     .helpcontext = " Sensor zero point",
-
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem8 = {
+const menu_item_t CameraMenuItemManualVoltRef = {
     .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeMode, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 0, .ofs_y = 2, .width = 5, 
-    .caption = " Item 8",
-    .helpcontext = " Some item 8",
+    .ofs_x = 0, .ofs_y = 2, .width = 5,
+    .id = idVoltageRef, 
+    .caption = " %sv",
+    .helpcontext = " Sensor voltage reference",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemEdgeMode = {
-    .prev = &CameraMenuItemManualItem8,     .next = &CameraMenuItemManualItem10, 
+    .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualItem10, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 5, .ofs_y = 2, .width = 5,
     .id = idEdgeMode, 
@@ -308,24 +313,31 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
-                if (redraw_selection = inc_dec_int8(change_direction, &current_exposure, 0, MAX_INDEX(exposures), 1)) RENDER_CAM_REG_EXPTIME();
+                if (redraw_selection = inc_dec_int8(&current_exposure, 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
                 break;
             case idGain:
-                if (redraw_selection = inc_dec_int8(change_direction, &current_gain, 0, MAX_INDEX(gains), 1)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (redraw_selection = inc_dec_int8(&current_gain, 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idVOut: 
-                if (redraw_selection = inc_dec_int16(change_direction, &voltage_out, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, VOLTAGE_OUT_STEP)) RENDER_CAM_REG_ZEROVOUT();
+                if (redraw_selection = inc_dec_int16(&voltage_out, VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
                 dithering = !dithering, redraw_selection = TRUE;
                 // TODO: modify dithering array
+                break;
             case idInvOutput:
                 positive = !positive, redraw_selection = TRUE;
                 RENDER_CAM_REG_EDRAINVVREF();
+                break;
             case idZeroPoint:
-                if (redraw_selection = inc_dec_int8(change_direction, &current_zero_point, 0, MAX_INDEX(zero_points), 1)) RENDER_CAM_REG_ZEROVOUT();
+                if (redraw_selection = inc_dec_int8(&current_zero_point, 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                break;
+            case idVoltageRef:
+                if (redraw_selection = inc_dec_int8(&current_voltage_ref, 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                break;
             case idEdgeMode:
-                if (redraw_selection = inc_dec_int8(change_direction, &current_edge_mode, 0, MAX_INDEX(edge_modes), 1)) RENDER_CAM_REG_EDRAINVVREF();
+                if (redraw_selection = inc_dec_int8(&current_edge_mode, 1, 0, MAX_INDEX(edge_modes), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                break;
             default:
                 break;
         }
@@ -377,6 +389,9 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         case idZeroPoint:
             sprintf(text_buffer, self->caption, zero_points[current_zero_point].caption);
+            break;
+        case idVoltageRef:
+            sprintf(text_buffer, self->caption, voltage_refs[current_voltage_ref].caption);
             break;
         case idEdgeMode:
             sprintf(text_buffer, self->caption, edge_modes[current_edge_mode].caption);

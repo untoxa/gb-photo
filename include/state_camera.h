@@ -34,6 +34,7 @@ typedef enum {
     idDither,
     idInvOutput,
     idZeroPoint,
+    idVoltageRef,
     idEdgeMode,
 } camera_menu_e;
 
@@ -43,19 +44,18 @@ typedef enum {
     changeIncrease
 } change_direction_e;
 
-inline uint8_t inc_dec_int8(change_direction_e dir, int8_t * value, int8_t min, int8_t max, int8_t delta) {
-    int16_t v = *value;
+inline uint8_t inc_dec_int8(int8_t * value, int8_t delta, int8_t min, int8_t max, change_direction_e dir) {
+    int8_t v = *value;
     switch (dir) {
         case changeDecrease:
-            *value = ((*value - delta) < min) ? min : (*value - delta); 
-            break;
+            return (v != (*value = ((*value - delta) < min) ? min : (*value - delta))); 
         case changeIncrease:
-            *value = ((*value + delta) > max) ? max : (*value + delta); 
-            break;
+            return (v != (*value = ((*value + delta) > max) ? max : (*value + delta))); 
+        default:
+            return FALSE;
     }
-    return (v != *value);
 }
-inline uint8_t inc_dec_int16(change_direction_e dir, int16_t * value, int16_t min, int16_t max, int16_t delta) {
+inline uint8_t inc_dec_int16(int16_t * value, int16_t delta, int16_t min, int16_t max, change_direction_e dir) {
     int16_t v = *value;
     switch (dir) {
         case changeDecrease:
