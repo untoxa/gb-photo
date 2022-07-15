@@ -15,13 +15,13 @@
 #include "menu_yesno.h"
 
 // audio assets
-#include "sound_ok.h" 
+#include "sound_ok.h"
 #include "sound_error.h"
 
 #if (DEBUG_ENABLED==1)
     #define MENUITEM_DEBUG &MainMenuItemDebug
     #define MAINMENU_HEIGHT 6
-#else 
+#else
     #define MENUITEM_DEBUG NULL
     #define MAINMENU_HEIGHT 5
 #endif
@@ -33,9 +33,9 @@
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t MainMenuItemCamera = {
-    .prev = NULL,                   .next = &MainMenuItemGallery, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 1, .ofs_y = 1, .width = 10, 
+    .prev = NULL,                   .next = &MainMenuItemGallery,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 1, .width = 10,
     .caption = " Camera",
     .helpcontext = " Make your own pictures",
     .onPaint = NULL,
@@ -52,7 +52,7 @@ const menu_item_t MainMenuItemGallery = {
 };
 const menu_item_t MainMenuItemAbout = {
     .prev = &MainMenuItemGallery,   .next = MENUITEM_DEBUG,
-    .sub = &AboutMenu, .sub_params = NULL, 
+    .sub = &AboutMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 10,
     .caption = " About",
     .helpcontext = " About PXLR-Studio " QUOTE(VERSION),
@@ -73,8 +73,8 @@ const menu_item_t MainMenuItemDebug = {
 const menu_t MainMenu = {
     .x = 1, .y = 3, .width = 12, .height = MAINMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &MainMenuItemCamera, 
-    .onShow = NULL, .onHelpContext = onHelpMainMenu, 
+    .items = &MainMenuItemCamera,
+    .onShow = NULL, .onHelpContext = onHelpMainMenu,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultMainMenu
 };
 
@@ -87,7 +87,7 @@ uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct me
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
     return 0;
 }
 
@@ -102,7 +102,7 @@ uint8_t MainMenuDispatch(uint8_t menu_result) {
             return STATE_CHANGED();
         case ACTION_GALLERY:
             CHANGE_STATE(state_gallery);
-            return STATE_CHANGED();         // don't refresh screen if state changed 
+            return STATE_CHANGED();         // don't refresh screen if state changed
         default:
             // default action
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));

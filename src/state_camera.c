@@ -39,6 +39,7 @@ trigger_mode_e trigger_mode = trigger_mode_abutton;
 after_action_e after_action = after_action_save;
 
 uint8_t image_live_preview = TRUE;
+uint8_t images_taken = 30;
 
 int8_t current_exposure = 14;
 int8_t current_gain = 0;
@@ -112,6 +113,8 @@ void camera_load_settings() {
 static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
     display_last_seen(TRUE);
+    sprintf(text_buffer, "%d/30", images_taken);
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
 
 uint8_t ENTER_state_camera() BANKED {
@@ -305,7 +308,7 @@ const menu_t CameraMenuManual = {
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
-static menu_item_t * last_menu_items[N_CAMERA_MODES] = { NULL, NULL, NULL, NULL };
+static const menu_item_t * last_menu_items[N_CAMERA_MODES] = { NULL, NULL, NULL, NULL };
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
@@ -456,7 +459,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
     return 0;
 }
 

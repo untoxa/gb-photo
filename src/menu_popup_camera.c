@@ -147,7 +147,7 @@ const menu_item_t CameraMenuItemTrigger = {
     .sub = &TriggerSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 11,
     .id = idPopupCameraTrigger,
-    .helpcontext = " Select trigger behavior",
+    .helpcontext = " Trigger behavior",
     .caption = " Trigger\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -157,7 +157,7 @@ const menu_item_t CameraMenuItemAction = {
     .sub = &ActionSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 11,
     .id = idPopupCameraAction,
-    .helpcontext = " Select post-processing action",
+    .helpcontext = " Post-processing action",
     .caption = " Action\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -168,7 +168,7 @@ const menu_item_t CameraMenuItemReset = {
     .ofs_x = 1, .ofs_y = 4, .width = 11, .flags = MENUITEM_TERM,
     .id = idPopupCameraRestore,
     .caption = " Restore defaults",
-    .helpcontext = " Restore default camera settings",
+    .helpcontext = " Restore default settings",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = ACTION_RESTORE_DEFAULTS
 };
@@ -220,7 +220,7 @@ uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t *
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
     return 0;
 }
 
