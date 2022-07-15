@@ -29,6 +29,9 @@
 #include "menu_main.h"
 #include "menu_popup_camera.h"
 
+// dither patterns
+#include "ditherPatterns.h"
+
 BANKREF(state_camera)
 
 camera_mode_e camera_mode = camera_mode_manual;
@@ -45,6 +48,7 @@ int8_t current_voltage_ref = 3;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t ditheringHighLight = TRUE;
+uint8_t current_contrast = 9;
 uint8_t invertOutput = FALSE;
 uint8_t edge_exclusive = TRUE;
 
@@ -94,6 +98,10 @@ void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((edge_exclusive) ? CA
 void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
 void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((invertOutput) ? CAM04F_INV : CAM04F_POS) | voltage_refs[current_voltage_ref].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
+
+void RENDER_CAM_REG_DITHERPATTERN() {
+  memcpy(CAM_DITHERPATTERN, &ditherPatterns[dithering ? 0 : 1][ditheringHighLight ? 0 : 1][current_contrast - 1], NUM_CONTRAST_SIZE);
+}
 
 void camera_load_settings() {
     static const uint8_t pattern[] = {
@@ -146,8 +154,8 @@ const menu_item_t CameraMenuItemAssistedContrast = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 8, .ofs_y = 0, .width = 6,
     .id = idContrast,
-    .caption = " Cont: %s",
-    .helpcontext = " Contrast value",
+    .caption = " Cont: %d",
+    .helpcontext = " Contrast level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
@@ -201,7 +209,7 @@ const menu_item_t CameraMenuItemManualVOut = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem3 = {
-    .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualItem4,
+    .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualContrast,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5,
     .caption = " Item 3",
@@ -209,17 +217,18 @@ const menu_item_t CameraMenuItemManualItem3 = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem4 = {
-    .prev = &CameraMenuItemManualItem3,     .next = &CameraMenuItemManualDither,
+const menu_item_t CameraMenuItemManualContrast = {
+    .prev = &CameraMenuItemManualItem3,    .next = &CameraMenuItemManualDither,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 1, .width = 5,
-    .caption = " Item 4",
-    .helpcontext = " Some item 4",
+    .id = idContrast,
+    .caption = " Cont: %d",
+    .helpcontext = " Contrast level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualDither = {
-    .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemManualDitherLight,
+    .prev = &CameraMenuItemManualContrast,     .next = &CameraMenuItemManualDitherLight,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 1, .width = 5,
     .id = idDither,
@@ -336,11 +345,14 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
             case idDither:
                 dithering = !dithering;
-                // TODO: modify dithering array
+                RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idDitherLight:
                 ditheringHighLight = !ditheringHighLight;
-                // TODO: modify dithering array
+                RENDER_CAM_REG_DITHERPATTERN();
+                break;
+            case idContrast:
+                if (redraw_selection = inc_dec_int8(&current_contrast, 1, 1, NUM_CONTRAST_SETS, change_direction)) RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idInvOutput:
                 invertOutput = !invertOutput;
@@ -402,7 +414,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             sprintf(text_buffer, self->caption, voltage_out);
             break;
         case idContrast:
-            sprintf(text_buffer, self->caption, "9");
+            sprintf(text_buffer, self->caption, current_contrast);
             break;
         case idDither:
             sprintf(text_buffer, self->caption, ditherOnOff[((dithering) ? 1 : 0)]);
