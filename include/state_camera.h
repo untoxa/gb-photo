@@ -41,6 +41,36 @@ typedef enum {
     changeIncrease
 } change_direction_e;
 
+inline uint8_t inc_dec_int8(change_direction_e dir, int8_t * value, int8_t min, int8_t max, int8_t delta) {
+    int16_t v = *value;
+    switch (dir) {
+        case changeDecrease:
+            *value = ((*value - delta) < min) ? min : (*value - delta); 
+            break;
+        case changeIncrease:
+            *value = ((*value + delta) > max) ? max : (*value + delta); 
+            break;
+    }
+    return (v != *value);
+}
+inline uint8_t inc_dec_int16(change_direction_e dir, int16_t * value, int16_t min, int16_t max, int16_t delta) {
+    int16_t v = *value;
+    switch (dir) {
+        case changeDecrease:
+            *value = ((*value - delta) < min) ? min : (*value - delta); 
+            break;
+        case changeIncrease:
+            *value = ((*value + delta) > max) ? max : (*value + delta); 
+            break;
+    }
+    return (v != *value);
+}
+
+typedef struct table_value_t {
+    uint8_t value;
+    const uint8_t * caption;
+} table_value_t;
+
 extern camera_mode_e camera_mode;
 extern trigger_mode_e trigger_mode;
 extern after_action_e after_action;

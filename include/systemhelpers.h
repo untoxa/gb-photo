@@ -34,6 +34,7 @@
 #define MOVE_BKG(x, y) (shadow_scx_reg = (x), shadow_scy_reg = WRAP_SCROLL_Y((y)))
 
 #define LENGTH(a) (sizeof((a))/sizeof((a)[0]))
+#define MAX_INDEX(a) (sizeof((a))/sizeof((a)[0])-1)
 
 #if defined(SEGA)
     #define WRAP_SCROLL_Y(y) ((y) % 224u)

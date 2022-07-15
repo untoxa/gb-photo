@@ -36,7 +36,9 @@ trigger_mode_e trigger_mode = trigger_mode_abutton;
 after_action_e after_action = after_action_save;
 
 uint8_t image_live_preview = TRUE;
-uint8_t current_exposure = 14;
+
+int8_t current_exposure = 14;
+int8_t current_gain = 0;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t positive = TRUE;
@@ -56,6 +58,15 @@ static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(800000), US_TO_EXPOSURE_VALUE(1000000), US_TO_EXPOSURE_VALUE(1048560)
 };
 
+static const table_value_t gains[] = {
+    { CAM01_GAIN_140, "14.0" }, { CAM01_GAIN_155, "15.5" }, { CAM01_GAIN_170, "17.0" }, { CAM01_GAIN_185, "18.5" },
+    { CAM01_GAIN_200, "20.0" }, { CAM01_GAIN_215, "21.5" }, { CAM01_GAIN_230, "23.0" }, { CAM01_GAIN_245, "24.5" },
+    { CAM01_GAIN_260, "26.0" }, { CAM01_GAIN_275, "27.5" }, { CAM01_GAIN_290, "29.0" }, { CAM01_GAIN_305, "30.5" },
+    { CAM01_GAIN_320, "32.0" }, { CAM01_GAIN_350, "35.0" }, { CAM01_GAIN_380, "38.0" }, { CAM01_GAIN_410, "41.0" },
+    { CAM01_GAIN_440, "44.0" }, { CAM01_GAIN_455, "45.5" }, { CAM01_GAIN_470, "47.0" }, { CAM01_GAIN_515, "51.5" },
+    { CAM01_GAIN_575, "57.5" }
+};
+
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (camera_mode == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
@@ -63,7 +74,7 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-inline void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0; }
+inline void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0 | gains[current_gain].value; }
 inline void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
 inline void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = ((positive) ? CAM04F_POS : CAM04F_INV) | 0x03; }
 inline void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = CAM05_ZERO_POS | TO_VOLTAGE_OUT(voltage_out); }
@@ -285,32 +296,18 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
-                if (change_direction == changeDecrease) {
-                    if (current_exposure) {
-                        current_exposure--;
-                        RENDER_CAM_REG_EXPTIME();
-                        redraw_selection = TRUE;
-                    }
-                } else {
-                    if (++current_exposure < LENGTH(exposures)) {
-                        RENDER_CAM_REG_EXPTIME();
-                        redraw_selection = TRUE;
-                    } else current_exposure = LENGTH(exposures) - 1;
+                if (inc_dec_int8(change_direction, &current_exposure, 0, MAX_INDEX(exposures), 1)) {
+                    RENDER_CAM_REG_EXPTIME(), redraw_selection = TRUE;
                 }
                 break;
-            case idVOut:
-                if (change_direction == changeDecrease) {
-                    if (voltage_out > MIN_VOLTAGE_OUT) {
-                        voltage_out -= VOLTAGE_OUT_STEP;
-                        RENDER_CAM_REG_ZEROVOUT();
-                        redraw_selection = TRUE;
-                    }
-                } else {
-                    if (voltage_out < MAX_VOLTAGE_OUT) {
-                        voltage_out += VOLTAGE_OUT_STEP;
-                        RENDER_CAM_REG_ZEROVOUT();
-                        redraw_selection = TRUE;
-                    } else current_exposure = LENGTH(exposures) - 1;
+            case idGain:
+                if (inc_dec_int8(change_direction, &current_gain, 0, MAX_INDEX(gains), 1)) {
+                    RENDER_CAM_REG_EDEXOPGAIN(), redraw_selection = TRUE;
+                }
+                break;
+            case idVOut: 
+                if (inc_dec_int16(change_direction, &voltage_out, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, VOLTAGE_OUT_STEP)) {
+                    RENDER_CAM_REG_ZEROVOUT(), redraw_selection = TRUE;
                 } 
                 break;
             case idDither:
@@ -319,8 +316,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 redraw_selection = TRUE;
             case idInvOutput:
                 positive = !positive;
-                RENDER_CAM_REG_EDRAINVVREF();
-                redraw_selection = TRUE;
+                RENDER_CAM_REG_EDRAINVVREF(), redraw_selection = TRUE;
             default:
                 break;
         }
@@ -356,7 +352,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         }
         case idGain:
-            sprintf(text_buffer, self->caption, "20.0");
+            sprintf(text_buffer, self->caption, gains[current_gain].caption);
             break;
         case idVOut:
             sprintf(text_buffer, self->caption, voltage_out);
