@@ -30,11 +30,11 @@ const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t *
     return (new_selection) ? new_selection : selection;
 }
 
-uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
+uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
     const menu_item_t * selection;
     uint8_t result = 0;
 
-    selection = menu->items;
+    selection = (select) ? select : (menu->items);
 
     if (menu->width) {
         // zero menu frame width == not draw menu frame
@@ -74,7 +74,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
             }
         } else if (KEY_PRESSED(J_A)) {
             if (selection->sub) {
-                result = menu_execute(selection->sub, selection->sub_params);
+                result = menu_execute(selection->sub, selection->sub_params, NULL);
                 if (menu->onTranslateSubResult) result = menu->onTranslateSubResult(menu, selection, result);
             } else result = selection->result;
         } else if (KEY_PRESSED(menu->cancel_mask)) {

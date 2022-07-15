@@ -10,7 +10,7 @@
 #include "states.h"
 
 // audio assets
-#include "sound_ok.h" 
+#include "sound_ok.h"
 #include "sound_error.h"
 
 // menus
@@ -27,21 +27,21 @@ extern uint8_t gallery_picture_no;
 static uint8_t thumbnails_page_no = 0, cx = 0, cy = 0, cursor_anim = 0;
 
 const metasprite_t gallery_cursor0[] = {
-	METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0), 
-    METASPR_ITEM(24,  0, 2, 0), METASPR_ITEM(0, -24, 3, 0), 
+	METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0),
+    METASPR_ITEM(24,  0, 2, 0), METASPR_ITEM(0, -24, 3, 0),
     METASPR_TERM
 };
 const metasprite_t gallery_cursor1[] = {
-	METASPR_ITEM(17,  9, 0, 0), METASPR_ITEM(0,  22, 1, 0), 
-    METASPR_ITEM(22,  0, 2, 0), METASPR_ITEM(0, -22, 3, 0), 
+	METASPR_ITEM(17,  9, 0, 0), METASPR_ITEM(0,  22, 1, 0),
+    METASPR_ITEM(22,  0, 2, 0), METASPR_ITEM(0, -22, 3, 0),
     METASPR_TERM
 };
 const metasprite_t gallery_cursor2[] = {
-	METASPR_ITEM(18, 10, 0, 0), METASPR_ITEM(0,  20, 1, 0), 
-    METASPR_ITEM(20,  0, 2, 0), METASPR_ITEM(0, -20, 3, 0), 
+	METASPR_ITEM(18, 10, 0, 0), METASPR_ITEM(0,  20, 1, 0),
+    METASPR_ITEM(20,  0, 2, 0), METASPR_ITEM(0, -20, 3, 0),
     METASPR_TERM
 };
-const metasprite_t * const gallery_cursor[] = {gallery_cursor0, gallery_cursor1, gallery_cursor2, gallery_cursor1}; 
+const metasprite_t * const gallery_cursor[] = {gallery_cursor0, gallery_cursor1, gallery_cursor2, gallery_cursor1};
 
 inline uint8_t coords_to_picture_no(uint8_t x, uint8_t y) {
     uint8_t no = (thumbnails_page_no << 4) | (y << 2) | x;
@@ -58,7 +58,7 @@ uint8_t ENTER_state_thumbnails() BANKED {
     thumbnails_page_no = (gallery_picture_no >> 4);
     cx = gallery_picture_no & 0x03, cy = (gallery_picture_no >> 2) & 0x03;
     refresh_screen();
-    return 0;     
+    return 0;
 }
 
 uint8_t UPDATE_state_thumbnails() BANKED {
@@ -91,14 +91,14 @@ uint8_t UPDATE_state_thumbnails() BANKED {
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL))) refresh_screen();
+        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
     }
     hide_sprites_range(move_metasprite(gallery_cursor[cursor_anim], 0xfa, 0, ((cx << 2) + 2) << 3, ((cy << 2) + 1) << 3), MAX_HARDWARE_SPRITES);
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
-    return 0;     
+    return 0;
 }
 
 uint8_t LEAVE_state_thumbnails() BANKED {
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-    return 0;     
+    return 0;
 }

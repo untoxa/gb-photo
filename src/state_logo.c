@@ -9,7 +9,7 @@
 #include "bankdata.h"
 
 // audio assets
-#include "sound_ok.h" 
+#include "sound_ok.h"
 #include "sound_error.h"
 
 // menus
@@ -52,7 +52,7 @@ static void refresh_screen() {
 
 uint8_t ENTER_state_logo() BANKED {
     refresh_screen();
-    return 0;     
+    return 0;
 }
 
 uint8_t UPDATE_state_logo() BANKED {
@@ -63,11 +63,11 @@ uint8_t UPDATE_state_logo() BANKED {
         return 0;
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
-        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL))) refresh_screen();
+        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
     }
     return 0;
 }
 
 uint8_t LEAVE_state_logo() BANKED {
-    return 0;     
+    return 0;
 }

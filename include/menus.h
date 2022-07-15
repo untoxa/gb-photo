@@ -48,6 +48,6 @@ typedef struct menu_t {
 void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text);
 const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t * selection, const menu_item_t * new_selection);
 
-uint8_t menu_execute(const menu_t * menu, uint8_t * param);
+uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select);
 
 #endif

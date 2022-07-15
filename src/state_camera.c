@@ -443,12 +443,12 @@ uint8_t UPDATE_state_camera() BANKED {
     JOYPAD_RESET();
     switch (camera_mode) {
         case camera_mode_manual:
-            menu_result = menu_execute(&CameraMenuManual, NULL);
+            menu_result = menu_execute(&CameraMenuManual, NULL, NULL);
             break;
         case camera_mode_assisted:
         case camera_mode_auto:
         case camera_mode_iterate:
-            menu_result = menu_execute(&CameraMenuAssisted, NULL);
+            menu_result = menu_execute(&CameraMenuAssisted, NULL, NULL);
             break;
         default:
             // error, must not get here
@@ -464,7 +464,7 @@ uint8_t UPDATE_state_camera() BANKED {
             }
             break;
         case ACTION_MAIN_MENU:
-            if (!MainMenuDispatch(menu_execute(&MainMenu, NULL))) refresh_screen();
+            if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
             break;
         case ACTION_CAMERA_SUBMENU: {
             switch (menu_result = menu_popup_camera_execute()) {
