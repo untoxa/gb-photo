@@ -19,13 +19,13 @@ void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * t
 }
 
 const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t * selection, const menu_item_t * new_selection) {
-    if (selection) 
-        menu_text_out(menu->x + selection->ofs_x, menu->y + selection->ofs_y, selection->width, 
-                    SOLID_WHITE, 
+    if (selection)
+        menu_text_out(menu->x + selection->ofs_x, menu->y + selection->ofs_y, selection->width,
+                    SOLID_WHITE,
                     (selection->onPaint) ? selection->onPaint(menu, selection) : (uint8_t *)selection->caption);
     if (new_selection)
-        menu_text_out(menu->x + new_selection->ofs_x, menu->y + new_selection->ofs_y, new_selection->width, 
-                      SOLID_BLACK, 
+        menu_text_out(menu->x + new_selection->ofs_x, menu->y + new_selection->ofs_y, new_selection->width,
+                      SOLID_BLACK,
                       (new_selection->onPaint) ? new_selection->onPaint(menu, new_selection) : (uint8_t *)new_selection->caption);
     return (new_selection) ? new_selection : selection;
 }
@@ -47,10 +47,11 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
 
     // draw menu items
     for (const menu_item_t * current_item = selection; (current_item); current_item = current_item->next) {
-        menu_text_out(menu->x + current_item->ofs_x, menu->y + current_item->ofs_y, current_item->width, 
-                      ((current_item == selection) ? SOLID_BLACK : SOLID_WHITE), 
+        menu_text_out(menu->x + current_item->ofs_x, menu->y + current_item->ofs_y, current_item->width,
+                      ((current_item == selection) ? SOLID_BLACK : SOLID_WHITE),
                       (current_item->onPaint) ? current_item->onPaint(menu, current_item) : (uint8_t *)current_item->caption);
         if ((current_item == selection) && (menu->onHelpContext)) menu->onHelpContext(menu, selection);
+        if (current_item->flags & MENUITEM_TERM) break;
     }
 
     if (menu->onShow) menu->onShow(menu, param);
@@ -81,7 +82,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param) {
         }
         if (menu->onIdle) {
             uint8_t res;
-            if (res = menu->onIdle(menu, selection)) return res; 
+            if (res = menu->onIdle(menu, selection)) return res;
         } else wait_vbl_done();
     } while (result == 0);
 

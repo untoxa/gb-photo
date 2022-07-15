@@ -171,7 +171,7 @@ const menu_t CameraMenuAssisted = {
 
 // --- Manual menu -----------------------------------
 const menu_item_t CameraMenuItemManualExposure = {
-    .prev = NULL,                               .next = &CameraMenuItemManualGain,
+    .prev = &CameraMenuItemManualEdgeExclusive, .next = &CameraMenuItemManualGain,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 0, .width = 5,
     .id = idExposure,
@@ -279,9 +279,9 @@ const menu_item_t CameraMenuItemEdgeMode = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualEdgeExclusive = {
-    .prev = &CameraMenuItemEdgeMode,        .next = NULL,
+    .prev = &CameraMenuItemEdgeMode,        .next = &CameraMenuItemManualExposure,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 15, .ofs_y = 2, .width = 5,
+    .ofs_x = 15, .ofs_y = 2, .width = 5, .flags = MENUITEM_TERM,
     .id = idEdgeExclusive,
     .caption = " %s",
     .helpcontext = "Sensor edge exclusive",
