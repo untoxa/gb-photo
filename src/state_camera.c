@@ -41,8 +41,8 @@ after_action_e after_action = after_action_save;
 uint8_t image_live_preview = TRUE;
 uint8_t images_taken = 30;
 
-#define SETTING(A) current_settings[camera_mode].A
 #define MODE_SETTING(A,B) current_settings[B].A
+#define SETTING(A) MODE_SETTING(A,camera_mode)
 camera_mode_settings_t current_settings[N_CAMERA_MODES] = {
     {
         .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
