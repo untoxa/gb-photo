@@ -131,20 +131,11 @@ const menu_t ActionSubMenu = {
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
-const menu_item_t CameraMenuItemReset = {
-    .prev = NULL,                   .next = &CameraMenuItemMode,
-    .sub = &YesNoMenu, .sub_params = "Restore defaults?",
-    .ofs_x = 1, .ofs_y = 1, .width = 11,
-    .id = idPopupCameraRestore,
-    .caption = " Restore defaults",
-    .helpcontext = " Restore default camera settings",
-    .onPaint = onCameraPopupMenuItemPaint,
-    .result = ACTION_RESTORE_DEFAULTS
-};
+
 const menu_item_t CameraMenuItemMode = {
     .prev = &CameraMenuItemReset,   .next = &CameraMenuItemTrigger,
     .sub = &CameraModeSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 11,
+    .ofs_x = 1, .ofs_y = 1, .width = 11,
     .id = idPopupCameraMode,
     .helpcontext = " Select camera mode",
     .caption = " Mode\t\t%s",
@@ -154,7 +145,7 @@ const menu_item_t CameraMenuItemMode = {
 const menu_item_t CameraMenuItemTrigger = {
     .prev = &CameraMenuItemMode,    .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 11,
+    .ofs_x = 1, .ofs_y = 2, .width = 11,
     .id = idPopupCameraTrigger,
     .helpcontext = " Select trigger behavior",
     .caption = " Trigger\t%s",
@@ -162,19 +153,30 @@ const menu_item_t CameraMenuItemTrigger = {
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAction = {
-    .prev = &CameraMenuItemTrigger, .next = NULL,
+    .prev = &CameraMenuItemTrigger, .next = &CameraMenuItemReset,
     .sub = &ActionSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 11,
+    .ofs_x = 1, .ofs_y = 3, .width = 11,
     .id = idPopupCameraAction,
     .helpcontext = " Select post-processing action",
     .caption = " Action\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
+const menu_item_t CameraMenuItemReset = {
+    .prev = &CameraMenuItemAction, .next = &CameraMenuItemMode,
+    .sub = &YesNoMenu, .sub_params = "Restore defaults?",
+    .ofs_x = 1, .ofs_y = 4, .width = 11, .flags = MENUITEM_TERM,
+    .id = idPopupCameraRestore,
+    .caption = " Restore defaults",
+    .helpcontext = " Restore default camera settings",
+    .onPaint = onCameraPopupMenuItemPaint,
+    .result = ACTION_RESTORE_DEFAULTS
+};
+
 const menu_t CameraPopupMenu = {
     .x = 1, .y = 3, .width = 13, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &CameraMenuItemReset,
+    .items = &CameraMenuItemMode,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultCameraPopup
 };

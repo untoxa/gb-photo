@@ -138,7 +138,7 @@ const menu_item_t CameraMenuItemAssistedExposure = {
     .prev = &CameraMenuItemAssistedDitherLight, .next = &CameraMenuItemAssistedContrast,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 0, .width = 5,
-    .id = idExposure,
+    .id = idAssistedExposure,
     .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
@@ -164,7 +164,7 @@ const menu_item_t CameraMenuItemAssistedDither = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemAssistedDitherLight = {
+const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this menu option when it's being set automatically via `.id = idAssistedExposure`
     .prev = &CameraMenuItemAssistedDither,     .next = &CameraMenuItemAssistedExposure,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
@@ -342,6 +342,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case idExposure:
                 if (redraw_selection = inc_dec_int8(&current_exposure, 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
                 break;
+            case idAssistedExposure:
+                if (redraw_selection = inc_dec_int8(&current_exposure, 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
+                // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure'
+                // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
+                break;
             case idGain:
                 if (redraw_selection = inc_dec_int8(&current_gain, 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
@@ -393,6 +398,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
     static const uint8_t * const ditherHighLow[] = {"Dit Low", "Dit High"};
     static const uint8_t * const invert[] = {"Normal", "Inverted"};
     switch (self->id) {
+        case idAssistedExposure:
         case idExposure: {
             uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
             uint8_t * buf = text_buffer + 100;
