@@ -26,12 +26,18 @@
     #define MAINMENU_HEIGHT 5
 #endif
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
+
+uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t MainMenuItemCamera = {
     .prev = NULL,                   .next = &MainMenuItemGallery, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 1, .ofs_y = 1, .width = 10, 
     .caption = " Camera",
+    .helpcontext = " Make your own pictures",
     .onPaint = NULL,
     .result = ACTION_CAMERA
 };
@@ -40,6 +46,7 @@ const menu_item_t MainMenuItemGallery = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 10,
     .caption = " Image gallery",
+    .helpcontext = " View your image gallery",
     .onPaint = NULL,
     .result = ACTION_GALLERY
 };
@@ -48,6 +55,7 @@ const menu_item_t MainMenuItemAbout = {
     .sub = &AboutMenu, .sub_params = NULL, 
     .ofs_x = 1, .ofs_y = 3, .width = 10,
     .caption = " About",
+    .helpcontext = " About PXLR-Studio " QUOTE(VERSION),
     .onPaint = NULL,
     .result = 6
 };
@@ -57,6 +65,7 @@ const menu_item_t MainMenuItemDebug = {
     .sub = &DebugMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 10,
     .caption = " Debug",
+    .helpcontext = " Show debug info",
     .onPaint = NULL,
     .result = MENU_RESULT_CLOSE
 };
@@ -65,7 +74,8 @@ const menu_t MainMenu = {
     .x = 1, .y = 3, .width = 12, .height = MAINMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &MainMenuItemCamera, 
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultMainMenu
+    .onShow = NULL, .onHelpContext = onHelpMainMenu, 
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultMainMenu
 };
 
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
@@ -73,6 +83,12 @@ uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct me
         return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
     }
     return value;
+}
+uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    // we draw help context here
+    menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
+    return 0;
 }
 
 // Main Menu dispatcher function
