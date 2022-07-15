@@ -156,7 +156,7 @@ const menu_item_t CameraMenuItemAssistedDither = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 0, .width = 5,
     .id = idDither,
-    .caption = " %s",
+    .caption = " Dit %s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -166,7 +166,7 @@ const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this men
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
     .id = idDitherLight,
-    .caption = " %s",
+    .caption = " Dit %s",
     .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -234,7 +234,7 @@ const menu_item_t CameraMenuItemManualDither = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 1, .width = 5,
     .id = idDither,
-    .caption = " %s",
+    .caption = " Dit %s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -244,7 +244,7 @@ const menu_item_t CameraMenuItemManualDitherLight = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 1, .width = 5,
     .id = idDitherLight,
-    .caption = " %s",
+    .caption = " Dit %s",
     .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -294,7 +294,7 @@ const menu_item_t CameraMenuItemManualEdgeExclusive = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 2, .width = 5, .flags = MENUITEM_TERM,
     .id = idEdgeExclusive,
-    .caption = " %s",
+    .caption = " Edg %s",
     .helpcontext = "Sensor edge exclusive",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -390,10 +390,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    static const uint8_t * const edgeOnOff[] = {"Edg Off", "Edg On"};
-    static const uint8_t * const ditherOnOff[] = {"Dit Off", "Dit On"};
-    static const uint8_t * const ditherHighLow[] = {"Dit Low", "Dit High"};
-    static const uint8_t * const invert[] = {"Normal", "Inverted"};
+    static const uint8_t * const on_off[] = {"Off", "On"};
+    static const uint8_t * const low_high[] = {"Low", "High"};
+    static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (self->id) {
         case idAssistedExposure:
         case idExposure: {
@@ -425,13 +424,13 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             sprintf(text_buffer, self->caption, current_contrast);
             break;
         case idDither:
-            sprintf(text_buffer, self->caption, ditherOnOff[((dithering) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, on_off[((dithering) ? 1 : 0)]);
             break;
         case idDitherLight:
-            sprintf(text_buffer, self->caption, ditherHighLow[((ditheringHighLight) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, low_high[((ditheringHighLight) ? 1 : 0)]);
             break;
         case idInvOutput:
-            sprintf(text_buffer, self->caption, invert[((invertOutput) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, norm_inv[((invertOutput) ? 1 : 0)]);
             break;
         case idZeroPoint:
             sprintf(text_buffer, self->caption, zero_points[current_zero_point].caption);
@@ -443,7 +442,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             sprintf(text_buffer, self->caption, edge_modes[current_edge_mode].caption);
             break;
         case idEdgeExclusive:
-            sprintf(text_buffer, self->caption, edgeOnOff[((edge_exclusive) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, on_off[((edge_exclusive) ? 1 : 0)]);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
