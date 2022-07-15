@@ -10,7 +10,7 @@ typedef enum {
     camera_mode_manual,
     camera_mode_assisted,
     camera_mode_auto,
-    camera_mode_iterate  
+    camera_mode_iterate
 } camera_mode_e;
 
 typedef enum {
@@ -26,12 +26,13 @@ typedef enum {
 } after_action_e;
 
 typedef enum {
-    idNone = 0, 
+    idNone = 0,
     idExposure,
     idGain,
     idVOut,
     idContrast,
     idDither,
+    idDitherLight,
     idInvOutput,
     idZeroPoint,
     idVoltageRef,
@@ -49,9 +50,9 @@ inline uint8_t inc_dec_int8(int8_t * value, int8_t delta, int8_t min, int8_t max
     int8_t v = *value;
     switch (dir) {
         case changeDecrease:
-            return (v != (*value = ((*value - delta) < min) ? min : (*value - delta))); 
+            return (v != (*value = ((*value - delta) < min) ? min : (*value - delta)));
         case changeIncrease:
-            return (v != (*value = ((*value + delta) > max) ? max : (*value + delta))); 
+            return (v != (*value = ((*value + delta) > max) ? max : (*value + delta)));
         default:
             return FALSE;
     }
@@ -60,10 +61,10 @@ inline uint8_t inc_dec_int16(int16_t * value, int16_t delta, int16_t min, int16_
     int16_t v = *value;
     switch (dir) {
         case changeDecrease:
-            *value = ((*value - delta) < min) ? min : (*value - delta); 
+            *value = ((*value - delta) < min) ? min : (*value - delta);
             break;
         case changeIncrease:
-            *value = ((*value + delta) > max) ? max : (*value + delta); 
+            *value = ((*value + delta) > max) ? max : (*value + delta);
             break;
     }
     return (v != *value);
@@ -89,13 +90,13 @@ inline uint8_t image_captured() {
     uint8_t v = CAM_REG_CAPTURE;
     uint8_t r = (((v ^ old_capture_reg) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
     old_capture_reg = v;
-#if (USE_CGB_DOUBLE_SPEED==1)    
+#if (USE_CGB_DOUBLE_SPEED==1)
     if (r) cpu_fast();              // speed up when captured
 #endif
     return r;
 }
 inline void image_capture() {
-#if (USE_CGB_DOUBLE_SPEED==1)    
+#if (USE_CGB_DOUBLE_SPEED==1)
     if (_is_COLOR) cpu_slow();      // slowdown before capturing image
 #endif
     SWITCH_RAM(CAMERA_BANK_REGISTERS);

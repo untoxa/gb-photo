@@ -14,11 +14,11 @@
 #include "states.h"
 #include "bankdata.h"
 
-#include "globals.h" 
+#include "globals.h"
 #include "state_camera.h"
 
 // audio assets
-#include "sound_ok.h" 
+#include "sound_ok.h"
 #include "sound_error.h"
 #include "shutter01.h"
 #include "shutter02.h"
@@ -44,7 +44,8 @@ int8_t current_edge_mode = 0;
 int8_t current_voltage_ref = 3;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
-uint8_t positive = TRUE;
+uint8_t ditheringHighLight = TRUE;
+uint8_t invertOutput = FALSE;
 uint8_t edge_exclusive = TRUE;
 
 uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
@@ -54,11 +55,11 @@ static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(600),    US_TO_EXPOSURE_VALUE(800),     US_TO_EXPOSURE_VALUE(1000),   US_TO_EXPOSURE_VALUE(1250),
     US_TO_EXPOSURE_VALUE(1500),   US_TO_EXPOSURE_VALUE(2000),    US_TO_EXPOSURE_VALUE(2500),   US_TO_EXPOSURE_VALUE(3000),
     US_TO_EXPOSURE_VALUE(4000),   US_TO_EXPOSURE_VALUE(5000),    US_TO_EXPOSURE_VALUE(6000),   US_TO_EXPOSURE_VALUE(8000),
-    US_TO_EXPOSURE_VALUE(10000),  US_TO_EXPOSURE_VALUE(12500),   US_TO_EXPOSURE_VALUE(15000),  US_TO_EXPOSURE_VALUE(20000),  
-    US_TO_EXPOSURE_VALUE(25000),  US_TO_EXPOSURE_VALUE(30000),   US_TO_EXPOSURE_VALUE(40000),  US_TO_EXPOSURE_VALUE(50000), 
-    US_TO_EXPOSURE_VALUE(60000),  US_TO_EXPOSURE_VALUE(70000),   US_TO_EXPOSURE_VALUE(80000),  US_TO_EXPOSURE_VALUE(100000), 
+    US_TO_EXPOSURE_VALUE(10000),  US_TO_EXPOSURE_VALUE(12500),   US_TO_EXPOSURE_VALUE(15000),  US_TO_EXPOSURE_VALUE(20000),
+    US_TO_EXPOSURE_VALUE(25000),  US_TO_EXPOSURE_VALUE(30000),   US_TO_EXPOSURE_VALUE(40000),  US_TO_EXPOSURE_VALUE(50000),
+    US_TO_EXPOSURE_VALUE(60000),  US_TO_EXPOSURE_VALUE(70000),   US_TO_EXPOSURE_VALUE(80000),  US_TO_EXPOSURE_VALUE(100000),
     US_TO_EXPOSURE_VALUE(125000), US_TO_EXPOSURE_VALUE(160000),  US_TO_EXPOSURE_VALUE(200000), US_TO_EXPOSURE_VALUE(250000),
-    US_TO_EXPOSURE_VALUE(300000), US_TO_EXPOSURE_VALUE(400000),  US_TO_EXPOSURE_VALUE(500000), US_TO_EXPOSURE_VALUE(600000), 
+    US_TO_EXPOSURE_VALUE(300000), US_TO_EXPOSURE_VALUE(400000),  US_TO_EXPOSURE_VALUE(500000), US_TO_EXPOSURE_VALUE(600000),
     US_TO_EXPOSURE_VALUE(800000), US_TO_EXPOSURE_VALUE(1000000), US_TO_EXPOSURE_VALUE(1048560)
 };
 static const table_value_t gains[] = {
@@ -91,13 +92,13 @@ void display_last_seen(uint8_t restore) {
 
 void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((edge_exclusive) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | 0x60 | gains[current_gain].value; }
 void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
-void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((positive) ? CAM04F_POS : CAM04F_INV) | voltage_refs[current_voltage_ref].value; }
+void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((invertOutput) ? CAM04F_INV : CAM04F_POS) | voltage_refs[current_voltage_ref].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
 
 void camera_load_settings() {
-    static const uint8_t pattern[] = { 
-        0x8C, 0x98, 0xAC, 0x95, 0xA7, 0xDB, 0x8E, 0x9B, 0xB7, 0x97, 0xAA, 0xE7, 0x92, 0xA2, 0xCB, 0x8F, 
-        0x9D, 0xBB, 0x94, 0xA5, 0xD7, 0x91, 0xA0, 0xC7, 0x8D, 0x9A, 0xB3, 0x96, 0xA9, 0xE3, 0x8C, 0x99, 
+    static const uint8_t pattern[] = {
+        0x8C, 0x98, 0xAC, 0x95, 0xA7, 0xDB, 0x8E, 0x9B, 0xB7, 0x97, 0xAA, 0xE7, 0x92, 0xA2, 0xCB, 0x8F,
+        0x9D, 0xBB, 0x94, 0xA5, 0xD7, 0x91, 0xA0, 0xC7, 0x8D, 0x9A, 0xB3, 0x96, 0xA9, 0xE3, 0x8C, 0x99,
         0xAF, 0x95, 0xA8, 0xDF, 0x93, 0xA4, 0xD3, 0x90, 0x9F, 0xC3, 0x92, 0xA3, 0xCF, 0x8F, 0x9E, 0xBF
     };
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
@@ -120,7 +121,7 @@ uint8_t ENTER_state_camera() BANKED {
     camera_load_settings();
     if (image_live_preview) image_capture();
 
-    return 0;     
+    return 0;
 }
 
 // callback forward declarations
@@ -131,38 +132,38 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
 // --- Assisted menu ---------------------------------
 const menu_item_t CameraMenuItemAssistedExposure = {
-    .prev = NULL,                               .next = &CameraMenuItemAssistedContrast, 
-    .sub = NULL, .sub_params = NULL,        
+    .prev = NULL,                               .next = &CameraMenuItemAssistedContrast,
+    .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 0, .width = 8,
-    .id = idExposure, 
+    .id = idExposure,
     .caption = " Exp: %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
-}; 
+};
 const menu_item_t CameraMenuItemAssistedContrast = {
-    .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither, 
-    .sub = NULL, .sub_params = NULL,        
+    .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither,
+    .sub = NULL, .sub_params = NULL,
     .ofs_x = 8, .ofs_y = 0, .width = 6,
-    .id = idContrast, 
+    .id = idContrast,
     .caption = " Cont: %s",
     .helpcontext = " Contrast value",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
-}; 
+};
 const menu_item_t CameraMenuItemAssistedDither = {
-    .prev = &CameraMenuItemAssistedContrast,    .next = NULL, 
-    .sub = NULL, .sub_params = NULL,        
+    .prev = &CameraMenuItemAssistedContrast,    .next = NULL,
+    .sub = NULL, .sub_params = NULL,
     .ofs_x = 14, .ofs_y = 0, .width = 6,
-    .id = idDither, 
+    .id = idDither,
     .caption = " Dith: %s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
-}; 
+};
 const menu_t CameraMenuAssisted = {
-    .x = 0, .y = 0, .width = 0, .height = 0, 
-    .items = &CameraMenuItemAssistedExposure, 
+    .x = 0, .y = 0, .width = 0, .height = 0,
+    .items = &CameraMenuItemAssistedExposure,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
@@ -170,116 +171,126 @@ const menu_t CameraMenuAssisted = {
 
 // --- Manual menu -----------------------------------
 const menu_item_t CameraMenuItemManualExposure = {
-    .prev = NULL,                               .next = &CameraMenuItemManualGain, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 0, .ofs_y = 0, .width = 5, 
-    .id = idExposure, 
+    .prev = NULL,                               .next = &CameraMenuItemManualGain,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 0, .ofs_y = 0, .width = 5,
+    .id = idExposure,
     .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
-}; 
+};
 const menu_item_t CameraMenuItemManualGain = {
-    .prev = &CameraMenuItemManualExposure,  .next = &CameraMenuItemManualVOut, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 5, .ofs_y = 0, .width = 5, 
-    .id = idGain, 
+    .prev = &CameraMenuItemManualExposure,  .next = &CameraMenuItemManualVOut,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 5, .ofs_y = 0, .width = 5,
+    .id = idGain,
     .caption = " %s",
     .helpcontext = " Sensor gain",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualVOut = {
-    .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemManualItem3, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 10, .ofs_y = 0, .width = 5, 
-    .id = idVOut, 
+    .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemManualItem3,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 10, .ofs_y = 0, .width = 5,
+    .id = idVOut,
     .caption = " %dmv",
     .helpcontext = " Sensor voltage out",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem3 = {
-    .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualItem4, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 15, .ofs_y = 0, .width = 5, 
+    .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualItem4,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 15, .ofs_y = 0, .width = 5,
     .caption = " Item 3",
     .helpcontext = " Some item 3",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem4 = {
-    .prev = &CameraMenuItemManualItem3,     .next = &CameraMenuItemManualDither, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 0, .ofs_y = 1, .width = 5, 
+    .prev = &CameraMenuItemManualItem3,     .next = &CameraMenuItemManualDither,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 0, .ofs_y = 1, .width = 5,
     .caption = " Item 4",
     .helpcontext = " Some item 4",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualDither = {
-    .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemInvertedOutput, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 5, .ofs_y = 1, .width = 5, 
-    .id = idDither, 
+    .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemManualDitherLight,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 5, .ofs_y = 1, .width = 5,
+    .id = idDither,
     .caption = " %s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemInvertedOutput = {
-    .prev = &CameraMenuItemManualDither,    .next = &CameraMenuItemManualZeroPoint, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 10, .ofs_y = 1, .width = 5, 
-    .id = idInvOutput, 
+const menu_item_t CameraMenuItemManualDitherLight = {
+    .prev = &CameraMenuItemManualDither,     .next = &CameraMenuItemInvertedOutput,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 10, .ofs_y = 1, .width = 5,
+    .id = idDitherLight,
     .caption = " %s",
-    .helpcontext = " Inverted output",
+    .helpcontext = " Dithering light level",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemInvertedOutput = {
+    .prev = &CameraMenuItemManualDitherLight,    .next = &CameraMenuItemManualZeroPoint,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 15, .ofs_y = 1, .width = 5,
+    .id = idInvOutput,
+    .caption = " %s",
+    .helpcontext = " Invert output",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualZeroPoint = {
-    .prev = &CameraMenuItemInvertedOutput,  .next = &CameraMenuItemManualVoltRef, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 15, .ofs_y = 1, .width = 5, 
-    .id = idZeroPoint, 
+    .prev = &CameraMenuItemInvertedOutput,  .next = &CameraMenuItemManualVoltRef,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 0, .ofs_y = 2, .width = 5,
+    .id = idZeroPoint,
     .caption = " %s",
     .helpcontext = " Sensor zero point",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualVoltRef = {
-    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeMode, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 0, .ofs_y = 2, .width = 5,
-    .id = idVoltageRef, 
+    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeMode,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 5, .ofs_y = 2, .width = 5,
+    .id = idVoltageRef,
     .caption = " %sv",
     .helpcontext = " Sensor voltage reference",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemEdgeMode = {
-    .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualEdgeExclusive, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 5, .ofs_y = 2, .width = 5,
-    .id = idEdgeMode, 
+    .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualEdgeExclusive,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 10, .ofs_y = 2, .width = 5,
+    .id = idEdgeMode,
     .caption = " %s",
     .helpcontext = " Sensor edge mode",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualEdgeExclusive = {
-    .prev = &CameraMenuItemEdgeMode,        .next = NULL, 
-    .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 10, .ofs_y = 2, .width = 5,
-    .id = idEdgeExclusive, 
-    .caption = " V-%s",
+    .prev = &CameraMenuItemEdgeMode,        .next = NULL,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 15, .ofs_y = 2, .width = 5,
+    .id = idEdgeExclusive,
+    .caption = " %s",
     .helpcontext = "Sensor edge exclusive",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_t CameraMenuManual = {
-    .x = 0, .y = 0, .width = 0, .height = 0, 
-    .items = &CameraMenuItemManualExposure, 
+    .x = 0, .y = 0, .width = 0, .height = 0,
+    .items = &CameraMenuItemManualExposure,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
@@ -320,15 +331,19 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case idGain:
                 if (redraw_selection = inc_dec_int8(&current_gain, 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
-            case idVOut: 
+            case idVOut:
                 if (redraw_selection = inc_dec_int16(&voltage_out, VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
                 dithering = !dithering;
                 // TODO: modify dithering array
                 break;
+            case idDitherLight:
+                ditheringHighLight = !ditheringHighLight;
+                // TODO: modify dithering array
+                break;
             case idInvOutput:
-                positive = !positive;
+                invertOutput = !invertOutput;
                 RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idZeroPoint:
@@ -350,14 +365,16 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // redraw selection if requested
         if (redraw_selection) menu_move_selection(menu, NULL, selection);
     }
-    // wait for VBlank if not capturing (avoid HALT CPU state) 
+    // wait for VBlank if not capturing (avoid HALT CPU state)
     if (!is_capturing()) wait_vbl_done();
     return 0;
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    static const uint8_t * const onoff[] = {"Off", "On"};
-    static const uint8_t * const posit[] = {"Inverted", "Normal"};
+    static const uint8_t * const edgeOnOff[] = {"Edg Off", "Edg On"};
+    static const uint8_t * const ditherOnOff[] = {"Dit Off", "Dit On"};
+    static const uint8_t * const ditherHighLow[] = {"Dit Low", "Dit High"};
+    static const uint8_t * const invert[] = {"Normal", "Inverted"};
     switch (self->id) {
         case idExposure: {
             uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
@@ -388,10 +405,13 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             sprintf(text_buffer, self->caption, "9");
             break;
         case idDither:
-            sprintf(text_buffer, self->caption, onoff[((dithering) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, ditherOnOff[((dithering) ? 1 : 0)]);
+            break;
+        case idDitherLight:
+            sprintf(text_buffer, self->caption, ditherHighLow[((ditheringHighLight) ? 1 : 0)]);
             break;
         case idInvOutput:
-            sprintf(text_buffer, self->caption, posit[((positive) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, invert[((invertOutput) ? 1 : 0)]);
             break;
         case idZeroPoint:
             sprintf(text_buffer, self->caption, zero_points[current_zero_point].caption);
@@ -403,12 +423,12 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             sprintf(text_buffer, self->caption, edge_modes[current_edge_mode].caption);
             break;
         case idEdgeExclusive:
-            sprintf(text_buffer, self->caption, onoff[((edge_exclusive) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, edgeOnOff[((edge_exclusive) ? 1 : 0)]);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
 
-    } 
+    }
     return text_buffer;
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
@@ -433,7 +453,7 @@ uint8_t UPDATE_state_camera() BANKED {
         default:
             // error, must not get here
             menu_result = ACTION_CAMERA_SUBMENU;
-            break; 
+            break;
     }
     switch (menu_result) {
         case ACTION_SHUTTER:
@@ -454,7 +474,7 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_MODE_ITERATE: {
                     static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_iterate};
                     camera_mode = cmodes[menu_result - ACTION_MODE_MANUAL];
-                    break;            
+                    break;
                 }
                 case ACTION_TRIGGER_ABUTTON:
                 case ACTION_TRIGGER_TIMER:
@@ -472,7 +492,7 @@ uint8_t UPDATE_state_camera() BANKED {
                 }
                 case ACTION_RESTORE_DEFAULTS:
                     // TODO: restore defaults
-                    break; 
+                    break;
                 default:
                     // error, must not get here
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
@@ -489,5 +509,5 @@ uint8_t UPDATE_state_camera() BANKED {
 }
 
 uint8_t LEAVE_state_camera() BANKED {
-    return 0;     
+    return 0;
 }
