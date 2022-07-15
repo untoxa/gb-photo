@@ -85,6 +85,9 @@ static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 
 // Camera hardware register: EdgeExclusive, EdgeOperation, Gain
 
+#define CAM01F_EDGEEXCL_V_ON    0b10000000
+#define CAM01F_EDGEEXCL_V_OFF   0b00000000
+
 // The Game Boy Camera uses 0x00, 0x04, 0x08 and 0x0C
 // They are 14.0dB, 20.0dB, 26.0dB and 32dB, which translate to a gain of 5.01, 10.00, 19.95 and 39.81.
 #define CAM01_GAIN_140   0b00000000 // 14.0 (gbcam gain:  5.01)

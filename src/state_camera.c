@@ -45,6 +45,7 @@ int8_t current_voltage_ref = 3;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t positive = TRUE;
+uint8_t edge_exclusive = TRUE;
 
 uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
 
@@ -88,7 +89,7 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0 | gains[current_gain].value; }
+void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((edge_exclusive) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | 0x60 | gains[current_gain].value; }
 void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
 void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((positive) ? CAM04F_POS : CAM04F_INV) | voltage_refs[current_voltage_ref].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
@@ -257,7 +258,7 @@ const menu_item_t CameraMenuItemManualVoltRef = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemEdgeMode = {
-    .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualItem10, 
+    .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualEdgeExclusive, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 5, .ofs_y = 2, .width = 5,
     .id = idEdgeMode, 
@@ -266,12 +267,13 @@ const menu_item_t CameraMenuItemEdgeMode = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem10 = {
+const menu_item_t CameraMenuItemManualEdgeExclusive = {
     .prev = &CameraMenuItemEdgeMode,        .next = NULL, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 10, .ofs_y = 2, .width = 5, 
-    .caption = " Item 10",
-    .helpcontext = "Some item 10",
+    .ofs_x = 10, .ofs_y = 2, .width = 5,
+    .id = idEdgeExclusive, 
+    .caption = " V-%s",
+    .helpcontext = "Sensor edge exclusive",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
@@ -309,7 +311,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
         static uint8_t redraw_selection;
-        redraw_selection = FALSE;
+        redraw_selection = TRUE;
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
@@ -322,11 +324,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (redraw_selection = inc_dec_int16(&voltage_out, VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
-                dithering = !dithering, redraw_selection = TRUE;
+                dithering = !dithering;
                 // TODO: modify dithering array
                 break;
             case idInvOutput:
-                positive = !positive, redraw_selection = TRUE;
+                positive = !positive;
                 RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idZeroPoint:
@@ -338,7 +340,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case idEdgeMode:
                 if (redraw_selection = inc_dec_int8(&current_edge_mode, 1, 0, MAX_INDEX(edge_modes), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
+            case idEdgeExclusive:
+                edge_exclusive = !edge_exclusive;
+                break;
             default:
+                redraw_selection = FALSE;
                 break;
         }
         // redraw selection if requested
@@ -395,6 +401,9 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         case idEdgeMode:
             sprintf(text_buffer, self->caption, edge_modes[current_edge_mode].caption);
+            break;
+        case idEdgeExclusive:
+            sprintf(text_buffer, self->caption, onoff[((edge_exclusive) ? 1 : 0)]);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
