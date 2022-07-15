@@ -32,6 +32,7 @@ typedef enum {
     idVOut,
     idContrast,
     idDither,
+    idZeroPoint,
     idInvOutput
 } camera_menu_e;
 

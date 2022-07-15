@@ -39,6 +39,7 @@ uint8_t image_live_preview = TRUE;
 
 int8_t current_exposure = 14;
 int8_t current_gain = 0;
+int8_t current_zero_point = 1;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t positive = TRUE;
@@ -57,7 +58,6 @@ static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(300000), US_TO_EXPOSURE_VALUE(400000),  US_TO_EXPOSURE_VALUE(500000), US_TO_EXPOSURE_VALUE(600000), 
     US_TO_EXPOSURE_VALUE(800000), US_TO_EXPOSURE_VALUE(1000000), US_TO_EXPOSURE_VALUE(1048560)
 };
-
 static const table_value_t gains[] = {
     { CAM01_GAIN_140, "14.0" }, { CAM01_GAIN_155, "15.5" }, { CAM01_GAIN_170, "17.0" }, { CAM01_GAIN_185, "18.5" },
     { CAM01_GAIN_200, "20.0" }, { CAM01_GAIN_215, "21.5" }, { CAM01_GAIN_230, "23.0" }, { CAM01_GAIN_245, "24.5" },
@@ -66,6 +66,10 @@ static const table_value_t gains[] = {
     { CAM01_GAIN_440, "44.0" }, { CAM01_GAIN_455, "45.5" }, { CAM01_GAIN_470, "47.0" }, { CAM01_GAIN_515, "51.5" },
     { CAM01_GAIN_575, "57.5" }
 };
+static const table_value_t zero_points[] = {
+    { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
+};
+
 
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
@@ -77,7 +81,7 @@ void display_last_seen(uint8_t restore) {
 inline void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0 | gains[current_gain].value; }
 inline void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
 inline void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = ((positive) ? CAM04F_POS : CAM04F_INV) | 0x03; }
-inline void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = CAM05_ZERO_POS | TO_VOLTAGE_OUT(voltage_out); }
+inline void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
 
 void camera_load_settings() {
     static const uint8_t pattern[] = { 
@@ -213,7 +217,7 @@ const menu_item_t CameraMenuItemManualDither = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem6 = {
-    .prev = &CameraMenuItemManualDither,    .next = &CameraMenuItemManualItem7, 
+    .prev = &CameraMenuItemManualDither,    .next = &CameraMenuItemManualZeroPoint, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 10, .ofs_y = 1, .width = 5, 
     .caption = " Item 6",
@@ -221,17 +225,18 @@ const menu_item_t CameraMenuItemManualItem6 = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem7 = {
+const menu_item_t CameraMenuItemManualZeroPoint = {
     .prev = &CameraMenuItemManualItem6,     .next = &CameraMenuItemManualItem8, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 15, .ofs_y = 1, .width = 5, 
-    .caption = " Item 7",
-    .helpcontext = " Some item 7",
+    .id = idZeroPoint, 
+    .caption = " %s",
+    .helpcontext = " Sensor zero point",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem8 = {
-    .prev = &CameraMenuItemManualItem7,     .next = &CameraMenuItemInvertedOutput, 
+    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemInvertedOutput, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 0, .ofs_y = 2, .width = 5, 
     .caption = " Item 8",
@@ -314,6 +319,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 dithering = !dithering;
                 // TODO: modify dithering array
                 redraw_selection = TRUE;
+            case idZeroPoint:
+                if (inc_dec_int8(change_direction, &current_zero_point, 0, MAX_INDEX(zero_points), 1)) {
+                    RENDER_CAM_REG_ZEROVOUT(), redraw_selection = TRUE;
+                }
             case idInvOutput:
                 positive = !positive;
                 RENDER_CAM_REG_EDRAINVVREF(), redraw_selection = TRUE;
@@ -362,6 +371,9 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         case idDither:
             sprintf(text_buffer, self->caption, onoff[((dithering) ? 1 : 0)]);
+            break;
+        case idZeroPoint:
+            sprintf(text_buffer, self->caption, zero_points[current_zero_point].caption);
             break;
         case idInvOutput:
             sprintf(text_buffer, self->caption, posit[((positive) ? 1 : 0)]);
