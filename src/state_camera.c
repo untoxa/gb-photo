@@ -40,6 +40,7 @@ uint8_t image_live_preview = TRUE;
 int8_t current_exposure = 14;
 int8_t current_gain = 0;
 int8_t current_zero_point = 1;
+int8_t current_edge_mode = 0;
 int16_t voltage_out = 192;
 uint8_t dithering = TRUE;
 uint8_t positive = TRUE;
@@ -69,6 +70,10 @@ static const table_value_t gains[] = {
 static const table_value_t zero_points[] = {
     { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
 };
+static const table_value_t edge_modes[] = {
+    { CAM04_EDGE_RATIO_050, "50%" }, { CAM04_EDGE_RATIO_075, "75%" }, { CAM04_EDGE_RATIO_100, "100%" },{ CAM04_EDGE_RATIO_125, "125%" },
+    { CAM04_EDGE_RATIO_200, "200%" },{ CAM04_EDGE_RATIO_300, "300%" },{ CAM04_EDGE_RATIO_400, "400%" },{ CAM04_EDGE_RATIO_500, "500%" },
+};
 
 
 void display_last_seen(uint8_t restore) {
@@ -80,7 +85,7 @@ void display_last_seen(uint8_t restore) {
 
 inline void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = 0xe0 | gains[current_gain].value; }
 inline void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
-inline void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = ((positive) ? CAM04F_POS : CAM04F_INV) | 0x03; }
+inline void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((positive) ? CAM04F_POS : CAM04F_INV) | 0x03; }
 inline void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
 
 void camera_load_settings() {
@@ -207,7 +212,7 @@ const menu_item_t CameraMenuItemManualItem4 = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualDither = {
-    .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemManualItem6, 
+    .prev = &CameraMenuItemManualItem4,     .next = &CameraMenuItemInvertedOutput, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 5, .ofs_y = 1, .width = 5, 
     .id = idDither, 
@@ -216,27 +221,29 @@ const menu_item_t CameraMenuItemManualDither = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem6 = {
+const menu_item_t CameraMenuItemInvertedOutput = {
     .prev = &CameraMenuItemManualDither,    .next = &CameraMenuItemManualZeroPoint, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 10, .ofs_y = 1, .width = 5, 
-    .caption = " Item 6",
-    .helpcontext = " Some item 6",
+    .id = idInvOutput, 
+    .caption = " %s",
+    .helpcontext = " Inverted output",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualZeroPoint = {
-    .prev = &CameraMenuItemManualItem6,     .next = &CameraMenuItemManualItem8, 
+    .prev = &CameraMenuItemInvertedOutput,  .next = &CameraMenuItemManualItem8, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 15, .ofs_y = 1, .width = 5, 
     .id = idZeroPoint, 
     .caption = " %s",
     .helpcontext = " Sensor zero point",
+
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem8 = {
-    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemInvertedOutput, 
+    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeMode, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 0, .ofs_y = 2, .width = 5, 
     .caption = " Item 8",
@@ -244,18 +251,18 @@ const menu_item_t CameraMenuItemManualItem8 = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemInvertedOutput = {
+const menu_item_t CameraMenuItemEdgeMode = {
     .prev = &CameraMenuItemManualItem8,     .next = &CameraMenuItemManualItem10, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 5, .ofs_y = 2, .width = 5,
-    .id = idInvOutput, 
+    .id = idEdgeMode, 
     .caption = " %s",
-    .helpcontext = " Inverted output",
+    .helpcontext = " Sensor edge mode",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualItem10 = {
-    .prev = &CameraMenuItemInvertedOutput,  .next = NULL, 
+    .prev = &CameraMenuItemEdgeMode,        .next = NULL, 
     .sub = NULL, .sub_params = NULL,        
     .ofs_x = 10, .ofs_y = 2, .width = 5, 
     .caption = " Item 10",
@@ -301,31 +308,24 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
-                if (inc_dec_int8(change_direction, &current_exposure, 0, MAX_INDEX(exposures), 1)) {
-                    RENDER_CAM_REG_EXPTIME(), redraw_selection = TRUE;
-                }
+                if (redraw_selection = inc_dec_int8(change_direction, &current_exposure, 0, MAX_INDEX(exposures), 1)) RENDER_CAM_REG_EXPTIME();
                 break;
             case idGain:
-                if (inc_dec_int8(change_direction, &current_gain, 0, MAX_INDEX(gains), 1)) {
-                    RENDER_CAM_REG_EDEXOPGAIN(), redraw_selection = TRUE;
-                }
+                if (redraw_selection = inc_dec_int8(change_direction, &current_gain, 0, MAX_INDEX(gains), 1)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idVOut: 
-                if (inc_dec_int16(change_direction, &voltage_out, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, VOLTAGE_OUT_STEP)) {
-                    RENDER_CAM_REG_ZEROVOUT(), redraw_selection = TRUE;
-                } 
+                if (redraw_selection = inc_dec_int16(change_direction, &voltage_out, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, VOLTAGE_OUT_STEP)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
-                dithering = !dithering;
+                dithering = !dithering, redraw_selection = TRUE;
                 // TODO: modify dithering array
-                redraw_selection = TRUE;
-            case idZeroPoint:
-                if (inc_dec_int8(change_direction, &current_zero_point, 0, MAX_INDEX(zero_points), 1)) {
-                    RENDER_CAM_REG_ZEROVOUT(), redraw_selection = TRUE;
-                }
             case idInvOutput:
-                positive = !positive;
-                RENDER_CAM_REG_EDRAINVVREF(), redraw_selection = TRUE;
+                positive = !positive, redraw_selection = TRUE;
+                RENDER_CAM_REG_EDRAINVVREF();
+            case idZeroPoint:
+                if (redraw_selection = inc_dec_int8(change_direction, &current_zero_point, 0, MAX_INDEX(zero_points), 1)) RENDER_CAM_REG_ZEROVOUT();
+            case idEdgeMode:
+                if (redraw_selection = inc_dec_int8(change_direction, &current_edge_mode, 0, MAX_INDEX(edge_modes), 1)) RENDER_CAM_REG_EDRAINVVREF();
             default:
                 break;
         }
@@ -372,11 +372,14 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
         case idDither:
             sprintf(text_buffer, self->caption, onoff[((dithering) ? 1 : 0)]);
             break;
+        case idInvOutput:
+            sprintf(text_buffer, self->caption, posit[((positive) ? 1 : 0)]);
+            break;
         case idZeroPoint:
             sprintf(text_buffer, self->caption, zero_points[current_zero_point].caption);
             break;
-        case idInvOutput:
-            sprintf(text_buffer, self->caption, posit[((positive) ? 1 : 0)]);
+        case idEdgeMode:
+            sprintf(text_buffer, self->caption, edge_modes[current_edge_mode].caption);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
