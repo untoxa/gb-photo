@@ -135,11 +135,11 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
 // --- Assisted menu ---------------------------------
 const menu_item_t CameraMenuItemAssistedExposure = {
-    .prev = NULL,                               .next = &CameraMenuItemAssistedContrast,
+    .prev = &CameraMenuItemAssistedDitherLight, .next = &CameraMenuItemAssistedContrast,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 8,
+    .ofs_x = 0, .ofs_y = 0, .width = 5,
     .id = idExposure,
-    .caption = " Exp: %sms",
+    .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -147,7 +147,7 @@ const menu_item_t CameraMenuItemAssistedExposure = {
 const menu_item_t CameraMenuItemAssistedContrast = {
     .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 8, .ofs_y = 0, .width = 6,
+    .ofs_x = 5, .ofs_y = 0, .width = 5,
     .id = idContrast,
     .caption = " Cont: %d",
     .helpcontext = " Contrast level",
@@ -155,22 +155,32 @@ const menu_item_t CameraMenuItemAssistedContrast = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemAssistedDither = {
-    .prev = &CameraMenuItemAssistedContrast,    .next = NULL,
+    .prev = &CameraMenuItemAssistedContrast,     .next = &CameraMenuItemAssistedDitherLight,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 14, .ofs_y = 0, .width = 6,
+    .ofs_x = 10, .ofs_y = 0, .width = 5,
     .id = idDither,
-    .caption = " Dith: %s",
+    .caption = " %s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
+const menu_item_t CameraMenuItemAssistedDitherLight = {
+    .prev = &CameraMenuItemAssistedDither,     .next = &CameraMenuItemAssistedExposure,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 15, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
+    .id = idDitherLight,
+    .caption = " %s",
+    .helpcontext = " Dithering light level",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+
 const menu_t CameraMenuAssisted = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .items = &CameraMenuItemAssistedExposure,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
-
 
 // --- Manual menu -----------------------------------
 const menu_item_t CameraMenuItemManualExposure = {
