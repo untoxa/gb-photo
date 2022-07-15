@@ -270,6 +270,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // select opens popup-menu
     if (KEY_PRESSED(J_SELECT)) {
         return ACTION_CAMERA_SUBMENU;
+    } else if (KEY_PRESSED(J_START)) {
+        return ACTION_MAIN_MENU;
     }
     // !!! d-pad keys are translated
     if (KEY_PRESSED(J_RIGHT)) change_direction = changeDecrease;
@@ -405,6 +407,9 @@ uint8_t UPDATE_state_camera() BANKED {
 //                music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
                 image_capture();
             }
+            break;
+        case ACTION_MAIN_MENU:
+            if (!MainMenuDispatch(menu_execute(&MainMenu, NULL))) refresh_screen();
             break;
         case ACTION_CAMERA_SUBMENU: {
             switch (menu_result = menu_popup_camera_execute()) {
