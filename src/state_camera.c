@@ -107,9 +107,9 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 const menu_item_t CameraMenuItemAssistedExposure = {
     .prev = NULL,                               .next = &CameraMenuItemAssistedContrast, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 0, .ofs_y = 0, .width = 5,
+    .ofs_x = 0, .ofs_y = 0, .width = 8,
     .id = idExposure, 
-    .caption = " %sms",
+    .caption = " Exp: %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -117,9 +117,9 @@ const menu_item_t CameraMenuItemAssistedExposure = {
 const menu_item_t CameraMenuItemAssistedContrast = {
     .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 5, .ofs_y = 0, .width = 5,
+    .ofs_x = 8, .ofs_y = 0, .width = 6,
     .id = idContrast, 
-    .caption = " %s",
+    .caption = " Cont: %s",
     .helpcontext = " Contrast value",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -127,9 +127,9 @@ const menu_item_t CameraMenuItemAssistedContrast = {
 const menu_item_t CameraMenuItemAssistedDither = {
     .prev = &CameraMenuItemAssistedContrast,    .next = NULL, 
     .sub = NULL, .sub_params = NULL,        
-    .ofs_x = 10, .ofs_y = 0, .width = 5,
+    .ofs_x = 14, .ofs_y = 0, .width = 6,
     .id = idDither, 
-    .caption = " %s",
+    .caption = " Dith: %s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
