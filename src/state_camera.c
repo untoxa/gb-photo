@@ -41,17 +41,27 @@ after_action_e after_action = after_action_save;
 uint8_t image_live_preview = TRUE;
 uint8_t images_taken = 30;
 
-int8_t current_exposure = 14;
-int8_t current_gain = 0;
-int8_t current_zero_point = 1;
-int8_t current_edge_mode = 0;
-int8_t current_voltage_ref = 3;
-int16_t voltage_out = 192;
-uint8_t dithering = TRUE;
-uint8_t ditheringHighLight = TRUE;
-uint8_t current_contrast = 9;
-uint8_t invertOutput = FALSE;
-uint8_t edge_exclusive = TRUE;
+#define SETTING(A) current_settings[camera_mode].A
+#define MODE_SETTING(A,B) current_settings[B].A
+camera_mode_settings_t current_settings[N_CAMERA_MODES] = {
+    {
+        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
+        .edge_exclusive = TRUE
+    },{
+        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
+        .edge_exclusive = TRUE
+    },{
+        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
+        .edge_exclusive = TRUE
+    },{
+        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
+        .edge_exclusive = TRUE
+    }
+};
 
 uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
 
@@ -95,11 +105,11 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((edge_exclusive) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | 0x60 | gains[current_gain].value; }
-void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[current_exposure]; }
-void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[current_edge_mode].value | ((invertOutput) ? CAM04F_INV : CAM04F_POS) | voltage_refs[current_voltage_ref].value; }
-void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[current_zero_point].value | TO_VOLTAGE_OUT(voltage_out); }
-inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(dithering, ditheringHighLight, current_contrast - 1); }
+void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | 0x60 | gains[SETTING(current_gain)].value; }
+void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[SETTING(current_exposure)]; }
+void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
+void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
+inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
 void camera_load_settings() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
@@ -343,45 +353,45 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
-                if (redraw_selection = inc_dec_int8(&current_exposure, 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure), 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
                 break;
             case idAssistedExposure:
-                if (redraw_selection = inc_dec_int8(&current_exposure, 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure), 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
                 // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure'
                 // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
                 break;
             case idGain:
-                if (redraw_selection = inc_dec_int8(&current_gain, 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idVOut:
-                if (redraw_selection = inc_dec_int16(&voltage_out, VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (redraw_selection = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
-                dithering = !dithering;
+                SETTING(dithering) = !SETTING(dithering);
                 RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idDitherLight:
-                ditheringHighLight = !ditheringHighLight;
+                SETTING(ditheringHighLight) = !SETTING(ditheringHighLight);
                 RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idContrast:
-                if (redraw_selection = inc_dec_int8(&current_contrast, 1, 1, NUM_CONTRAST_SETS, change_direction)) RENDER_CAM_REG_DITHERPATTERN();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idInvOutput:
-                invertOutput = !invertOutput;
+                SETTING(invertOutput) = !SETTING(invertOutput);
                 RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idZeroPoint:
-                if (redraw_selection = inc_dec_int8(&current_zero_point, 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_zero_point), 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idVoltageRef:
-                if (redraw_selection = inc_dec_int8(&current_voltage_ref, 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeMode:
-                if (redraw_selection = inc_dec_int8(&current_edge_mode, 1, 0, MAX_INDEX(edge_modes), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_mode), 1, 0, MAX_INDEX(edge_modes), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeExclusive:
-                edge_exclusive = !edge_exclusive;
+                SETTING(edge_exclusive) = !SETTING(edge_exclusive);
                 break;
             default:
                 redraw_selection = FALSE;
@@ -402,7 +412,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
     switch (self->id) {
         case idAssistedExposure:
         case idExposure: {
-            uint16_t value = EXPOSURE_VALUE_TO_US(exposures[current_exposure]) / 100;
+            uint16_t value = EXPOSURE_VALUE_TO_US(exposures[SETTING(current_exposure)]) / 100;
             uint8_t * buf = text_buffer + 100;
             uint8_t len = strlen(uitoa(value, buf, 10));
             if (len == 1) {
@@ -421,38 +431,38 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         }
         case idGain:
-            sprintf(text_buffer, self->caption, gains[current_gain].caption);
+            sprintf(text_buffer, self->caption, gains[SETTING(current_gain)].caption);
             break;
         case idVOut:
-            sprintf(text_buffer, self->caption, voltage_out);
+            sprintf(text_buffer, self->caption, SETTING(voltage_out));
             break;
         case idContrast:
-            sprintf(text_buffer, self->caption, current_contrast);
+            sprintf(text_buffer, self->caption, SETTING(current_contrast));
             break;
         case idDither:
-            sprintf(text_buffer, self->caption, on_off[((dithering) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, on_off[((SETTING(dithering)) ? 1 : 0)]);
             break;
         case idDitherLight:
-            sprintf(text_buffer, self->caption, low_high[((ditheringHighLight) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, low_high[((SETTING(ditheringHighLight)) ? 1 : 0)]);
             break;
         case idInvOutput:
-            sprintf(text_buffer, self->caption, norm_inv[((invertOutput) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, norm_inv[((SETTING(invertOutput)) ? 1 : 0)]);
             break;
         case idZeroPoint:
-            sprintf(text_buffer, self->caption, zero_points[current_zero_point].caption);
+            sprintf(text_buffer, self->caption, zero_points[SETTING(current_zero_point)].caption);
             break;
         case idVoltageRef:
-            sprintf(text_buffer, self->caption, voltage_refs[current_voltage_ref].caption);
+            sprintf(text_buffer, self->caption, voltage_refs[SETTING(current_voltage_ref)].caption);
             break;
         case idEdgeMode:
-            sprintf(text_buffer, self->caption, edge_modes[current_edge_mode].caption);
+            sprintf(text_buffer, self->caption, edge_modes[SETTING(current_edge_mode)].caption);
             break;
         case idEdgeExclusive:
-            sprintf(text_buffer, self->caption, on_off[((edge_exclusive) ? 1 : 0)]);
+            sprintf(text_buffer, self->caption, on_off[((SETTING(edge_exclusive)) ? 1 : 0)]);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
-
+            break;
     }
     return text_buffer;
 }

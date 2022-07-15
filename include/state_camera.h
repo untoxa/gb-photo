@@ -77,6 +77,20 @@ typedef struct table_value_t {
     const uint8_t * caption;
 } table_value_t;
 
+typedef struct camera_mode_settings_t {
+    int8_t current_exposure;
+    int8_t current_gain;
+    int8_t current_zero_point;
+    int8_t current_edge_mode;
+    int8_t current_voltage_ref;
+    int16_t voltage_out;
+    uint8_t dithering;
+    uint8_t ditheringHighLight;
+    uint8_t current_contrast;
+    uint8_t invertOutput;
+    uint8_t edge_exclusive;
+} camera_mode_settings_t;
+
 extern camera_mode_e camera_mode;
 extern trigger_mode_e trigger_mode;
 extern after_action_e after_action;
