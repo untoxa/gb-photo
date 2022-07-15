@@ -10,7 +10,8 @@ typedef enum {
     camera_mode_manual,
     camera_mode_assisted,
     camera_mode_auto,
-    camera_mode_iterate
+    camera_mode_iterate,
+    N_CAMERA_MODES
 } camera_mode_e;
 
 typedef enum {

@@ -46,7 +46,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     }
 
     // draw menu items
-    for (const menu_item_t * current_item = selection; (current_item); current_item = current_item->next) {
+    for (const menu_item_t * current_item = menu->items; (current_item); current_item = current_item->next) {
         menu_text_out(menu->x + current_item->ofs_x, menu->y + current_item->ofs_y, current_item->width,
                       ((current_item == selection) ? SOLID_BLACK : SOLID_WHITE),
                       (current_item->onPaint) ? current_item->onPaint(menu, current_item) : (uint8_t *)current_item->caption);

@@ -305,7 +305,7 @@ const menu_t CameraMenuManual = {
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
-
+static menu_item_t * last_menu_items[N_CAMERA_MODES] = { NULL, NULL, NULL, NULL };
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
@@ -315,6 +315,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     menu; selection;
     static change_direction_e change_direction;
 
+    // save current selection
+    last_menu_items[camera_mode] = selection;
+    // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
         display_last_seen(FALSE);
         if (image_live_preview) image_capture();
@@ -462,12 +465,12 @@ uint8_t UPDATE_state_camera() BANKED {
     JOYPAD_RESET();
     switch (camera_mode) {
         case camera_mode_manual:
-            menu_result = menu_execute(&CameraMenuManual, NULL, NULL);
+            menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[camera_mode]);
             break;
         case camera_mode_assisted:
         case camera_mode_auto:
         case camera_mode_iterate:
-            menu_result = menu_execute(&CameraMenuAssisted, NULL, NULL);
+            menu_result = menu_execute(&CameraMenuAssisted, NULL, last_menu_items[camera_mode]);
             break;
         default:
             // error, must not get here
