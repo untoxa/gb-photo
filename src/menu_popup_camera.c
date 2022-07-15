@@ -2,6 +2,7 @@
 
 #include <gbdk/platform.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "globals.h"
 
@@ -11,9 +12,11 @@
 // menus
 #include "menus.h"
 #include "menu_codes.h"
+#include "menu_yesno.h"
 
 typedef enum {
-    idPopupNone = 0, 
+    idPopupNone = 0,
+    idPopupCameraRestore, 
     idPopupCameraMode,
     idPopupCameraTrigger,
     idPopupCameraAction
@@ -124,20 +127,30 @@ const menu_t ActionSubMenu = {
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
+uint8_t onTranslateSubResultCameraPopupMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
-const menu_item_t CameraMenuItemMode = {
-    .prev = NULL,                   .next = &CameraMenuItemTrigger, 
-    .sub = &CameraModeSubMenu, .sub_params = NULL,        
+const menu_item_t CameraMenuItemReset = {
+    .prev = NULL,                   .next = &CameraMenuItemMode, 
+    .sub = &YesNoMenu, .sub_params = "Restore defaults?",        
     .ofs_x = 1, .ofs_y = 1, .width = 11,
+    .id = idPopupCameraRestore, 
+    .caption = " Restore defaults",
+    .onPaint = onCameraPopupMenuItemPaint,
+    .result = ACTION_RESTORE_DEFAULTS
+};
+const menu_item_t CameraMenuItemMode = {
+    .prev = &CameraMenuItemReset,   .next = &CameraMenuItemTrigger, 
+    .sub = &CameraModeSubMenu, .sub_params = NULL,        
+    .ofs_x = 1, .ofs_y = 2, .width = 11,
     .id = idPopupCameraMode, 
     .caption = " Mode\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemTrigger = {
-    .prev = &CameraMenuItemMode,  .next = &CameraMenuItemAction,
+    .prev = &CameraMenuItemMode,    .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 11, 
+    .ofs_x = 1, .ofs_y = 3, .width = 11, 
     .id = idPopupCameraTrigger, 
     .caption = " Trigger\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
@@ -146,24 +159,33 @@ const menu_item_t CameraMenuItemTrigger = {
 const menu_item_t CameraMenuItemAction = {
     .prev = &CameraMenuItemTrigger, .next = NULL,
     .sub = &ActionSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 11, 
+    .ofs_x = 1, .ofs_y = 4, .width = 11, 
     .id = idPopupCameraAction, 
     .caption = " Action\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 const menu_t CameraPopupMenu = {
-    .x = 1, .y = 3, .width = 13, .height = 5, 
+    .x = 1, .y = 3, .width = 13, .height = 6, 
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &CameraMenuItemMode, 
-    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .items = &CameraMenuItemReset, 
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultCameraPopupMenu
 };
+uint8_t onTranslateSubResultCameraPopupMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    if (self->id == idPopupCameraRestore) {
+        return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+    }
+    return value;
+}
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
     static const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
     static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
-    switch (self->id) {
+    switch ((camera_popup_menu_e)self->id) {
+        case idPopupCameraRestore:
+            strcpy(text_buffer, self->caption);
+            break;
         case idPopupCameraMode: 
             sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
             break;

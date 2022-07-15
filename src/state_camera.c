@@ -256,7 +256,7 @@ const menu_t CameraMenuManual = {
 
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
-    // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons
+    // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
     return (value & 0b11110000) | ((value << 1) & 0b00000100) | ((value >> 1) & 0b00000010) | ((value << 3) & 0b00001000) | ((value >> 3) & 0b00000001);
 }
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
@@ -280,6 +280,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (change_direction != changeNone) {
         static uint8_t redraw_selection;
         redraw_selection = FALSE;
+        // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
                 if (change_direction == changeDecrease) {
@@ -429,6 +430,9 @@ uint8_t UPDATE_state_camera() BANKED {
                     after_action = aactions[menu_result - ACTION_ACTION_SAVE];
                     break;
                 }
+                case ACTION_RESTORE_DEFAULTS:
+                    // TODO: restore defaults
+                    break; 
                 default:
                     // error, must not get here
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));

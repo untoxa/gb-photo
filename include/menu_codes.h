@@ -33,10 +33,11 @@
 #define ACTION_ACTION_SAVE      19
 #define ACTION_ACTION_PRINT     20
 #define ACTION_ACTION_SAVEPRINT 21
+#define ACTION_RESTORE_DEFAULTS 22
 
 // camera actions
-#define ACTION_SHUTTER          22
-#define ACTION_CAMERA_SUBMENU   23
+#define ACTION_SHUTTER          23
+#define ACTION_CAMERA_SUBMENU   24
 
 // system menu results
 #define MENU_RESULT_YES         254
