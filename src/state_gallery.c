@@ -113,6 +113,7 @@ static void refresh_screen() {
 
 uint8_t ENTER_state_gallery() BANKED {
     refresh_screen();
+    JOYPAD_RESET();
     return 0;
 }
 

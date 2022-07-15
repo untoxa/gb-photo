@@ -58,6 +58,7 @@ uint8_t ENTER_state_thumbnails() BANKED {
     thumbnails_page_no = (gallery_picture_no >> 4);
     cx = gallery_picture_no & 0x03, cy = (gallery_picture_no >> 2) & 0x03;
     refresh_screen();
+    JOYPAD_RESET();
     return 0;
 }
 
