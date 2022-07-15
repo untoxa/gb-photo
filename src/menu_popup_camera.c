@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "globals.h"
+#include "screen.h"
 
 // camera state
 #include "state_camera.h"
@@ -127,14 +128,16 @@ const menu_t ActionSubMenu = {
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
-uint8_t onTranslateSubResultCameraPopupMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t CameraMenuItemReset = {
     .prev = NULL,                   .next = &CameraMenuItemMode, 
     .sub = &YesNoMenu, .sub_params = "Restore defaults?",        
     .ofs_x = 1, .ofs_y = 1, .width = 11,
     .id = idPopupCameraRestore, 
     .caption = " Restore defaults",
+    .helpcontext = " Restore default camera settings",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = ACTION_RESTORE_DEFAULTS
 };
@@ -143,6 +146,7 @@ const menu_item_t CameraMenuItemMode = {
     .sub = &CameraModeSubMenu, .sub_params = NULL,        
     .ofs_x = 1, .ofs_y = 2, .width = 11,
     .id = idPopupCameraMode, 
+    .helpcontext = " Select camera mode",
     .caption = " Mode\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -152,6 +156,7 @@ const menu_item_t CameraMenuItemTrigger = {
     .sub = &TriggerSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 11, 
     .id = idPopupCameraTrigger, 
+    .helpcontext = " Select trigger behavior",
     .caption = " Trigger\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -161,6 +166,7 @@ const menu_item_t CameraMenuItemAction = {
     .sub = &ActionSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 11, 
     .id = idPopupCameraAction, 
+    .helpcontext = " Select post-processing action",
     .caption = " Action\t\t%s",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
@@ -169,9 +175,11 @@ const menu_t CameraPopupMenu = {
     .x = 1, .y = 3, .width = 13, .height = 6, 
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &CameraMenuItemReset, 
-    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultCameraPopupMenu
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup, 
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultCameraPopup
 };
-uint8_t onTranslateSubResultCameraPopupMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu;
     if (self->id == idPopupCameraRestore) {
         return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
     }
@@ -205,6 +213,12 @@ uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t *
     menu; selection;
     // wait for VBlank if not capturing (avoid HALT CPU state) 
     if (!is_capturing()) wait_vbl_done();
+    return 0;
+}
+uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    // we draw help context here
+    menu_text_out(0, 17, 20, SOLID_BLACK, selection->helpcontext);
     return 0;
 }
 
