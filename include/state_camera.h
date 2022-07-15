@@ -29,7 +29,6 @@ typedef enum {
 typedef enum {
     idNone = 0,
     idExposure,
-    idAssistedExposure,
     idGain,
     idVOut,
     idContrast,

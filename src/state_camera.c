@@ -148,7 +148,7 @@ const menu_item_t CameraMenuItemAssistedExposure = {
     .prev = &CameraMenuItemAssistedDitherLight, .next = &CameraMenuItemAssistedContrast,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 0, .width = 5,
-    .id = idAssistedExposure,
+    .id = idExposure,
     .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
@@ -174,7 +174,7 @@ const menu_item_t CameraMenuItemAssistedDither = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this menu option when it's being set automatically via `.id = idAssistedExposure`
+const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this menu option when it's being set automatically via `.id = idExposure`
     .prev = &CameraMenuItemAssistedDither,     .next = &CameraMenuItemAssistedExposure,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
@@ -354,11 +354,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         switch (selection->id) {
             case idExposure:
                 if (redraw_selection = inc_dec_int8(&SETTING(current_exposure), 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
-                break;
-            case idAssistedExposure:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure), 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
-                // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure'
-                // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
+                if (camera_mode == camera_mode_assisted) {
+                    // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure'
+                    // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
+                }
                 break;
             case idGain:
                 if (redraw_selection = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
@@ -410,7 +409,6 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
     static const uint8_t * const low_high[] = {"Low", "High"};
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (self->id) {
-        case idAssistedExposure:
         case idExposure: {
             uint16_t value = EXPOSURE_VALUE_TO_US(exposures[SETTING(current_exposure)]) / 100;
             uint8_t * buf = text_buffer + 100;
