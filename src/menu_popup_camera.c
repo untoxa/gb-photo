@@ -15,6 +15,14 @@
 #include "menu_codes.h"
 #include "menu_yesno.h"
 
+#if (PICNREC_ENABLED==1)
+    #define MENUITEM_PICNREC &ActionSubMenuPicNRec
+    #define ACTION_SUBMENU_HEIGHT 6
+#else
+    #define MENUITEM_PICNREC NULL
+    #define ACTION_SUBMENU_HEIGHT 5
+#endif
+
 typedef enum {
     idPopupNone = 0,
     idPopupCameraRestore,
@@ -114,7 +122,7 @@ const menu_item_t ActionSubMenuPrint = {
     .result = ACTION_ACTION_PRINT
 };
 const menu_item_t ActionSubMenuSaveAndPrint = {
-    .prev = &ActionSubMenuPrint,   .next = &ActionSubMenuPicNRec,
+    .prev = &ActionSubMenuPrint,   .next = MENUITEM_PICNREC,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Save & Print",
@@ -130,7 +138,7 @@ const menu_item_t ActionSubMenuPicNRec = {
     .result = ACTION_ACTION_PICNREC
 };
 const menu_t ActionSubMenu = {
-    .x = 5, .y = 6, .width = 10, .height = 6,
+    .x = 5, .y = 6, .width = 10, .height = ACTION_SUBMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ActionSubMenuSave,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL

@@ -8,12 +8,14 @@
 #define HELP_CONTEXT_WIDTH 16
 #define IMAGE_SLOTS_USED_WIDTH (20 - HELP_CONTEXT_WIDTH)
 
-
 #ifndef DEBUG_ENABLED
     #define DEBUG_ENABLED 1
 #endif
 #ifndef USE_CGB_DOUBLE_SPEED
     #define USE_CGB_DOUBLE_SPEED 1
+#endif
+#ifndef PICNREC_ENABLED
+    #define PICNREC_ENABLED 1
 #endif
 
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text
