@@ -114,15 +114,23 @@ const menu_item_t ActionSubMenuPrint = {
     .result = ACTION_ACTION_PRINT
 };
 const menu_item_t ActionSubMenuSaveAndPrint = {
-    .prev = &ActionSubMenuPrint,   .next = NULL,
+    .prev = &ActionSubMenuPrint,   .next = &ActionSubMenuPicNRec,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Save & Print",
     .onPaint = NULL,
     .result = ACTION_ACTION_SAVEPRINT
 };
+const menu_item_t ActionSubMenuPicNRec = {
+    .prev = &ActionSubMenuPrint,   .next = NULL,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 4, .width = 8,
+    .caption = " Pic'n'rec",
+    .onPaint = NULL,
+    .result = ACTION_ACTION_PICNREC
+};
 const menu_t ActionSubMenu = {
-    .x = 5, .y = 6, .width = 10, .height = 5,
+    .x = 5, .y = 6, .width = 10, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ActionSubMenuSave,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
@@ -135,7 +143,7 @@ uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t *
 const menu_item_t CameraMenuItemMode = {
     .prev = &CameraMenuItemReset,   .next = &CameraMenuItemTrigger,
     .sub = &CameraModeSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 11,
+    .ofs_x = 1, .ofs_y = 1, .width = 12,
     .id = idPopupCameraMode,
     .helpcontext = " Select camera mode",
     .caption = " Mode\t\t%s",
@@ -145,7 +153,7 @@ const menu_item_t CameraMenuItemMode = {
 const menu_item_t CameraMenuItemTrigger = {
     .prev = &CameraMenuItemMode,    .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 11,
+    .ofs_x = 1, .ofs_y = 2, .width = 12,
     .id = idPopupCameraTrigger,
     .helpcontext = " Trigger behavior",
     .caption = " Trigger\t%s",
@@ -155,7 +163,7 @@ const menu_item_t CameraMenuItemTrigger = {
 const menu_item_t CameraMenuItemAction = {
     .prev = &CameraMenuItemTrigger, .next = &CameraMenuItemReset,
     .sub = &ActionSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 11,
+    .ofs_x = 1, .ofs_y = 3, .width = 12,
     .id = idPopupCameraAction,
     .helpcontext = " Post-processing action",
     .caption = " Action\t\t%s",
@@ -165,7 +173,7 @@ const menu_item_t CameraMenuItemAction = {
 const menu_item_t CameraMenuItemReset = {
     .prev = &CameraMenuItemAction, .next = &CameraMenuItemMode,
     .sub = &YesNoMenu, .sub_params = "Restore defaults?",
-    .ofs_x = 1, .ofs_y = 4, .width = 11, .flags = MENUITEM_TERM,
+    .ofs_x = 1, .ofs_y = 4, .width = 12, .flags = MENUITEM_TERM,
     .id = idPopupCameraRestore,
     .caption = " Restore defaults",
     .helpcontext = " Restore default settings",
@@ -174,7 +182,7 @@ const menu_item_t CameraMenuItemReset = {
 };
 
 const menu_t CameraPopupMenu = {
-    .x = 1, .y = 3, .width = 13, .height = 6,
+    .x = 1, .y = 3, .width = 14, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &CameraMenuItemMode,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -191,7 +199,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     menu;
     static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
     static const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
-    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]"};
+    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[Pic'n'Rec]"};
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
             strcpy(text_buffer, self->caption);
@@ -214,7 +222,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing()) wait_vbl_done();
+    if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
 }
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {

@@ -65,7 +65,7 @@ uint8_t UPDATE_state_logo() BANKED {
         // run Main Menu
         if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
     }
-    return 0;
+    return TRUE;
 }
 
 uint8_t LEAVE_state_logo() BANKED {

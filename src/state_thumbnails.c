@@ -96,7 +96,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
     }
     hide_sprites_range(move_metasprite(gallery_cursor[cursor_anim], 0xfa, 0, ((cx << 2) + 2) << 3, ((cy << 2) + 1) << 3), MAX_HARDWARE_SPRITES);
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
-    return 0;
+    return TRUE;
 }
 
 uint8_t LEAVE_state_thumbnails() BANKED {

@@ -16,6 +16,7 @@
 
 #include "globals.h"
 #include "state_camera.h"
+#include "pic-n-rec.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -40,6 +41,7 @@ after_action_e after_action = after_action_save;
 
 uint8_t image_live_preview = TRUE;
 uint8_t images_taken = 30;
+uint8_t recording_video = FALSE;
 
 #define MODE_SETTING(A,B) current_settings[B].A
 #define SETTING(A) MODE_SETTING(A,camera_mode)
@@ -123,7 +125,14 @@ void camera_load_settings() {
 static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
     display_last_seen(TRUE);
-    sprintf(text_buffer, "%d/30", images_taken);
+    switch (after_action) {
+        case after_action_picnrec:
+            if (recording_video) memcpy(text_buffer, "\x03\x00 REC \x03\xff ", 11); else *text_buffer = 0;
+            break;
+        default:
+            sprintf(text_buffer, "%d/30", images_taken);
+            break;
+    }
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
 
@@ -332,8 +341,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     last_menu_items[camera_mode] = selection;
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
+        if (recording_video) picnrec_trigger();
         display_last_seen(FALSE);
-        if (image_live_preview) image_capture();
+        if (image_live_preview || recording_video) image_capture();
     }
     // select opens popup-menu
     if (KEY_PRESSED(J_SELECT)) {
@@ -400,7 +410,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (redraw_selection) menu_move_selection(menu, NULL, selection);
     }
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing()) wait_vbl_done();
+    if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
@@ -490,16 +500,28 @@ uint8_t UPDATE_state_camera() BANKED {
     }
     switch (menu_result) {
         case ACTION_SHUTTER:
-            if (!is_capturing()) {
-                music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
-//                music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
-                image_capture();
+            switch (after_action) {
+                case after_action_picnrec:
+                    // toggle recording and start image capture
+                    recording_video = !recording_video;
+                    if (recording_video && !is_capturing()) image_capture();
+                    refresh_screen();
+                    break;
+                default:
+                    if (!is_capturing()) {
+                        music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
+//                        music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+                        image_capture();
+                    }
+                    break;
             }
             break;
         case ACTION_MAIN_MENU:
+            recording_video = FALSE;
             if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
             break;
         case ACTION_CAMERA_SUBMENU: {
+            recording_video = FALSE;
             switch (menu_result = menu_popup_camera_execute()) {
                 case ACTION_MODE_MANUAL:
                 case ACTION_MODE_ASSISTED:
@@ -518,8 +540,9 @@ uint8_t UPDATE_state_camera() BANKED {
                 }
                 case ACTION_ACTION_SAVE:
                 case ACTION_ACTION_PRINT:
-                case ACTION_ACTION_SAVEPRINT: {
-                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave};
+                case ACTION_ACTION_SAVEPRINT:
+                case ACTION_ACTION_PICNREC: {
+                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_picnrec};
                     after_action = aactions[menu_result - ACTION_ACTION_SAVE];
                     break;
                 }
@@ -538,9 +561,10 @@ uint8_t UPDATE_state_camera() BANKED {
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
             break;
     }
-    return 0;
+    return FALSE;
 }
 
 uint8_t LEAVE_state_camera() BANKED {
+    recording_video = FALSE;
     return 0;
 }

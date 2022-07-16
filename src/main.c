@@ -23,7 +23,7 @@
 #include "music.h"
 
 
-#define _STATE(STATE_ID) DECLARE_STATE(STATE_ID) 
+#define _STATE(STATE_ID) DECLARE_STATE(STATE_ID)
 STATES
 #undef _STATE
 
@@ -76,7 +76,7 @@ void main() {
 
     detect_system();    // detect system compatibility
     if (_is_COLOR) {
-#if (USE_CGB_DOUBLE_SPEED==1)    
+#if (USE_CGB_DOUBLE_SPEED==1)
         cpu_fast();
 #endif
         cgb_compatibility();
@@ -89,11 +89,11 @@ void main() {
         add_LCD(LCD_ISR);
 #endif
         music_setup_timer();
-        add_low_priority_TIM(music_play_isr);    
+        add_low_priority_TIM(music_play_isr);
     }
 #if defined(NINTENDO)
     set_interrupts(VBL_IFLAG | LCD_IFLAG | TIM_IFLAG);
-#else 
+#else
     set_interrupts(VBL_IFLAG | TIM_IFLAG);
 #endif
     music_load(BANK(music_ingame), &music_ingame), music_pause(music_paused = TRUE);
@@ -111,7 +111,7 @@ void main() {
         VBK_REG = 0;
     }
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
-    SHOW_BKG; SHOW_SPRITES; SPRITES_8x8; 
+    SHOW_BKG; SHOW_SPRITES; SPRITES_8x8;
     DISPLAY_ON;
 
 //        if (joy & J_UP)     music_play_sfx(BANK(sound_effect1), sound_effect1, SFX_MUTE_MASK(sound_effect1));
@@ -125,10 +125,9 @@ void main() {
 
     while (TRUE) {
         if (OLD_PROGRAM_STATE != CURRENT_PROGRAM_STATE) {
-            if (OLD_PROGRAM_STATE < N_STATES) call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE].LEAVE); 
+            if (OLD_PROGRAM_STATE < N_STATES) call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE].LEAVE);
             call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE = CURRENT_PROGRAM_STATE].ENTER);
         }
-        call_far(&PROGRAM_STATES[CURRENT_PROGRAM_STATE].UPDATE);
-        wait_vbl_done();
+        if (call_far(&PROGRAM_STATES[CURRENT_PROGRAM_STATE].UPDATE)) wait_vbl_done();
     }
 }

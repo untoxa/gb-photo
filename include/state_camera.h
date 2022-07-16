@@ -23,7 +23,8 @@ typedef enum {
 typedef enum {
     after_action_save,
     after_action_print,
-    after_action_printsave
+    after_action_printsave,
+    after_action_picnrec
 } after_action_e;
 
 typedef enum {
@@ -93,6 +94,8 @@ typedef struct camera_mode_settings_t {
 extern camera_mode_e camera_mode;
 extern trigger_mode_e trigger_mode;
 extern after_action_e after_action;
+
+extern uint8_t recording_video;
 
 extern uint8_t old_capture_reg;
 
