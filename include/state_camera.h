@@ -77,6 +77,15 @@ typedef struct table_value_t {
     const uint8_t * caption;
 } table_value_t;
 
+typedef struct camera_state_options_t {
+    camera_mode_e camera_mode;
+    trigger_mode_e trigger_mode;
+    after_action_e after_action;
+} camera_state_options_t;
+
+#define OPTION(OPT) camera_state.OPT
+extern camera_state_options_t camera_state;
+
 typedef struct camera_mode_settings_t {
     int8_t current_exposure;
     int8_t current_gain;
@@ -91,9 +100,9 @@ typedef struct camera_mode_settings_t {
     uint8_t edge_exclusive;
 } camera_mode_settings_t;
 
-extern camera_mode_e camera_mode;
-extern trigger_mode_e trigger_mode;
-extern after_action_e after_action;
+#define MODE_SETTING(SET,STAT) current_settings[OPTION(STAT)].SET
+#define SETTING(SET) MODE_SETTING(SET,camera_mode)
+extern camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 extern uint8_t recording_video;
 

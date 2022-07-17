@@ -213,13 +213,13 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
             strcpy(text_buffer, self->caption);
             break;
         case idPopupCameraMode:
-            sprintf(text_buffer, self->caption, camera_modes[camera_mode]);
+            sprintf(text_buffer, self->caption, camera_modes[OPTION(camera_mode)]);
             break;
         case idPopupCameraTrigger:
-            sprintf(text_buffer, self->caption, trigger_modes[trigger_mode]);
+            sprintf(text_buffer, self->caption, trigger_modes[OPTION(trigger_mode)]);
             break;
         case idPopupCameraAction:
-            sprintf(text_buffer, self->caption, after_actions[after_action]);
+            sprintf(text_buffer, self->caption, after_actions[OPTION(after_action)]);
             break;
         default:
             *text_buffer = 0;

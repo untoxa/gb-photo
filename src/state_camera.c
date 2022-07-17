@@ -17,6 +17,7 @@
 #include "globals.h"
 #include "state_camera.h"
 #include "pic-n-rec.h"
+#include "load_save.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -35,35 +36,13 @@
 
 BANKREF(state_camera)
 
-camera_mode_e camera_mode = camera_mode_manual;
-trigger_mode_e trigger_mode = trigger_mode_abutton;
-after_action_e after_action = after_action_save;
+camera_state_options_t camera_state;
 
 uint8_t image_live_preview = TRUE;
 uint8_t images_taken = 30;
 uint8_t recording_video = FALSE;
 
-#define MODE_SETTING(A,B) current_settings[B].A
-#define SETTING(A) MODE_SETTING(A,camera_mode)
-camera_mode_settings_t current_settings[N_CAMERA_MODES] = {
-    {
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
-    },{
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
-    },{
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
-    },{
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
-    }
-};
+camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
 
@@ -102,7 +81,7 @@ static const table_value_t voltage_refs[] = {
 
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
-    uint8_t ypos = (camera_mode == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
+    uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
     screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
@@ -125,7 +104,7 @@ void camera_load_settings() {
 static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
     display_last_seen(TRUE);
-    switch (after_action) {
+    switch (OPTION(after_action)) {
         case after_action_picnrec:
             if (recording_video) memcpy(text_buffer, "\x03\x00 REC \x03\xff ", 11); else *text_buffer = 0;
             break;
@@ -338,7 +317,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     static change_direction_e change_direction;
 
     // save current selection
-    last_menu_items[camera_mode] = selection;
+    last_menu_items[OPTION(camera_mode)] = selection;
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
         if (recording_video) picnrec_trigger();
@@ -364,7 +343,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         switch (selection->id) {
             case idExposure:
                 if (redraw_selection = inc_dec_int8(&SETTING(current_exposure), 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
-                if (camera_mode == camera_mode_assisted) {
+                if (OPTION(camera_mode) == camera_mode_assisted) {
                     // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure'
                     // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
                 }
@@ -407,7 +386,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
         // redraw selection if requested
-        if (redraw_selection) menu_move_selection(menu, NULL, selection);
+        if (redraw_selection) {
+            save_camera_mode_settings(OPTION(camera_mode));
+            menu_move_selection(menu, NULL, selection);
+        }
     }
     // wait for VBlank if not capturing (avoid HALT CPU state)
     if (!is_capturing() && !recording_video) wait_vbl_done();
@@ -484,14 +466,14 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
     JOYPAD_RESET();
-    switch (camera_mode) {
+    switch (OPTION(camera_mode)) {
         case camera_mode_manual:
-            menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[camera_mode]);
+            menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
         case camera_mode_assisted:
         case camera_mode_auto:
         case camera_mode_iterate:
-            menu_result = menu_execute(&CameraMenuAssisted, NULL, last_menu_items[camera_mode]);
+            menu_result = menu_execute(&CameraMenuAssisted, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
         default:
             // error, must not get here
@@ -500,7 +482,7 @@ uint8_t UPDATE_state_camera() BANKED {
     }
     switch (menu_result) {
         case ACTION_SHUTTER:
-            switch (after_action) {
+            switch (OPTION(after_action)) {
                 case after_action_picnrec:
                     // toggle recording and start image capture
                     recording_video = !recording_video;
@@ -528,14 +510,14 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_MODE_AUTO:
                 case ACTION_MODE_ITERATE: {
                     static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_iterate};
-                    camera_mode = cmodes[menu_result - ACTION_MODE_MANUAL];
+                    OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
                     break;
                 }
                 case ACTION_TRIGGER_ABUTTON:
                 case ACTION_TRIGGER_TIMER:
                 case ACTION_TRIGGER_INTERVAL: {
                     static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval};
-                    trigger_mode = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
+                    OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                     break;
                 }
                 case ACTION_ACTION_SAVE:
@@ -543,17 +525,18 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_ACTION_SAVEPRINT:
                 case ACTION_ACTION_PICNREC: {
                     static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_picnrec};
-                    after_action = aactions[menu_result - ACTION_ACTION_SAVE];
+                    OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                     break;
                 }
                 case ACTION_RESTORE_DEFAULTS:
-                    // TODO: restore defaults
+                    restore_default_mode_settings(OPTION(camera_mode));
                     break;
                 default:
                     // error, must not get here
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                     break;
             }
+            save_camera_state();
             refresh_screen();
             break;
         }

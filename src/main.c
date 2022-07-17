@@ -5,6 +5,7 @@
 
 #include "globals.h"
 #include "states.h"
+#include "load_save.h"
 
 #include "systemdetect.h"
 #include "systemhelpers.h"
@@ -81,6 +82,8 @@ void main() {
 #endif
         cgb_compatibility();
     }
+
+    init_save_structure();
 
     music_init();
     CRITICAL {
