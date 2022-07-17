@@ -36,6 +36,7 @@ const menu_item_t FrameMenuItemNoFrame = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " No Frame",
+    .helpcontext = " Print without frame",
     .onPaint = NULL,
     .result = ACTION_PRINT_FRAME0
 };
@@ -43,7 +44,8 @@ const menu_item_t FrameMenuItemWild = {
     .prev = &FrameMenuItemNoFrame, .next = NULL,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
-    .caption = " Wild",
+    .caption = " GB Camera",
+    .helpcontext = " \"GB Camera\" frame",
     .onPaint = NULL,
     .result = ACTION_PRINT_FRAME1
 };
@@ -61,6 +63,7 @@ const menu_item_t GalleryMenuItemThumb = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " Thumbnails",
+    .helpcontext = " Thumbnail view",
     .onPaint = NULL,
     .result = ACTION_THUMBNAILS
 };
@@ -69,6 +72,7 @@ const menu_item_t GalleryMenuItemInfo = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Info",
+    .helpcontext = " View image metadata",
     .onPaint = NULL,
     .result = MENU_RESULT_CLOSE
 };
@@ -77,6 +81,7 @@ const menu_item_t GalleryMenuItemPrint = {
     .sub = &FramesSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Print",
+    .helpcontext = " Print current image",
     .onPaint = NULL,
     .result = MENU_RESULT_NONE
 };
@@ -85,6 +90,7 @@ const menu_item_t GalleryMenuItemDelete = {
     .sub = &YesNoMenu, .sub_params = "Are you sure?",
     .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Delete",
+    .helpcontext = " Delete current image",
     .onPaint = NULL,
     .result = ACTION_ERASE_IMAGE
 };
@@ -93,6 +99,7 @@ const menu_item_t GalleryMenuItemDeleteAll = {
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
     .ofs_x = 1, .ofs_y = 5, .width = 8,
     .caption = " Delete all",
+    .helpcontext = " Erase whole Gallery",
     .onPaint = NULL,
     .result = ACTION_ERASE_GALLERY
 };
@@ -119,10 +126,10 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
 
 static void refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
-    menu_text_out(0, 0, 20, SOLID_BLACK, "Gallery view");
+    menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
     screen_show_picture(gallery_picture_no);
 
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, "START/SELECT for menus");
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " [STA]/[SEL] for menus");
     sprintf(text_buffer, "%d/30", images_taken);
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
