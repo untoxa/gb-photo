@@ -46,8 +46,8 @@ void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data) O
 void vwf_print_reset(uint8_t * tile) {
     vwf_current_tile = tile;
     vwf_current_offset = 0;
-    vwf_swap_tiles(); 
-    vwf_swap_tiles(); 
+    vwf_swap_tiles();
+    vwf_swap_tiles();
 }
 
 uint8_t vwf_print_render(const unsigned char ch) {
@@ -83,7 +83,7 @@ uint8_t vwf_print_render(const unsigned char ch) {
     }
 }
 
-uint8_t vwf_draw_text(uint8_t * base_tile, const unsigned char * str) {
+uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str) {
     static const uint8_t * ui_text_ptr;
     ui_text_ptr = str;
 
@@ -101,12 +101,12 @@ uint8_t vwf_draw_text(uint8_t * base_tile, const unsigned char * str) {
                     set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                     vwf_current_tile += VWF_TILE_SIZE;
                     vwf_swap_tiles();
-                } else vwf_print_reset(vwf_next_tile()); 
+                } else vwf_print_reset(vwf_next_tile());
                 while ((uint8_t)((uint16_t)(vwf_current_tile - base_tile) >> VWF_TILE_SIZE_BITS) % vwf_tab_size) {
                     set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                     vwf_current_tile += VWF_TILE_SIZE;
                     vwf_swap_tiles();
-                } 
+                }
                 break;
             default:
                 vwf_print_render(*ui_text_ptr);
@@ -121,12 +121,12 @@ uint8_t vwf_draw_text(uint8_t * base_tile, const unsigned char * str) {
 void vwf_load_font(uint8_t idx, const void * font, uint8_t bank) {
     vwf_fonts[idx].bank = bank;
     vwf_fonts[idx].ptr = (void *)font;
-    vwf_activate_font(idx); 
+    vwf_activate_font(idx);
 }
 
 void vwf_activate_font(uint8_t idx) {
     vwf_current_font_bank = vwf_fonts[idx].bank;
-    vwf_memcpy(&vwf_current_font_desc, vwf_fonts[idx].ptr, sizeof(font_desc_t), vwf_current_font_bank);    
+    vwf_memcpy(&vwf_current_font_desc, vwf_fonts[idx].ptr, sizeof(font_desc_t), vwf_current_font_bank);
 }
 
 uint8_t * vwf_next_tile() {

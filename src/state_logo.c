@@ -8,6 +8,8 @@
 #include "states.h"
 #include "bankdata.h"
 
+#include "misc_assets.h"
+
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"

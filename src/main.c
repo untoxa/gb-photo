@@ -15,6 +15,7 @@
 #include "screen.h"
 #include "vwf.h"
 #include "remote.h"
+#include "misc_assets.h"
 
 // graphic assets
 #include "cursors.h"
@@ -106,8 +107,9 @@ void main() {
     remote_init();
     remote_activate(REMOTE_ENABLED);
 
-    // Initialize screen
-    screen_init();
+    misc_assets_init(); // load some assets (menu corners, solid black/white blocks)
+
+    // initialize the screen
     if (_is_COLOR) {
         VBK_REG = 1;
         fill_bkg_rect(0, 0, 20, 18, 0);

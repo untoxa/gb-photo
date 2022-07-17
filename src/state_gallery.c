@@ -11,7 +11,10 @@
 #include "gbprinter.h"
 #include "remote.h"
 
+#include "state_gallery.h"
 #include "state_camera.h"
+
+#include "misc_assets.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -29,6 +32,20 @@
 BANKREF(state_gallery)
 
 uint8_t gallery_picture_no;
+
+uint8_t gallery_show_picture(uint8_t n) {
+    wait_vbl_done();
+    screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, SOLID_BLACK);
+
+    if (n > (CAMERA_MAX_IMAGE_SLOTS - 1)) return FALSE;
+    SWITCH_RAM((n >> 1) + 1);
+    screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((n & 1) ? image_second : image_first));
+
+    wait_vbl_done();
+    screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
+    return TRUE;
+}
+
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t FrameMenuItemNoFrame = {
@@ -99,7 +116,7 @@ const menu_item_t GalleryMenuItemDeleteAll = {
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
     .ofs_x = 1, .ofs_y = 5, .width = 8,
     .caption = " Delete all",
-    .helpcontext = " Erase whole Gallery",
+    .helpcontext = " Erase whole gallery",
     .onPaint = NULL,
     .result = ACTION_ERASE_GALLERY
 };
@@ -127,9 +144,9 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
 static void refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
-    screen_show_picture(gallery_picture_no);
+    gallery_show_picture(gallery_picture_no);
 
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " [STA]/[SEL] for menus");
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " [STRT]/[SEL] for menus");
     sprintf(text_buffer, "%d/30", images_taken);
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
@@ -146,12 +163,12 @@ uint8_t UPDATE_state_gallery() BANKED {
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
         if (++gallery_picture_no == CAMERA_MAX_IMAGE_SLOTS) gallery_picture_no = 0;
-        screen_show_picture(gallery_picture_no);
+        gallery_show_picture(gallery_picture_no);
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
         if (gallery_picture_no) --gallery_picture_no; else gallery_picture_no = CAMERA_MAX_IMAGE_SLOTS - 1;
-        screen_show_picture(gallery_picture_no);
-    } else if (KEY_PRESSED(J_B)) {
+        gallery_show_picture(gallery_picture_no);
+    } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
         CHANGE_STATE(state_thumbnails);
         return 0;

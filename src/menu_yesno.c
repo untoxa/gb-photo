@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "misc_assets.h"
+
 #include "menus.h"
 #include "menu_codes.h"
 #include "screen.h"
@@ -26,14 +28,14 @@ const menu_item_t YesNoMenuItems[] = {
     }
 };
 const menu_t YesNoMenu = {
-    .x = 4, .y = 8, .width = 12, .height = 5, 
-    .items = YesNoMenuItems, 
+    .x = 4, .y = 8, .width = 12, .height = 5,
+    .items = YesNoMenuItems,
     .onShow = onShowYesNo, .onTranslateKey = onTranslateKeyYesNo, .onTranslateSubResult = NULL
 };
 
 uint8_t onShowYesNo(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 1, self->y + 1, 0, SOLID_WHITE, param);
-    return 0; 
+    return 0;
 }
 
 uint8_t onTranslateKeyYesNo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {

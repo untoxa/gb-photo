@@ -2,9 +2,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "screen.h"
-#include "vwf.h"
 #include "joy.h"
+#include "vwf.h"
+#include "screen.h"
+#include "misc_assets.h"
 
 #include "menus.h"
 

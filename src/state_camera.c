@@ -19,6 +19,8 @@
 #include "pic-n-rec.h"
 #include "load_save.h"
 
+#include "misc_assets.h"
+
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"

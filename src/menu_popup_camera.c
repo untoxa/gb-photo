@@ -10,6 +10,8 @@
 // camera state
 #include "state_camera.h"
 
+#include "misc_assets.h"
+
 // menus
 #include "menus.h"
 #include "menu_codes.h"

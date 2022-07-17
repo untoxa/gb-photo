@@ -3,13 +3,14 @@
 #include <stdio.h>
 
 #include "musicmanager.h"
-#include "menus.h"
-#include "menu_codes.h"
 #include "screen.h"
 #include "states.h"
-
 #include "globals.h"
 
+#include "misc_assets.h"
+
+#include "menus.h"
+#include "menu_codes.h"
 #include "menu_about.h"
 #include "menu_debug.h"
 #include "menu_yesno.h"
