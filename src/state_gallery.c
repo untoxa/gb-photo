@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdio.h>
 
 #include "musicmanager.h"
 #include "joy.h"
@@ -9,6 +10,8 @@
 #include "states.h"
 #include "gbprinter.h"
 #include "remote.h"
+
+#include "state_camera.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -27,6 +30,7 @@ BANKREF(state_gallery)
 
 uint8_t gallery_picture_no;
 
+uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t FrameMenuItemNoFrame = {
     .prev = NULL,                 .next = &FrameMenuItemWild,
     .sub = NULL, .sub_params = NULL,
@@ -47,7 +51,8 @@ const menu_t FramesSubMenu = {
     .x = 7, .y = 4, .width = 10, .height = 4,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &FrameMenuItemNoFrame,
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
+    .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
@@ -95,7 +100,8 @@ const menu_t GalleryMenu = {
     .x = 1, .y = 3, .width = 10, .height = 7,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &GalleryMenuItemThumb,
-    .onShow = NULL, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultGalleryMenu
+    .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultGalleryMenu
 };
 
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
@@ -104,11 +110,21 @@ uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct
     }
     return value;
 }
+uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    // we draw help context here
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    return 0;
+}
 
 static void refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
-    screen_text_out(0, 0, "\x03\xff Gallery view");
+    menu_text_out(0, 0, 20, SOLID_BLACK, "Gallery view");
     screen_show_picture(gallery_picture_no);
+
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, "START/SELECT for menus");
+    sprintf(text_buffer, "%d/30", images_taken);
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
 
 uint8_t ENTER_state_gallery() BANKED {
@@ -132,7 +148,7 @@ uint8_t UPDATE_state_gallery() BANKED {
         // switch to thumbnail view
         CHANGE_STATE(state_thumbnails);
         return 0;
-    } else if (KEY_PRESSED(J_A)) {
+    } else if (KEY_PRESSED(J_SELECT)) {
         switch (menu_result = menu_execute(&GalleryMenu, NULL, NULL)) {
             case ACTION_ERASE_GALLERY:
                 // TODO: erase image library
