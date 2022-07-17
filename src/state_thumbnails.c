@@ -2,14 +2,17 @@
 
 #include <gbdk/platform.h>
 #include <gbdk/metasprites.h>
+#include <stdio.h>
 
 #include "musicmanager.h"
 #include "joy.h"
 #include "gbcamera.h"
 #include "screen.h"
 #include "states.h"
+#include "vector.h"
 
 #include "state_thumbnails.h"
+#include "state_gallery.h"
 
 #include "misc_assets.h"
 
@@ -25,7 +28,7 @@
 BANKREF(state_thumbnails)
 
 extern uint8_t gallery_picture_no;
-static uint8_t thumbnails_page_no = 0, cx = 0, cy = 0, cursor_anim = 0;
+static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, cx = 0, cy = 0, cursor_anim = 0;
 
 const metasprite_t gallery_cursor0[] = {
 	METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0),
@@ -60,29 +63,38 @@ inline uint8_t coords_to_picture_no(uint8_t x, uint8_t y) {
 uint8_t tumbnails_diaplay(uint8_t start) {
     wait_vbl_done();
     screen_clear_rect(THUMBNAIL_DISPLAY_X, THUMBNAIL_DISPLAY_Y, THUMBNAIL_DISPLAY_WIDTH, THUMBNAIL_DISPLAY_HEIGHT, SOLID_BLACK);
-    static uint8_t i, j;
-    j = start;
-    for (i = 0; i != 16; i++, j++) {
-        if (j > (CAMERA_MAX_IMAGE_SLOTS - 1)) break;
-
-        SWITCH_RAM((j >> 1) + 1);
-        screen_load_image(thumbnail_coords[i].x, thumbnail_coords[i].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT, ((j & 1) ? image_second_thumbnail : image_first_thumbnail));
-
+    for (uint8_t i = start, j = 0; (i < VECTOR_LEN(used_slots)) && (j != MAX_PREVIEW_THUMBNAILS); i++, j++) {
+        uint8_t itm = VECTOR_GET(used_slots, i);
+        SWITCH_RAM((itm >> 1) + 1);
+        screen_load_image(thumbnail_coords[j].x, thumbnail_coords[j].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT, ((itm & 1) ? image_second_thumbnail : image_first_thumbnail));
         wait_vbl_done();
-        screen_restore_rect(thumbnail_coords[i].x, thumbnail_coords[i].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
+        screen_restore_rect(thumbnail_coords[j].x, thumbnail_coords[j].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     }
     return TRUE;
 }
 
 static void refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
-    screen_text_out(0, 0, "\x03\xff Thumbnail view");
+    menu_text_out(0, 0, 20, SOLID_BLACK, " Thumbnail view");
+
     tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+
+    sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+}
+
+uint8_t INIT_state_thumbnails() BANKED {
+    return 0;
 }
 
 uint8_t ENTER_state_thumbnails() BANKED {
+    thumbnails_num_pages = VECTOR_LEN(used_slots) >> 4;
+    if (VECTOR_LEN(used_slots) & 0x0f) thumbnails_num_pages++;
+
     thumbnails_page_no = (gallery_picture_no >> 4);
+
     cx = gallery_picture_no & 0x03, cy = (gallery_picture_no >> 2) & 0x03;
+
     refresh_screen();
     JOYPAD_RESET();
     return 0;
@@ -96,17 +108,23 @@ uint8_t UPDATE_state_thumbnails() BANKED {
         if (cy < (THUMBS_COUNT_Y - 1)) ++cy;
     } else if (KEY_PRESSED(J_LEFT)) {
         if (!cx) {
-            if (thumbnails_page_no) --thumbnails_page_no; else thumbnails_page_no = MAX_PREVIEW_PAGES - 1;
+            uint8_t old_page = thumbnails_page_no;
+            if (thumbnails_page_no) --thumbnails_page_no; else thumbnails_page_no = thumbnails_num_pages - 1;
             cx = THUMBS_COUNT_X - 1;
-            hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-            tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+            if (old_page != thumbnails_page_no) {
+                hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+                tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+            }
         } else --cx;
     } else if (KEY_PRESSED(J_RIGHT)) {
         if (++cx == THUMBS_COUNT_X) {
-            if (thumbnails_page_no) --thumbnails_page_no; else thumbnails_page_no = MAX_PREVIEW_PAGES - 1;
+            uint8_t old_page = thumbnails_page_no;
+            if (thumbnails_page_no < thumbnails_num_pages - 1) ++thumbnails_page_no; else thumbnails_page_no = 0;
             cx = 0;
-            hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-            tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+            if (old_page != thumbnails_page_no) {
+                hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+                tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+            }
         };
     } else if (KEY_PRESSED(J_A)) {
         gallery_picture_no = coords_to_picture_no(cx, cy);

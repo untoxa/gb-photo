@@ -16,6 +16,7 @@
 
 #include "globals.h"
 #include "state_camera.h"
+#include "state_gallery.h"
 #include "pic-n-rec.h"
 #include "load_save.h"
 
@@ -41,7 +42,6 @@ BANKREF(state_camera)
 camera_state_options_t camera_state;
 
 uint8_t image_live_preview = TRUE;
-uint8_t images_taken = 30;
 uint8_t recording_video = FALSE;
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
@@ -114,10 +114,14 @@ static void refresh_screen() {
             if (recording_video) memcpy(text_buffer, "\x03\x00 REC \x03\xff ", 11); else *text_buffer = 0;
             break;
         default:
-            sprintf(text_buffer, "%d/30", images_taken);
+            sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
             break;
     }
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+}
+
+uint8_t INIT_state_camera() BANKED {
+    return 0;
 }
 
 uint8_t ENTER_state_camera() BANKED {

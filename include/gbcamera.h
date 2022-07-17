@@ -17,6 +17,8 @@
 
 #define CAMERA_MAGIC "Magic"
 
+#define CAMERA_IMAGE_DELETED 0xFF
+#define CAMERA_IMAGE_UNDEFINED 0xFE
 typedef struct cam_game_data_t {
     uint8_t imageslots[CAMERA_MAX_IMAGE_SLOTS];
     uint8_t magic[5];

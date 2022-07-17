@@ -52,6 +52,10 @@ static void refresh_screen() {
     screen_restore_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT);
 }
 
+uint8_t INIT_state_logo() BANKED {
+    return 0;
+}
+
 uint8_t ENTER_state_logo() BANKED {
     refresh_screen();
     return 0;

@@ -106,7 +106,6 @@ typedef struct camera_mode_settings_t {
 #define SETTING(SET) MODE_SETTING(SET,camera_mode)
 extern camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
-extern uint8_t images_taken;
 extern uint8_t recording_video;
 
 extern uint8_t old_capture_reg;

@@ -30,6 +30,7 @@ STATES
 #undef _STATE
 
 #define _STATE(STATE_ID) { \
+    .INIT = {.SEG = BANK(STATE_ID), .OFS = (void *)INIT_##STATE_ID}, \
     .ENTER = {.SEG = BANK(STATE_ID), .OFS = (void *)ENTER_##STATE_ID}, \
     .UPDATE = {.SEG = BANK(STATE_ID), .OFS = (void *)UPDATE_##STATE_ID}, \
     .LEAVE = {.SEG = BANK(STATE_ID), .OFS = (void *)LEAVE_##STATE_ID} \
@@ -128,6 +129,10 @@ void main() {
     vwf_activate_font(0);
 //    vwf_set_colors(2, 1);
 
+    // call init for each state
+    for (uint8_t i = 0; i != N_STATES; i++) call_far(&PROGRAM_STATES[i].INIT);
+
+    // main program loop
     while (TRUE) {
         if (OLD_PROGRAM_STATE != CURRENT_PROGRAM_STATE) {
             if (OLD_PROGRAM_STATE < N_STATES) call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE].LEAVE);

@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "musicmanager.h"
@@ -10,9 +11,9 @@
 #include "states.h"
 #include "gbprinter.h"
 #include "remote.h"
+#include "vector.h"
 
 #include "state_gallery.h"
-#include "state_camera.h"
 
 #include "misc_assets.h"
 
@@ -33,11 +34,25 @@ BANKREF(state_gallery)
 
 uint8_t gallery_picture_no;
 
+VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
+VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
+
+void gallery_toss_images() {
+    VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
+    for (uint8_t i = 0; i < CAMERA_MAX_IMAGE_SLOTS; i++) {
+        uint8_t slot = cam_game_data.imageslots[i];
+        if (slot == CAMERA_IMAGE_DELETED) VECTOR_ADD(free_slots, i); else VECTOR_ADD(used_slots, i);
+    }
+}
+
 uint8_t gallery_show_picture(uint8_t n) {
     wait_vbl_done();
     screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, SOLID_BLACK);
 
-    if (n > (CAMERA_MAX_IMAGE_SLOTS - 1)) return FALSE;
+    if (!VECTOR_LEN(used_slots)) return FALSE;
+    if (n >= VECTOR_LEN(used_slots)) n = VECTOR_LEN(used_slots) - 1;
+    n = VECTOR_GET(used_slots, n);
+
     SWITCH_RAM((n >> 1) + 1);
     screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((n & 1) ? image_second : image_first));
 
@@ -147,8 +162,13 @@ static void refresh_screen() {
     gallery_show_picture(gallery_picture_no);
 
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " [STRT]/[SEL] for menus");
-    sprintf(text_buffer, "%d/30", images_taken);
+    sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+}
+
+uint8_t INIT_state_gallery() BANKED {
+    gallery_toss_images();
+    return 0;
 }
 
 uint8_t ENTER_state_gallery() BANKED {
@@ -162,16 +182,18 @@ uint8_t UPDATE_state_gallery() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
-        if (++gallery_picture_no == CAMERA_MAX_IMAGE_SLOTS) gallery_picture_no = 0;
+        if (++gallery_picture_no == VECTOR_LEN(used_slots)) gallery_picture_no = 0;
         gallery_show_picture(gallery_picture_no);
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
-        if (gallery_picture_no) --gallery_picture_no; else gallery_picture_no = CAMERA_MAX_IMAGE_SLOTS - 1;
+        if (gallery_picture_no) --gallery_picture_no; else gallery_picture_no = VECTOR_LEN(used_slots) - 1;
         gallery_show_picture(gallery_picture_no);
     } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
-        CHANGE_STATE(state_thumbnails);
-        return 0;
+        if (VECTOR_LEN(used_slots) != 0) {
+            CHANGE_STATE(state_thumbnails);
+            return FALSE;
+        }
     } else if (KEY_PRESSED(J_SELECT)) {
         switch (menu_result = menu_execute(&GalleryMenu, NULL, NULL)) {
             case ACTION_ERASE_GALLERY:
@@ -199,7 +221,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 break;
             case ACTION_THUMBNAILS:
                 CHANGE_STATE(state_thumbnails);
-                return 0;
+                return FALSE;
             default:
                 // error, must not get here
                 music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));

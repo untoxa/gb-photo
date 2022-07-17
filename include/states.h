@@ -5,6 +5,7 @@
 #include "globals.h"
 
 #define DECLARE_STATE(STATE_IDX) \
+    uint8_t INIT_##STATE_IDX() BANKED; \
     uint8_t ENTER_##STATE_IDX() BANKED; \
     uint8_t UPDATE_##STATE_IDX() BANKED; \
     uint8_t LEAVE_##STATE_IDX() BANKED; \
@@ -26,6 +27,7 @@ typedef struct far_ptr_t {
 } far_ptr_t;
 
 typedef struct state_desc_t {
+    far_ptr_t INIT;
     far_ptr_t ENTER;
     far_ptr_t UPDATE;
     far_ptr_t LEAVE;
