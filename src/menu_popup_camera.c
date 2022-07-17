@@ -33,11 +33,13 @@ typedef enum {
 
 
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
+uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t ModeSubMenuItemManual = {
     .prev = NULL,                       .next = &ModeSubMenuItemAssisted,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 9,
     .caption = " Manual",
+    .helpcontext = " Expert mode",
     .onPaint = NULL,
     .result = ACTION_MODE_MANUAL
 };
@@ -46,6 +48,7 @@ const menu_item_t ModeSubMenuItemAssisted = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 9,
     .caption = " Assisted",
+    .helpcontext = " Assisted mode",
     .onPaint = NULL,
     .result = ACTION_MODE_ASSISTED
 };
@@ -54,6 +57,7 @@ const menu_item_t ModeSubMenuItemAuto = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 9,
     .caption = " Auto",
+    .helpcontext = " Full automatic mode",
     .onPaint = NULL,
     .result = ACTION_MODE_AUTO
 };
@@ -69,7 +73,8 @@ const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ModeSubMenuItemManual,
-    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
+    .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 
@@ -78,6 +83,7 @@ const menu_item_t TriggerSubMenuItemAButton = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " A Button",
+    .helpcontext = " Trigger shutter with [A]",
     .onPaint = NULL,
     .result = ACTION_TRIGGER_ABUTTON
 };
@@ -86,6 +92,7 @@ const menu_item_t TriggerSubMenuItemTimer = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Timer",
+    .helpcontext = " Use shutter timer",
     .onPaint = NULL,
     .result = ACTION_TRIGGER_TIMER
 };
@@ -94,6 +101,7 @@ const menu_item_t TriggerSubMenuItemInterval = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Repeat",
+    .helpcontext = " Make series of pictures",
     .onPaint = NULL,
     .result = ACTION_TRIGGER_INTERVAL
 };
@@ -101,7 +109,8 @@ const menu_t TriggerSubMenu = {
     .x = 5, .y = 5, .width = 10, .height = 5,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &TriggerSubMenuItemAButton,
-    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
+    .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 
@@ -110,6 +119,7 @@ const menu_item_t ActionSubMenuSave = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " Save",
+    .helpcontext = " Save to Gallery",
     .onPaint = NULL,
     .result = ACTION_ACTION_SAVE
 };
@@ -118,6 +128,7 @@ const menu_item_t ActionSubMenuPrint = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Print",
+    .helpcontext = " Print using GB Printer",
     .onPaint = NULL,
     .result = ACTION_ACTION_PRINT
 };
@@ -126,6 +137,7 @@ const menu_item_t ActionSubMenuSaveAndPrint = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Save & Print",
+    .helpcontext = " Save then Print",
     .onPaint = NULL,
     .result = ACTION_ACTION_SAVEPRINT
 };
@@ -133,7 +145,8 @@ const menu_item_t ActionSubMenuPicNRec = {
     .prev = &ActionSubMenuPrint,   .next = NULL,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 8,
-    .caption = " Pic'n'rec",
+    .caption = " Pic'N'Rec",
+    .helpcontext = " Record video via Pic'N'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC
 };
@@ -141,20 +154,20 @@ const menu_t ActionSubMenu = {
     .x = 5, .y = 6, .width = 10, .height = ACTION_SUBMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ActionSubMenuSave,
-    .onShow = NULL, .onIdle = onIdleCameraPopup, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
+    .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
-uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 
 const menu_item_t CameraMenuItemMode = {
     .prev = &CameraMenuItemReset,   .next = &CameraMenuItemTrigger,
     .sub = &CameraModeSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 12,
     .id = idPopupCameraMode,
-    .helpcontext = " Select camera mode",
     .caption = " Mode\t\t%s",
+    .helpcontext = " Select camera mode",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
@@ -163,8 +176,8 @@ const menu_item_t CameraMenuItemTrigger = {
     .sub = &TriggerSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 12,
     .id = idPopupCameraTrigger,
-    .helpcontext = " Trigger behavior",
     .caption = " Trigger\t%s",
+    .helpcontext = " Trigger behavior",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
@@ -173,8 +186,8 @@ const menu_item_t CameraMenuItemAction = {
     .sub = &ActionSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 12,
     .id = idPopupCameraAction,
-    .helpcontext = " Post-processing action",
     .caption = " Action\t\t%s",
+    .helpcontext = " Post-processing action",
     .onPaint = onCameraPopupMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
