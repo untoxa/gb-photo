@@ -85,6 +85,11 @@ static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 
 // Camera hardware register: EdgeExclusive, EdgeOperation, Gain
 
+#define CAM01_EDGEOP_NONE   0b00000000
+#define CAM01_EDGEOP_HORIZ  0b00100000
+#define CAM01_EDGEOP_VERT   0b01000000
+#define CAM01_EDGEOP_2D     0b01100000
+
 #define CAM01F_EDGEEXCL_V_ON    0b10000000
 #define CAM01F_EDGEEXCL_V_OFF   0b00000000
 

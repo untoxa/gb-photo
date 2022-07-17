@@ -39,7 +39,8 @@ typedef enum {
     idZeroPoint,
     idVoltageRef,
     idEdgeMode,
-    idEdgeExclusive
+    idEdgeExclusive,
+    idEdgeOperation
 } camera_menu_e;
 
 typedef enum {
@@ -98,6 +99,7 @@ typedef struct camera_mode_settings_t {
     uint8_t current_contrast;
     uint8_t invertOutput;
     uint8_t edge_exclusive;
+    uint8_t edge_operation;
 } camera_mode_settings_t;
 
 #define MODE_SETTING(SET,STAT) current_settings[OPTION(STAT)].SET

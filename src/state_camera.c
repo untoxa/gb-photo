@@ -77,6 +77,9 @@ static const table_value_t voltage_refs[] = {
     { CAM04_VOLTAGE_REF_00, "0.0" }, { CAM04_VOLTAGE_REF_05, "0.5" }, { CAM04_VOLTAGE_REF_10, "1.0" }, { CAM04_VOLTAGE_REF_15, "1.5" },
     { CAM04_VOLTAGE_REF_20, "2.0" }, { CAM04_VOLTAGE_REF_25, "2.5" }, { CAM04_VOLTAGE_REF_30, "3.0" }, { CAM04_VOLTAGE_REF_35, "3.5" },
 };
+static const table_value_t edge_operations[] = {
+    { CAM01_EDGEOP_2D, "2D" }, { CAM01_EDGEOP_HORIZ, "Horiz" }, { CAM01_EDGEOP_VERT, "Vert" },{ CAM01_EDGEOP_NONE, "None" }
+};
 
 
 void display_last_seen(uint8_t restore) {
@@ -86,7 +89,7 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | 0x60 | gains[SETTING(current_gain)].value; }
+void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
 void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[SETTING(current_exposure)]; }
 void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
@@ -202,7 +205,7 @@ const menu_item_t CameraMenuItemManualGain = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualVOut = {
-    .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemManualItem3,
+    .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemEdgeOperation,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 0, .width = 5,
     .id = idVOut,
@@ -211,17 +214,18 @@ const menu_item_t CameraMenuItemManualVOut = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualItem3 = {
+const menu_item_t CameraMenuItemEdgeOperation = {
     .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualContrast,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5,
-    .caption = " Item 3",
-    .helpcontext = " Some item 3",
+    .id = idEdgeOperation,
+    .caption = " %s",
+    .helpcontext = " Sensor edge operation",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualContrast = {
-    .prev = &CameraMenuItemManualItem3,    .next = &CameraMenuItemManualDither,
+    .prev = &CameraMenuItemEdgeOperation,    .next = &CameraMenuItemManualDither,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 1, .width = 5,
     .id = idContrast,
@@ -381,6 +385,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
                 break;
+            case idEdgeOperation:
+                if (redraw_selection = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                break;
             default:
                 redraw_selection = FALSE;
                 break;
@@ -449,6 +456,9 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
             break;
         case idEdgeExclusive:
             sprintf(text_buffer, self->caption, on_off[((SETTING(edge_exclusive)) ? 1 : 0)]);
+            break;
+        case idEdgeOperation:
+            sprintf(text_buffer, self->caption, edge_operations[SETTING(edge_operation)].caption);
             break;
         default:
             if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
