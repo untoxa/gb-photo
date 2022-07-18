@@ -84,8 +84,8 @@ const menu_item_t TriggerSubMenuItemAButton = {
     .prev = NULL,                       .next = &TriggerSubMenuItemTimer,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
-    .caption = " A Button",
-    .helpcontext = " Trigger shutter with [A]",
+    .caption = " " ICON_A " button",
+    .helpcontext = " Trigger shutter with " ICON_A,
     .onPaint = NULL,
     .result = ACTION_TRIGGER_ABUTTON
 };
@@ -221,7 +221,7 @@ uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
-    static const uint8_t * const trigger_modes[] = {"[Btn: A]", "[Timer]", "[Repeat]"};
+    static const uint8_t * const trigger_modes[] = { "[" ICON_A " button]", "[Timer]", "[Repeat]"};
     static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[Pic'n'Rec]"};
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:

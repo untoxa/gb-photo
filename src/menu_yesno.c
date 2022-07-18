@@ -15,20 +15,21 @@ const menu_item_t YesNoMenuItems[] = {
         .prev = NULL, .next = &YesNoMenuItems[1],
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 2, .ofs_y = 3, .width = 0,
-        .caption = " NO ",
+        .caption = " " ICON_B " No ",
         .onPaint = NULL,
         .result = MENU_RESULT_NO
     },{
         .prev = &YesNoMenuItems[0], .next = NULL,
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 7, .ofs_y = 3, .width = 0,
-        .caption = " YES",
+        .caption = " Yes",
         .onPaint = NULL,
         .result = MENU_RESULT_YES
     }
 };
 const menu_t YesNoMenu = {
     .x = 4, .y = 8, .width = 12, .height = 5,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = YesNoMenuItems,
     .onShow = onShowYesNo, .onTranslateKey = onTranslateKeyYesNo, .onTranslateSubResult = NULL
 };

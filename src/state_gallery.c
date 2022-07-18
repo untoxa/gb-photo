@@ -161,7 +161,7 @@ static void refresh_screen() {
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
     gallery_show_picture(gallery_picture_no);
 
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " \x1e\x1f/\x1c\x1d for Menus");
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START "/" ICON_SELECT " for Menus");
     sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
