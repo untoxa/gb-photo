@@ -201,7 +201,7 @@ const menu_item_t CameraMenuItemManualExposure = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualGain = {
-    .prev = &CameraMenuItemManualExposure,  .next = &CameraMenuItemManualVOut,
+    .prev = &CameraMenuItemManualExposure,      .next = &CameraMenuItemManualDither,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 0, .width = 5,
     .id = idGain,
@@ -210,28 +210,28 @@ const menu_item_t CameraMenuItemManualGain = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualVOut = {
-    .prev = &CameraMenuItemManualGain,      .next = &CameraMenuItemEdgeOperation,
+const menu_item_t CameraMenuItemManualDither = {
+    .prev = &CameraMenuItemManualGain,          .next = &CameraMenuItemManualDitherLight,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 0, .width = 5,
-    .id = idVOut,
-    .caption = " %dmv",
-    .helpcontext = " Sensor voltage out",
+    .id = idDither,
+    .caption = " " ICON_DITHER "\t%s",
+    .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemEdgeOperation = {
-    .prev = &CameraMenuItemManualVOut,      .next = &CameraMenuItemManualContrast,
+const menu_item_t CameraMenuItemManualDitherLight = {
+    .prev = &CameraMenuItemManualDither,        .next = &CameraMenuItemManualContrast,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5,
-    .id = idEdgeOperation,
-    .caption = " " ICON_EDGE "\t%s",
-    .helpcontext = " Sensor edge operation",
+    .id = idDitherLight,
+    .caption = " " ICON_DITHER "\t%s",
+    .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualContrast = {
-    .prev = &CameraMenuItemEdgeOperation,    .next = &CameraMenuItemManualDither,
+    .prev = &CameraMenuItemManualDitherLight,   .next = &CameraMenuItemManualZeroPoint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 1, .width = 5,
     .id = idContrast,
@@ -240,58 +240,58 @@ const menu_item_t CameraMenuItemManualContrast = {
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualDither = {
-    .prev = &CameraMenuItemManualContrast,     .next = &CameraMenuItemManualDitherLight,
+const menu_item_t CameraMenuItemManualZeroPoint = {
+    .prev = &CameraMenuItemManualContrast,      .next = &CameraMenuItemManualVOut,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 1, .width = 5,
-    .id = idDither,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering on/off",
-    .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
-};
-const menu_item_t CameraMenuItemManualDitherLight = {
-    .prev = &CameraMenuItemManualDither,     .next = &CameraMenuItemInvertedOutput,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 10, .ofs_y = 1, .width = 5,
-    .id = idDitherLight,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering light level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
-};
-const menu_item_t CameraMenuItemInvertedOutput = {
-    .prev = &CameraMenuItemManualDitherLight,    .next = &CameraMenuItemManualZeroPoint,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 15, .ofs_y = 1, .width = 5,
-    .id = idInvOutput,
-    .caption = " %s",
-    .helpcontext = " Invert output",
-    .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
-};
-const menu_item_t CameraMenuItemManualZeroPoint = {
-    .prev = &CameraMenuItemInvertedOutput,  .next = &CameraMenuItemManualVoltRef,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 2, .width = 5,
     .id = idZeroPoint,
     .caption = " %s",
     .helpcontext = " Sensor zero point",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemManualVoltRef = {
-    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeRatio,
+const menu_item_t CameraMenuItemManualVOut = {
+    .prev = &CameraMenuItemManualZeroPoint,     .next = &CameraMenuItemManualVoltRef,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 2, .width = 5,
+    .ofs_x = 10, .ofs_y = 1, .width = 5,
+    .id = idVOut,
+    .caption = " %dmv",
+    .helpcontext = " Sensor voltage out",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemManualVoltRef = {
+    .prev = &CameraMenuItemManualVOut,          .next = &CameraMenuItemInvertedOutput,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 15, .ofs_y = 1, .width = 5,
     .id = idVoltageRef,
     .caption = " " ICON_VOLTAGE "\t%sv",
     .helpcontext = " Sensor voltage reference",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
+const menu_item_t CameraMenuItemInvertedOutput = {
+    .prev = &CameraMenuItemManualVoltRef,       .next = &CameraMenuItemEdgeOperation,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 0, .ofs_y = 2, .width = 5,
+    .id = idInvOutput,
+    .caption = " %s",
+    .helpcontext = " Invert output",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
+const menu_item_t CameraMenuItemEdgeOperation = {
+    .prev = &CameraMenuItemInvertedOutput,      .next = &CameraMenuItemEdgeRatio,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 5, .ofs_y = 2, .width = 5,
+    .id = idEdgeOperation,
+    .caption = " " ICON_EDGE "\t%s",
+    .helpcontext = " Sensor edge operation",
+    .onPaint = onCameraMenuItemPaint,
+    .result = ACTION_SHUTTER
+};
 const menu_item_t CameraMenuItemEdgeRatio = {
-    .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualEdgeExclusive,
+    .prev = &CameraMenuItemEdgeOperation,   .next = &CameraMenuItemManualEdgeExclusive,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 2, .width = 5,
     .id = idEdgeRatio,
