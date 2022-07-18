@@ -9,6 +9,11 @@
 #define CORNER_DR 0xfcu
 #define CORNER_DL 0xfdu
 
+#define ICON_VOLTAGE        "\x13"
+#define ICON_EDGE           "\x14"
+#define ICON_GAIN           "\x15"
+#define ICON_DITHER         "\x16"
+#define ICON_CONTRAST       "\x17"
 #define ICON_CBX            "\x18"
 #define ICON_CBX_CHECKED    "\x19"
 #define ICON_A              "\x1a"

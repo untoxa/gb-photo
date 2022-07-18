@@ -38,7 +38,7 @@ typedef enum {
     idInvOutput,
     idZeroPoint,
     idVoltageRef,
-    idEdgeMode,
+    idEdgeRatio,
     idEdgeExclusive,
     idEdgeOperation
 } camera_menu_e;

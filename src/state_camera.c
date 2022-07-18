@@ -71,7 +71,7 @@ static const table_value_t gains[] = {
 static const table_value_t zero_points[] = {
     { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
 };
-static const table_value_t edge_modes[] = {
+static const table_value_t edge_ratios[] = {
     { CAM04_EDGE_RATIO_050, "50%" }, { CAM04_EDGE_RATIO_075, "75%" }, { CAM04_EDGE_RATIO_100, "100%" },{ CAM04_EDGE_RATIO_125, "125%" },
     { CAM04_EDGE_RATIO_200, "200%" },{ CAM04_EDGE_RATIO_300, "300%" },{ CAM04_EDGE_RATIO_400, "400%" },{ CAM04_EDGE_RATIO_500, "500%" },
 };
@@ -93,7 +93,7 @@ void display_last_seen(uint8_t restore) {
 
 void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
 void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[SETTING(current_exposure)]; }
-void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_modes[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
+void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
@@ -156,7 +156,7 @@ const menu_item_t CameraMenuItemAssistedContrast = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 0, .width = 5,
     .id = idContrast,
-    .caption = " Cont: %d",
+    .caption = " " ICON_CONTRAST "\t%d",
     .helpcontext = " Contrast level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -166,7 +166,7 @@ const menu_item_t CameraMenuItemAssistedDither = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 0, .width = 5,
     .id = idDither,
-    .caption = " Dit %s",
+    .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -176,7 +176,7 @@ const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this men
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
     .id = idDitherLight,
-    .caption = " Dit %s",
+    .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -205,7 +205,7 @@ const menu_item_t CameraMenuItemManualGain = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 0, .width = 5,
     .id = idGain,
-    .caption = " %s",
+    .caption = " " ICON_GAIN "\t%s",
     .helpcontext = " Sensor gain",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -225,7 +225,7 @@ const menu_item_t CameraMenuItemEdgeOperation = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 0, .width = 5,
     .id = idEdgeOperation,
-    .caption = " %s",
+    .caption = " " ICON_EDGE "\t%s",
     .helpcontext = " Sensor edge operation",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -235,7 +235,7 @@ const menu_item_t CameraMenuItemManualContrast = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 1, .width = 5,
     .id = idContrast,
-    .caption = " Cont: %d",
+    .caption = " " ICON_CONTRAST "\t%d",
     .helpcontext = " Contrast level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -245,7 +245,7 @@ const menu_item_t CameraMenuItemManualDither = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 1, .width = 5,
     .id = idDither,
-    .caption = " Dit %s",
+    .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -255,7 +255,7 @@ const menu_item_t CameraMenuItemManualDitherLight = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 1, .width = 5,
     .id = idDitherLight,
-    .caption = " Dit %s",
+    .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -281,31 +281,31 @@ const menu_item_t CameraMenuItemManualZeroPoint = {
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualVoltRef = {
-    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeMode,
+    .prev = &CameraMenuItemManualZeroPoint, .next = &CameraMenuItemEdgeRatio,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 5, .ofs_y = 2, .width = 5,
     .id = idVoltageRef,
-    .caption = " %sv",
+    .caption = " " ICON_VOLTAGE "\t%sv",
     .helpcontext = " Sensor voltage reference",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
-const menu_item_t CameraMenuItemEdgeMode = {
+const menu_item_t CameraMenuItemEdgeRatio = {
     .prev = &CameraMenuItemManualVoltRef,   .next = &CameraMenuItemManualEdgeExclusive,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 10, .ofs_y = 2, .width = 5,
-    .id = idEdgeMode,
-    .caption = " %s",
-    .helpcontext = " Sensor edge mode",
+    .id = idEdgeRatio,
+    .caption = " " ICON_EDGE "\t%s",
+    .helpcontext = " Sensor edge ratio",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
 };
 const menu_item_t CameraMenuItemManualEdgeExclusive = {
-    .prev = &CameraMenuItemEdgeMode,        .next = &CameraMenuItemManualExposure,
+    .prev = &CameraMenuItemEdgeRatio,        .next = &CameraMenuItemManualExposure,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 15, .ofs_y = 2, .width = 5, .flags = MENUITEM_TERM,
     .id = idEdgeExclusive,
-    .caption = " Edg %s",
+    .caption = " " ICON_EDGE "\t%s",
     .helpcontext = "Sensor edge exclusive",
     .onPaint = onCameraMenuItemPaint,
     .result = ACTION_SHUTTER
@@ -385,8 +385,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case idVoltageRef:
                 if (redraw_selection = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
-            case idEdgeMode:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_mode), 1, 0, MAX_INDEX(edge_modes), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+            case idEdgeRatio:
+                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_mode), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
@@ -457,8 +457,8 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
         case idVoltageRef:
             sprintf(text_buffer, self->caption, voltage_refs[SETTING(current_voltage_ref)].caption);
             break;
-        case idEdgeMode:
-            sprintf(text_buffer, self->caption, edge_modes[SETTING(current_edge_mode)].caption);
+        case idEdgeRatio:
+            sprintf(text_buffer, self->caption, edge_ratios[SETTING(current_edge_mode)].caption);
             break;
         case idEdgeExclusive:
             sprintf(text_buffer, self->caption, on_off[((SETTING(edge_exclusive)) ? 1 : 0)]);
