@@ -9,6 +9,7 @@
 #define CORNER_DR 0xfcu
 #define CORNER_DL 0xfdu
 
+#define ICON_REC            "\x10\x11\x12"
 #define ICON_VOLTAGE        "\x13"
 #define ICON_EDGE           "\x14"
 #define ICON_GAIN           "\x15"

@@ -10,7 +10,7 @@
 #define IMAGE_DISPLAY_Y 2
 
 // width of the help context display in tiles
-#define HELP_CONTEXT_WIDTH 16
+#define HELP_CONTEXT_WIDTH 17
 // width of the slot usage display in tiles
 #define IMAGE_SLOTS_USED_WIDTH (20 - HELP_CONTEXT_WIDTH)
 

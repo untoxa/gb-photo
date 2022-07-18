@@ -111,7 +111,7 @@ static void refresh_screen() {
     display_last_seen(TRUE);
     switch (OPTION(after_action)) {
         case after_action_picnrec:
-            if (recording_video) memcpy(text_buffer, "\x03\x00 REC \x03\xff ", 11); else *text_buffer = 0;
+            if (recording_video) strcpy(text_buffer, ICON_REC); else *text_buffer = 0;
             break;
         default:
             sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
