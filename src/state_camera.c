@@ -13,6 +13,7 @@
 #include "screen.h"
 #include "states.h"
 #include "bankdata.h"
+#include "gbprinter.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -36,6 +37,9 @@
 
 // dither patterns
 #include "dither_patterns.h"
+
+// frames
+#include "print_frames.h"
 
 BANKREF(state_camera)
 
@@ -128,16 +132,30 @@ static void refresh_screen() {
     refresh_usage_indicator();
 }
 
+static uint8_t onPrinterProgress() BANKED {
+    // printer progress callback handler
+    uint8_t * ptr = text_buffer;
+    *ptr++ = ' ', *ptr++ = ICON_PROG_START;
+    for (uint8_t i = 0; i != 8; i++) {
+        *ptr++ = (i > printer_completion) ? ICON_PROG_EMPTY : ICON_PROG_FULL;
+    }
+    *ptr++ = ICON_PROG_END;
+    *ptr = 0;
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+    return 0;
+}
+
+
 uint8_t INIT_state_camera() BANKED {
     return 0;
 }
 
 uint8_t ENTER_state_camera() BANKED {
     refresh_screen();
+    gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
 
     // load some initial settings
     camera_load_settings();
-    if (image_live_preview) image_capture();
 
     return 0;
 }
@@ -342,6 +360,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (recording_video) picnrec_trigger();
         display_last_seen(FALSE);
         if (capture_triggered) {
+            capture_triggered = FALSE;
             switch (OPTION(after_action)) {
                 case after_action_save:
                     camera_image_save();
@@ -353,7 +372,6 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     break;
             }
             refresh_usage_indicator();
-            capture_triggered = FALSE;
         }
         if (image_live_preview || recording_video) image_capture();
     }
@@ -522,6 +540,9 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
     JOYPAD_RESET();
+    // start capturing of the image
+    if (image_live_preview) image_capture();
+    // execute menu for the mode
     switch (OPTION(camera_mode)) {
         case camera_mode_manual:
             menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[OPTION(camera_mode)]);
@@ -538,7 +559,11 @@ uint8_t UPDATE_state_camera() BANKED {
     }
     switch (menu_result) {
         case ACTION_CAMERA_PRINT:
-            // TODO: call print image
+            remote_activate(REMOTE_DISABLED);
+            if (gbprinter_detect(10) == STATUS_OK) {
+                gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + 0, BANK(print_frames));
+            } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+            remote_activate(REMOTE_ENABLED);
             break;
         case ACTION_MAIN_MENU:
             recording_video = FALSE;
@@ -591,5 +616,6 @@ uint8_t UPDATE_state_camera() BANKED {
 
 uint8_t LEAVE_state_camera() BANKED {
     recording_video = FALSE;
+    gbprinter_set_handler(NULL, 0);
     return 0;
 }

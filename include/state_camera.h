@@ -6,6 +6,8 @@
 #include "globals.h"
 #include "systemdetect.h"
 
+BANKREF_EXTERN(state_camera)
+
 typedef enum {
     camera_mode_manual,
     camera_mode_assisted,

@@ -78,7 +78,7 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
     return res;
 }
 
-uint8_t onPrinterProgress() BANKED {
+static uint8_t onPrinterProgress() BANKED {
     // printer progress callback handler
     uint8_t * ptr = text_buffer;
     *ptr++ = ' ', *ptr++ = ICON_PROG_START;
