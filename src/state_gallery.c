@@ -61,6 +61,23 @@ uint8_t gallery_show_picture(uint8_t n) {
     return TRUE;
 }
 
+uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
+    uint8_t res = FALSE;
+
+    if (!VECTOR_LEN(used_slots)) return FALSE;
+    if (image_no >= VECTOR_LEN(used_slots)) image_no = VECTOR_LEN(used_slots) - 1;
+    image_no = VECTOR_GET(used_slots, image_no);
+
+    remote_activate(REMOTE_DISABLED);
+    if (gbprinter_detect(10) == STATUS_OK) {
+        gbprinter_print_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1, print_frames + frame_no, BANK(print_frames));
+        res = TRUE;
+    }
+    remote_activate(REMOTE_ENABLED);
+
+    return res;
+}
+
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t FrameMenuItemNoFrame = {
@@ -209,11 +226,9 @@ uint8_t UPDATE_state_gallery() BANKED {
             case ACTION_PRINT_FRAME2:
             case ACTION_PRINT_FRAME3:
                 // print image
-                remote_activate(REMOTE_DISABLED);
-                if (gbprinter_detect(10) == STATUS_OK) {
-                    gbprinter_print_image(gallery_picture_no, print_frames + (menu_result - ACTION_PRINT_FRAME0), BANK(print_frames));
-                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
-                remote_activate(REMOTE_ENABLED);
+                if (!gallery_print_picture(gallery_picture_no, (menu_result - ACTION_PRINT_FRAME0))) {
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                }
                 break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info

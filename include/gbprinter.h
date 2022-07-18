@@ -37,6 +37,6 @@
 #define SECONDS(A)          ((A)*60)
 
 uint8_t gbprinter_detect(uint8_t delay) BANKED;
-uint8_t gbprinter_print_image(const uint8_t n, const frame_desc_t * frame, uint8_t frame_bank) BANKED;
+uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const frame_desc_t * frame, uint8_t frame_bank) BANKED;
 
 #endif

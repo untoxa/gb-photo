@@ -74,8 +74,9 @@ uint8_t gbprinter_detect(uint8_t delay) BANKED {
     return printer_wait(delay, STATUS_MASK_ANY, STATUS_OK);
 }
 
-uint8_t gbprinter_print_image(const uint8_t n, const frame_desc_t * frame, uint8_t frame_bank) BANKED {
+uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const frame_desc_t * frame, uint8_t frame_bank) BANKED {
     static frame_desc_t current_frame;
+    static const uint8_t * img;
 
     banked_memcpy(&current_frame, frame, sizeof(current_frame), frame_bank);
 
@@ -83,10 +84,8 @@ uint8_t gbprinter_print_image(const uint8_t n, const frame_desc_t * frame, uint8
 
     if ((packets = current_frame.height >> 1) == 0) return STATUS_OK;
 
-    if (n > (CAMERA_MAX_IMAGE_SLOTS - 1)) return STATUS_MASK_ERRORS;
-    SWITCH_RAM((n >> 1) + 1);
-
-    uint8_t * image = ((n & 1) ? image_second : image_first);
+    SWITCH_RAM(image_bank);
+    img = image;
 
     const uint8_t * map = current_frame.map;
     printer_tile_num = 0;
@@ -98,9 +97,9 @@ uint8_t gbprinter_print_image(const uint8_t n, const frame_desc_t * frame, uint8
                 banked_memcpy(tile_data, current_frame.tiles + ((uint16_t)tileno << 4), sizeof(tile_data), current_frame.tiles_bank);
             } else memset(tile_data, 0, sizeof(tile_data));
             // overlay the picture tile if in range
-            if ((y >= current_frame.image_y) && (y < (current_frame.image_y + CAMERA_IMAGE_TILE_HEIGHT)) && 
+            if ((y >= current_frame.image_y) && (y < (current_frame.image_y + CAMERA_IMAGE_TILE_HEIGHT)) &&
                 (x >= current_frame.image_x) && (x < (current_frame.image_x + CAMERA_IMAGE_TILE_WIDTH))) {
-                memcpy(tile_data, image + ((((y - current_frame.image_y) << 4) + (x - current_frame.image_x)) << 4), sizeof(tile_data));
+                memcpy(tile_data, img + ((((y - current_frame.image_y) << 4) + (x - current_frame.image_x)) << 4), sizeof(tile_data));
             }
             // print the resulting tile
             if (printer_print_tile(tile_data)) {
