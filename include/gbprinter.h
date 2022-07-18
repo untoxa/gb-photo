@@ -37,6 +37,8 @@
 
 #define SECONDS(A)          ((A)*60)
 
+#define PRN_MAX_PROGRESS    8
+
 extern uint8_t printer_completion;
 extern far_ptr_t printer_progress_handler;
 

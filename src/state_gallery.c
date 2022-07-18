@@ -80,13 +80,7 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
 
 static uint8_t onPrinterProgress() BANKED {
     // printer progress callback handler
-    uint8_t * ptr = text_buffer;
-    *ptr++ = ' ', *ptr++ = ICON_PROG_START;
-    for (uint8_t i = 0; i != 8; i++) {
-        *ptr++ = (i > printer_completion) ? ICON_PROG_EMPTY : ICON_PROG_FULL;
-    }
-    *ptr++ = ICON_PROG_END;
-    *ptr = 0;
+    misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
     return 0;
 }

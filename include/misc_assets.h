@@ -33,6 +33,17 @@
 #define ICON_SELECT         "\x1c\x1d"
 #define ICON_START          "\x1e\x1f"
 
+inline void misc_render_progressbar(uint8_t value, uint8_t size, uint8_t * buffer) {
+    // printer progress callback handler
+    uint8_t * ptr = buffer;
+    *ptr++ = ' ', *ptr++ = ICON_PROG_START;
+    for (uint8_t i = 0; i != size; i++) {
+        *ptr++ = (i > value) ? ICON_PROG_EMPTY : ICON_PROG_FULL;
+    }
+    *ptr++ = ICON_PROG_END;
+    *ptr = 0;
+}
+
 void misc_assets_init() BANKED;
 
 #endif
