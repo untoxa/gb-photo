@@ -106,9 +106,11 @@ void camera_load_settings() {
     RENDER_CAM_REG_DITHERPATTERN();
 }
 
-static void refresh_screen() {
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
-    display_last_seen(TRUE);
+void camera_image_save() {
+    // TODO: save last seen image to gallery
+}
+
+static void refresh_usage_indicator() {
     switch (OPTION(after_action)) {
         case after_action_picnrec:
             if (recording_video) strcpy(text_buffer, ICON_REC); else *text_buffer = 0;
@@ -118,6 +120,12 @@ static void refresh_screen() {
             break;
     }
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+}
+
+static void refresh_screen() {
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
+    display_last_seen(TRUE);
+    refresh_usage_indicator();
 }
 
 uint8_t INIT_state_camera() BANKED {
@@ -149,7 +157,7 @@ const menu_item_t CameraMenuItemAssistedExposure = {
     .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAssistedContrast = {
     .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither,
@@ -159,7 +167,7 @@ const menu_item_t CameraMenuItemAssistedContrast = {
     .caption = " " ICON_CONTRAST "\t%d",
     .helpcontext = " Contrast level",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAssistedDither = {
     .prev = &CameraMenuItemAssistedContrast,     .next = &CameraMenuItemAssistedDitherLight,
@@ -169,7 +177,7 @@ const menu_item_t CameraMenuItemAssistedDither = {
     .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this menu option when it's being set automatically via `.id = idExposure`
     .prev = &CameraMenuItemAssistedDither,     .next = &CameraMenuItemAssistedExposure,
@@ -179,7 +187,7 @@ const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this men
     .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 
 const menu_t CameraMenuAssisted = {
@@ -198,7 +206,7 @@ const menu_item_t CameraMenuItemManualExposure = {
     .caption = " %sms",
     .helpcontext = " Exposure time",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualGain = {
     .prev = &CameraMenuItemManualExposure,      .next = &CameraMenuItemManualDither,
@@ -208,7 +216,7 @@ const menu_item_t CameraMenuItemManualGain = {
     .caption = " " ICON_GAIN "\t%s",
     .helpcontext = " Sensor gain",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualDither = {
     .prev = &CameraMenuItemManualGain,          .next = &CameraMenuItemManualDitherLight,
@@ -218,7 +226,7 @@ const menu_item_t CameraMenuItemManualDither = {
     .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering on/off",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualDitherLight = {
     .prev = &CameraMenuItemManualDither,        .next = &CameraMenuItemManualContrast,
@@ -228,7 +236,7 @@ const menu_item_t CameraMenuItemManualDitherLight = {
     .caption = " " ICON_DITHER "\t%s",
     .helpcontext = " Dithering light level",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualContrast = {
     .prev = &CameraMenuItemManualDitherLight,   .next = &CameraMenuItemManualZeroPoint,
@@ -238,7 +246,7 @@ const menu_item_t CameraMenuItemManualContrast = {
     .caption = " " ICON_CONTRAST "\t%d",
     .helpcontext = " Contrast level",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualZeroPoint = {
     .prev = &CameraMenuItemManualContrast,      .next = &CameraMenuItemManualVOut,
@@ -248,7 +256,7 @@ const menu_item_t CameraMenuItemManualZeroPoint = {
     .caption = " %s",
     .helpcontext = " Sensor zero point",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualVOut = {
     .prev = &CameraMenuItemManualZeroPoint,     .next = &CameraMenuItemManualVoltRef,
@@ -258,7 +266,7 @@ const menu_item_t CameraMenuItemManualVOut = {
     .caption = " %dmv",
     .helpcontext = " Sensor voltage out",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualVoltRef = {
     .prev = &CameraMenuItemManualVOut,          .next = &CameraMenuItemInvertedOutput,
@@ -268,7 +276,7 @@ const menu_item_t CameraMenuItemManualVoltRef = {
     .caption = " " ICON_VOLTAGE "\t%sv",
     .helpcontext = " Sensor voltage reference",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemInvertedOutput = {
     .prev = &CameraMenuItemManualVoltRef,       .next = &CameraMenuItemEdgeOperation,
@@ -278,7 +286,7 @@ const menu_item_t CameraMenuItemInvertedOutput = {
     .caption = " %s",
     .helpcontext = " Invert output",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemEdgeOperation = {
     .prev = &CameraMenuItemInvertedOutput,      .next = &CameraMenuItemEdgeRatio,
@@ -288,7 +296,7 @@ const menu_item_t CameraMenuItemEdgeOperation = {
     .caption = " " ICON_EDGE "\t%s",
     .helpcontext = " Sensor edge operation",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemEdgeRatio = {
     .prev = &CameraMenuItemEdgeOperation,   .next = &CameraMenuItemManualEdgeExclusive,
@@ -298,7 +306,7 @@ const menu_item_t CameraMenuItemEdgeRatio = {
     .caption = " " ICON_EDGE "\t%s",
     .helpcontext = " Sensor edge ratio",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemManualEdgeExclusive = {
     .prev = &CameraMenuItemEdgeRatio,        .next = &CameraMenuItemManualExposure,
@@ -308,7 +316,7 @@ const menu_item_t CameraMenuItemManualEdgeExclusive = {
     .caption = " " ICON_EDGE "\t%s",
     .helpcontext = "Sensor edge exclusive",
     .onPaint = onCameraMenuItemPaint,
-    .result = ACTION_SHUTTER
+    .result = MENU_RESULT_NONE
 };
 const menu_t CameraMenuManual = {
     .x = 0, .y = 0, .width = 0, .height = 0,
@@ -325,6 +333,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     static change_direction_e change_direction;
+    static uint8_t capture_triggered = FALSE;
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
@@ -332,10 +341,41 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (image_captured()) {
         if (recording_video) picnrec_trigger();
         display_last_seen(FALSE);
+        if (capture_triggered) {
+            switch (OPTION(after_action)) {
+                case after_action_save:
+                    camera_image_save();
+                    break;
+                case after_action_printsave:
+                    camera_image_save();
+                case after_action_print:
+                    return ACTION_CAMERA_PRINT;
+                    break;
+            }
+            refresh_usage_indicator();
+            capture_triggered = FALSE;
+        }
         if (image_live_preview || recording_video) image_capture();
     }
     // select opens popup-menu
-    if (KEY_PRESSED(J_SELECT)) {
+    if (KEY_PRESSED(J_A)) {
+        switch (OPTION(after_action)) {
+            case after_action_picnrec:
+                // toggle recording and start image capture
+                recording_video = !recording_video;
+                if (recording_video && !is_capturing()) image_capture();
+                refresh_usage_indicator();
+                break;
+            default:
+                if (!is_capturing()) {
+                    music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
+    //                        music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+                    image_capture();
+                    capture_triggered = TRUE;
+                }
+                break;
+        }
+    } else if (KEY_PRESSED(J_SELECT)) {
         return ACTION_CAMERA_SUBMENU;
     } else if (KEY_PRESSED(J_START)) {
         return ACTION_MAIN_MENU;
@@ -497,22 +537,8 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
     }
     switch (menu_result) {
-        case ACTION_SHUTTER:
-            switch (OPTION(after_action)) {
-                case after_action_picnrec:
-                    // toggle recording and start image capture
-                    recording_video = !recording_video;
-                    if (recording_video && !is_capturing()) image_capture();
-                    refresh_screen();
-                    break;
-                default:
-                    if (!is_capturing()) {
-                        music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
-//                        music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
-                        image_capture();
-                    }
-                    break;
-            }
+        case ACTION_CAMERA_PRINT:
+            // TODO: call print image
             break;
         case ACTION_MAIN_MENU:
             recording_video = FALSE;

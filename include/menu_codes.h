@@ -38,7 +38,7 @@
 #define ACTION_RESTORE_DEFAULTS 51
 
 // camera actions
-#define ACTION_SHUTTER          60
+#define ACTION_CAMERA_PRINT     60
 #define ACTION_CAMERA_SUBMENU   61
 
 // global actions

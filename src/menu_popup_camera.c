@@ -147,8 +147,8 @@ const menu_item_t ActionSubMenuPicNRec = {
     .prev = &ActionSubMenuPrint,   .next = NULL,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 8,
-    .caption = " Pic'N'Rec",
-    .helpcontext = " Record video via Pic'N'Rec",
+    .caption = " Pic'n'Rec",
+    .helpcontext = " Record video via Pic'n'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC
 };

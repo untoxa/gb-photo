@@ -13,7 +13,7 @@
 #define AUTOREPEAT_RATE 15
 
 #if (INT_DRIVEN_JOYPAD==1)
-#define COOLDOWN_RATE 7
+#define COOLDOWN_RATE 10
 
 extern volatile uint8_t joy_isr_value;
 #endif
@@ -30,12 +30,12 @@ inline void JOYPAD_INPUT() {
 #endif
 }
 inline void JOYPAD_AUTOREPEAT() {
-    if (old_joy ^ joy) joy_ts = sys_time; 
+    if (old_joy ^ joy) joy_ts = sys_time;
 }
 
 inline void PROCESS_INPUT() {
     JOYPAD_INPUT();
-    JOYPAD_AUTOREPEAT(); 
+    JOYPAD_AUTOREPEAT();
 }
 
 inline uint8_t KEY_PRESSED(uint8_t key) {
@@ -43,7 +43,7 @@ inline uint8_t KEY_PRESSED(uint8_t key) {
 }
 
 inline void JOYPAD_RESET() {
-    joy = old_joy = 0;    
+    joy = old_joy = 0;
 #if (INT_DRIVEN_JOYPAD==1)
     joy_isr_value = 0;
 #endif
@@ -57,7 +57,7 @@ inline void joy_init() {
     CRITICAL{
         add_VBL(joypad_ISR);
     }
-} 
+}
 #define JOYPAD_INIT joy_init()
 
 #else
