@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#include "states.h"
+
+uint8_t call_far(const far_ptr_t * ptr);
 void * banked_memcpy(void *dest, const void *src, size_t len, uint8_t bank);
 void set_banked_sprite_data(uint8_t first_tile, uint8_t nb_tiles, const uint8_t *data, uint8_t bank);
 void set_banked_bkg_data(uint8_t first_tile, uint8_t nb_tiles, const uint8_t *data, uint8_t bank);

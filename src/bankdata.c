@@ -2,7 +2,28 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "states.h"
+#include "bankdata.h"
+
 static uint8_t _save;
+
+uint8_t call_far(const far_ptr_t * ptr) NONBANKED NAKED {
+    ptr;
+#if defined(NINTENDO)
+__asm
+        ld h, d
+        ld l, e
+        ld a, (hl+)
+        ld e, a         ; e = ptr->SEG
+        ld a, (hl+)
+        ld h, (hl)
+        ld l, a         ; hl = ptr->SEG
+        or h
+        ret z           ; return if zero pointer
+        jp ___sdcc_bcall_ehl
+__endasm;
+#endif
+}
 
 void * banked_memcpy(void *dest, const void *src, size_t len, uint8_t bank) NONBANKED {
     _save = _current_bank;

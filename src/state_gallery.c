@@ -78,6 +78,18 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
     return res;
 }
 
+uint8_t onPrinterProgress() BANKED {
+    // printer progress callback handler
+    uint8_t * ptr = text_buffer;
+    *ptr++ = ' ', *ptr++ = ICON_PROG_START;
+    for (uint8_t i = 0; i != 8; i++) {
+        *ptr++ = (i > printer_completion) ? ICON_PROG_EMPTY : ICON_PROG_FULL;
+    }
+    *ptr++ = ICON_PROG_END;
+    *ptr = 0;
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+    return 0;
+}
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t FrameMenuItemNoFrame = {
@@ -190,6 +202,7 @@ uint8_t INIT_state_gallery() BANKED {
 
 uint8_t ENTER_state_gallery() BANKED {
     refresh_screen();
+    gbprinter_set_handler(onPrinterProgress, BANK(state_gallery));
     JOYPAD_RESET();
     return 0;
 }
@@ -229,6 +242,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 if (!gallery_print_picture(gallery_picture_no, (menu_result - ACTION_PRINT_FRAME0))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 }
+                JOYPAD_RESET();
                 break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info
@@ -251,5 +265,6 @@ uint8_t UPDATE_state_gallery() BANKED {
 }
 
 uint8_t LEAVE_state_gallery() BANKED {
+    gbprinter_set_handler(NULL, 0);
     return 0;
 }

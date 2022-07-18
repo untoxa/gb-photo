@@ -4,6 +4,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "bankdata.h"
 #include "print_frames.h"
 
 #define PALETTE_NORMAL      0b11100100u
@@ -36,7 +37,14 @@
 
 #define SECONDS(A)          ((A)*60)
 
+extern uint8_t printer_completion;
+extern far_ptr_t printer_progress_handler;
+
 uint8_t gbprinter_detect(uint8_t delay) BANKED;
 uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const frame_desc_t * frame, uint8_t frame_bank) BANKED;
+
+inline void gbprinter_set_handler(void * fn_ofs, uint8_t fn_seg) {
+    printer_progress_handler.SEG = fn_seg, printer_progress_handler.OFS = fn_ofs;
+}
 
 #endif

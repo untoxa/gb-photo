@@ -56,19 +56,6 @@ void LCD_ISR() {
         LYC_REG = 95;
     }
 }
-uint8_t call_far(const far_ptr_t * ptr) NAKED {
-    ptr;
-__asm
-        ld h, d
-        ld l, e
-        ld a, (hl+)
-        ld e, a         ; e = ptr->SEG
-        ld a, (hl+)
-        ld h, (hl)
-        ld l, a         ; hl = ptr->SEG
-        jp ___sdcc_bcall_ehl
-__endasm;
-}
 #endif
 
 void main() {

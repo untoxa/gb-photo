@@ -6,6 +6,8 @@
 #include "gbcamera.h"
 #include "vector.h"
 
+BANKREF_EXTERN(state_gallery)
+
 VECTOR_DECLARE_EXTERN(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE_EXTERN(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 

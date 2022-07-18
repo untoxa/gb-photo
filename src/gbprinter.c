@@ -5,6 +5,7 @@
 #include "gbprinter.h"
 #include "gbcamera.h"
 #include "bankdata.h"
+#include "states.h"
 
 const uint8_t PRINTER_INIT[]    = { sizeof(PRINTER_INIT),  0x88,0x33,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
 const uint8_t PRINTER_STATUS[]  = { sizeof(PRINTER_STATUS),0x88,0x33,0x0F,0x00,0x00,0x00,0x0F,0x00,0x00,0x00 };
@@ -13,6 +14,9 @@ const uint8_t PRINTER_START[]   = { sizeof(PRINTER_START), 0x88,0x33,0x02,0x00,0
 
 uint16_t printer_status;
 uint8_t printer_tile_num;
+
+uint8_t printer_completion = 0;
+far_ptr_t printer_progress_handler = {0, NULL};
 
 uint8_t printer_send_receive(uint8_t b) {
     SB_REG = b;             // data to send
@@ -78,6 +82,9 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
     static frame_desc_t current_frame;
     static const uint8_t * img;
 
+    printer_completion = 0;
+    call_far(&printer_progress_handler);
+
     banked_memcpy(&current_frame, frame, sizeof(current_frame), frame_bank);
 
     uint8_t tile_data[16], error, packets;
@@ -108,6 +115,11 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 printer_send_command(PRINTER_STATUS);
                 if ((error = printer_wait(SECONDS(1), STATUS_BUSY, STATUS_BUSY)) & STATUS_MASK_ERRORS) return error;
                 if ((error = printer_wait(SECONDS(10), STATUS_BUSY, 0)) & STATUS_MASK_ERRORS) return error;
+
+                uint8_t current_progress = ((uint16_t)y << 3) / (packets << 1);
+                if (printer_completion != current_progress) {
+                    printer_completion = current_progress, call_far(&printer_progress_handler);
+                }
             }
         }
     }
