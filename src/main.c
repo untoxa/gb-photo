@@ -19,7 +19,7 @@
 
 // graphic assets
 #include "cursors.h"
-#include "vwf_font.h"
+#include "font_proportional.h"
 
 // audio assets
 #include "music.h"
@@ -125,7 +125,7 @@ void main() {
 //        if (joy & J_SELECT) music_stop(), music_pause(music_paused = FALSE);
 //        if (joy & J_START)  music_pause(music_paused = (!music_paused));
 
-    vwf_load_font(0, vwf_font, BANK(vwf_font));
+    vwf_load_font(0, font_proportional, BANK(font_proportional));
     vwf_activate_font(0);
 //    vwf_set_colors(2, 1);
 

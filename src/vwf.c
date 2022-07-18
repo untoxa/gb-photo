@@ -43,8 +43,8 @@ void vwf_swap_tiles() OLDCALL;
 
 void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data) OLDCALL PRESERVES_REGS(b, c);
 
-void vwf_print_reset(uint8_t * tile) {
-    vwf_current_tile = tile;
+void vwf_print_reset(const uint8_t * tile) {
+    vwf_current_tile = (uint8_t *)tile;
     vwf_current_offset = 0;
     vwf_swap_tiles();
     vwf_swap_tiles();
