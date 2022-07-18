@@ -13,10 +13,11 @@
 // gallery actions
 #define ACTION_ERASE_IMAGE      20
 #define ACTION_DISPLAY_INFO     21
-#define ACTION_PRINT_FRAME0     22
-#define ACTION_PRINT_FRAME1     23
-#define ACTION_PRINT_FRAME2     24
-#define ACTION_PRINT_FRAME3     25
+#define ACTION_PRINT_IMAGE      22
+#define ACTION_PRINT_FRAME0     23
+#define ACTION_PRINT_FRAME1     24
+#define ACTION_PRINT_FRAME2     25
+#define ACTION_PRINT_FRAME3     26
 
 // state switching actions
 #define ACTION_THUMBNAILS       30

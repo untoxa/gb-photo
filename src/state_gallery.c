@@ -33,6 +33,7 @@
 BANKREF(state_gallery)
 
 uint8_t gallery_picture_no;
+uint8_t gallery_current_print_frame = 0;
 
 VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
@@ -87,7 +88,7 @@ static uint8_t onPrinterProgress() BANKED {
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t FrameMenuItemNoFrame = {
-    .prev = NULL,                 .next = &FrameMenuItemWild,
+    .prev = NULL,                 .next = &FrameMenuItemPxlr,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " No Frame",
@@ -95,17 +96,26 @@ const menu_item_t FrameMenuItemNoFrame = {
     .onPaint = NULL,
     .result = ACTION_PRINT_FRAME0
 };
-const menu_item_t FrameMenuItemWild = {
-    .prev = &FrameMenuItemNoFrame, .next = NULL,
+const menu_item_t FrameMenuItemPxlr = {
+    .prev = &FrameMenuItemNoFrame, .next = &FrameMenuItemWild,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
-    .caption = " GB Camera",
-    .helpcontext = " \"GB Camera\" frame",
+    .caption = " PXLR Studio",
+    .helpcontext = " \"PXLR Studio\" frame",
     .onPaint = NULL,
     .result = ACTION_PRINT_FRAME1
 };
+const menu_item_t FrameMenuItemWild = {
+    .prev = &FrameMenuItemPxlr, .next = NULL,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .caption = " GB Camera",
+    .helpcontext = " \"GB Camera\" frame",
+    .onPaint = NULL,
+    .result = ACTION_PRINT_FRAME2
+};
 const menu_t FramesSubMenu = {
-    .x = 7, .y = 4, .width = 10, .height = 4,
+    .x = 7, .y = 4, .width = 10, .height = 5,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &FrameMenuItemNoFrame,
     .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
@@ -114,7 +124,7 @@ const menu_t FramesSubMenu = {
 
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t GalleryMenuItemThumb = {
-    .prev = NULL,                   .next = &GalleryMenuItemInfo,
+    .prev = NULL,                           .next = &GalleryMenuItemInfo,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " Thumbnails",
@@ -123,7 +133,7 @@ const menu_item_t GalleryMenuItemThumb = {
     .result = ACTION_THUMBNAILS
 };
 const menu_item_t GalleryMenuItemInfo = {
-    .prev = &GalleryMenuItemThumb,  .next = &GalleryMenuItemPrint,
+    .prev = &GalleryMenuItemThumb,          .next = &GalleryMenuItemPrint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Info",
@@ -132,34 +142,43 @@ const menu_item_t GalleryMenuItemInfo = {
     .result = MENU_RESULT_CLOSE
 };
 const menu_item_t GalleryMenuItemPrint = {
-    .prev = &GalleryMenuItemInfo,   .next = &GalleryMenuItemDelete,
-    .sub = &FramesSubMenu, .sub_params = NULL,
+    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemPrintOptions,
+    .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Print",
     .helpcontext = " Print current image",
     .onPaint = NULL,
+    .result = ACTION_PRINT_IMAGE
+};
+const menu_item_t GalleryMenuItemPrintOptions = {
+    .prev = &GalleryMenuItemPrint,          .next = &GalleryMenuItemDelete,
+    .sub = &FramesSubMenu, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 4, .width = 8,
+    .caption = " Print options",
+    .helpcontext = " Setup printing",
+    .onPaint = NULL,
     .result = MENU_RESULT_NONE
 };
 const menu_item_t GalleryMenuItemDelete = {
-    .prev = &GalleryMenuItemPrint,  .next = &GalleryMenuItemDeleteAll,
+    .prev = &GalleryMenuItemPrintOptions,   .next = &GalleryMenuItemDeleteAll,
     .sub = &YesNoMenu, .sub_params = "Are you sure?",
-    .ofs_x = 1, .ofs_y = 4, .width = 8,
+    .ofs_x = 1, .ofs_y = 5, .width = 8,
     .caption = " Delete",
     .helpcontext = " Delete current image",
     .onPaint = NULL,
     .result = ACTION_ERASE_IMAGE
 };
 const menu_item_t GalleryMenuItemDeleteAll = {
-    .prev = &GalleryMenuItemDelete, .next = NULL,
+    .prev = &GalleryMenuItemDelete,         .next = NULL,
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
-    .ofs_x = 1, .ofs_y = 5, .width = 8,
+    .ofs_x = 1, .ofs_y = 6, .width = 8,
     .caption = " Delete all",
     .helpcontext = " Erase whole gallery",
     .onPaint = NULL,
     .result = ACTION_ERASE_GALLERY
 };
 const menu_t GalleryMenu = {
-    .x = 1, .y = 3, .width = 10, .height = 7,
+    .x = 1, .y = 3, .width = 10, .height = 8,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &GalleryMenuItemThumb,
     .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
@@ -228,15 +247,18 @@ uint8_t UPDATE_state_gallery() BANKED {
                 // TODO: erase image
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 break;
+            case ACTION_PRINT_IMAGE:
+                if (!gallery_print_picture(gallery_picture_no, gallery_current_print_frame)) {
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                }
+                JOYPAD_RESET();
+                break;
             case ACTION_PRINT_FRAME0:
             case ACTION_PRINT_FRAME1:
             case ACTION_PRINT_FRAME2:
             case ACTION_PRINT_FRAME3:
                 // print image
-                if (!gallery_print_picture(gallery_picture_no, (menu_result - ACTION_PRINT_FRAME0))) {
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
-                }
-                JOYPAD_RESET();
+                gallery_current_print_frame = (menu_result - ACTION_PRINT_FRAME0);
                 break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info
