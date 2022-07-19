@@ -12,6 +12,7 @@
 #include "gbprinter.h"
 #include "remote.h"
 #include "vector.h"
+#include "load_save.h"
 
 #include "state_camera.h"
 #include "state_gallery.h"
@@ -27,9 +28,20 @@
 #include "menu_codes.h"
 #include "menu_main.h"
 #include "menu_yesno.h"
+#include "menu_debug.h"
+#include "menu_settings.h"
 
 // frames
 #include "print_frames.h"
+
+#if (DEBUG_ENABLED==1)
+    #define MENUITEM_DEBUG &GalleryMenuItemDebug
+    #define GALLERYMENU_HEIGHT 8
+#else
+    #define MENUITEM_DEBUG NULL
+    #define MAINMENU_HEIGHT 7
+#endif
+
 
 BANKREF(state_gallery)
 
@@ -85,41 +97,6 @@ static uint8_t onPrinterProgress() BANKED {
 }
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
-const menu_item_t FrameMenuItemNoFrame = {
-    .prev = NULL,                 .next = &FrameMenuItemPxlr,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 8,
-    .caption = " No Frame",
-    .helpcontext = " Print without frame",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_FRAME0
-};
-const menu_item_t FrameMenuItemPxlr = {
-    .prev = &FrameMenuItemNoFrame, .next = &FrameMenuItemWild,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 8,
-    .caption = " PXLR Studio",
-    .helpcontext = " \"PXLR Studio\" frame",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_FRAME1
-};
-const menu_item_t FrameMenuItemWild = {
-    .prev = &FrameMenuItemPxlr, .next = NULL,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8,
-    .caption = " GB Camera",
-    .helpcontext = " \"GB Camera\" frame",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_FRAME2
-};
-const menu_t FramesSubMenu = {
-    .x = 7, .y = 4, .width = 10, .height = 5,
-    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &FrameMenuItemNoFrame,
-    .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
-    .onTranslateKey = NULL, .onTranslateSubResult = NULL
-};
-
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t GalleryMenuItemThumb = {
     .prev = NULL,                           .next = &GalleryMenuItemInfo,
@@ -140,7 +117,7 @@ const menu_item_t GalleryMenuItemInfo = {
     .result = MENU_RESULT_CLOSE
 };
 const menu_item_t GalleryMenuItemPrint = {
-    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemPrintOptions,
+    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemDelete,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
     .caption = " Print",
@@ -148,35 +125,37 @@ const menu_item_t GalleryMenuItemPrint = {
     .onPaint = NULL,
     .result = ACTION_PRINT_IMAGE
 };
-const menu_item_t GalleryMenuItemPrintOptions = {
-    .prev = &GalleryMenuItemPrint,          .next = &GalleryMenuItemDelete,
-    .sub = &FramesSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 8,
-    .caption = " Print options",
-    .helpcontext = " Setup printing",
-    .onPaint = NULL,
-    .result = MENU_RESULT_NONE
-};
 const menu_item_t GalleryMenuItemDelete = {
-    .prev = &GalleryMenuItemPrintOptions,   .next = &GalleryMenuItemDeleteAll,
+    .prev = &GalleryMenuItemPrint,          .next = &GalleryMenuItemDeleteAll,
     .sub = &YesNoMenu, .sub_params = "Are you sure?",
-    .ofs_x = 1, .ofs_y = 5, .width = 8,
+    .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Delete",
     .helpcontext = " Delete current image",
     .onPaint = NULL,
     .result = ACTION_ERASE_IMAGE
 };
 const menu_item_t GalleryMenuItemDeleteAll = {
-    .prev = &GalleryMenuItemDelete,         .next = NULL,
+    .prev = &GalleryMenuItemDelete,         .next = MENUITEM_DEBUG,
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
-    .ofs_x = 1, .ofs_y = 6, .width = 8,
+    .ofs_x = 1, .ofs_y = 5, .width = 8,
     .caption = " Delete all",
     .helpcontext = " Erase whole gallery",
     .onPaint = NULL,
     .result = ACTION_ERASE_GALLERY
 };
+#if (DEBUG_ENABLED==1)
+const menu_item_t GalleryMenuItemDebug = {
+    .prev = &GalleryMenuItemDeleteAll,     .next = NULL,
+    .sub = &DebugMenu, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 6, .width = 8,
+    .caption = " Debug",
+    .helpcontext = " Show debug info",
+    .onPaint = NULL,
+    .result = MENU_RESULT_CLOSE
+};
+#endif
 const menu_t GalleryMenu = {
-    .x = 1, .y = 3, .width = 10, .height = 8,
+    .x = 1, .y = 3, .width = 10, .height = GALLERYMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &GalleryMenuItemThumb,
     .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
@@ -253,14 +232,6 @@ uint8_t UPDATE_state_gallery() BANKED {
                 }
                 JOYPAD_RESET();
                 break;
-            case ACTION_PRINT_FRAME0:
-            case ACTION_PRINT_FRAME1:
-            case ACTION_PRINT_FRAME2:
-            case ACTION_PRINT_FRAME3:
-                // print image
-                OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
-                save_camera_state();
-                break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
@@ -276,7 +247,7 @@ uint8_t UPDATE_state_gallery() BANKED {
         refresh_screen();
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
-        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
+        if (!menu_main_execute()) refresh_screen();
     }
     return TRUE;
 }

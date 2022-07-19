@@ -10,6 +10,7 @@
 #include "screen.h"
 #include "states.h"
 #include "vector.h"
+#include "load_save.h"
 
 #include "state_camera.h"
 #include "state_thumbnails.h"
@@ -137,7 +138,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
+        if (!menu_main_execute()) refresh_screen();
     }
     hide_sprites_range(move_metasprite(gallery_cursor[cursor_anim], 0xfa, 0, ((cx << 2) + 2) << 3, ((cy << 2) + 1) << 3), MAX_HARDWARE_SPRITES);
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;

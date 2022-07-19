@@ -481,7 +481,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
     switch (self->id) {
         case idExposure: {
             uint16_t value = EXPOSURE_VALUE_TO_US(exposures[SETTING(current_exposure)]) / 100;
-            uint8_t * buf = text_buffer + 100;
+            uint8_t * buf = text_buffer_extra;
             uint8_t len = strlen(uitoa(value, buf, 10));
             if (len == 1) {
                 *--buf = ',';
@@ -574,7 +574,7 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
         case ACTION_MAIN_MENU:
             recording_video = FALSE;
-            if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
+            if (!menu_main_execute()) refresh_screen();
             break;
         case ACTION_CAMERA_SUBMENU: {
             recording_video = FALSE;

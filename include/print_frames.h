@@ -11,6 +11,8 @@ typedef struct frame_desc_t {
     const uint8_t * tiles;          // tiledata used by the frame
     uint8_t tiles_bank;             // bank of the tiledata
     uint8_t image_y, image_x;       // y and x coordinates in tiles of the upper left corner of the photo
+    const uint8_t * caption;        // frame title
+    const uint8_t * desc;           // frame description
 } frame_desc_t;
 
 BANKREF_EXTERN(print_frames)

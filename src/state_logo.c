@@ -69,7 +69,7 @@ uint8_t UPDATE_state_logo() BANKED {
         return 0;
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
-        if (!MainMenuDispatch(menu_execute(&MainMenu, NULL, NULL))) refresh_screen();
+        if (!menu_main_execute()) refresh_screen();
     }
     return TRUE;
 }

@@ -7,7 +7,7 @@
 
 static uint8_t _save;
 
-uint8_t call_far(const far_ptr_t * ptr) NONBANKED NAKED {
+uint8_t call_far(const far_ptr_t *ptr) NONBANKED NAKED {
     ptr;
 #if defined(NINTENDO)
 __asm
@@ -23,6 +23,14 @@ __asm
         jp ___sdcc_bcall_ehl
 __endasm;
 #endif
+}
+
+uint8_t * banked_strcpy(uint8_t *dest, const uint8_t *src, uint8_t bank) NONBANKED {
+    _save = _current_bank;
+    SWITCH_ROM(bank);
+    uint8_t * res = strcpy(dest, src);
+    SWITCH_ROM(_save);
+    return res;
 }
 
 void * banked_memcpy(void *dest, const void *src, size_t len, uint8_t bank) NONBANKED {

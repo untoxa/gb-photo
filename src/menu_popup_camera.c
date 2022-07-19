@@ -7,7 +7,6 @@
 #include "globals.h"
 #include "screen.h"
 
-// camera state
 #include "state_camera.h"
 
 #include "misc_assets.h"

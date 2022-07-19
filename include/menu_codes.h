@@ -14,15 +14,12 @@
 #define ACTION_ERASE_IMAGE          20
 #define ACTION_DISPLAY_INFO         21
 #define ACTION_PRINT_IMAGE          22
-#define ACTION_PRINT_FRAME0         23
-#define ACTION_PRINT_FRAME1         24
-#define ACTION_PRINT_FRAME2         25
-#define ACTION_PRINT_FRAME3         26
 
 // state switching actions
 #define ACTION_THUMBNAILS           30
 #define ACTION_GALLERY              31
 #define ACTION_CAMERA               32
+#define ACTION_SETTINGS             33
 
 // camera popup menu actions
 #define ACTION_MODE_MANUAL          40
@@ -42,6 +39,12 @@
 // camera actions
 #define ACTION_CAMERA_PRINT         60
 #define ACTION_CAMERA_SUBMENU       61
+
+// printer frames
+#define ACTION_PRINT_FRAME0         80
+#define ACTION_PRINT_FRAME1         81
+#define ACTION_PRINT_FRAME2         82
+#define ACTION_PRINT_FRAME3         83
 
 // global actions
 #define ACTION_MAIN_MENU            100

@@ -3,8 +3,6 @@
 
 #include "menus.h"
 
-extern const menu_t MainMenu;
-
-uint8_t MainMenuDispatch(uint8_t menu_result);
+uint8_t menu_main_execute() BANKED;
 
 #endif
