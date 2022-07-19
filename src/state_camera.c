@@ -348,28 +348,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
-    // check image was captured, if yes, then restart capturing process
-    if (image_captured()) {
-        if (recording_video) picnrec_trigger();
-        display_last_seen(FALSE);
-        if (capture_triggered) {
-            capture_triggered = FALSE;
-            switch (OPTION(after_action)) {
-                case after_action_save:
-                    camera_image_save();
-                    break;
-                case after_action_printsave:
-                    camera_image_save();
-                case after_action_print:
-                    return ACTION_CAMERA_PRINT;
-                    break;
-            }
-            refresh_usage_indicator();
-        }
-        if (image_live_preview || recording_video) image_capture();
-    }
-    // select opens popup-menu
+    // process joypad buttons
     if (KEY_PRESSED(J_A)) {
+        // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec:
                 // toggle recording and start image capture
@@ -378,17 +359,19 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 refresh_usage_indicator();
                 break;
             default:
-                if (!is_capturing()) {
+                if (!capture_triggered) {
                     music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
-    //                        music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
-                    image_capture();
+//                    music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+                    if (!is_capturing()) image_capture();
                     capture_triggered = TRUE;
                 }
                 break;
         }
     } else if (KEY_PRESSED(J_SELECT)) {
+        // select opens popup-menu
         return ACTION_CAMERA_SUBMENU;
     } else if (KEY_PRESSED(J_START)) {
+        // start open main menu
         return ACTION_MAIN_MENU;
     }
     // !!! d-pad keys are translated
@@ -455,6 +438,28 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             menu_move_selection(menu, NULL, selection);
         }
     }
+
+    // check image was captured, if yes, then restart capturing process
+    if (image_captured()) {
+        if (recording_video) picnrec_trigger();
+        display_last_seen(FALSE);
+        if (capture_triggered) {
+            capture_triggered = FALSE;
+            switch (OPTION(after_action)) {
+                case after_action_save:
+                    camera_image_save();
+                    break;
+                case after_action_printsave:
+                    camera_image_save();
+                case after_action_print:
+                    return ACTION_CAMERA_PRINT;
+                    break;
+            }
+            refresh_usage_indicator();
+        }
+        if (image_live_preview || recording_video) image_capture();
+    }
+
     // wait for VBlank if not capturing (avoid HALT CPU state)
     if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
