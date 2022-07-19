@@ -19,14 +19,17 @@ typedef enum {
 typedef enum {
     trigger_mode_abutton,
     trigger_mode_timer,
-    trigger_mode_interval
+    trigger_mode_interval,
+    N_TRIGGER_MODES
 } trigger_mode_e;
 
 typedef enum {
     after_action_save,
     after_action_print,
     after_action_printsave,
-    after_action_picnrec
+    after_action_picnrec,
+    after_action_picnrec_video,
+    N_AFTER_ACTIONS
 } after_action_e;
 
 typedef enum {

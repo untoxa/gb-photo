@@ -116,7 +116,7 @@ void camera_image_save() {
 
 static void refresh_usage_indicator() {
     switch (OPTION(after_action)) {
-        case after_action_picnrec:
+        case after_action_picnrec_video:
             if (recording_video) strcpy(text_buffer, ICON_REC); else *text_buffer = 0;
             break;
         default:
@@ -203,6 +203,7 @@ const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this men
 
 const menu_t CameraMenuAssisted = {
     .x = 0, .y = 0, .width = 0, .height = 0,
+    .flags = MENU_INVERSE,
     .items = &CameraMenuItemAssistedExposure,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
@@ -331,6 +332,7 @@ const menu_item_t CameraMenuItemManualEdgeExclusive = {
 };
 const menu_t CameraMenuManual = {
     .x = 0, .y = 0, .width = 0, .height = 0,
+    .flags = MENU_INVERSE,
     .items = &CameraMenuItemManualExposure,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
@@ -344,7 +346,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     static change_direction_e change_direction;
-    static uint8_t capture_triggered = FALSE;
+    static uint8_t capture_triggered = FALSE;       // state of static variable persists between calls
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
@@ -352,7 +354,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (KEY_PRESSED(J_A)) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
-            case after_action_picnrec:
+            case after_action_picnrec_video:
                 // toggle recording and start image capture
                 recording_video = !recording_video;
                 if (recording_video && !is_capturing()) image_capture();
@@ -369,9 +371,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
+        capture_triggered = FALSE;
         return ACTION_CAMERA_SUBMENU;
     } else if (KEY_PRESSED(J_START)) {
         // start open main menu
+        capture_triggered = FALSE;
         return ACTION_MAIN_MENU;
     }
     // !!! d-pad keys are translated
@@ -442,21 +446,26 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
         if (recording_video) picnrec_trigger();
-        display_last_seen(FALSE);
         if (capture_triggered) {
             capture_triggered = FALSE;
             switch (OPTION(after_action)) {
+                case after_action_picnrec:
+                    picnrec_trigger();
+                    break;
                 case after_action_save:
                     camera_image_save();
+                    refresh_usage_indicator();
                     break;
                 case after_action_printsave:
                     camera_image_save();
+                    refresh_usage_indicator();
                 case after_action_print:
+                    display_last_seen(FALSE);
                     return ACTION_CAMERA_PRINT;
                     break;
             }
-            refresh_usage_indicator();
         }
+        display_last_seen(FALSE);
         if (image_live_preview || recording_video) image_capture();
     }
 
@@ -588,8 +597,9 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_ACTION_SAVE:
                 case ACTION_ACTION_PRINT:
                 case ACTION_ACTION_SAVEPRINT:
-                case ACTION_ACTION_PICNREC: {
-                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_picnrec};
+                case ACTION_ACTION_PICNREC:
+                case ACTION_ACTION_PICNREC_VIDEO: {
+                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_picnrec, after_action_picnrec_video};
                     OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                     break;
                 }

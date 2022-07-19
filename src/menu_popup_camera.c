@@ -19,7 +19,7 @@
 
 #if (PICNREC_ENABLED==1)
     #define MENUITEM_PICNREC &ActionSubMenuPicNRec
-    #define ACTION_SUBMENU_HEIGHT 6
+    #define ACTION_SUBMENU_HEIGHT 7
 #else
     #define MENUITEM_PICNREC NULL
     #define ACTION_SUBMENU_HEIGHT 5
@@ -144,13 +144,22 @@ const menu_item_t ActionSubMenuSaveAndPrint = {
     .result = ACTION_ACTION_SAVEPRINT
 };
 const menu_item_t ActionSubMenuPicNRec = {
-    .prev = &ActionSubMenuPrint,   .next = NULL,
+    .prev = &ActionSubMenuSaveAndPrint,   .next = &ActionSubMenuPicNRecVideo,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 8,
-    .caption = " Pic'n'Rec",
-    .helpcontext = " Record video via Pic'n'Rec",
+    .caption = " P'n'R",
+    .helpcontext = " Save images to Pic'n'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC
+};
+const menu_item_t ActionSubMenuPicNRecVideo = {
+    .prev = &ActionSubMenuPicNRec,   .next = NULL,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 5, .width = 8,
+    .caption = " P'n'R " ICON_REC,
+    .helpcontext = " Record video using Pic'n'Rec",
+    .onPaint = NULL,
+    .result = ACTION_ACTION_PICNREC_VIDEO
 };
 const menu_t ActionSubMenu = {
     .x = 5, .y = 6, .width = 10, .height = ACTION_SUBMENU_HEIGHT,
@@ -166,7 +175,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 const menu_item_t CameraMenuItemMode = {
     .prev = &CameraMenuItemReset,   .next = &CameraMenuItemTrigger,
     .sub = &CameraModeSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 12,
+    .ofs_x = 1, .ofs_y = 1, .width = 13,
     .id = idPopupCameraMode,
     .caption = " Mode\t\t%s",
     .helpcontext = " Select camera mode",
@@ -176,7 +185,7 @@ const menu_item_t CameraMenuItemMode = {
 const menu_item_t CameraMenuItemTrigger = {
     .prev = &CameraMenuItemMode,    .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 12,
+    .ofs_x = 1, .ofs_y = 2, .width = 13,
     .id = idPopupCameraTrigger,
     .caption = " Trigger\t%s",
     .helpcontext = " Trigger behavior",
@@ -186,7 +195,7 @@ const menu_item_t CameraMenuItemTrigger = {
 const menu_item_t CameraMenuItemAction = {
     .prev = &CameraMenuItemTrigger, .next = &CameraMenuItemReset,
     .sub = &ActionSubMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 12,
+    .ofs_x = 1, .ofs_y = 3, .width = 13,
     .id = idPopupCameraAction,
     .caption = " Action\t\t%s",
     .helpcontext = " Post-processing action",
@@ -196,7 +205,7 @@ const menu_item_t CameraMenuItemAction = {
 const menu_item_t CameraMenuItemReset = {
     .prev = &CameraMenuItemAction, .next = &CameraMenuItemMode,
     .sub = &YesNoMenu, .sub_params = "Restore defaults?",
-    .ofs_x = 1, .ofs_y = 4, .width = 12, .flags = MENUITEM_TERM,
+    .ofs_x = 1, .ofs_y = 4, .width = 13, .flags = MENUITEM_TERM,
     .id = idPopupCameraRestore,
     .caption = " Restore defaults",
     .helpcontext = " Restore default settings",
@@ -205,7 +214,7 @@ const menu_item_t CameraMenuItemReset = {
 };
 
 const menu_t CameraPopupMenu = {
-    .x = 1, .y = 3, .width = 14, .height = 6,
+    .x = 1, .y = 3, .width = 15, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &CameraMenuItemMode,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -222,7 +231,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     menu;
     static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
     static const uint8_t * const trigger_modes[] = { "[" ICON_A " button]", "[Timer]", "[Repeat]"};
-    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[Pic'n'Rec]"};
+    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[P'n'R]", "[P'n'R " ICON_REC "]"};
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
             strcpy(text_buffer, self->caption);

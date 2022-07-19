@@ -9,6 +9,8 @@ typedef struct menu_item_t;
 #define MENUITEM_NONE 0
 #define MENUITEM_TERM 1
 
+#define MENU_INVERSE  1
+
 typedef uint8_t menu_handler_t (const struct menu_t * self, uint8_t * param);
 typedef uint8_t idle_handler_t (const struct menu_t * menu, const struct menu_item_t * selection);
 typedef uint8_t menu_translate_t (const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
@@ -37,6 +39,7 @@ typedef struct menu_t {
     uint8_t height;
     uint8_t cancel_mask;
     uint8_t cancel_result;
+    uint8_t flags;
     menu_item_t * items;
     menu_handler_t * onShow;
     idle_handler_t * onIdle;
