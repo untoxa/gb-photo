@@ -568,7 +568,7 @@ uint8_t UPDATE_state_camera() BANKED {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
             if (gbprinter_detect(10) == STATUS_OK) {
-                gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + gallery_current_print_frame, BANK(print_frames));
+                gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames));
             } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
             remote_activate(REMOTE_ENABLED);
             break;

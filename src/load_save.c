@@ -20,7 +20,9 @@ save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;
 const camera_state_options_t default_camera_state_options = {
     .camera_mode = camera_mode_manual,
     .trigger_mode = trigger_mode_abutton,
-    .after_action = after_action_save
+    .after_action = after_action_save,
+    .gallery_picture_idx = 0,
+    .print_frame_idx = 0
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {

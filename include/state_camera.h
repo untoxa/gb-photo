@@ -87,6 +87,8 @@ typedef struct camera_state_options_t {
     camera_mode_e camera_mode;
     trigger_mode_e trigger_mode;
     after_action_e after_action;
+    uint8_t gallery_picture_idx;
+    uint8_t print_frame_idx;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT

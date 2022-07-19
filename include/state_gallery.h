@@ -8,8 +8,6 @@
 
 BANKREF_EXTERN(state_gallery)
 
-extern uint8_t gallery_current_print_frame;
-
 VECTOR_DECLARE_EXTERN(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE_EXTERN(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 

@@ -11,6 +11,7 @@
 #include "states.h"
 #include "vector.h"
 
+#include "state_camera.h"
 #include "state_thumbnails.h"
 #include "state_gallery.h"
 
@@ -27,7 +28,6 @@
 
 BANKREF(state_thumbnails)
 
-extern uint8_t gallery_picture_no;
 static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, cx = 0, cy = 0, cursor_anim = 0;
 
 const metasprite_t gallery_cursor0[] = {
@@ -91,9 +91,9 @@ uint8_t ENTER_state_thumbnails() BANKED {
     thumbnails_num_pages = VECTOR_LEN(used_slots) >> 4;
     if (VECTOR_LEN(used_slots) & 0x0f) thumbnails_num_pages++;
 
-    thumbnails_page_no = (gallery_picture_no >> 4);
+    thumbnails_page_no = (OPTION(gallery_picture_idx) >> 4);
 
-    cx = gallery_picture_no & 0x03, cy = (gallery_picture_no >> 2) & 0x03;
+    cx = OPTION(gallery_picture_idx) & 0x03, cy = (OPTION(gallery_picture_idx) >> 2) & 0x03;
 
     refresh_screen();
     JOYPAD_RESET();
@@ -127,7 +127,8 @@ uint8_t UPDATE_state_thumbnails() BANKED {
             }
         };
     } else if (KEY_PRESSED(J_A)) {
-        gallery_picture_no = coords_to_picture_no(cx, cy);
+        OPTION(gallery_picture_idx) = coords_to_picture_no(cx, cy);
+        save_camera_state();
         CHANGE_STATE(state_gallery);
         return 0;
     } else if (KEY_PRESSED(J_B)) {

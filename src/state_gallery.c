@@ -13,6 +13,7 @@
 #include "remote.h"
 #include "vector.h"
 
+#include "state_camera.h"
 #include "state_gallery.h"
 
 #include "misc_assets.h"
@@ -31,9 +32,6 @@
 #include "print_frames.h"
 
 BANKREF(state_gallery)
-
-uint8_t gallery_picture_no;
-uint8_t gallery_current_print_frame = 0;
 
 VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
@@ -201,7 +199,7 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
 static void refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
-    gallery_show_picture(gallery_picture_no);
+    gallery_show_picture(OPTION(gallery_picture_idx));
 
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START "/" ICON_SELECT " for Menus");
     sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
@@ -225,12 +223,14 @@ uint8_t UPDATE_state_gallery() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
-        if (++gallery_picture_no == VECTOR_LEN(used_slots)) gallery_picture_no = 0;
-        gallery_show_picture(gallery_picture_no);
+        if (++OPTION(gallery_picture_idx) == VECTOR_LEN(used_slots)) OPTION(gallery_picture_idx) = 0;
+        gallery_show_picture(OPTION(gallery_picture_idx));
+        save_camera_state();
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
-        if (gallery_picture_no) --gallery_picture_no; else gallery_picture_no = VECTOR_LEN(used_slots) - 1;
-        gallery_show_picture(gallery_picture_no);
+        if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = VECTOR_LEN(used_slots) - 1;
+        gallery_show_picture(OPTION(gallery_picture_idx));
+        save_camera_state();
     } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
         if (VECTOR_LEN(used_slots) != 0) {
@@ -248,7 +248,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 break;
             case ACTION_PRINT_IMAGE:
-                if (!gallery_print_picture(gallery_picture_no, gallery_current_print_frame)) {
+                if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 }
                 JOYPAD_RESET();
@@ -258,7 +258,8 @@ uint8_t UPDATE_state_gallery() BANKED {
             case ACTION_PRINT_FRAME2:
             case ACTION_PRINT_FRAME3:
                 // print image
-                gallery_current_print_frame = (menu_result - ACTION_PRINT_FRAME0);
+                OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
+                save_camera_state();
                 break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info
