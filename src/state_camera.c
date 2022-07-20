@@ -15,6 +15,7 @@
 #include "states.h"
 #include "bankdata.h"
 #include "gbprinter.h"
+#include "linkcable.h"
 #include "fade_manager.h"
 
 #include "globals.h"
@@ -146,7 +147,9 @@ uint8_t INIT_state_camera() BANKED {
 }
 
 uint8_t ENTER_state_camera() BANKED {
+#if (USE_CGB_DOUBLE_SPEED==1)
     music_setup_timer_ex(CPU_SLOW());
+#endif
     refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
     // load some initial settings
@@ -465,6 +468,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     display_last_seen(FALSE);
                     return ACTION_CAMERA_PRINT;
                     break;
+                case after_action_transfersave:
+                    camera_image_save();
+                    refresh_usage_indicator();
+                case after_action_transfer:
+                    display_last_seen(FALSE);
+                    return ACTION_CAMERA_TRANSFER;
             }
         }
         display_last_seen(FALSE);
@@ -574,6 +583,11 @@ uint8_t UPDATE_state_camera() BANKED {
             } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
             remote_activate(REMOTE_ENABLED);
             break;
+        case ACTION_CAMERA_TRANSFER:
+            remote_activate(REMOTE_DISABLED);
+            linkcable_transfer_image(last_seen, CAMERA_BANK_LAST_SEEN);
+            remote_activate(REMOTE_ENABLED);
+            break;
         case ACTION_MAIN_MENU:
             recording_video = FALSE;
             if (!menu_main_execute()) refresh_screen();
@@ -599,9 +613,11 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_ACTION_SAVE:
                 case ACTION_ACTION_PRINT:
                 case ACTION_ACTION_SAVEPRINT:
+                case ACTION_ACTION_TRANSFER:
+                case ACTION_ACTION_SAVETRANSFER:
                 case ACTION_ACTION_PICNREC:
                 case ACTION_ACTION_PICNREC_VIDEO: {
-                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_picnrec, after_action_picnrec_video};
+                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_transfer, after_action_transfersave, after_action_picnrec, after_action_picnrec_video};
                     OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                     break;
                 }
@@ -626,7 +642,9 @@ uint8_t UPDATE_state_camera() BANKED {
 
 uint8_t LEAVE_state_camera() BANKED {
     fade_out_modal();
+#if (USE_CGB_DOUBLE_SPEED==1)
     music_setup_timer_ex(CPU_FAST());
+#endif
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
     return 0;

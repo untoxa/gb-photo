@@ -141,7 +141,7 @@ const menu_item_t GalleryMenuItemTransfer = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Transfer",
-    .helpcontext = " Link cable transfer",
+    .helpcontext = " Transfer by the link cable",
     .onPaint = NULL,
     .result = ACTION_TRANSFER_IMAGE
 };

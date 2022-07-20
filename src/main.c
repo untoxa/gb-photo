@@ -76,7 +76,9 @@ void main() {
     }
     fade_setspeed(1);
 
+#if (USE_CGB_DOUBLE_SPEED==1)
     CPU_FAST();
+#endif
 
     init_save_structure();
 

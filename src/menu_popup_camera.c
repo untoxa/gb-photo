@@ -18,10 +18,10 @@
 
 #if (PICNREC_ENABLED==1)
     #define MENUITEM_PICNREC &ActionSubMenuPicNRec
-    #define ACTION_SUBMENU_HEIGHT 7
+    #define ACTION_SUBMENU_HEIGHT 9
 #else
     #define MENUITEM_PICNREC NULL
-    #define ACTION_SUBMENU_HEIGHT 5
+    #define ACTION_SUBMENU_HEIGHT 7
 #endif
 
 typedef enum {
@@ -118,34 +118,52 @@ const menu_t TriggerSubMenu = {
 const menu_item_t ActionSubMenuSave = {
     .prev = NULL,                       .next = &ActionSubMenuPrint,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 8,
+    .ofs_x = 1, .ofs_y = 1, .width = 10,
     .caption = " Save",
     .helpcontext = " Save to Gallery",
     .onPaint = NULL,
     .result = ACTION_ACTION_SAVE
 };
 const menu_item_t ActionSubMenuPrint = {
-    .prev = &ActionSubMenuSave, .next = &ActionSubMenuSaveAndPrint,
+    .prev = &ActionSubMenuSave,         .next = &ActionSubMenuSaveAndPrint,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 8,
+    .ofs_x = 1, .ofs_y = 2, .width = 10,
     .caption = " Print",
     .helpcontext = " Print using GB Printer",
     .onPaint = NULL,
     .result = ACTION_ACTION_PRINT
 };
 const menu_item_t ActionSubMenuSaveAndPrint = {
-    .prev = &ActionSubMenuPrint,   .next = MENUITEM_PICNREC,
+    .prev = &ActionSubMenuPrint,        .next = &ActionSubMenuTransfer,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .ofs_x = 1, .ofs_y = 3, .width = 10,
     .caption = " Save & Print",
     .helpcontext = " Save then Print",
     .onPaint = NULL,
     .result = ACTION_ACTION_SAVEPRINT
 };
-const menu_item_t ActionSubMenuPicNRec = {
-    .prev = &ActionSubMenuSaveAndPrint,   .next = &ActionSubMenuPicNRecVideo,
+const menu_item_t ActionSubMenuTransfer = {
+    .prev = &ActionSubMenuSaveAndPrint, .next = &ActionSubMenuSaveAndTransfer,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 8,
+    .ofs_x = 1, .ofs_y = 4, .width = 10,
+    .caption = " Transfer",
+    .helpcontext = " Transfer by the link cable",
+    .onPaint = NULL,
+    .result = ACTION_ACTION_TRANSFER
+};
+const menu_item_t ActionSubMenuSaveAndTransfer = {
+    .prev = &ActionSubMenuTransfer,     .next = MENUITEM_PICNREC,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 5, .width = 10,
+    .caption = " Save & Transfer",
+    .helpcontext = " Save then Transfer",
+    .onPaint = NULL,
+    .result = ACTION_ACTION_SAVETRANSFER
+};
+const menu_item_t ActionSubMenuPicNRec = {
+    .prev = &ActionSubMenuSaveAndTransfer, .next = &ActionSubMenuPicNRecVideo,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 6, .width = 10,
     .caption = " P'n'R",
     .helpcontext = " Save images to Pic'n'Rec",
     .onPaint = NULL,
@@ -154,14 +172,14 @@ const menu_item_t ActionSubMenuPicNRec = {
 const menu_item_t ActionSubMenuPicNRecVideo = {
     .prev = &ActionSubMenuPicNRec,   .next = NULL,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 5, .width = 8,
+    .ofs_x = 1, .ofs_y = 7, .width = 10,
     .caption = " P'n'R " ICON_REC,
     .helpcontext = " Record video using Pic'n'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC_VIDEO
 };
 const menu_t ActionSubMenu = {
-    .x = 5, .y = 6, .width = 10, .height = ACTION_SUBMENU_HEIGHT,
+    .x = 5, .y = 6, .width = 12, .height = ACTION_SUBMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ActionSubMenuSave,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -229,8 +247,8 @@ uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
-    static const uint8_t * const trigger_modes[] = { "[" ICON_A " button]", "[Timer]", "[Repeat]"};
-    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[P'n'R]", "[P'n'R " ICON_REC "]"};
+    static const uint8_t * const trigger_modes[] = {"[" ICON_A " button]", "[Timer]", "[Repeat]"};
+    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[Transfer]", "[S & T]", "[P'n'R]", "[P'n'R " ICON_REC "]"};
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
             strcpy(text_buffer, self->caption);
