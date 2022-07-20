@@ -11,16 +11,22 @@
 #endif
 
 #define MUSIC_STOP_BANK 0xffu
-//#define FORCE_CUT_SFX                                   // don't cut by default 
+//#define FORCE_CUT_SFX                                   // don't cut by default
 
 extern volatile uint8_t music_current_track_bank;
 extern uint8_t music_mute_mask;
 extern const MUSIC_MODULE * music_next_track;
 
+inline void music_setup_timer_ex(uint8_t is_fast) {
+#if defined(NINTENDO)
+    TMA_REG = (is_fast) ? 0x80u : 0xC0u;
+    TAC_REG = 0x07u;
+#endif
+}
+
 inline void music_setup_timer() {
 #if defined(NINTENDO)
-    TMA_REG = ((_cpu == CGB_TYPE) && (*(UBYTE *)0x0143 & 0x80)) ? 0x80u : 0xC0u;
-    TAC_REG = 0x07u;
+    music_setup_timer_ex((_cpu == CGB_TYPE) && (*(UBYTE *)0x0143 & 0x80));
 #endif
 }
 

@@ -11,6 +11,7 @@
 #include "states.h"
 #include "vector.h"
 #include "load_save.h"
+#include "fade_manager.h"
 
 #include "state_camera.h"
 #include "state_thumbnails.h"
@@ -97,6 +98,7 @@ uint8_t ENTER_state_thumbnails() BANKED {
     cx = OPTION(gallery_picture_idx) & 0x03, cy = (OPTION(gallery_picture_idx) >> 2) & 0x03;
 
     refresh_screen();
+    fade_in_modal();
     JOYPAD_RESET();
     return 0;
 }
@@ -146,6 +148,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
 }
 
 uint8_t LEAVE_state_thumbnails() BANKED {
+    fade_out_modal();
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
     return 0;
 }

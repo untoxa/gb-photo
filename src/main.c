@@ -16,6 +16,8 @@
 #include "vwf.h"
 #include "remote.h"
 #include "misc_assets.h"
+#include "palette.h"
+#include "fade_manager.h"
 
 // graphic assets
 #include "cursors.h"
@@ -65,7 +67,16 @@ void main() {
     DISPLAY_OFF;
 
     detect_system();    // detect system compatibility
-    if (_is_COLOR) cgb_compatibility();
+
+    palette_init();
+    fade_init();
+    if (_is_COLOR) {
+        palette_cgb_zero(BCPS_REG_ADDR);
+        palette_cgb_zero(OCPS_REG_ADDR);
+    }
+    fade_setspeed(1);
+
+    CPU_FAST();
 
     init_save_structure();
 
@@ -75,7 +86,7 @@ void main() {
         LYC_REG = 144, STAT_REG |= STATF_LYC;
         add_LCD(LCD_ISR);
 #endif
-        music_setup_timer();
+        music_setup_timer_ex(_is_CPU_FAST);
         add_low_priority_TIM(music_play_isr);
     }
 #if defined(NINTENDO)
@@ -84,8 +95,6 @@ void main() {
     set_interrupts(VBL_IFLAG | TIM_IFLAG);
 #endif
     music_load(BANK(music_ingame), &music_ingame), music_pause(music_paused = TRUE);
-
-    CPU_FAST(FALSE);
 
     JOYPAD_INIT;
 

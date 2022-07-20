@@ -20,7 +20,7 @@
 #endif
 // enable usage of CGB double speed mode
 #ifndef USE_CGB_DOUBLE_SPEED
-    #define USE_CGB_DOUBLE_SPEED 1
+    #define USE_CGB_DOUBLE_SPEED 0
 #endif
 // enable fast printer transfers
 #ifndef CGB_FAST_TRANSFER

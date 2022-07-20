@@ -14,6 +14,7 @@
 #include "remote.h"
 #include "vector.h"
 #include "load_save.h"
+#include "fade_manager.h"
 
 #include "state_camera.h"
 #include "state_gallery.h"
@@ -221,6 +222,7 @@ uint8_t INIT_state_gallery() BANKED {
 uint8_t ENTER_state_gallery() BANKED {
     refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_gallery));
+    fade_in_modal();
     JOYPAD_RESET();
     return 0;
 }
@@ -311,6 +313,7 @@ uint8_t UPDATE_state_gallery() BANKED {
 }
 
 uint8_t LEAVE_state_gallery() BANKED {
+    fade_out_modal();
     gbprinter_set_handler(NULL, 0);
     return 0;
 }

@@ -20,30 +20,18 @@ void detect_system() {
 #endif
 }
 
-void CPU_FAST(uint8_t display) {
+uint8_t CPU_FAST() {
 #if (USE_CGB_DOUBLE_SPEED==1)
-    if (_is_COLOR) {
-        if (display) DISPLAY_OFF;
-        cpu_fast();
-        TMA_REG = 0xC0u;
-        _is_CPU_FAST = TRUE;
-        if (display) DISPLAY_ON;
-    } else _is_CPU_FAST = FALSE;
+    _is_CPU_FAST = (_is_COLOR) ? (cpu_fast(), TRUE) : FALSE;
+    return _is_CPU_FAST;
 #else
-    display;
-    _is_CPU_FAST = FALSE;
+    return (_is_CPU_FAST = FALSE);
 #endif
 }
 
-void CPU_SLOW(uint8_t display) {
-    display;
+uint8_t CPU_SLOW() {
 #if (USE_CGB_DOUBLE_SPEED==1)
-    if (_is_COLOR) {
-        if (display) DISPLAY_OFF;
-        cpu_slow();
-        TMA_REG = 0x80u;
-        if (display) DISPLAY_ON;
-    }
+    if (_is_COLOR) cpu_slow();
 #endif
-    _is_CPU_FAST = FALSE;
+    return (_is_CPU_FAST = FALSE);
 }

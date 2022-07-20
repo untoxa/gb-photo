@@ -7,6 +7,7 @@
 #include "screen.h"
 #include "states.h"
 #include "bankdata.h"
+#include "fade_manager.h"
 
 #include "misc_assets.h"
 
@@ -58,6 +59,7 @@ uint8_t INIT_state_logo() BANKED {
 
 uint8_t ENTER_state_logo() BANKED {
     refresh_screen();
+    fade_in_modal();
     return 0;
 }
 
@@ -75,5 +77,6 @@ uint8_t UPDATE_state_logo() BANKED {
 }
 
 uint8_t LEAVE_state_logo() BANKED {
+    fade_out_modal();
     return 0;
 }
