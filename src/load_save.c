@@ -22,7 +22,8 @@ const camera_state_options_t default_camera_state_options = {
     .trigger_mode = trigger_mode_abutton,
     .after_action = after_action_save,
     .gallery_picture_idx = 0,
-    .print_frame_idx = 0
+    .print_frame_idx = 0,
+    .print_fast = FALSE
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {

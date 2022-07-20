@@ -7,19 +7,21 @@
 
 // default actions
 #define ACTION_NONE MENU_RESULT_CLOSE
-// main menu actions
-#define ACTION_ERASE_GALLERY        10
 
 // gallery actions
-#define ACTION_ERASE_IMAGE          20
-#define ACTION_DISPLAY_INFO         21
-#define ACTION_PRINT_IMAGE          22
+#define ACTION_ERASE_GALLERY        10
+#define ACTION_ERASE_IMAGE          11
+#define ACTION_DISPLAY_INFO         12
+#define ACTION_TRANSFER_IMAGE       13
+#define ACTION_PRINT_IMAGE          14
+
+// settings
+#define ACTION_SETTINGS_PRINT_FAST  20
 
 // state switching actions
-#define ACTION_THUMBNAILS           30
-#define ACTION_GALLERY              31
-#define ACTION_CAMERA               32
-#define ACTION_SETTINGS             33
+#define ACTION_GALLERY              30
+#define ACTION_CAMERA               31
+#define ACTION_SETTINGS             32
 
 // camera popup menu actions
 #define ACTION_MODE_MANUAL          40

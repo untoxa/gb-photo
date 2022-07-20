@@ -67,7 +67,7 @@ const menu_item_t MainMenuItemGallery = {
     .result = ACTION_GALLERY
 };
 const menu_item_t MainMenuItemSettings = {
-    .prev = &MainMenuItemCamera,    .next = &MainMenuItemAbout,
+    .prev = &MainMenuItemGallery,    .next = &MainMenuItemAbout,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 10,
     .caption = " Settings",

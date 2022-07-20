@@ -18,7 +18,7 @@ START_SAVE = 12
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket sms gg
 #TARGETS = gb gbc pocket sms gg
-TARGETS = gb
+TARGETS = gb gbc
 
 LIBRARIES = -Wl-llib/$(PORT)/hUGEDriver.lib
 

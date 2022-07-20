@@ -10,6 +10,7 @@
 #include "screen.h"
 #include "states.h"
 #include "gbprinter.h"
+#include "linkcable.h"
 #include "remote.h"
 #include "vector.h"
 #include "load_save.h"
@@ -80,7 +81,7 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
     image_no = VECTOR_GET(used_slots, image_no);
 
     remote_activate(REMOTE_DISABLED);
-    if (gbprinter_detect(10) == STATUS_OK) {
+    if (gbprinter_detect(10) == PRN_STATUS_OK) {
         gbprinter_print_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1, print_frames + frame_no, BANK(print_frames));
         res = TRUE;
     }
@@ -88,6 +89,19 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
 
     return res;
 }
+
+uint8_t gallery_transfer_picture(uint8_t image_no) {
+    if (!VECTOR_LEN(used_slots)) return FALSE;
+    if (image_no >= VECTOR_LEN(used_slots)) image_no = VECTOR_LEN(used_slots) - 1;
+    image_no = VECTOR_GET(used_slots, image_no);
+
+    remote_activate(REMOTE_DISABLED);
+    linkcable_transfer_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1);
+    remote_activate(REMOTE_ENABLED);
+
+    return TRUE;
+}
+
 
 static uint8_t onPrinterProgress() BANKED {
     // printer progress callback handler
@@ -98,35 +112,35 @@ static uint8_t onPrinterProgress() BANKED {
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-const menu_item_t GalleryMenuItemThumb = {
-    .prev = NULL,                           .next = &GalleryMenuItemInfo,
+const menu_item_t GalleryMenuItemInfo = {
+    .prev = NULL,                           .next = &GalleryMenuItemPrint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
-    .caption = " Thumbnails",
-    .helpcontext = " Thumbnail view",
-    .onPaint = NULL,
-    .result = ACTION_THUMBNAILS
-};
-const menu_item_t GalleryMenuItemInfo = {
-    .prev = &GalleryMenuItemThumb,          .next = &GalleryMenuItemPrint,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Info",
     .helpcontext = " View image metadata",
     .onPaint = NULL,
     .result = MENU_RESULT_CLOSE
 };
 const menu_item_t GalleryMenuItemPrint = {
-    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemDelete,
+    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemTransfer,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Print",
     .helpcontext = " Print current image",
     .onPaint = NULL,
     .result = ACTION_PRINT_IMAGE
 };
+const menu_item_t GalleryMenuItemTransfer = {
+    .prev = &GalleryMenuItemPrint,           .next = &GalleryMenuItemDelete,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .caption = " Transfer",
+    .helpcontext = " Link cable transfer",
+    .onPaint = NULL,
+    .result = ACTION_TRANSFER_IMAGE
+};
 const menu_item_t GalleryMenuItemDelete = {
-    .prev = &GalleryMenuItemPrint,          .next = &GalleryMenuItemDeleteAll,
+    .prev = &GalleryMenuItemTransfer,          .next = &GalleryMenuItemDeleteAll,
     .sub = &YesNoMenu, .sub_params = "Are you sure?",
     .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Delete",
@@ -157,7 +171,7 @@ const menu_item_t GalleryMenuItemDebug = {
 const menu_t GalleryMenu = {
     .x = 1, .y = 3, .width = 10, .height = GALLERYMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &GalleryMenuItemThumb,
+    .items = &GalleryMenuItemInfo,
     .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultGalleryMenu
 };
@@ -226,19 +240,22 @@ uint8_t UPDATE_state_gallery() BANKED {
                 // TODO: erase image
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 break;
+            case ACTION_DISPLAY_INFO:
+                // TODO: display image info
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+                break;
+            case ACTION_TRANSFER_IMAGE:
+                if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                }
+                JOYPAD_RESET();
+                break;
             case ACTION_PRINT_IMAGE:
                 if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 }
                 JOYPAD_RESET();
                 break;
-            case ACTION_DISPLAY_INFO:
-                // TODO: display image info
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
-                break;
-            case ACTION_THUMBNAILS:
-                CHANGE_STATE(state_thumbnails);
-                return FALSE;
             default:
                 // error, must not get here
                 music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));

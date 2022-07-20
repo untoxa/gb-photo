@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "bankdata.h"
 #include "print_frames.h"
+#include "load_save.h"
 
 #include "state_camera.h"
 
@@ -30,7 +31,8 @@ typedef enum {
     idPrintFrame0,
     idPrintFrame1,
     idPrintFrame2,
-    idSettingsPrintFrame
+    idSettingsPrintFrame,
+    idSettingsPrintFast
 } settings_menu_e;
 
 
@@ -77,7 +79,7 @@ const menu_t PrinterFramesMenu = {
 
 
 const menu_item_t SettingsMenuItemPrintFrame = {
-    .prev = NULL, .next = NULL,
+    .prev = NULL,                           .next = &SettingsMenuItemPrintFast,
     .sub = &PrinterFramesMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 13,
     .id = idSettingsPrintFrame,
@@ -85,6 +87,16 @@ const menu_item_t SettingsMenuItemPrintFrame = {
     .helpcontext = " Select frame for printing",
     .onPaint = onSettingsMenuItemPaint,
     .result = ACTION_NONE
+};
+const menu_item_t SettingsMenuItemPrintFast = {
+    .prev = &SettingsMenuItemPrintFrame,    .next = NULL,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 2, .width = 13,
+    .id = idSettingsPrintFast,
+    .caption = " Fast printing\t\t\t%s",
+    .helpcontext = " Enable CGB fast transfer",
+    .onPaint = onSettingsMenuItemPaint,
+    .result = ACTION_SETTINGS_PRINT_FAST
 };
 const menu_t GlobalSettingsMenu = {
     .x = 3, .y = 5, .width = 15, .height = 5,
@@ -113,6 +125,7 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
 }
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
+    static const uint8_t * checkbox[] = {ICON_CBX, ICON_CBX_CHECKED};
     switch ((settings_menu_e)self->id) {
         case idPrintFrame0:
         case idPrintFrame1:
@@ -123,6 +136,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsPrintFrame:
             banked_strcpy(text_buffer_extra, print_frames[OPTION(print_frame_idx)].caption, BANK(print_frames));
             sprintf(text_buffer, self->caption, text_buffer_extra);
+            break;
+        case idSettingsPrintFast:
+            sprintf(text_buffer, self->caption, checkbox[(OPTION(print_fast)) ? 1 : 0]);
             break;
         default:
             *text_buffer = 0;
@@ -138,6 +154,10 @@ void menu_settings_execute() BANKED {
         case ACTION_PRINT_FRAME1:
         case ACTION_PRINT_FRAME2:
             OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
+            save_camera_state();
+            break;
+        case ACTION_SETTINGS_PRINT_FAST:
+            OPTION(print_fast) = !OPTION(print_fast);
             save_camera_state();
             break;
         default:

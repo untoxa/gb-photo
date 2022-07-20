@@ -1,16 +1,35 @@
 #pragma bank 255
 
+#include <gbdk/platform.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "gbprinter.h"
 #include "gbcamera.h"
 #include "bankdata.h"
 #include "states.h"
+#include "globals.h"
 
-const uint8_t PRINTER_INIT[]    = { sizeof(PRINTER_INIT),  0x88,0x33,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
-const uint8_t PRINTER_STATUS[]  = { sizeof(PRINTER_STATUS),0x88,0x33,0x0F,0x00,0x00,0x00,0x0F,0x00,0x00,0x00 };
-const uint8_t PRINTER_EOF[]     = { sizeof(PRINTER_EOF),   0x88,0x33,0x04,0x00,0x00,0x00,0x04,0x00,0x00,0x00 };
-const uint8_t PRINTER_START[]   = { sizeof(PRINTER_START), 0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x7F,0x6A,0x01,0x00,0x00 };
+#include "state_camera.h"
+
+#define START_TRANSFER 0x81
+#if (CGB_FAST_TRANSFER==1)
+    // 0b10000011 - start, CGB double speed, internal clock
+    #define START_TRANSFER_FAST 0x83
+#else
+    // 0b10000001 - start, internal clock
+    #define START_TRANSFER_FAST 0x81
+#endif
+
+static const uint8_t PRN_PKT_INIT[]    = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
+static const uint8_t PRN_PKT_STATUS[]  = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_STATUS,0x00,0x00,0x00,0x0F,0x00,0x00,0x00 };
+static const uint8_t PRN_PKT_EOF[]     = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_DATA,0x00,0x00,0x00,0x04,0x00,0x00,0x00 };
+
+status_packet_t PRN_PKT_START = {
+    .magic = PRN_MAGIC, .command = PRN_CMD_PRINT, .length = 4,
+    .print = TRUE, .margins = 0, .palette = PRN_PALETTE_NORMAL, .exposure = PRN_EXPOSURE_DARK,
+    .crc = 0, .trail = 0
+};
 
 uint16_t printer_status;
 uint8_t printer_tile_num;
@@ -19,21 +38,22 @@ uint8_t printer_completion = 0;
 far_ptr_t printer_progress_handler = {0, NULL};
 
 uint8_t printer_send_receive(uint8_t b) {
-    SB_REG = b;             // data to send
-    SC_REG = 0x81;          // 1000 0001 - start, internal clock
-    while (SC_REG & 0x80);  // wait until b1 reset
-    return SB_REG;          // return response stored in SB_REG
+    SB_REG = b;
+    SC_REG = (OPTION(print_fast)) ? START_TRANSFER_FAST : START_TRANSFER;
+    while (SC_REG & 0x80);
+    return SB_REG;
 }
 
 uint8_t printer_send_byte(uint8_t b) {
     return (uint8_t)(printer_status = ((printer_status << 8) | printer_send_receive(b)));
 }
 
-uint8_t printer_send_command(const uint8_t *command) {
-    uint8_t index = 0, length = *command++ - 1;
+uint8_t printer_send_command(const uint8_t *command, uint8_t length) {
+    uint8_t index = 0;
     while (index++ < length) printer_send_byte(*command++);
-    return ((uint8_t)(printer_status >> 8) == 0x81) ? (uint8_t) printer_status : STATUS_MASK_ERRORS;
+    return ((uint8_t)(printer_status >> 8) == 0x81) ? (uint8_t) printer_status : PRN_STATUS_MASK_ERRORS;
 }
+#define PRINTER_SEND_COMMAND(CMD) printer_send_command((const uint8_t *)&(CMD), sizeof(CMD))
 
 uint8_t printer_print_tile(const uint8_t *tiledata) {
     static const uint8_t PRINT_TILE[] = { 0x88,0x33,0x04,0x00,0x80,0x02 };
@@ -60,14 +80,14 @@ uint8_t printer_print_tile(const uint8_t *tiledata) {
 
 inline void printer_init() {
     printer_tile_num = 0;
-    printer_send_command(PRINTER_INIT);
+    PRINTER_SEND_COMMAND(PRN_PKT_INIT);
 }
 
 uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
     uint8_t error;
-    while (((error = printer_send_command(PRINTER_STATUS)) & mask) != value) {
-        if (timeout-- == 0) return STATUS_MASK_ERRORS;
-        if (error & STATUS_MASK_ERRORS) break;
+    while (((error = PRINTER_SEND_COMMAND(PRN_PKT_STATUS)) & mask) != value) {
+        if (timeout-- == 0) return PRN_STATUS_MASK_ERRORS;
+        if (error & PRN_STATUS_MASK_ERRORS) break;
         wait_vbl_done();
     }
     return error;
@@ -75,7 +95,7 @@ uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
 
 uint8_t gbprinter_detect(uint8_t delay) BANKED {
     printer_init();
-    return printer_wait(delay, STATUS_MASK_ANY, STATUS_OK);
+    return printer_wait(delay, PRN_STATUS_MASK_ANY, PRN_STATUS_OK);
 }
 
 uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const frame_desc_t * frame, uint8_t frame_bank) BANKED {
@@ -89,14 +109,16 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
 
     uint8_t tile_data[16], error, packets;
 
-    if ((packets = current_frame.height >> 1) == 0) return STATUS_OK;
+    if ((packets = current_frame.height >> 1) == 0) return PRN_STATUS_OK;
 
     SWITCH_RAM(image_bank);
     img = image;
 
-    const uint8_t * map = current_frame.map;
+    const uint8_t * map = current_frame.map, row_count = packets << 1;
     printer_tile_num = 0;
-    for (uint8_t y = 0; y != packets << 1; y++) {
+
+    gbprinter_set_print_params(0, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+    for (uint8_t y = 0; y != row_count; y++) {
         for (uint8_t x = 0; x != 20; x++, map++) {
             // copy frame tile if applicable
             if (current_frame.map) {
@@ -110,19 +132,21 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
             }
             // print the resulting tile
             if (printer_print_tile(tile_data)) {
-                printer_send_command(PRINTER_EOF);
-                printer_send_command(PRINTER_START);
-                printer_send_command(PRINTER_STATUS);
-                if ((error = printer_wait(SECONDS(1), STATUS_BUSY, STATUS_BUSY)) & STATUS_MASK_ERRORS) return error;
-                if ((error = printer_wait(SECONDS(10), STATUS_BUSY, 0)) & STATUS_MASK_ERRORS) return error;
+                PRINTER_SEND_COMMAND(PRN_PKT_EOF);
+                // setup printing if required
+                if (y == row_count - 1) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+                PRINTER_SEND_COMMAND(PRN_PKT_START);
+                // query printer status
+                if ((error = printer_wait(SECONDS(1), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(SECONDS(10), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
 
-                uint8_t current_progress = ((uint16_t)y << 3) / (packets << 1);
+                uint8_t current_progress = ((uint16_t)y << 3) / row_count;
                 if (printer_completion != current_progress) {
                     printer_completion = current_progress, call_far(&printer_progress_handler);
                 }
             }
         }
     }
-    return printer_send_command(PRINTER_STATUS);
+    return PRINTER_SEND_COMMAND(PRN_PKT_STATUS);
 }
 

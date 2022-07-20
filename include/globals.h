@@ -22,6 +22,10 @@
 #ifndef USE_CGB_DOUBLE_SPEED
     #define USE_CGB_DOUBLE_SPEED 1
 #endif
+// enable fast printer transfers
+#ifndef CGB_FAST_TRANSFER
+    #define CGB_FAST_TRANSFER 1
+#endif
 // enable support for Pic'N'Rec
 #ifndef PICNREC_ENABLED
     #define PICNREC_ENABLED 1
