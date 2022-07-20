@@ -74,31 +74,21 @@ uint8_t gallery_show_picture(uint8_t n) {
 }
 
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
-    uint8_t res = FALSE;
-
     if (!VECTOR_LEN(used_slots)) return FALSE;
     if (image_no >= VECTOR_LEN(used_slots)) image_no = VECTOR_LEN(used_slots) - 1;
     image_no = VECTOR_GET(used_slots, image_no);
-
-    remote_activate(REMOTE_DISABLED);
     if (gbprinter_detect(10) == PRN_STATUS_OK) {
         gbprinter_print_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1, print_frames + frame_no, BANK(print_frames));
-        res = TRUE;
+        return TRUE;
     }
-    remote_activate(REMOTE_ENABLED);
-
-    return res;
+    return FALSE;
 }
 
 uint8_t gallery_transfer_picture(uint8_t image_no) {
     if (!VECTOR_LEN(used_slots)) return FALSE;
     if (image_no >= VECTOR_LEN(used_slots)) image_no = VECTOR_LEN(used_slots) - 1;
     image_no = VECTOR_GET(used_slots, image_no);
-
-    remote_activate(REMOTE_DISABLED);
     linkcable_transfer_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1);
-    remote_activate(REMOTE_ENABLED);
-
     return TRUE;
 }
 
@@ -263,33 +253,41 @@ uint8_t UPDATE_state_gallery() BANKED {
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 break;
             case ACTION_TRANSFER_IMAGE:
+                remote_activate(REMOTE_DISABLED);
                 if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 }
+                remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
             case ACTION_TRANSFER_GALLERY:
+                remote_activate(REMOTE_DISABLED);
                 for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
                     if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                         break;
                     }
                 }
+                remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
             case ACTION_PRINT_IMAGE:
+                remote_activate(REMOTE_DISABLED);
                 if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 }
+                remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
             case ACTION_PRINT_GALLERY:
+                remote_activate(REMOTE_DISABLED);
                 for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
                     if (!gallery_print_picture(i, OPTION(print_frame_idx))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                         break;
                     }
                 }
+                remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
             default:
