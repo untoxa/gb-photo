@@ -486,8 +486,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    static const uint8_t * const on_off[] = {"Off", "On"};
-    static const uint8_t * const low_high[] = {"Low", "High"};
+    static const uint8_t * const on_off[]   = {"Off",    "On"} ;
+    static const uint8_t * const low_high[] = {"Low",    "High"};
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (self->id) {
         case idExposure: {

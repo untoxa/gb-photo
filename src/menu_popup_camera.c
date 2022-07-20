@@ -246,9 +246,26 @@ uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct
 }
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    static const uint8_t * const camera_modes[]  = {"[Manual]", "[Assist]", "[Auto]", "[Iter]"};
-    static const uint8_t * const trigger_modes[] = {"[" ICON_A " button]", "[Timer]", "[Repeat]"};
-    static const uint8_t * const after_actions[] = {"[Save]", "[Print]", "[S & P]", "[Transfer]", "[S & T]", "[P'n'R]", "[P'n'R " ICON_REC "]"};
+    static const uint8_t * const camera_modes[N_CAMERA_MODES]  = {
+        [camera_mode_manual]         = "[Manual]",
+        [camera_mode_assisted]       = "[Assist]",
+        [camera_mode_auto]           = "[Auto]",
+        [camera_mode_iterate]        = "[Iter]"
+    };
+    static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
+        [trigger_mode_abutton]       = "[" ICON_A " button]",
+        [trigger_mode_timer]         = "[Timer]",
+        [trigger_mode_interval]      = "[Repeat]"
+    };
+    static const uint8_t * const after_actions[N_AFTER_ACTIONS] = {
+        [after_action_save]          = "[Save]",
+        [after_action_print]         = "[Print]",
+        [after_action_printsave]     = "[S & P]",
+        [after_action_transfer]      = "[Transfer]",
+        [after_action_transfersave]  = "[S & T]",
+        [after_action_picnrec]       = "[P'n'R]",
+        [after_action_picnrec_video] = "[P'n'R " ICON_REC "]"
+    };
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
             strcpy(text_buffer, self->caption);
