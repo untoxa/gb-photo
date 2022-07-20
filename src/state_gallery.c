@@ -57,16 +57,17 @@ void gallery_toss_images() {
     }
 }
 
-uint8_t gallery_show_picture(uint8_t n) {
+uint8_t gallery_show_picture(uint8_t image_no) {
     wait_vbl_done();
     screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, SOLID_BLACK);
 
     if (!VECTOR_LEN(used_slots)) return FALSE;
-    if (n >= VECTOR_LEN(used_slots)) n = VECTOR_LEN(used_slots) - 1;
-    n = VECTOR_GET(used_slots, n);
+    uint8_t image_index = image_no;
+    if (image_index >= VECTOR_LEN(used_slots)) image_index = VECTOR_LEN(used_slots) - 1;
+    image_index = VECTOR_GET(used_slots, image_index);
 
-    SWITCH_RAM((n >> 1) + 1);
-    screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((n & 1) ? image_second : image_first));
+    SWITCH_RAM((image_index >> 1) + 1);
+    screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((image_index & 1) ? image_second : image_first));
 
     wait_vbl_done();
     screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
@@ -75,10 +76,11 @@ uint8_t gallery_show_picture(uint8_t n) {
 
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
     if (!VECTOR_LEN(used_slots)) return FALSE;
-    if (image_no >= VECTOR_LEN(used_slots)) image_no = VECTOR_LEN(used_slots) - 1;
-    image_no = VECTOR_GET(used_slots, image_no);
+    uint8_t image_index = image_no;
+    if (image_index >= VECTOR_LEN(used_slots)) image_index = VECTOR_LEN(used_slots) - 1;
+    image_index = VECTOR_GET(used_slots, image_index);
     if (gbprinter_detect(10) == PRN_STATUS_OK) {
-        gbprinter_print_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1, print_frames + frame_no, BANK(print_frames));
+        gbprinter_print_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1, print_frames + frame_no, BANK(print_frames));
         return TRUE;
     }
     return FALSE;
@@ -86,17 +88,21 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
 
 uint8_t gallery_transfer_picture(uint8_t image_no) {
     if (!VECTOR_LEN(used_slots)) return FALSE;
-    if (image_no >= VECTOR_LEN(used_slots)) image_no = VECTOR_LEN(used_slots) - 1;
-    image_no = VECTOR_GET(used_slots, image_no);
-    linkcable_transfer_image(((image_no & 1) ? image_second : image_first), (image_no >> 1) + 1);
+    uint8_t image_index = image_no;
+    if (image_index >= VECTOR_LEN(used_slots)) image_index = VECTOR_LEN(used_slots) - 1;
+    image_index = VECTOR_GET(used_slots, image_index);
+    linkcable_transfer_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1);
     return TRUE;
 }
 
+inline void show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
+    misc_render_progressbar(value, size, text_buffer);
+    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+}
 
 static uint8_t onPrinterProgress() BANKED {
     // printer progress callback handler
-    misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+    show_progressbar(0, printer_completion, PRN_MAX_PROGRESS);
     return 0;
 }
 
@@ -263,6 +269,7 @@ uint8_t UPDATE_state_gallery() BANKED {
             case ACTION_TRANSFER_GALLERY:
                 remote_activate(REMOTE_DISABLED);
                 for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
+                    show_progressbar(0, i, VECTOR_LEN(used_slots));
                     if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                         break;

@@ -50,7 +50,7 @@ void LCD_ISR() {
     if (LYC_REG == 95) {
         while (STAT_REG & STATF_BUSY);
         LCDC_REG |= LCDCF_BG8000;
-        LYC_REG = 144;
+        LYC_REG = 150;
     } else {
         LCDC_REG &= ~LCDCF_BG8000;
         LYC_REG = 95;
@@ -65,12 +65,7 @@ void main() {
     DISPLAY_OFF;
 
     detect_system();    // detect system compatibility
-    if (_is_COLOR) {
-#if (USE_CGB_DOUBLE_SPEED==1)
-        cpu_fast();
-#endif
-        cgb_compatibility();
-    }
+    if (_is_COLOR) cgb_compatibility();
 
     init_save_structure();
 
@@ -89,6 +84,8 @@ void main() {
     set_interrupts(VBL_IFLAG | TIM_IFLAG);
 #endif
     music_load(BANK(music_ingame), &music_ingame), music_pause(music_paused = TRUE);
+
+    CPU_FAST(FALSE);
 
     JOYPAD_INIT;
 

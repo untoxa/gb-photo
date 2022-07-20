@@ -8,6 +8,7 @@
 
 #include "gbcamera.h"
 #include "musicmanager.h"
+#include "systemdetect.h"
 #include "systemhelpers.h"
 #include "joy.h"
 #include "screen.h"
@@ -144,6 +145,7 @@ uint8_t INIT_state_camera() BANKED {
 }
 
 uint8_t ENTER_state_camera() BANKED {
+    CPU_SLOW(TRUE);
     refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
 
@@ -567,9 +569,11 @@ uint8_t UPDATE_state_camera() BANKED {
     switch (menu_result) {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
+            CPU_FAST(TRUE);
             if (gbprinter_detect(10) == PRN_STATUS_OK) {
                 gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames));
             } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+            CPU_SLOW(TRUE);
             remote_activate(REMOTE_ENABLED);
             break;
         case ACTION_MAIN_MENU:
@@ -623,6 +627,7 @@ uint8_t UPDATE_state_camera() BANKED {
 }
 
 uint8_t LEAVE_state_camera() BANKED {
+    CPU_FAST(TRUE);
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
     return 0;
