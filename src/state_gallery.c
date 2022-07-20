@@ -37,10 +37,10 @@
 
 #if (DEBUG_ENABLED==1)
     #define MENUITEM_DEBUG &GalleryMenuItemDebug
-    #define GALLERYMENU_HEIGHT 8
+    #define GALLERYMENU_HEIGHT 10
 #else
     #define MENUITEM_DEBUG NULL
-    #define MAINMENU_HEIGHT 7
+    #define MAINMENU_HEIGHT 9
 #endif
 
 
@@ -122,7 +122,7 @@ const menu_item_t GalleryMenuItemInfo = {
     .result = MENU_RESULT_CLOSE
 };
 const menu_item_t GalleryMenuItemPrint = {
-    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemTransfer,
+    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemPrintAll,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Print",
@@ -130,19 +130,37 @@ const menu_item_t GalleryMenuItemPrint = {
     .onPaint = NULL,
     .result = ACTION_PRINT_IMAGE
 };
-const menu_item_t GalleryMenuItemTransfer = {
-    .prev = &GalleryMenuItemPrint,           .next = &GalleryMenuItemDelete,
+const menu_item_t GalleryMenuItemPrintAll = {
+    .prev = &GalleryMenuItemPrint,          .next = &GalleryMenuItemTransfer,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .caption = " Print all",
+    .helpcontext = " Print the whole gallery",
+    .onPaint = NULL,
+    .result = ACTION_PRINT_GALLERY
+};
+const menu_item_t GalleryMenuItemTransfer = {
+    .prev = &GalleryMenuItemPrintAll,           .next = &GalleryMenuItemTransferAll,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Transfer",
     .helpcontext = " Link cable transfer",
     .onPaint = NULL,
     .result = ACTION_TRANSFER_IMAGE
 };
+const menu_item_t GalleryMenuItemTransferAll = {
+    .prev = &GalleryMenuItemTransfer,           .next = &GalleryMenuItemDelete,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 5, .width = 8,
+    .caption = " Transfer all",
+    .helpcontext = " Transfer the whole gallery",
+    .onPaint = NULL,
+    .result = ACTION_TRANSFER_GALLERY
+};
 const menu_item_t GalleryMenuItemDelete = {
-    .prev = &GalleryMenuItemTransfer,          .next = &GalleryMenuItemDeleteAll,
+    .prev = &GalleryMenuItemTransferAll,        .next = &GalleryMenuItemDeleteAll,
     .sub = &YesNoMenu, .sub_params = "Are you sure?",
-    .ofs_x = 1, .ofs_y = 4, .width = 8,
+    .ofs_x = 1, .ofs_y = 6, .width = 8,
     .caption = " Delete",
     .helpcontext = " Delete current image",
     .onPaint = NULL,
@@ -151,9 +169,9 @@ const menu_item_t GalleryMenuItemDelete = {
 const menu_item_t GalleryMenuItemDeleteAll = {
     .prev = &GalleryMenuItemDelete,         .next = MENUITEM_DEBUG,
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
-    .ofs_x = 1, .ofs_y = 5, .width = 8,
+    .ofs_x = 1, .ofs_y = 7, .width = 8,
     .caption = " Delete all",
-    .helpcontext = " Erase whole gallery",
+    .helpcontext = " Erase the whole gallery",
     .onPaint = NULL,
     .result = ACTION_ERASE_GALLERY
 };
@@ -161,7 +179,7 @@ const menu_item_t GalleryMenuItemDeleteAll = {
 const menu_item_t GalleryMenuItemDebug = {
     .prev = &GalleryMenuItemDeleteAll,     .next = NULL,
     .sub = &DebugMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 6, .width = 8,
+    .ofs_x = 1, .ofs_y = 8, .width = 8,
     .caption = " Debug",
     .helpcontext = " Show debug info",
     .onPaint = NULL,
@@ -250,9 +268,27 @@ uint8_t UPDATE_state_gallery() BANKED {
                 }
                 JOYPAD_RESET();
                 break;
+            case ACTION_TRANSFER_GALLERY:
+                for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
+                    if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                        break;
+                    }
+                }
+                JOYPAD_RESET();
+                break;
             case ACTION_PRINT_IMAGE:
                 if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                }
+                JOYPAD_RESET();
+                break;
+            case ACTION_PRINT_GALLERY:
+                for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
+                    if (!gallery_print_picture(i, OPTION(print_frame_idx))) {
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                        break;
+                    }
                 }
                 JOYPAD_RESET();
                 break;

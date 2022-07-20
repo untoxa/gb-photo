@@ -13,7 +13,9 @@
 #define ACTION_ERASE_IMAGE          11
 #define ACTION_DISPLAY_INFO         12
 #define ACTION_TRANSFER_IMAGE       13
-#define ACTION_PRINT_IMAGE          14
+#define ACTION_TRANSFER_GALLERY     14
+#define ACTION_PRINT_IMAGE          15
+#define ACTION_PRINT_GALLERY        16
 
 // settings
 #define ACTION_SETTINGS_PRINT_FAST  20

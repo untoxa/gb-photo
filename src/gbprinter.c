@@ -134,7 +134,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
             if (printer_print_tile(tile_data)) {
                 PRINTER_SEND_COMMAND(PRN_PKT_EOF);
                 // setup printing if required
-                if (y == row_count - 1) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+                if (y == (row_count - 1)) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
                 if ((error = printer_wait(SECONDS(1), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;

@@ -68,7 +68,7 @@ inline void gbprinter_set_handler(void * fn_ofs, uint8_t fn_seg) {
 }
 
 inline void gbprinter_set_print_params(uint8_t margins, uint8_t palette, uint8_t exposure) {
-    PRN_PKT_START.crc = 0x05 + (PRN_PKT_START.margins = margins) + (PRN_PKT_START.palette = palette) + (PRN_PKT_START.exposure = exposure);
+    PRN_PKT_START.crc = ((PRN_CMD_PRINT + 0x04u + 0x01u) + (PRN_PKT_START.margins = margins) + (PRN_PKT_START.palette = palette) + (PRN_PKT_START.exposure = exposure));
 }
 
 #endif
