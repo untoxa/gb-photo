@@ -48,13 +48,13 @@
 /** Palette format: the bits, grouped two by two, give the printing color of the encoded pixel value
     for the default palette 0xE4 = 0b11100100 = [3 2 1 0]
     Any value is valid, which means that 1 to 4 color images are possible
-    0b00000000u acts the same for the printer
+    0x00 acts the same as 0xE4 for the printer
 */
 #define PRN_PALETTE_NORMAL      0b11100100u
 #define PRN_PALETTE_INV         0b00011011u
 
 /** Exposure: 0x40 is default value, values from 0x80 to 0xFF act as 0x40
-    determines the time used by the printer head to heat the thermal paper
+    Determines the time used by the printer head to heat the thermal paper
 */
 #define PRN_EXPOSURE_LIGHT      0x00
 #define PRN_EXPOSURE_DEFAULT    0x40
