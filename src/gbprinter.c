@@ -25,7 +25,7 @@ static const uint8_t PRN_PKT_INIT[]    = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT,
 static const uint8_t PRN_PKT_STATUS[]  = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_STATUS,0x00,0x00,0x00,0x0F,0x00,0x00,0x00 };
 static const uint8_t PRN_PKT_EOF[]     = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_DATA,0x00,0x00,0x00,0x04,0x00,0x00,0x00 };
 
-status_packet_t PRN_PKT_START = {
+start_print_pkt_t PRN_PKT_START = {
     .magic = PRN_MAGIC, .command = PRN_CMD_PRINT, .length = 4,
     .print = TRUE, .margins = 0, .palette = PRN_PALETTE_NORMAL, .exposure = PRN_EXPOSURE_DARK,
     .crc = 0, .trail = 0

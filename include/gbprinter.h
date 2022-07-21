@@ -43,7 +43,7 @@
 
 #define PRN_MAX_PROGRESS        8
 
-typedef struct status_packet_t {
+typedef struct start_print_pkt_t {
     uint16_t magic;
     uint16_t command;
     uint16_t length;
@@ -53,12 +53,12 @@ typedef struct status_packet_t {
     uint8_t exposure;
     uint16_t crc;
     uint16_t trail;
-} status_packet_t;
+} start_print_pkt_t;
 
 extern uint8_t printer_completion;
 extern far_ptr_t printer_progress_handler;
 
-extern status_packet_t PRN_PKT_START;
+extern start_print_pkt_t PRN_PKT_START;
 
 uint8_t gbprinter_detect(uint8_t delay) BANKED;
 uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const frame_desc_t * frame, uint8_t frame_bank) BANKED;
