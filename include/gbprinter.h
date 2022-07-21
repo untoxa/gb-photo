@@ -10,7 +10,7 @@
 #define PRN_LOW(A) ((A) & 0xFF)
 #define PRN_HIGH(A) ((A) >> 8)
 
-#define PRN_MAGIC               0x3388 //Mandatory first bytes to initialised a communication with printer
+#define PRN_MAGIC               0x3388 //Mandatory first bytes to initialise a communication with printer
 #define PRN_MAGIC_1             PRN_LOW(PRN_MAGIC)
 #define PRN_MAGIC_2             PRN_HIGH(PRN_MAGIC)
 // Two consecutive linked commands must never be more than 150 ms apart
