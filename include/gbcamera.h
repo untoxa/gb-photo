@@ -15,10 +15,17 @@
 #define CAMERA_IMAGE_SIZE (CAMERA_IMAGE_TILE_WIDTH * CAMERA_IMAGE_TILE_HEIGHT * 16)
 #define CAMERA_THUMB_SIZE (CAMERA_THUMB_TILE_WIDTH * CAMERA_THUMB_TILE_HEIGHT * 16)
 
+/** Magic (in ASCII) is a mandatory keyword in the sram
+    It precedes any checksum
+*/
 #define CAMERA_MAGIC "Magic"
 
+/** Images are stored in 30 sram slots and the state of each slot is stored in a vector state of 30 bytes, in the same order
+    0xFF means that the slot is free or erased, any number between 0x00 and 0x1D indicates the # of image in the album corresponding to the # of the memory slot
+    Deleting an image replace its value by 0xFF but does not erase the memory slot.
+*/
 #define CAMERA_IMAGE_DELETED 0xFF
-#define CAMERA_IMAGE_UNDEFINED 0xFE
+
 typedef struct cam_game_data_t {
     uint8_t imageslots[CAMERA_MAX_IMAGE_SLOTS];
     uint8_t magic[5];
@@ -31,6 +38,7 @@ typedef struct cam_game_data_t {
  * Using RAM Bank 0
  * Containing Last seen image, gameface data etc.
  */
+
 #define CAMERA_BANK_LAST_SEEN 0
 
 //static uint8_t AT(0xA000) last_seen_upper_unused[256];
@@ -73,6 +81,22 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
 /*
  * 0x0000 to 0x0035
  * Must be written to RAM bank 16 to control the camera's sensor
+ */
+
+/** The Mitsubishi M64282FP artificial retina of the Game Boy Camera is driven by filling 8 registers of 1 byte each
+    The MAC-GBD only accept 5 registers for image settings (+1 for com, not counted), so 3 are probably forced by the MAC-GBD and not editable.
+    (https://github.com/AntonioND/gbcam-rev-engineer)
+    (https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor)
+    0xA001 (CAM01) = M64282FP register 1: exclusively set edge enhancement mode (1 bit), vertical/horizontal edge enhancement mode (1 bit) and gain (5 bits)
+    0xA002 (CAM02) = M64282FP register 2: exposure time, raw, from 4 ms to 1 second (8 bits)
+    0xA003 (CAM03) = M64282FP register 3: exposure time, fine, from 0 to 4 ms (8 bits) - value below 0.25 ms create vertical artifacts
+    M64282FP register 4: 1D filtering kernel P (8 bits) - not editable - set t0 0x01 by Game Boy Camera MAC-GBD
+    M64282FP register 5: 1D filtering kernel M (8 bits) - not editable - set t0 0x00 by Game Boy Camera MAC-GBD
+    M64282FP register 6: 1D filtering kernel X (8 bits) - not editable - set t0 0x01 by Game Boy Camera MAC-GBD
+    0xA004 (CAM04) = M64282FP register 7: Edge engancement ratio (4 bits), inverted output (1 bit), output bias voltage (3 bits)
+    0xA005 (CAM05) = M64282FP register 0: zero point calibration (2 bits), output reference voltage (6 bits)
+    
+    0x0000 (CAM0) is an exchange register
  */
 
 #define CAMERA_BANK_REGISTERS 16
