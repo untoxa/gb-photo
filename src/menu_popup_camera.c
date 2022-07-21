@@ -147,7 +147,7 @@ const menu_item_t ActionSubMenuTransfer = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 10,
     .caption = " Transfer",
-    .helpcontext = " Transfer by the link cable",
+    .helpcontext = " Transfer using link cable",
     .onPaint = NULL,
     .result = ACTION_ACTION_TRANSFER
 };

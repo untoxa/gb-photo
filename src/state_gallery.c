@@ -141,7 +141,7 @@ const menu_item_t GalleryMenuItemTransfer = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Transfer",
-    .helpcontext = " Transfer by the link cable",
+    .helpcontext = " Transfer using link cable",
     .onPaint = NULL,
     .result = ACTION_TRANSFER_IMAGE
 };
@@ -209,7 +209,7 @@ static void refresh_screen() {
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
     gallery_show_picture(OPTION(gallery_picture_idx));
 
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START "/" ICON_SELECT " for Menus");
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
     sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
@@ -246,7 +246,7 @@ uint8_t UPDATE_state_gallery() BANKED {
             CHANGE_STATE(state_thumbnails);
             return FALSE;
         }
-    } else if (KEY_PRESSED(J_SELECT)) {
+    } else if ((KEY_PRESSED(J_SELECT)) || (KEY_PRESSED(J_B))) {
         switch (menu_result = menu_execute(&GalleryMenu, NULL, NULL)) {
             case ACTION_ERASE_GALLERY:
                 // TODO: erase image library
@@ -262,6 +262,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 break;
             case ACTION_TRANSFER_IMAGE:
                 remote_activate(REMOTE_DISABLED);
+                linkcable_transfer_reset();
                 if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 }
@@ -270,11 +271,18 @@ uint8_t UPDATE_state_gallery() BANKED {
                 break;
             case ACTION_TRANSFER_GALLERY:
                 remote_activate(REMOTE_DISABLED);
-                for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
-                    show_progressbar(0, i, VECTOR_LEN(used_slots));
+                linkcable_transfer_reset();
+                uint8_t transfer_completion = 0, image_count = VECTOR_LEN(used_slots);
+                show_progressbar(0, 0, 8);
+                for (uint8_t i = 0; i != image_count; i++) {
                     if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                         break;
+                    }
+                    uint8_t current_progress = (((uint16_t)i * PRN_MAX_PROGRESS) / image_count);
+                    if (transfer_completion != current_progress) {
+                        transfer_completion = current_progress;
+                        show_progressbar(0, current_progress, PRN_MAX_PROGRESS);
                     }
                 }
                 remote_activate(REMOTE_ENABLED);

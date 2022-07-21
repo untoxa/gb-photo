@@ -28,7 +28,7 @@
 #define PRN_CMD_PRINT           0x02
 
 /** DATA command
-    Can be any length between 0 and 640 bytes. 
+    Can be any length between 0 and 640 bytes.
     DATA command with lenght 0 triggers PRN_STATUS_FULL and is mandatory before print command
 */
 #define PRN_CMD_DATA            0x04
@@ -68,7 +68,7 @@
 */
 #define PRN_STATUS_ER2          0x40
 
-/** Paper jam  (abnormal motor operation) 
+/** Paper jam  (abnormal motor operation)
 */
 #define PRN_STATUS_ER1          0x20
 
@@ -102,7 +102,7 @@
 #define PRN_STATUS_MASK_ERRORS  0xF0
 #define PRN_STATUS_MASK_ANY     0xFF
 
-#define SECONDS(A)              ((A)*60)
+#define PRN_SECONDS(A)          ((A)*60)
 
 #define PRN_MAX_PROGRESS        8
 

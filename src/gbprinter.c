@@ -137,10 +137,10 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 if (y == (row_count - 1)) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
-                if ((error = printer_wait(SECONDS(1), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
-                if ((error = printer_wait(SECONDS(10), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_SECONDS(1), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_SECONDS(10), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
 
-                uint8_t current_progress = ((uint16_t)y << 3) / row_count;
+                uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / row_count);
                 if (printer_completion != current_progress) {
                     printer_completion = current_progress, call_far(&printer_progress_handler);
                 }

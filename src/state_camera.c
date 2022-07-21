@@ -585,6 +585,7 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
         case ACTION_CAMERA_TRANSFER:
             remote_activate(REMOTE_DISABLED);
+            linkcable_transfer_reset();
             linkcable_transfer_image(last_seen, CAMERA_BANK_LAST_SEEN);
             remote_activate(REMOTE_ENABLED);
             break;

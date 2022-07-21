@@ -9,8 +9,10 @@
 // 0b10000011 - start, CGB double speed, internal clock
 #define START_TRANSFER_FAST 0x83
 
-static const uint8_t DATA_HEADER[] = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT << 4,0x00, PRN_LOW(CAMERA_IMAGE_SIZE),PRN_HIGH(CAMERA_IMAGE_SIZE) };
-static const uint8_t DATA_FOOTER[] = { 0x00,0x00,0x00,0x00 };
+static const uint8_t PRN_PKT_INIT[] = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
+
+static const uint8_t DATA_HEADER[]  = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT << 4,0x00, PRN_LOW(CAMERA_IMAGE_SIZE),PRN_HIGH(CAMERA_IMAGE_SIZE) };
+static const uint8_t DATA_FOOTER[]  = { 0x00,0x00,0x00,0x00 };
 
 void linkcable_send_string(const uint8_t * data, uint8_t len) {
 #ifdef NINTENDO
@@ -53,11 +55,15 @@ lbl:
 #endif
 }
 
+uint8_t linkcable_transfer_reset() BANKED {
+    linkcable_send_string(PRN_PKT_INIT, sizeof(PRN_PKT_INIT));
+    return PRN_STATUS_OK;
+}
 
 uint8_t linkcable_transfer_image(const uint8_t * image, uint8_t image_bank) BANKED {
     SWITCH_RAM(image_bank);
     linkcable_send_string(DATA_HEADER, sizeof(DATA_HEADER));
     linkcable_send_block(image);
-    linkcable_send_string(DATA_FOOTER, sizeof(DATA_HEADER));
+    linkcable_send_string(DATA_FOOTER, sizeof(DATA_FOOTER));
     return PRN_STATUS_OK;
 }
