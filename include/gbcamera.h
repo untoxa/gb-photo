@@ -90,9 +90,9 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
     0xA001 (CAM01) = M64282FP register 1: exclusively set edge enhancement mode (1 bit), vertical/horizontal edge enhancement mode (1 bit) and gain (5 bits)
     0xA002 (CAM02) = M64282FP register 2: exposure time, raw, from 4 ms to 1 second (8 bits)
     0xA003 (CAM03) = M64282FP register 3: exposure time, fine, from 0 to 4 ms (8 bits) - value below 0.25 ms create vertical artifacts
-    M64282FP register 4: 1D filtering kernel P (8 bits) - not editable - set t0 0x01 by Game Boy Camera MAC-GBD
-    M64282FP register 5: 1D filtering kernel M (8 bits) - not editable - set t0 0x00 by Game Boy Camera MAC-GBD
-    M64282FP register 6: 1D filtering kernel X (8 bits) - not editable - set t0 0x01 by Game Boy Camera MAC-GBD
+    M64282FP register 4: 1D filtering kernel P (8 bits) - not editable - set to 0x01 by Game Boy Camera MAC-GBD
+    M64282FP register 5: 1D filtering kernel M (8 bits) - not editable - set to 0x00 by Game Boy Camera MAC-GBD
+    M64282FP register 6: 1D filtering kernel X (8 bits) - not editable - set to 0x01 by Game Boy Camera MAC-GBD
     0xA004 (CAM04) = M64282FP register 7: Edge engancement ratio (4 bits), inverted output (1 bit), output bias voltage (3 bits)
     0xA005 (CAM05) = M64282FP register 0: zero point calibration (2 bits), output reference voltage (6 bits)
     
