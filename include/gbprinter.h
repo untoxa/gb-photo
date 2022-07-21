@@ -29,7 +29,7 @@
 
 /** DATA command
     Can be any length between 0 and 640 bytes. 
-    Lenght 0 triggers PRN_STATUS_FULL and is mandatory before print command
+    DATA command with lenght 0 triggers PRN_STATUS_FULL and is mandatory before print command
 */
 #define PRN_CMD_DATA            0x04
 
