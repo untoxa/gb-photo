@@ -18,7 +18,7 @@
 #define PRN_CMD_PRINT           0x02 //print command
 #define PRN_CMD_DATA            0x04 //data command. Can be any length between 0 and 640 bytes. Length 0 triggers PRN_STATUS_FULL and is mandatory before print command
 #define PRN_CMD_ABORT           0x08 //abort command
-#define PRN_CMD_STATUS          0x0F //status commnd. Resets PRN_STATUS_UNTRAN
+#define PRN_CMD_STATUS          0x0F //status command. Resets PRN_STATUS_UNTRAN
 
 #define PRN_PALETTE_NORMAL      0b11100100u // 0b00000000u acts the same for the printer
 #define PRN_PALETTE_INV         0b00011011u
@@ -31,7 +31,7 @@
 #define PRN_STATUS_ER2          0x40 //unspecified error
 #define PRN_STATUS_ER1          0x20 //paper jam
 #define PRN_STATUS_ER0          0x10 //packet error
-#define PRN_STATUS_UNTRAN       0x08 //allows to verify that printer got data with correct checksum
+#define PRN_STATUS_UNTRAN       0x08 //unprocessed data, allows to verify that printer got some data in memory with correct checksum
 #define PRN_STATUS_FULL         0x04 //status data ready, mandatory to allow printing
 #define PRN_STATUS_BUSY         0x02 //message while physically printing
 #define PRN_STATUS_SUM          0x01 //checksum error
