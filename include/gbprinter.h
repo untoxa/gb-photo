@@ -13,7 +13,7 @@
 /** 0x88,0x33 are mandatory first bytes to initialise a communication with printer
     Any command sequence begins by these
 */
-#define PRN_MAGIC               0x3388 //Mandatory first bytes to initialise a communication with printer
+#define PRN_MAGIC               0x3388
 #define PRN_MAGIC_1             PRN_LOW(PRN_MAGIC)
 #define PRN_MAGIC_2             PRN_HIGH(PRN_MAGIC)
 
@@ -70,7 +70,7 @@
 
 /** Paper jam  (abnormal motor operation) 
 */
-#define PRN_STATUS_ER1          0x20 //paper jam
+#define PRN_STATUS_ER1          0x20
 
 /** Packet error (but not checksum error)
 */
