@@ -26,7 +26,7 @@ Install few other dependancies:
 Clone the git to its desired destination: 
     
     cd (root of your git directory)
-    git clone https://github.com/untoxa/2bit-pxlr-studio
+    git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
 Change the Home directory into the git Makefile:
 
