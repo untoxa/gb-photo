@@ -3,9 +3,9 @@
 # Fast compiling guide for Windows users 
 
 
-Download GBDK-2020 from (here)[https://github.com/gbdk-2020/gbdk-2020/actions] under the GBDK Build and Package link.
+Download GBDK-2020 from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the GBDK Build and Package link.
 
-Download and install MSYS2 built for Windows from (here)[https://www.msys2.org/].
+Download and install MSYS2 built for Windows from [here](https://www.msys2.org/).
 
 Then run in MSYS2 command line: 
 
