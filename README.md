@@ -9,8 +9,10 @@ Install latest GBDK built for Windows from [https://github.com/gbdk-2020/gbdk-20
 Then run in MSYS2 command line: 
 
     pacman -S python
+    pacman -S make
+    pacman -S nano
    
-It installs Python 3. For whatever the reason, installing pip is a pain under Windows, so get this script and run it:
+It installs Python 3, make and nano (text editor). For whatever the reason, installing pip is always a pain, so get this little script and run it:
 
     wget https://bootstrap.pypa.io/get-pip.py
     python3 get-pip.py
@@ -20,11 +22,17 @@ Install few other dependancies:
     python3 -m pip install --upgrade Pillow
     python3 -m pip install --upgrade wave
     
-Clone the git to you local home: 
+Clone the git to its desired destination: 
     
+    cd (root of your git directory)
     git clone https://github.com/untoxa/2bit-pxlr-studio
 
-Change the Home directory in the git Makefile? Then run in MSYS2 command line: 
+Change the Home directory into the git Makefile:
+
+    cd (your git directory)
+    nano Makefile
+
+Modify GBDK_HOME entry, save, then run in MSYS2 command line: 
 
     make
 
