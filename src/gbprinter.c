@@ -21,7 +21,7 @@
     #define START_TRANSFER_FAST 0x81
 #endif
 
-static const uint8_t PRN_PKT_INIT[]    = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
+static const uint8_t LNK_PKT_INIT[]    = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
 static const uint8_t PRN_PKT_STATUS[]  = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_STATUS,0x00,0x00,0x00,0x0F,0x00,0x00,0x00 };
 static const uint8_t PRN_PKT_EOF[]     = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_DATA,0x00,0x00,0x00,0x04,0x00,0x00,0x00 };
 
@@ -80,7 +80,7 @@ uint8_t printer_print_tile(const uint8_t *tiledata) {
 
 inline void printer_init() {
     printer_tile_num = 0;
-    PRINTER_SEND_COMMAND(PRN_PKT_INIT);
+    PRINTER_SEND_COMMAND(LNK_PKT_INIT);
 }
 
 uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
@@ -107,18 +107,18 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
 
     banked_memcpy(&current_frame, frame, sizeof(current_frame), frame_bank);
 
-    uint8_t tile_data[16], error, packets;
+    uint8_t tile_data[16], error, packets = ((current_frame.height >> 1) << 1), pkt_count = 0;
 
-    if ((packets = current_frame.height >> 1) == 0) return PRN_STATUS_OK;
+    if ((packets >> 1) == 0) return PRN_STATUS_OK;
 
     SWITCH_RAM(image_bank);
     img = image;
 
-    const uint8_t * map = current_frame.map, row_count = packets << 1;
+    const uint8_t * map = current_frame.map;
     printer_tile_num = 0;
 
     gbprinter_set_print_params(0, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
-    for (uint8_t y = 0; y != row_count; y++) {
+    for (uint8_t y = 0; y != packets; y++) {
         for (uint8_t x = 0; x != 20; x++, map++) {
             // copy frame tile if applicable
             if (current_frame.map) {
@@ -131,21 +131,34 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 memcpy(tile_data, img + ((((y - current_frame.image_y) << 4) + (x - current_frame.image_x)) << 4), sizeof(tile_data));
             }
             // print the resulting tile
-            if (printer_print_tile(tile_data)) {
+            if (printer_print_tile(tile_data)) pkt_count++;
+            if (pkt_count == 9) {
+                pkt_count = 0;
                 PRINTER_SEND_COMMAND(PRN_PKT_EOF);
-                // setup printing if required
-                if (y == (row_count - 1)) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+                // setup margin if last packet
+                if (y == (packets - 1)) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
                 if ((error = printer_wait(PRN_SECONDS(1), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
-                if ((error = printer_wait(PRN_SECONDS(10), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_SECONDS(20), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
 
-                uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / row_count);
+                uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / packets);
                 if (printer_completion != current_progress) {
                     printer_completion = current_progress, call_far(&printer_progress_handler);
                 }
             }
         }
+    }
+    if (pkt_count) {
+        PRINTER_SEND_COMMAND(PRN_PKT_EOF);
+        // setup printing if required
+        gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+        PRINTER_SEND_COMMAND(PRN_PKT_START);
+        // query printer status
+        if ((error = printer_wait(PRN_SECONDS(1), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+        if ((error = printer_wait(PRN_SECONDS(10), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+        // indicate 100% completion
+        printer_completion = PRN_MAX_PROGRESS, call_far(&printer_progress_handler);
     }
     return PRINTER_SEND_COMMAND(PRN_PKT_STATUS);
 }

@@ -269,13 +269,23 @@ uint8_t UPDATE_state_gallery() BANKED {
                 remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
-            case ACTION_TRANSFER_GALLERY:
+            case ACTION_PRINT_IMAGE:
                 remote_activate(REMOTE_DISABLED);
-                linkcable_transfer_reset();
+                if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                }
+                remote_activate(REMOTE_ENABLED);
+                JOYPAD_RESET();
+                break;
+            case ACTION_TRANSFER_GALLERY:
+            case ACTION_PRINT_GALLERY:
+                gbprinter_set_handler(NULL, 0);
+                remote_activate(REMOTE_DISABLED);
+                if (menu_result == ACTION_TRANSFER_GALLERY) linkcable_transfer_reset();
                 uint8_t transfer_completion = 0, image_count = VECTOR_LEN(used_slots);
                 show_progressbar(0, 0, 8);
-                for (uint8_t i = 0; i != image_count; i++) {
-                    if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
+                for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
+                    if (!((menu_result == ACTION_TRANSFER_GALLERY) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                         break;
                     }
@@ -286,25 +296,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                     }
                 }
                 remote_activate(REMOTE_ENABLED);
-                JOYPAD_RESET();
-                break;
-            case ACTION_PRINT_IMAGE:
-                remote_activate(REMOTE_DISABLED);
-                if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
-                }
-                remote_activate(REMOTE_ENABLED);
-                JOYPAD_RESET();
-                break;
-            case ACTION_PRINT_GALLERY:
-                remote_activate(REMOTE_DISABLED);
-                for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
-                    if (!gallery_print_picture(i, OPTION(print_frame_idx))) {
-                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
-                        break;
-                    }
-                }
-                remote_activate(REMOTE_ENABLED);
+                gbprinter_set_handler(onPrinterProgress, BANK(state_gallery));
                 JOYPAD_RESET();
                 break;
             default:
