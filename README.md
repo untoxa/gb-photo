@@ -24,8 +24,7 @@ Clone the git to you local home:
     
     git clone https://github.com/untoxa/2bit-pxlr-studio
 
-Change the Home directory in the git Makefile
-Then run in MSYS2 command line: 
+Change the Home directory in the git Makefile? Then run in MSYS2 command line: 
 
     make
 
