@@ -4,7 +4,7 @@
 
 Install MSYS2 built for windows from [https://www.msys2.org/]
 
-Install last GBDK built for windows from [https://github.com/gbdk-2020/gbdk-2020/actions/runs/2672801001]
+Install latest GBDK built for windows from [https://github.com/gbdk-2020/gbdk-2020/actions/runs/2672801001]
 
 Then run in MSYS2 command line: 
 
@@ -29,4 +29,4 @@ Then run in MSYS2 command line:
 
     make
 
-Your roms will be in /build folders
+Your roms will be in /build folders, enjoy ! 
