@@ -15,6 +15,7 @@
 #include "vector.h"
 #include "load_save.h"
 #include "fade_manager.h"
+#include "protected.h"
 
 #include "state_camera.h"
 #include "state_gallery.h"
@@ -62,38 +63,38 @@ uint8_t gallery_show_picture(uint8_t image_no) {
     wait_vbl_done();
     screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, SOLID_BLACK);
 
-    if (!VECTOR_LEN(used_slots)) return FALSE;
-    uint8_t image_index = image_no;
-    if (image_index >= VECTOR_LEN(used_slots)) image_index = VECTOR_LEN(used_slots) - 1;
-    image_index = VECTOR_GET(used_slots, image_index);
+    if (!images_taken()) return CAMERA_IMAGE_DELETED;
 
+    uint8_t displayed_index = (image_no < images_taken()) ? image_no : (images_taken() - 1);
+
+    uint8_t image_index = VECTOR_GET(used_slots, displayed_index);
     SWITCH_RAM((image_index >> 1) + 1);
     screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((image_index & 1) ? image_second : image_first));
 
     wait_vbl_done();
     screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
-    return TRUE;
+
+    return displayed_index;
 }
 
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
-    if (!VECTOR_LEN(used_slots)) return FALSE;
-    uint8_t image_index = image_no;
-    if (image_index >= VECTOR_LEN(used_slots)) image_index = VECTOR_LEN(used_slots) - 1;
-    image_index = VECTOR_GET(used_slots, image_index);
-    if (gbprinter_detect(10) == PRN_STATUS_OK) {
-        gbprinter_print_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1, print_frames + frame_no, BANK(print_frames));
-        return TRUE;
+    if (image_no < images_taken()) {
+        uint8_t image_index = VECTOR_GET(used_slots, image_no);
+        if (gbprinter_detect(10) == PRN_STATUS_OK) {
+            gbprinter_print_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1, print_frames + frame_no, BANK(print_frames));
+            return TRUE;
+        }
     }
     return FALSE;
 }
 
 uint8_t gallery_transfer_picture(uint8_t image_no) {
-    if (!VECTOR_LEN(used_slots)) return FALSE;
-    uint8_t image_index = image_no;
-    if (image_index >= VECTOR_LEN(used_slots)) image_index = VECTOR_LEN(used_slots) - 1;
-    image_index = VECTOR_GET(used_slots, image_index);
-    linkcable_transfer_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1);
-    return TRUE;
+    if (image_no < images_taken()) {
+        uint8_t image_index = VECTOR_GET(used_slots, image_no);
+        linkcable_transfer_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 inline void show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
@@ -192,7 +193,8 @@ const menu_t GalleryMenu = {
 };
 
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
-    if (menu == &YesNoMenu) {
+    menu;
+    if (self->sub == &YesNoMenu) {
         return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
     }
     return value;
@@ -204,14 +206,16 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
     return 0;
 }
 
-static void refresh_screen() {
+static uint8_t refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
-    gallery_show_picture(OPTION(gallery_picture_idx));
+    uint8_t res = gallery_show_picture(OPTION(gallery_picture_idx));
 
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
     sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+
+    return res;
 }
 
 uint8_t INIT_state_gallery() BANKED {
@@ -220,7 +224,7 @@ uint8_t INIT_state_gallery() BANKED {
 }
 
 uint8_t ENTER_state_gallery() BANKED {
-    refresh_screen();
+    OPTION(gallery_picture_idx) = refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_gallery));
     fade_in_modal();
     JOYPAD_RESET();
@@ -232,29 +236,41 @@ uint8_t UPDATE_state_gallery() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
-        if (++OPTION(gallery_picture_idx) == VECTOR_LEN(used_slots)) OPTION(gallery_picture_idx) = 0;
+        if (++OPTION(gallery_picture_idx) == images_taken()) OPTION(gallery_picture_idx) = 0;
         gallery_show_picture(OPTION(gallery_picture_idx));
         save_camera_state();
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
-        if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = VECTOR_LEN(used_slots) - 1;
+        if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = images_taken() - 1;
         gallery_show_picture(OPTION(gallery_picture_idx));
         save_camera_state();
     } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
-        if (VECTOR_LEN(used_slots) != 0) {
+        if (images_taken()) {
             CHANGE_STATE(state_thumbnails);
             return FALSE;
         }
     } else if ((KEY_PRESSED(J_SELECT)) || (KEY_PRESSED(J_B))) {
         switch (menu_result = menu_execute(&GalleryMenu, NULL, NULL)) {
             case ACTION_ERASE_GALLERY:
-                // TODO: erase image library
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+                if (images_taken()) {
+                    uint8_t i, elem;
+                    VECTOR_ITERATE(used_slots, i, elem) {
+                        VECTOR_ADD(free_slots, elem);
+                        protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
+                    }
+                    VECTOR_CLEAR(used_slots);
+                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 break;
             case ACTION_ERASE_IMAGE:
-                // TODO: erase image
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+                if (OPTION(gallery_picture_idx) < images_taken()) {
+                    uint8_t elem = VECTOR_GET(used_slots, OPTION(gallery_picture_idx));
+                    VECTOR_DEL(used_slots, OPTION(gallery_picture_idx));
+                    protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
+                    VECTOR_ADD(free_slots, elem);
+                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info
@@ -282,9 +298,9 @@ uint8_t UPDATE_state_gallery() BANKED {
                 gbprinter_set_handler(NULL, 0);
                 remote_activate(REMOTE_DISABLED);
                 if (menu_result == ACTION_TRANSFER_GALLERY) linkcable_transfer_reset();
-                uint8_t transfer_completion = 0, image_count = VECTOR_LEN(used_slots);
-                show_progressbar(0, 0, 8);
-                for (uint8_t i = 0; i != VECTOR_LEN(used_slots); i++) {
+                uint8_t transfer_completion = 0, image_count = images_taken();
+                show_progressbar(0, 0, PRN_MAX_PROGRESS);
+                for (uint8_t i = 0; i != images_taken(); i++) {
                     if (!((menu_result == ACTION_TRANSFER_GALLERY) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                         break;
@@ -304,7 +320,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 break;
         }
-        refresh_screen();
+        OPTION(gallery_picture_idx) = refresh_screen();
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
         if (!menu_main_execute()) refresh_screen();

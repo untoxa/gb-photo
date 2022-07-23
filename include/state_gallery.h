@@ -19,4 +19,8 @@ inline uint8_t images_total() {
     return CAMERA_MAX_IMAGE_SLOTS;
 }
 
+inline uint8_t images_free() {
+    return VECTOR_LEN(free_slots);
+}
+
 #endif
