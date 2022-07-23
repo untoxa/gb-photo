@@ -269,6 +269,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                     VECTOR_DEL(used_slots, OPTION(gallery_picture_idx));
                     protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
                     VECTOR_ADD(free_slots, elem);
+                    protected_pack(used_slots);
                     music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 break;

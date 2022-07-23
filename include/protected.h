@@ -14,4 +14,7 @@ inline void protected_modify_slot(uint8_t slot, uint8_t value) {
     cam_game_data_echo.CRC_xor = cam_game_data.CRC_xor ^= (value ^ old);
 }
 
+void protected_pack(uint8_t * v) BANKED;
+void protected_lastseen_to_slot(uint8_t slot) BANKED;
+
 #endif

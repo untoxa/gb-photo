@@ -11,5 +11,6 @@
 #define VECTOR_GET(VECTOR, POS) (VECTOR[(POS) + 1])
 #define VECTOR_ADD(VECTOR, ELEM) (VECTOR[++VECTOR[0]] = (ELEM))
 #define VECTOR_DEL(VECTOR, POS) (memcpy(&(VECTOR[(POS) + 1]), &(VECTOR[(POS) + 2]), ((VECTOR[0]) - (POS)) * sizeof(VECTOR[0])),VECTOR[0]--)
+#define VECTOR_POP(VECTOR) (VECTOR[(VECTOR[0]--) + 1])
 
 #endif
