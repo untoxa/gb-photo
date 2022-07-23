@@ -25,6 +25,8 @@
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"
+#include "sound_transmit.h"
+#include "sound_menu_alter.h"
 
 // menus
 #include "menus.h"
@@ -236,17 +238,20 @@ uint8_t UPDATE_state_gallery() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
+        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
         if (++OPTION(gallery_picture_idx) == images_taken()) OPTION(gallery_picture_idx) = 0;
         gallery_show_picture(OPTION(gallery_picture_idx));
         save_camera_state();
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
+        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
         if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = images_taken() - 1;
         gallery_show_picture(OPTION(gallery_picture_idx));
         save_camera_state();
     } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
         if (images_taken()) {
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
             CHANGE_STATE(state_thumbnails);
             return FALSE;
         }
@@ -278,6 +283,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 break;
             case ACTION_TRANSFER_IMAGE:
+                music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit));
                 remote_activate(REMOTE_DISABLED);
                 linkcable_transfer_reset();
                 if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
@@ -298,7 +304,10 @@ uint8_t UPDATE_state_gallery() BANKED {
             case ACTION_PRINT_GALLERY:
                 gbprinter_set_handler(NULL, 0);
                 remote_activate(REMOTE_DISABLED);
-                if (menu_result == ACTION_TRANSFER_GALLERY) linkcable_transfer_reset();
+                if (menu_result == ACTION_TRANSFER_GALLERY) {
+                    linkcable_transfer_reset();
+                    music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit));
+                }
                 uint8_t transfer_completion = 0, image_count = images_taken();
                 show_progressbar(0, 0, PRN_MAX_PROGRESS);
                 for (uint8_t i = 0; i != images_taken(); i++) {

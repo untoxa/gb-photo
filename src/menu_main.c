@@ -109,9 +109,11 @@ uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t menu_main_execute() BANKED {
     switch (menu_execute(&MainMenu, NULL, NULL)) {
         case ACTION_CAMERA:
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
             CHANGE_STATE(state_camera);
             return STATE_CHANGED();
         case ACTION_GALLERY:
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
             CHANGE_STATE(state_gallery);
             return STATE_CHANGED();         // don't refresh screen if state changed
         case ACTION_SETTINGS:

@@ -29,6 +29,7 @@
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"
+#include "sound_menu_alter.h"
 #include "shutter01.h"
 #include "shutter02.h"
 
@@ -443,6 +444,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
         // redraw selection if requested
         if (redraw_selection) {
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
             save_camera_mode_settings(OPTION(camera_mode));
             menu_move_selection(menu, NULL, selection);
         }

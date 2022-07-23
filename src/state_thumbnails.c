@@ -22,6 +22,7 @@
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"
+#include "sound_menu_alter.h"
 
 // menus
 #include "menus.h"
@@ -106,9 +107,9 @@ uint8_t ENTER_state_thumbnails() BANKED {
 uint8_t UPDATE_state_thumbnails() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP)) {
-        if (cy) --cy;
+        if (cy) --cy, music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
     } else if (KEY_PRESSED(J_DOWN)) {
-        if (cy < (THUMBS_COUNT_Y - 1)) ++cy;
+        if (cy < (THUMBS_COUNT_Y - 1)) ++cy, music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
     } else if (KEY_PRESSED(J_LEFT)) {
         if (!cx) {
             uint8_t old_page = thumbnails_page_no;
@@ -119,6 +120,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
             }
         } else --cx;
+        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
     } else if (KEY_PRESSED(J_RIGHT)) {
         if (++cx == THUMBS_COUNT_X) {
             uint8_t old_page = thumbnails_page_no;
@@ -129,12 +131,15 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
             }
         };
+        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
     } else if (KEY_PRESSED(J_A)) {
         OPTION(gallery_picture_idx) = coords_to_picture_no(cx, cy);
         save_camera_state();
+        music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
         CHANGE_STATE(state_gallery);
         return 0;
     } else if (KEY_PRESSED(J_B)) {
+        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
         CHANGE_STATE(state_gallery);
         return 0;
     } else if (KEY_PRESSED(J_START)) {

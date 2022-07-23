@@ -5,9 +5,12 @@
 #include "joy.h"
 #include "vwf.h"
 #include "screen.h"
+#include "musicmanager.h"
 #include "misc_assets.h"
 
 #include "menus.h"
+
+#include "sound_menu_move.h"
 
 void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text) {
     uint8_t len;
@@ -67,11 +70,13 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         // process menu keys
         if (KEY_PRESSED(J_UP)) {
             if (selection->prev) {
+                music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move));
                 selection = menu_move_selection(menu, selection, selection->prev);
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_DOWN)) {
             if (selection->next) {
+                music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move));
                 selection = menu_move_selection(menu, selection, selection->next);
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
