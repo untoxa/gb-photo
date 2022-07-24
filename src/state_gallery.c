@@ -57,15 +57,16 @@ VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 void gallery_toss_images() {
     memset(used_slots, CAMERA_IMAGE_DELETED, sizeof(used_slots));
     VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
-    uint8_t i, elem, j;
-    for (i = 0; i < CAMERA_MAX_IMAGE_SLOTS; i++) {
-        uint8_t order = cam_game_data.imageslots[i];
-        if (order < CAMERA_MAX_IMAGE_SLOTS) used_slots[order+1] = i; else VECTOR_ADD(free_slots, i);
+    uint8_t j;
+    for (uint8_t i = 0; i < CAMERA_MAX_IMAGE_SLOTS; i++) {
+        j = cam_game_data.imageslots[i];
+        if (j < CAMERA_MAX_IMAGE_SLOTS) used_slots[j + 1] = i; else VECTOR_ADD(free_slots, i);
     }
-    for (i = 1, j = 1; !(i > CAMERA_MAX_IMAGE_SLOTS); i++) {
-        if (used_slots[i] < CAMERA_MAX_IMAGE_SLOTS) used_slots[j++] = used_slots[i];
+    j = 0;
+    for (uint8_t i = 1; !(i > CAMERA_MAX_IMAGE_SLOTS); i++) {
+        if (used_slots[i] < CAMERA_MAX_IMAGE_SLOTS) used_slots[++j] = used_slots[i];
     }
-    VECTOR_LEN(used_slots) = (j - 1);
+    VECTOR_LEN(used_slots) = j;
 }
 
 uint8_t gallery_show_picture(uint8_t image_no) {
@@ -245,16 +246,20 @@ uint8_t UPDATE_state_gallery() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
-        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
-        if (++OPTION(gallery_picture_idx) == images_taken()) OPTION(gallery_picture_idx) = 0;
-        gallery_show_picture(OPTION(gallery_picture_idx));
-        save_camera_state();
+        if (images_taken() > 1) {
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
+            if (++OPTION(gallery_picture_idx) == images_taken()) OPTION(gallery_picture_idx) = 0;
+            gallery_show_picture(OPTION(gallery_picture_idx));
+            save_camera_state();
+        }
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
-        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
-        if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = images_taken() - 1;
-        gallery_show_picture(OPTION(gallery_picture_idx));
-        save_camera_state();
+        if (images_taken() > 1) {
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
+            if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = images_taken() - 1;
+            gallery_show_picture(OPTION(gallery_picture_idx));
+            save_camera_state();
+        }
     } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
         if (images_taken()) {
@@ -265,13 +270,12 @@ uint8_t UPDATE_state_gallery() BANKED {
     } else if ((KEY_PRESSED(J_SELECT)) || (KEY_PRESSED(J_B))) {
         switch (menu_result = menu_execute(&GalleryMenu, NULL, NULL)) {
             case ACTION_ERASE_GALLERY:
-                if (images_taken()) {
-                    uint8_t i, elem;
-                    VECTOR_ITERATE(used_slots, i, elem) {
-                        VECTOR_ADD(free_slots, elem);
-                        protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
+                if (images_taken() != 0) {
+                    VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
+                    for (uint8_t i = CAMERA_MAX_IMAGE_SLOTS; i != 0; i--) {
+                        protected_modify_slot(i - 1, CAMERA_IMAGE_DELETED);
+                        VECTOR_ADD(free_slots, i - 1);
                     }
-                    VECTOR_CLEAR(used_slots);
                     music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 break;
