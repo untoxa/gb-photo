@@ -17,6 +17,8 @@
 #include "gbprinter.h"
 #include "linkcable.h"
 #include "fade_manager.h"
+#include "vector.h"
+#include "protected.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -116,6 +118,14 @@ void camera_load_settings() {
 
 void camera_image_save() {
     // TODO: save last seen image to gallery
+    uint8_t n_images = images_taken();
+    if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
+        uint8_t slot = VECTOR_POP(free_slots);
+        protected_modify_slot(slot, n_images);
+        protected_lastseen_to_slot(slot);
+        protected_generate_thumbnail(slot);
+        VECTOR_ADD(used_slots, slot);
+    } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
 }
 
 static void refresh_usage_indicator() {

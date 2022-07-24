@@ -3,6 +3,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "musicmanager.h"
 #include "joy.h"
@@ -54,11 +55,17 @@ VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
 void gallery_toss_images() {
+    memset(used_slots, CAMERA_IMAGE_DELETED, sizeof(used_slots));
     VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
-    for (uint8_t i = 0; i < CAMERA_MAX_IMAGE_SLOTS; i++) {
-        uint8_t slot = cam_game_data.imageslots[i];
-        if (slot == CAMERA_IMAGE_DELETED) VECTOR_ADD(free_slots, i); else VECTOR_ADD(used_slots, i);
+    uint8_t i, elem, j;
+    for (i = 0; i < CAMERA_MAX_IMAGE_SLOTS; i++) {
+        uint8_t order = cam_game_data.imageslots[i];
+        if (order < CAMERA_MAX_IMAGE_SLOTS) used_slots[order+1] = i; else VECTOR_ADD(free_slots, i);
     }
+    for (i = 1, j = 1; !(i > CAMERA_MAX_IMAGE_SLOTS); i++) {
+        if (used_slots[i] < CAMERA_MAX_IMAGE_SLOTS) used_slots[j++] = used_slots[i];
+    }
+    VECTOR_LEN(used_slots) = (j - 1);
 }
 
 uint8_t gallery_show_picture(uint8_t image_no) {

@@ -52,6 +52,10 @@ lbl:
         jp nz, 1$
         ret
     __endasm;
+#else
+    __asm
+        ret
+    __endasm;
 #endif
 }
 

@@ -15,6 +15,7 @@ inline void protected_modify_slot(uint8_t slot, uint8_t value) {
 }
 
 void protected_pack(uint8_t * v) BANKED;
+void protected_generate_thumbnail(uint8_t slot) BANKED;
 void protected_lastseen_to_slot(uint8_t slot) BANKED;
 
 #endif

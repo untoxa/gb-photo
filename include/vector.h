@@ -12,5 +12,6 @@
 #define VECTOR_ADD(VECTOR, ELEM) (VECTOR[++VECTOR[0]] = (ELEM))
 #define VECTOR_DEL(VECTOR, POS) (memcpy(&(VECTOR[(POS) + 1]), &(VECTOR[(POS) + 2]), ((VECTOR[0]) - (POS)) * sizeof(VECTOR[0])),VECTOR[0]--)
 #define VECTOR_POP(VECTOR) (VECTOR[(VECTOR[0]--) + 1])
+#define VECTOR_INS(VECTOR, POS, ELEM) (memmove(&(VECTOR[(POS) + 2]), &(VECTOR[(POS) + 1]), ((VECTOR[0]) - (POS) + 1) * sizeof(VECTOR[0])), (VECTOR[(POS) + 1] = (ELEM)), VECTOR[0]++)
 
 #endif
