@@ -58,15 +58,16 @@ void gallery_toss_images() {
     memset(used_slots, CAMERA_IMAGE_DELETED, sizeof(used_slots));
     VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
     uint8_t j;
-    for (uint8_t i = 0; i < CAMERA_MAX_IMAGE_SLOTS; i++) {
-        j = cam_game_data.imageslots[i];
-        if (j < CAMERA_MAX_IMAGE_SLOTS) used_slots[j + 1] = i; else VECTOR_ADD(free_slots, i);
+    for (uint8_t i = CAMERA_MAX_IMAGE_SLOTS; i != 0 ; i--) {
+        j = cam_game_data.imageslots[i - 1];
+        if (j < CAMERA_MAX_IMAGE_SLOTS) used_slots[j + 1] = (i - 1); else VECTOR_ADD(free_slots, i - 1);
     }
     j = 0;
     for (uint8_t i = 1; !(i > CAMERA_MAX_IMAGE_SLOTS); i++) {
         if (used_slots[i] < CAMERA_MAX_IMAGE_SLOTS) used_slots[++j] = used_slots[i];
     }
     VECTOR_LEN(used_slots) = j;
+    protected_pack(used_slots);
 }
 
 uint8_t gallery_show_picture(uint8_t image_no) {
@@ -280,7 +281,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
                 break;
             case ACTION_ERASE_IMAGE:
-                if (OPTION(gallery_picture_idx) < images_taken()) {
+                if ((images_taken()) && (OPTION(gallery_picture_idx) < images_taken())) {
                     uint8_t elem = VECTOR_GET(used_slots, OPTION(gallery_picture_idx));
                     VECTOR_DEL(used_slots, OPTION(gallery_picture_idx));
                     protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
