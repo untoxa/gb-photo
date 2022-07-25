@@ -82,7 +82,7 @@ static void refresh_screen() {
 
     tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
 
-    sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
+    sprintf(text_buffer, "%hd/%hd", (uint8_t)((OPTION(gallery_picture_idx) < images_taken()) ? (OPTION(gallery_picture_idx) + 1) : 0), (uint8_t)images_taken());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
 }
 
