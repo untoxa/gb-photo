@@ -35,17 +35,17 @@ static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, cx = 0, cy = 0,
 
 const metasprite_t gallery_cursor0[] = {
 	METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0),
-    METASPR_ITEM(24,  0, 2, 0), METASPR_ITEM(0, -24, 3, 0),
+    METASPR_ITEM(24,  0, 3, 0), METASPR_ITEM(0, -24, 2, 0),
     METASPR_TERM
 };
 const metasprite_t gallery_cursor1[] = {
 	METASPR_ITEM(17,  9, 0, 0), METASPR_ITEM(0,  22, 1, 0),
-    METASPR_ITEM(22,  0, 2, 0), METASPR_ITEM(0, -22, 3, 0),
+    METASPR_ITEM(22,  0, 3, 0), METASPR_ITEM(0, -22, 2, 0),
     METASPR_TERM
 };
 const metasprite_t gallery_cursor2[] = {
 	METASPR_ITEM(18, 10, 0, 0), METASPR_ITEM(0,  20, 1, 0),
-    METASPR_ITEM(20,  0, 2, 0), METASPR_ITEM(0, -20, 3, 0),
+    METASPR_ITEM(20,  0, 3, 0), METASPR_ITEM(0, -20, 2, 0),
     METASPR_TERM
 };
 const metasprite_t * const gallery_cursor[] = {gallery_cursor0, gallery_cursor1, gallery_cursor2, gallery_cursor1};

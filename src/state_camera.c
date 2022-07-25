@@ -59,7 +59,7 @@ camera_mode_settings_t current_settings[N_CAMERA_MODES];
 uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
 
 static const uint16_t exposures[] = {
-    US_TO_EXPOSURE_VALUE(208),
+    US_TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
     US_TO_EXPOSURE_VALUE(304),     US_TO_EXPOSURE_VALUE(400),     US_TO_EXPOSURE_VALUE(512),     US_TO_EXPOSURE_VALUE(608),
     US_TO_EXPOSURE_VALUE(800),     US_TO_EXPOSURE_VALUE(1008),    US_TO_EXPOSURE_VALUE(1264),    US_TO_EXPOSURE_VALUE(1504),
     US_TO_EXPOSURE_VALUE(2000),    US_TO_EXPOSURE_VALUE(2512),    US_TO_EXPOSURE_VALUE(3008),    US_TO_EXPOSURE_VALUE(4000),
