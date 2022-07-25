@@ -39,7 +39,8 @@ CFLAGS = -Iinclude -Iinclude/$(PORT) -Iinclude/$(PLAT) -I$(RESDIR) -Iobj/$(PLAT)
 
 BRANCH      = $(shell git rev-parse --abbrev-ref HEAD)
 VERSION     = $(shell cat version)
-CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION)
+COMMIT      = $(shell git rev-parse --short HEAD)
+CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # You can set the name of the ROM file here
 PROJECTNAME = pxlr2
