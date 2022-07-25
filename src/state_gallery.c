@@ -51,23 +51,30 @@
 
 BANKREF(state_gallery)
 
+#define VECTOR_SET_DIRECT(VECTOR, POS, ELEM) ((VECTOR[(POS) + 1]) = (ELEM))
+
 VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
 void gallery_toss_images() {
     memset(used_slots, CAMERA_IMAGE_DELETED, sizeof(used_slots));
-    VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
-    uint8_t j;
-    for (uint8_t i = CAMERA_MAX_IMAGE_SLOTS; i != 0 ; i--) {
-        j = cam_game_data.imageslots[i - 1];
-        if (j < CAMERA_MAX_IMAGE_SLOTS) used_slots[j + 1] = (i - 1); else VECTOR_ADD(free_slots, i - 1);
+    VECTOR_CLEAR(free_slots);
+    uint8_t elem;
+    for (uint8_t i = 0; i != CAMERA_MAX_IMAGE_SLOTS; i++) {
+        uint8_t order = cam_game_data.imageslots[i];
+        if (order < CAMERA_MAX_IMAGE_SLOTS) {
+            elem = VECTOR_GET(used_slots, order);
+            if (elem == CAMERA_IMAGE_DELETED) VECTOR_SET_DIRECT(used_slots, order, i); else VECTOR_ADD(free_slots, i);
+        } else VECTOR_ADD(free_slots, i);
     }
-    j = 0;
-    for (uint8_t i = 1; !(i > CAMERA_MAX_IMAGE_SLOTS); i++) {
-        if (used_slots[i] < CAMERA_MAX_IMAGE_SLOTS) used_slots[++j] = used_slots[i];
+    uint8_t j = 0;
+    for (uint8_t i = 0; i != CAMERA_MAX_IMAGE_SLOTS; i++) {
+        elem = VECTOR_GET(used_slots, i);
+        if (elem < CAMERA_MAX_IMAGE_SLOTS) VECTOR_SET_DIRECT(used_slots, j++, elem);
     }
     VECTOR_LEN(used_slots) = j;
     protected_pack(used_slots);
+    VECTOR_ITERATE(free_slots, j, elem) protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
 }
 
 uint8_t gallery_show_picture(uint8_t image_no) {
@@ -86,6 +93,12 @@ uint8_t gallery_show_picture(uint8_t image_no) {
     screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 
     return displayed_index;
+}
+
+uint8_t gallery_show_position(uint8_t image_no) {
+    sprintf(text_buffer, "%hd/%hd", (uint8_t)((image_no < images_taken()) ? (image_no + 1) : 0), (uint8_t)images_taken());
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+    return image_no;
 }
 
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
@@ -220,13 +233,8 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
 static uint8_t refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
-    uint8_t res = gallery_show_picture(OPTION(gallery_picture_idx));
-
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
-    sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
-    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
-
-    return res;
+    return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }
 
 uint8_t INIT_state_gallery() BANKED {
@@ -250,7 +258,7 @@ uint8_t UPDATE_state_gallery() BANKED {
         if (images_taken() > 1) {
             music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
             if (++OPTION(gallery_picture_idx) == images_taken()) OPTION(gallery_picture_idx) = 0;
-            gallery_show_picture(OPTION(gallery_picture_idx));
+            gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
             save_camera_state();
         }
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
@@ -258,7 +266,7 @@ uint8_t UPDATE_state_gallery() BANKED {
         if (images_taken() > 1) {
             music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
             if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = images_taken() - 1;
-            gallery_show_picture(OPTION(gallery_picture_idx));
+            gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
             save_camera_state();
         }
     } else if (KEY_PRESSED(J_A)) {

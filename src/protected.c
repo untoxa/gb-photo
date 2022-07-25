@@ -9,9 +9,9 @@
 #include "protected.h"
 
 void protected_pack(uint8_t * v) BANKED {
-    uint8_t i, elem, idx = 0;
+    uint8_t i, elem;
     VECTOR_ITERATE(v, i, elem) {
-        protected_modify_slot(elem, idx++);
+        protected_modify_slot(elem, i);
     }
 }
 
