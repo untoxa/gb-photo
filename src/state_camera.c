@@ -645,6 +645,7 @@ uint8_t UPDATE_state_camera() BANKED {
                 }
                 case ACTION_RESTORE_DEFAULTS:
                     restore_default_mode_settings(OPTION(camera_mode));
+                    camera_load_settings();
                     break;
                 default:
                     // error, must not get here
