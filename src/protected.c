@@ -8,6 +8,8 @@
 
 #include "protected.h"
 
+#define LOWER_PIXELS_FILL 0xFFFFu
+
 void protected_pack(uint8_t * v) BANKED {
     uint8_t i, elem;
     VECTOR_ITERATE(v, i, elem) {
@@ -77,7 +79,7 @@ void protected_generate_thumbnail(uint8_t slot) BANKED {
     for (uint8_t y = 28; y != 32; y++) {
         uint16_t * d = dest + ((uint16_t)(y / 8)) * (CAMERA_THUMB_TILE_WIDTH * 8) + (y % 8);
         for (uint8_t x = 0; x != 4; x++) {
-            *d = 0, d += 8;
+            *d = LOWER_PIXELS_FILL, d += 8;
         }
     }
 }

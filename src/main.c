@@ -18,10 +18,12 @@
 #include "misc_assets.h"
 #include "palette.h"
 #include "fade_manager.h"
+#include "sgb_border.h"
 
 // graphic assets
 #include "cursors.h"
 #include "font_proportional.h"
+#include "camera_sgb_border.h"
 
 // audio assets
 #include "music.h"
@@ -63,10 +65,19 @@ void LCD_ISR() {
 void main() {
     static uint8_t music_paused = FALSE;
 
+    detect_system();    // detect system compatibility
+
+    if (_is_SUPER) {
+        // For SGB on PAL SNES this delay is required on startup, otherwise borders don't show up
+        for (uint8_t i = 4; i != 0; i--) wait_vbl_done();
+        set_sgb_border(camera_sgb_border_tiles, sizeof(camera_sgb_border_tiles),
+                       camera_sgb_border_map, sizeof(camera_sgb_border_map),
+                       camera_sgb_border_palettes, sizeof(camera_sgb_border_palettes),
+                       BANK(camera_sgb_border));
+    }
+
     ENABLE_RAM;
     DISPLAY_OFF;
-
-    detect_system();    // detect system compatibility
 
     palette_init();
     fade_init();
