@@ -57,6 +57,7 @@ VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
 void gallery_toss_images() {
+    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     memset(used_slots, CAMERA_IMAGE_DELETED, sizeof(used_slots));
     VECTOR_CLEAR(free_slots);
     uint8_t elem;
