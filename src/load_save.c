@@ -5,17 +5,22 @@
 #include <string.h>
 
 #include "globals.h"
+#include "systemhelpers.h"
 #include "state_camera.h"
+#include "load_save.h"
 
 #define MAGIC_VALUE 0x45564153
+
+#define FREE_SAVE_SPACE 72
 
 typedef struct save_structure_t {
     uint32_t MAGIC;
     camera_state_options_t state_options;
     camera_mode_settings_t mode_settings[N_CAMERA_MODES];
 } save_structure_t;
+CHECK_SIZE_LOWER(save_structure_t, FREE_SAVE_SPACE);    // compiling breaks here if sizeof(save_structure_t) becomes larger than the available amount of bytes
 
-save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;
+save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;  // bind the structure to the top of SRAM bank
 
 const camera_state_options_t default_camera_state_options = {
     .camera_mode = camera_mode_manual,
@@ -47,7 +52,7 @@ const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
 };
 
 void init_save_structure() BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     if (save_structure.MAGIC != MAGIC_VALUE) {
         save_structure.MAGIC = MAGIC_VALUE;
         save_structure.state_options = default_camera_state_options;
@@ -58,16 +63,16 @@ void init_save_structure() BANKED {
 }
 
 void save_camera_mode_settings(camera_mode_e mode) BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     save_structure.mode_settings[mode] = current_settings[mode];
 }
 
 void restore_default_mode_settings(camera_mode_e mode) BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     current_settings[mode] = save_structure.mode_settings[mode] = default_camera_mode_settings[mode];
 }
 
 void save_camera_state() BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     save_structure.state_options = camera_state;
 }

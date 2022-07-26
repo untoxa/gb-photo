@@ -248,9 +248,9 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     menu;
     static const uint8_t * const camera_modes[N_CAMERA_MODES]  = {
         [camera_mode_manual]         = "[Manual]",
-        [camera_mode_assisted]       = "[Assist]",
+        [camera_mode_assisted]       = "[Assisted]",
         [camera_mode_auto]           = "[Auto]",
-        [camera_mode_iterate]        = "[Iter]"
+        [camera_mode_iterate]        = "[Iterate]"
     };
     static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
         [trigger_mode_abutton]       = "[" ICON_A " button]",
