@@ -118,13 +118,21 @@ void camera_load_settings() {
 }
 
 void camera_image_save() {
-    // TODO: save last seen image to gallery
+    static image_metadata_t image_metadata;
     uint8_t n_images = images_taken();
     if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
+        // modify index
         uint8_t slot = VECTOR_POP(free_slots);
         protected_modify_slot(slot, n_images);
+        // copy image data
         protected_lastseen_to_slot(slot);
+        // generate thumbnail
         protected_generate_thumbnail(slot);
+        // save metadata
+        image_metadata.settings = current_settings[OPTION(camera_mode)];
+        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings));
+        protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
+        // add slot to used list
         VECTOR_ADD(used_slots, slot);
     } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
 }

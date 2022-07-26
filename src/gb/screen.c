@@ -55,3 +55,100 @@ void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * pic
     for (i = 0; i != h; i++, data += (w << 4))
         set_data(*addr++ + (x << 4), data, (w << 4));
 }
+
+void screen_copy_thumbnail_row(uint8_t * dest, uint8_t * sour) NAKED {
+    dest; sour;
+#ifdef NINTENDO
+    __asm
+.macro .WAIT_STAT_01 ?lbl
+lbl:
+        ldh a, (_STAT_REG)
+        and #STATF_BUSY
+        jr nz, lbl
+.endm
+        .rept 3
+            .WAIT_STAT_01
+            ld a, (bc)
+            ld (de), a
+            inc bc
+            inc de
+            .WAIT_STAT_01
+            ld a, (bc)
+            ld (de), a
+
+            ld hl, #15
+            add hl, bc
+            ld b, h
+            ld c, l
+
+            ld hl, #15
+            add hl, de
+            ld d, h
+            ld e, l
+        .endm
+        .WAIT_STAT_01
+        ld a, (bc)
+        ld (de), a
+        inc bc
+        inc de
+        .WAIT_STAT_01
+        ld a, (bc)
+        ld (de), a
+        ret
+    __endasm;
+#else
+    __asm__("ret");
+#endif
+}
+
+void screen_clear_thumbnail_row(uint8_t * dest) NAKED {
+    dest;
+#ifdef NINTENDO
+    __asm
+.macro .WAIT_STAT_02 ?lbl
+lbl:
+        ldh a, (_STAT_REG)
+        and #STATF_BUSY
+        jr nz, lbl
+.endm
+        .rept 3
+            .WAIT_STAT_02
+            ld a, #0xff
+            ld (de), a
+            inc de
+            .WAIT_STAT_02
+            ld a, #0xff
+            ld (de), a
+
+            ld hl, #15
+            add hl, de
+            ld d, h
+            ld e, l
+        .endm
+        .WAIT_STAT_02
+        ld a, #0xff
+        ld (de), a
+        inc de
+        .WAIT_STAT_02
+        ld a, #0xff
+        ld (de), a
+        ret
+    __endasm;
+#else
+    __asm__("ret");
+#endif
+}
+
+
+void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture) {
+    uint8_t * dest, *sour;
+    for (uint8_t i = 0; i != 32; i++) {
+        dest = (uint8_t *)(screen_tile_addresses[y + (i  / 8)] + (x * 16) + ((i % 8) << 1));
+        if (i < 2 || i > 29) {
+            screen_clear_thumbnail_row(dest);
+        } else {
+            sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH * 16) + (((i - 2) % 8) << 1);
+            screen_copy_thumbnail_row(dest, sour);
+        }
+    }
+}

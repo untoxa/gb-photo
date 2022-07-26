@@ -112,6 +112,11 @@ typedef struct camera_mode_settings_t {
     uint8_t edge_operation;
 } camera_mode_settings_t;
 
+typedef struct image_metadata_t {
+    uint16_t crc;
+    camera_mode_settings_t settings;
+} image_metadata_t;
+
 #define MODE_SETTING(SET,STAT) current_settings[OPTION(STAT)].SET
 #define SETTING(SET) MODE_SETTING(SET,camera_mode)
 extern camera_mode_settings_t current_settings[N_CAMERA_MODES];

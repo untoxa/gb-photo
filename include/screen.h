@@ -20,6 +20,7 @@ inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 }
 
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture);
+void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture);
 
 inline uint8_t screen_text_render(uint8_t x, uint8_t y, const uint8_t * text) {
     return vwf_draw_text(screen_tile_addresses[y] + (x << 4), text);

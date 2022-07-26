@@ -132,11 +132,44 @@ static uint8_t onPrinterProgress() BANKED {
     return 0;
 }
 
+uint8_t onShowImageInfo(const struct menu_t * self, uint8_t * param);
+const menu_item_t ImageInfoMenuItem = {
+    .prev = NULL, .next = NULL,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 9, .ofs_y = 12, .width = 0,
+    .caption = " " ICON_A " OK ",
+    .onPaint = NULL,
+    .result = MENU_RESULT_CLOSE
+};
+const menu_t ImageInfoMenu = {
+    .x = 4, .y = 2, .width = 14, .height = 14,
+    .items = &ImageInfoMenuItem,
+    .onShow = onShowImageInfo, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+};
+uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
+    static image_metadata_t image_metadata;
+    param;
+    if (OPTION(gallery_picture_idx) < images_taken()) {
+        uint8_t slot = VECTOR_GET(used_slots, OPTION(gallery_picture_idx));
+        image_metadata.settings = current_settings[OPTION(camera_mode)];
+        protected_metadata_read(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
+        if (image_metadata.crc == protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings))) {
+            menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "Image data:");
+            // thumbnail
+            menu_text_out(self->x + 1, self->y + 3, 0, SOLID_WHITE, "Thumbnail:");
+            SWITCH_RAM((slot >> 1) + 1);
+            screen_load_thumbnail(self->x + 9, self->y + 3, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail));
+            screen_restore_rect(self->x + 9, self->y + 3, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
+        } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No data...");
+    } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No image...");
+    return 0;
+}
+
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t GalleryMenuItemInfo = {
     .prev = NULL,                           .next = &GalleryMenuItemPrint,
-    .sub = NULL, .sub_params = NULL,
+    .sub = &ImageInfoMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " Info",
     .helpcontext = " View image metadata",
