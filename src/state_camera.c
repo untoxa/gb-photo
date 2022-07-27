@@ -108,7 +108,7 @@ void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_ratios[SETTING(cu
 void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
-void camera_load_settings() {
+void RENDER_CAM_REGISTERS() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
     RENDER_CAM_REG_EXPTIME();
@@ -173,7 +173,7 @@ uint8_t ENTER_state_camera() BANKED {
     refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
     // load some initial settings
-    camera_load_settings();
+    RENDER_CAM_REGISTERS();
     fade_in_modal();
     return 0;
 }
@@ -623,6 +623,7 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_MODE_ITERATE: {
                     static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_iterate};
                     OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
+                    RENDER_CAM_REGISTERS();
                     break;
                 }
                 case ACTION_TRIGGER_ABUTTON:
@@ -645,7 +646,7 @@ uint8_t UPDATE_state_camera() BANKED {
                 }
                 case ACTION_RESTORE_DEFAULTS:
                     restore_default_mode_settings(OPTION(camera_mode));
-                    camera_load_settings();
+                    RENDER_CAM_REGISTERS();
                     break;
                 default:
                     // error, must not get here
