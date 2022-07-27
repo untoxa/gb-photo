@@ -17,6 +17,7 @@
 #include "load_save.h"
 #include "fade_manager.h"
 #include "protected.h"
+#include "vwf.h"
 
 #include "state_camera.h"
 #include "state_gallery.h"
@@ -137,16 +138,17 @@ uint8_t onShowImageInfo(const struct menu_t * self, uint8_t * param);
 const menu_item_t ImageInfoMenuItem = {
     .prev = NULL, .next = NULL,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 9, .ofs_y = 12, .width = 0,
+    .ofs_x = 12, .ofs_y = 14, .width = 0,
     .caption = " " ICON_A " OK ",
     .onPaint = NULL,
     .result = MENU_RESULT_CLOSE
 };
 const menu_t ImageInfoMenu = {
-    .x = 4, .y = 2, .width = 14, .height = 14,
+    .x = 3, .y = 1, .width = 17, .height = 16,
     .items = &ImageInfoMenuItem,
     .onShow = onShowImageInfo, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
+
 uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
     static image_metadata_t image_metadata;
     param;
@@ -155,13 +157,25 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
         image_metadata.settings = current_settings[OPTION(camera_mode)];
         protected_metadata_read(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         if (image_metadata.crc == protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings))) {
-            menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "Image data:");
-            // thumbnail
-            menu_text_out(self->x + 1, self->y + 3, 0, SOLID_WHITE, "Thumbnail:");
-            SWITCH_RAM((slot >> 1) + 1);
-            screen_load_thumbnail(self->x + 9, self->y + 3, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail));
-            screen_restore_rect(self->x + 9, self->y + 3, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
+            vwf_set_tab_size(1);
+            menu_text_out(self->x + 4, self->y + 1,  0, SOLID_WHITE, "Image data:");
+            menu_text_out(self->x + 1, self->y + 2,  0, SOLID_WHITE, camera_render_item_text(idExposure,      strcpy(text_buffer_extra_ex, "Exposure\t%sms"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 3,  0, SOLID_WHITE, camera_render_item_text(idGain,          strcpy(text_buffer_extra_ex, "Gain\t\t\t\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 4,  0, SOLID_WHITE, camera_render_item_text(idContrast,      strcpy(text_buffer_extra_ex, "Contrast\t\t%d"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 5,  0, SOLID_WHITE, camera_render_item_text(idDither,        strcpy(text_buffer_extra_ex, "Dithering\t\t%s"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 6,  0, SOLID_WHITE, camera_render_item_text(idDitherLight,   strcpy(text_buffer_extra_ex, "Dith. light\t%s"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 7,  0, SOLID_WHITE, camera_render_item_text(idInvOutput,     strcpy(text_buffer_extra_ex, "Inverse\t\t\t%s"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 8,  0, SOLID_WHITE, camera_render_item_text(idZeroPoint,     strcpy(text_buffer_extra_ex, "Zero point\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 9,  0, SOLID_WHITE, camera_render_item_text(idVOut,          strcpy(text_buffer_extra_ex, "Volt. out.\t%dmv"), &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 10, 0, SOLID_WHITE, camera_render_item_text(idVoltageRef,    strcpy(text_buffer_extra_ex, "Volt. ref.\t%sv"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 11, 0, SOLID_WHITE, camera_render_item_text(idEdgeOperation, strcpy(text_buffer_extra_ex, "Edge op.\t\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 12, 0, SOLID_WHITE, camera_render_item_text(idEdgeRatio,     strcpy(text_buffer_extra_ex, "Edge ratio\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 13, 0, SOLID_WHITE, camera_render_item_text(idEdgeExclusive, strcpy(text_buffer_extra_ex, "Edge excl.\t%s"),   &image_metadata.settings));
+            vwf_set_tab_size(2);
         } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No data...");
+        SWITCH_RAM((slot >> 1) + 1);
+        screen_load_thumbnail(self->x + 12, self->y + 2, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail));
+        screen_restore_rect(self->x + 12, self->y + 2, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No image...");
     return 0;
 }

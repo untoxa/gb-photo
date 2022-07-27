@@ -119,6 +119,7 @@ typedef struct image_metadata_t {
 
 #define MODE_SETTING(SET,STAT) current_settings[OPTION(STAT)].SET
 #define SETTING(SET) MODE_SETTING(SET,camera_mode)
+#define CURRENT_SETTINGS current_settings[OPTION(camera_mode)]
 extern camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 extern uint8_t recording_video;
@@ -141,5 +142,6 @@ inline void image_capture() {
     old_capture_reg = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
 }
 
+uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;
 
 #endif

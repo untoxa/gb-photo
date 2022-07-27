@@ -321,7 +321,7 @@ const menu_item_t CameraMenuItemInvertedOutput = {
     .ofs_x = 0, .ofs_y = 2, .width = 5,
     .id = idInvOutput,
     .caption = " %s",
-    .helpcontext = " Invert output",
+    .helpcontext = " Inverse output",
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
@@ -505,14 +505,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
 }
-uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
-    menu;
+uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED {
     static const uint8_t * const on_off[]   = {"Off",    "On"} ;
     static const uint8_t * const low_high[] = {"Low",    "High"};
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
-    switch (self->id) {
+    switch (id) {
         case idExposure: {
-            uint16_t value = EXPOSURE_VALUE_TO_US(exposures[SETTING(current_exposure)]) / 100;
+            uint16_t value = EXPOSURE_VALUE_TO_US(exposures[settings->current_exposure]) / 100;
             uint8_t * buf = text_buffer_extra;
             uint8_t len = strlen(uitoa(value, buf, 10));
             if (len == 1) {
@@ -527,47 +526,51 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
                 }
                 *tail = 0;
             }
-            sprintf(text_buffer, self->caption, buf);
+            sprintf(text_buffer, format, buf);
             break;
         }
         case idGain:
-            sprintf(text_buffer, self->caption, gains[SETTING(current_gain)].caption);
+            sprintf(text_buffer, format, gains[settings->current_gain].caption);
             break;
         case idVOut:
-            sprintf(text_buffer, self->caption, SETTING(voltage_out));
+            sprintf(text_buffer, format, settings->voltage_out);
             break;
         case idContrast:
-            sprintf(text_buffer, self->caption, SETTING(current_contrast));
+            sprintf(text_buffer, format, settings->current_contrast);
             break;
         case idDither:
-            sprintf(text_buffer, self->caption, on_off[((SETTING(dithering)) ? 1 : 0)]);
+            sprintf(text_buffer, format, on_off[((settings->dithering) ? 1 : 0)]);
             break;
         case idDitherLight:
-            sprintf(text_buffer, self->caption, low_high[((SETTING(ditheringHighLight)) ? 1 : 0)]);
+            sprintf(text_buffer, format, low_high[((settings->ditheringHighLight) ? 1 : 0)]);
             break;
         case idInvOutput:
-            sprintf(text_buffer, self->caption, norm_inv[((SETTING(invertOutput)) ? 1 : 0)]);
+            sprintf(text_buffer, format, norm_inv[((settings->invertOutput) ? 1 : 0)]);
             break;
         case idZeroPoint:
-            sprintf(text_buffer, self->caption, zero_points[SETTING(current_zero_point)].caption);
+            sprintf(text_buffer, format, zero_points[settings->current_zero_point].caption);
             break;
         case idVoltageRef:
-            sprintf(text_buffer, self->caption, voltage_refs[SETTING(current_voltage_ref)].caption);
+            sprintf(text_buffer, format, voltage_refs[settings->current_voltage_ref].caption);
             break;
         case idEdgeRatio:
-            sprintf(text_buffer, self->caption, edge_ratios[SETTING(current_edge_mode)].caption);
+            sprintf(text_buffer, format, edge_ratios[settings->current_edge_mode].caption);
             break;
         case idEdgeExclusive:
-            sprintf(text_buffer, self->caption, on_off[((SETTING(edge_exclusive)) ? 1 : 0)]);
+            sprintf(text_buffer, format, on_off[((settings->edge_exclusive) ? 1 : 0)]);
             break;
         case idEdgeOperation:
-            sprintf(text_buffer, self->caption, edge_operations[SETTING(edge_operation)].caption);
+            sprintf(text_buffer, format, edge_operations[settings->edge_operation].caption);
             break;
         default:
-            if (self->caption) strcpy(text_buffer, self->caption); else *text_buffer = 0;
+            if (format) strcpy(text_buffer, format); else *text_buffer = 0;
             break;
     }
     return text_buffer;
+}
+uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
+    return camera_render_item_text(self->id, self->caption, &CURRENT_SETTINGS);
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
