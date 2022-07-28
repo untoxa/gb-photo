@@ -95,7 +95,7 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
     M64282FP register 6: 1D filtering kernel X (8 bits) - not editable - set to 0x01 by Game Boy Camera MAC-GBD
     0xA004 (CAM04) = M64282FP register 7: Edge engancement ratio (4 bits), inverted output (1 bit), output bias voltage (3 bits)
     0xA005 (CAM05) = M64282FP register 0: zero point calibration (2 bits), output reference voltage (6 bits)
-    
+
     0x0000 (CAM0) is an exchange register
  */
 
@@ -106,7 +106,7 @@ static uint8_t AT(0xBF5C) image_second_meta_echo[92];
 #define CAM00F_NEGATIVE     0b00000000
 #define CAM00F_CAPTURING    0b00000001
 
-static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
+static volatile uint8_t AT(0xA000) CAM00_REG;
 static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 
 // Camera hardware register: EdgeExclusive, EdgeOperation, Gain

@@ -56,7 +56,7 @@ uint8_t recording_video = FALSE;
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
-uint8_t old_capture_reg = 0;    // old value for the captiring register (image ready detection)
+camera_shadow_regs_t SHADOW;    // camera shadow registers for reading
 
 static const uint16_t exposures[] = {
     US_TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
@@ -102,10 +102,10 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
-void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = exposures[SETTING(current_exposure)]; }
-void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
-void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
+void RENDER_CAM_REG_EDEXOPGAIN()  { SHADOW.CAM_REG_EDEXOPGAIN  = CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
+void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = exposures[SETTING(current_exposure)]; }
+void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
+void RENDER_CAM_REG_ZEROVOUT()    { SHADOW.CAM_REG_ZEROVOUT    = CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
 void RENDER_CAM_REGISTERS() {
@@ -129,8 +129,10 @@ void camera_image_save() {
         // generate thumbnail
         protected_generate_thumbnail(slot);
         // save metadata
+        image_metadata.raw_regs = SHADOW;
         image_metadata.settings = current_settings[OPTION(camera_mode)];
-        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings));
+        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.raw_regs, sizeof(image_metadata.raw_regs), PROTECTED_SEED);
+        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), image_metadata.crc);
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         // add slot to used list
         VECTOR_ADD(used_slots, slot);
@@ -174,6 +176,8 @@ uint8_t ENTER_state_camera() BANKED {
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
     // load some initial settings
     RENDER_CAM_REGISTERS();
+    SHADOW.CAM_REG_CAPTURE = 0;
+    // fade in
     fade_in_modal();
     return 0;
 }
@@ -370,6 +374,12 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 }
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
+
+    static const shutter_sound_t shutter_sounds[N_SHUTTER_SOUNDS] = {
+        [shutter_sound_0] = {BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01)},
+        [shutter_sound_1] = {BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02)}
+    };
+
     static change_direction_e change_direction;
     static uint8_t capture_triggered = FALSE;       // state of static variable persists between calls
 
@@ -387,8 +397,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
             default:
                 if (!capture_triggered) {
-                    music_play_sfx(BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01));
-//                    music_play_sfx(BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02));
+                    music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask);
                     if (!is_capturing()) image_capture();
                     capture_triggered = TRUE;
                 }

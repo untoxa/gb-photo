@@ -168,7 +168,9 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
         uint8_t slot = VECTOR_GET(used_slots, OPTION(gallery_picture_idx));
         image_metadata.settings = current_settings[OPTION(camera_mode)];
         protected_metadata_read(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
-        if (image_metadata.crc == protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings))) {
+        uint16_t CRC = protected_calculate_crc((uint8_t *)&image_metadata.raw_regs, sizeof(image_metadata.raw_regs), PROTECTED_SEED);
+        CRC = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), CRC);
+        if (image_metadata.crc == CRC) {
             vwf_set_tab_size(1);
             menu_text_out(self->x + 4, self->y + 1,  0, SOLID_WHITE, "Image data:");
             menu_text_out(self->x + 1, self->y + 2,  0, SOLID_WHITE, camera_render_item_text(idExposure,      strcpy(text_buffer_extra_ex, "Exposure\t%sms"),   &image_metadata.settings));

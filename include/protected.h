@@ -6,6 +6,8 @@
 
 #include "gbcamera.h"
 
+#define PROTECTED_SEED 0xAA55u
+
 inline void protected_modify_slot(uint8_t slot, uint8_t value) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t old = cam_game_data.imageslots[slot];
@@ -14,8 +16,8 @@ inline void protected_modify_slot(uint8_t slot, uint8_t value) {
     cam_game_data_echo.CRC_xor = cam_game_data.CRC_xor ^= (value ^ old);
 }
 
-inline uint16_t protected_calculate_crc(uint8_t * data, uint8_t size) {
-    uint8_t a = 0x55, b = 0xAA;
+inline uint16_t protected_calculate_crc(uint8_t * data, uint8_t size, uint16_t seed) {
+    uint8_t a = (uint8_t)seed, b = (uint8_t)(seed >> 8);
     while (size--) a += *data, b ^= *data++;
     return ((uint16_t)b << 8) | a;
 }

@@ -35,6 +35,12 @@ typedef enum {
 } after_action_e;
 
 typedef enum {
+    shutter_sound_0,
+    shutter_sound_1,
+    N_SHUTTER_SOUNDS
+} shutter_sound_e;
+
+typedef enum {
     idNone = 0,
     idExposure,
     idGain,
@@ -85,6 +91,12 @@ typedef struct table_value_t {
     const uint8_t * caption;
 } table_value_t;
 
+typedef struct shutter_sound_t {
+    uint8_t bank;
+    uint8_t * sound;
+    uint8_t mask;
+} shutter_sound_t;
+
 typedef struct camera_state_options_t {
     camera_mode_e camera_mode;
     trigger_mode_e trigger_mode;
@@ -92,10 +104,19 @@ typedef struct camera_state_options_t {
     uint8_t gallery_picture_idx;
     uint8_t print_frame_idx;
     uint8_t print_fast;
+    shutter_sound_e shutter_sound;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT
 extern camera_state_options_t camera_state;
+
+typedef struct camera_shadow_regs_t {
+    uint8_t CAM_REG_CAPTURE;
+    uint8_t CAM_REG_EDEXOPGAIN;
+    uint16_t CAM_REG_EXPTIME;
+    uint8_t CAM_REG_EDRAINVVREF;
+    uint8_t CAM_REG_ZEROVOUT;
+} camera_shadow_regs_t;
 
 typedef struct camera_mode_settings_t {
     int8_t current_exposure;
@@ -113,8 +134,9 @@ typedef struct camera_mode_settings_t {
 } camera_mode_settings_t;
 
 typedef struct image_metadata_t {
-    uint16_t crc;
+    camera_shadow_regs_t raw_regs;
     camera_mode_settings_t settings;
+    uint16_t crc;
 } image_metadata_t;
 
 #define MODE_SETTING(SET,STAT) current_settings[OPTION(STAT)].SET
@@ -124,7 +146,7 @@ extern camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 extern uint8_t recording_video;
 
-extern uint8_t old_capture_reg;
+extern camera_shadow_regs_t SHADOW;
 
 inline uint8_t is_capturing() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
@@ -133,13 +155,13 @@ inline uint8_t is_capturing() {
 inline uint8_t image_captured() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     uint8_t v = CAM_REG_CAPTURE;
-    uint8_t r = (((v ^ old_capture_reg) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
-    old_capture_reg = v;
+    uint8_t r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
+    SHADOW.CAM_REG_CAPTURE = v;
     return r;
 }
 inline void image_capture() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    old_capture_reg = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
+    SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
 }
 
 uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;
