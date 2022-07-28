@@ -7,6 +7,10 @@
 #include "bankdata.h"
 #include "print_frames.h"
 
+/** Width of the printed image in tiles
+*/
+#define PRN_TILE_WIDTH          20
+
 #define PRN_LOW(A) ((A) & 0xFF)
 #define PRN_HIGH(A) ((A) >> 8)
 
@@ -125,6 +129,7 @@ extern start_print_pkt_t PRN_PKT_START;
 
 uint8_t gbprinter_detect(uint8_t delay) BANKED;
 uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const frame_desc_t * frame, uint8_t frame_bank) BANKED;
+uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t sh, uint8_t centered) BANKED;
 
 inline void gbprinter_set_handler(void * fn_ofs, uint8_t fn_seg) {
     printer_progress_handler.SEG = fn_seg, printer_progress_handler.OFS = fn_ofs;

@@ -101,7 +101,7 @@ lbl:
 #endif
 }
 
-void screen_clear_thumbnail_row(uint8_t * dest) NAKED {
+void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) NAKED {
     dest;
 #ifdef NINTENDO
     __asm
@@ -111,13 +111,14 @@ lbl:
         and #STATF_BUSY
         jr nz, lbl
 .endm
+        ld c, a
         .rept 3
             .WAIT_STAT_02
-            ld a, #0xff
+            ld a, c
             ld (de), a
             inc de
             .WAIT_STAT_02
-            ld a, #0xff
+            ld a, c
             ld (de), a
 
             ld hl, #15
@@ -126,11 +127,11 @@ lbl:
             ld e, l
         .endm
         .WAIT_STAT_02
-        ld a, #0xff
+        ld a, c
         ld (de), a
         inc de
         .WAIT_STAT_02
-        ld a, #0xff
+        ld a, c
         ld (de), a
         ret
     __endasm;
@@ -140,12 +141,12 @@ lbl:
 }
 
 
-void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture) {
+void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill) {
     uint8_t * dest, *sour;
     for (uint8_t i = 0; i != 32; i++) {
         dest = (uint8_t *)(screen_tile_addresses[y + (i  / 8)] + (x * 16) + ((i % 8) << 1));
         if (i < 2 || i > 29) {
-            screen_clear_thumbnail_row(dest);
+            screen_clear_thumbnail_row(dest, fill);
         } else {
             sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH * 16) + (((i - 2) % 8) << 1);
             screen_copy_thumbnail_row(dest, sour);

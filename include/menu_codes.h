@@ -16,6 +16,7 @@
 #define ACTION_TRANSFER_GALLERY     14
 #define ACTION_PRINT_IMAGE          15
 #define ACTION_PRINT_GALLERY        16
+#define ACTION_PRINT_INFO           17
 
 // settings
 #define ACTION_SETTINGS_PRINT_FAST  20

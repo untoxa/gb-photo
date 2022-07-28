@@ -139,20 +139,28 @@ static uint8_t onPrinterProgress() BANKED {
 }
 
 uint8_t onShowImageInfo(const struct menu_t * self, uint8_t * param);
-const menu_item_t ImageInfoMenuItem = {
-    .prev = NULL, .next = NULL,
+uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+const menu_item_t ImageInfoMenuItemOk = {
+    .prev = &ImageInfoMenuItemPrint,    .next = &ImageInfoMenuItemPrint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 12, .ofs_y = 14, .width = 0,
     .caption = " " ICON_A " OK ",
     .onPaint = NULL,
     .result = MENU_RESULT_CLOSE
 };
+const menu_item_t ImageInfoMenuItemPrint = {
+    .prev = &ImageInfoMenuItemOk,       .next = &ImageInfoMenuItemOk,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 7, .ofs_y = 14, .width = 0, .flags = MENUITEM_TERM,
+    .caption = " Print...",
+    .onPaint = NULL,
+    .result = ACTION_PRINT_INFO
+};
 const menu_t ImageInfoMenu = {
     .x = 3, .y = 1, .width = 17, .height = 16,
-    .items = &ImageInfoMenuItem,
-    .onShow = onShowImageInfo, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .items = &ImageInfoMenuItemOk,
+    .onShow = onShowImageInfo, .onTranslateKey = onTranslateKeyImageInfo, .onTranslateSubResult = NULL
 };
-
 uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
     static image_metadata_t image_metadata;
     param;
@@ -178,10 +186,16 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
             vwf_set_tab_size(2);
         } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No data...");
         SWITCH_RAM((slot >> 1) + 1);
-        screen_load_thumbnail(self->x + 12, self->y + 2, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail));
+        screen_load_thumbnail(self->x + 12, self->y + 2, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0x00);
         screen_restore_rect(self->x + 12, self->y + 2, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No image...");
     return 0;
+}
+uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu; self;
+    if (value & J_LEFT) value |= J_UP;
+    if (value & J_RIGHT) value |= J_DOWN;
+    return value;
 }
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
@@ -395,6 +409,14 @@ uint8_t UPDATE_state_gallery() BANKED {
                 }
                 remote_activate(REMOTE_ENABLED);
                 gbprinter_set_handler(onPrinterProgress, BANK(state_gallery));
+                JOYPAD_RESET();
+                break;
+            case ACTION_PRINT_INFO:
+                remote_activate(REMOTE_DISABLED);
+                if (!gbprinter_print_screen_rect(ImageInfoMenu.x + 1, ImageInfoMenu.y + 1, ImageInfoMenu.width - 2, ImageInfoMenu.height - 3, TRUE)) {
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                }
+                remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
             default:
