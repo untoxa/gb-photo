@@ -45,12 +45,12 @@
     #define MENUITEM_DEBUG_NEXT GalleryMenuItemDebug
     #define MENUITEM_FIRST_PREV GalleryMenuItemDebug
     #define MENUITEM_LAST_FLAGS 0
-    #define GALLERYMENU_HEIGHT 10
+    #define GALLERYMENU_HEIGHT 11
 #else
     #define MENUITEM_DEBUG_NEXT GalleryMenuItemInfo
-    #define MENUITEM_FIRST_PREV GalleryMenuItemDeleteAll
+    #define MENUITEM_FIRST_PREV GalleryMenuItemUndeleteAll
     #define MENUITEM_LAST_FLAGS MENUITEM_TERM
-    #define GALLERYMENU_HEIGHT 9
+    #define GALLERYMENU_HEIGHT 10
 #endif
 
 
@@ -255,19 +255,28 @@ const menu_item_t GalleryMenuItemDelete = {
     .result = ACTION_ERASE_IMAGE
 };
 const menu_item_t GalleryMenuItemDeleteAll = {
-    .prev = &GalleryMenuItemDelete,         .next = &MENUITEM_DEBUG_NEXT,
+    .prev = &GalleryMenuItemDelete,         .next = &GalleryMenuItemUndeleteAll,
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
-    .ofs_x = 1, .ofs_y = 7, .width = 8, .flags = MENUITEM_LAST_FLAGS,
+    .ofs_x = 1, .ofs_y = 7, .width = 8,
     .caption = " Delete all",
     .helpcontext = " Erase the whole gallery",
     .onPaint = NULL,
     .result = ACTION_ERASE_GALLERY
 };
+const menu_item_t GalleryMenuItemUndeleteAll = {
+    .prev = &GalleryMenuItemDeleteAll,      .next = &MENUITEM_DEBUG_NEXT,
+    .sub = &YesNoMenu, .sub_params = "Undelete all images?",
+    .ofs_x = 1, .ofs_y = 8, .width = 8, .flags = MENUITEM_LAST_FLAGS,
+    .caption = " Undelete all",
+    .helpcontext = " Unerase the whole gallery",
+    .onPaint = NULL,
+    .result = ACTION_UNERASE_GALLERY
+};
 #if (DEBUG_ENABLED==1)
 const menu_item_t GalleryMenuItemDebug = {
-    .prev = &GalleryMenuItemDeleteAll,     .next = &GalleryMenuItemInfo,
+    .prev = &GalleryMenuItemUndeleteAll,    .next = &GalleryMenuItemInfo,
     .sub = &DebugMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 8, .width = 8, .flags = MENUITEM_TERM,
+    .ofs_x = 1, .ofs_y = 9, .width = 8, .flags = MENUITEM_TERM,
     .caption = " Debug",
     .helpcontext = " Show debug info",
     .onPaint = NULL,
@@ -363,6 +372,13 @@ uint8_t UPDATE_state_gallery() BANKED {
                     protected_pack(used_slots);
                     music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
                 } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                break;
+            case ACTION_UNERASE_GALLERY:
+                while (VECTOR_LEN(free_slots)) {
+                    uint8_t elem = VECTOR_POP(free_slots);
+                    protected_modify_slot(elem, images_taken());
+                    VECTOR_ADD(used_slots, elem);
+                }
                 break;
             case ACTION_DISPLAY_INFO:
                 // TODO: display image info

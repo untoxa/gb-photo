@@ -11,12 +11,13 @@
 // gallery actions
 #define ACTION_ERASE_GALLERY        10
 #define ACTION_ERASE_IMAGE          11
-#define ACTION_DISPLAY_INFO         12
-#define ACTION_TRANSFER_IMAGE       13
-#define ACTION_TRANSFER_GALLERY     14
-#define ACTION_PRINT_IMAGE          15
-#define ACTION_PRINT_GALLERY        16
-#define ACTION_PRINT_INFO           17
+#define ACTION_UNERASE_GALLERY      12
+#define ACTION_DISPLAY_INFO         13
+#define ACTION_TRANSFER_IMAGE       14
+#define ACTION_TRANSFER_GALLERY     15
+#define ACTION_PRINT_IMAGE          16
+#define ACTION_PRINT_GALLERY        17
+#define ACTION_PRINT_INFO           18
 
 // settings
 #define ACTION_SETTINGS_PRINT_FAST  20
