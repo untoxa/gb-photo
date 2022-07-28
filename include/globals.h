@@ -16,7 +16,7 @@
 
 // enable debug menu item
 #ifndef DEBUG_ENABLED
-    #define DEBUG_ENABLED 1
+    #define DEBUG_ENABLED 0
 #endif
 // enable usage of CGB double speed mode
 #ifndef USE_CGB_DOUBLE_SPEED

@@ -40,7 +40,7 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 
 const menu_item_t FrameMenuItemNoFrame = {
-    .prev = NULL,                 .next = &FrameMenuItemPxlr,
+    .prev = &FrameMenuItemWild,     .next = &FrameMenuItemPxlr,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .id = idPrintFrame0,
@@ -50,7 +50,7 @@ const menu_item_t FrameMenuItemNoFrame = {
     .result = ACTION_PRINT_FRAME0
 };
 const menu_item_t FrameMenuItemPxlr = {
-    .prev = &FrameMenuItemNoFrame, .next = &FrameMenuItemWild,
+    .prev = &FrameMenuItemNoFrame,  .next = &FrameMenuItemWild,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .id = idPrintFrame1,
@@ -60,9 +60,9 @@ const menu_item_t FrameMenuItemPxlr = {
     .result = ACTION_PRINT_FRAME1
 };
 const menu_item_t FrameMenuItemWild = {
-    .prev = &FrameMenuItemPxlr,     .next = NULL,
+    .prev = &FrameMenuItemPxlr,     .next = &FrameMenuItemNoFrame,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .ofs_x = 1, .ofs_y = 3, .width = 8, .flags = MENUITEM_TERM,
     .id = idPrintFrame2,
     .caption = " %s",
     .helpcontext = " %s",
@@ -79,7 +79,7 @@ const menu_t PrinterFramesMenu = {
 
 
 const menu_item_t SettingsMenuItemPrintFrame = {
-    .prev = NULL,                           .next = &SettingsMenuItemPrintFast,
+    .prev = &SettingsMenuItemPrintFast,     .next = &SettingsMenuItemPrintFast,
     .sub = &PrinterFramesMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 13,
     .id = idSettingsPrintFrame,
@@ -89,9 +89,9 @@ const menu_item_t SettingsMenuItemPrintFrame = {
     .result = ACTION_NONE
 };
 const menu_item_t SettingsMenuItemPrintFast = {
-    .prev = &SettingsMenuItemPrintFrame,    .next = NULL,
+    .prev = &SettingsMenuItemPrintFrame,    .next = &SettingsMenuItemPrintFrame,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 13,
+    .ofs_x = 1, .ofs_y = 2, .width = 13, .flags = MENUITEM_TERM,
     .id = idSettingsPrintFast,
     .caption = " Fast printing\t\t\t%s",
     .helpcontext = " Enable CGB fast transfer",

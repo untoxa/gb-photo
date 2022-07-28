@@ -12,16 +12,16 @@ uint8_t onShowYesNo(const struct menu_t * self, uint8_t * param);
 uint8_t onTranslateKeyYesNo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t YesNoMenuItems[] = {
     {
-        .prev = NULL, .next = &YesNoMenuItems[1],
+        .prev = YesNoMenuItems + 1, .next = YesNoMenuItems + 1,
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 2, .ofs_y = 3, .width = 0,
         .caption = " " ICON_B " No ",
         .onPaint = NULL,
         .result = MENU_RESULT_NO
     },{
-        .prev = &YesNoMenuItems[0], .next = NULL,
+        .prev = YesNoMenuItems + 0, .next = YesNoMenuItems + 0,
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 7, .ofs_y = 3, .width = 0,
+        .ofs_x = 7, .ofs_y = 3, .width = 0, .flags = MENUITEM_TERM,
         .caption = " Yes",
         .onPaint = NULL,
         .result = MENU_RESULT_YES

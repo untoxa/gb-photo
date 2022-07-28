@@ -42,11 +42,15 @@
 #include "print_frames.h"
 
 #if (DEBUG_ENABLED==1)
-    #define MENUITEM_DEBUG &GalleryMenuItemDebug
+    #define MENUITEM_DEBUG_NEXT GalleryMenuItemDebug
+    #define MENUITEM_FIRST_PREV GalleryMenuItemDebug
+    #define MENUITEM_LAST_FLAGS 0
     #define GALLERYMENU_HEIGHT 10
 #else
-    #define MENUITEM_DEBUG NULL
-    #define MAINMENU_HEIGHT 9
+    #define MENUITEM_DEBUG_NEXT GalleryMenuItemInfo
+    #define MENUITEM_FIRST_PREV GalleryMenuItemDeleteAll
+    #define MENUITEM_LAST_FLAGS MENUITEM_TERM
+    #define GALLERYMENU_HEIGHT 9
 #endif
 
 
@@ -183,7 +187,7 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t GalleryMenuItemInfo = {
-    .prev = NULL,                           .next = &GalleryMenuItemPrint,
+    .prev = &MENUITEM_FIRST_PREV,           .next = &GalleryMenuItemPrint,
     .sub = &ImageInfoMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " Info",
@@ -210,7 +214,7 @@ const menu_item_t GalleryMenuItemPrintAll = {
     .result = ACTION_PRINT_GALLERY
 };
 const menu_item_t GalleryMenuItemTransfer = {
-    .prev = &GalleryMenuItemPrintAll,           .next = &GalleryMenuItemTransferAll,
+    .prev = &GalleryMenuItemPrintAll,       .next = &GalleryMenuItemTransferAll,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 8,
     .caption = " Transfer",
@@ -219,7 +223,7 @@ const menu_item_t GalleryMenuItemTransfer = {
     .result = ACTION_TRANSFER_IMAGE
 };
 const menu_item_t GalleryMenuItemTransferAll = {
-    .prev = &GalleryMenuItemTransfer,           .next = &GalleryMenuItemDelete,
+    .prev = &GalleryMenuItemTransfer,       .next = &GalleryMenuItemDelete,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 5, .width = 8,
     .caption = " Transfer all",
@@ -228,7 +232,7 @@ const menu_item_t GalleryMenuItemTransferAll = {
     .result = ACTION_TRANSFER_GALLERY
 };
 const menu_item_t GalleryMenuItemDelete = {
-    .prev = &GalleryMenuItemTransferAll,        .next = &GalleryMenuItemDeleteAll,
+    .prev = &GalleryMenuItemTransferAll,    .next = &GalleryMenuItemDeleteAll,
     .sub = &YesNoMenu, .sub_params = "Are you sure?",
     .ofs_x = 1, .ofs_y = 6, .width = 8,
     .caption = " Delete",
@@ -237,9 +241,9 @@ const menu_item_t GalleryMenuItemDelete = {
     .result = ACTION_ERASE_IMAGE
 };
 const menu_item_t GalleryMenuItemDeleteAll = {
-    .prev = &GalleryMenuItemDelete,         .next = MENUITEM_DEBUG,
+    .prev = &GalleryMenuItemDelete,         .next = &MENUITEM_DEBUG_NEXT,
     .sub = &YesNoMenu, .sub_params = "Delete all images?",
-    .ofs_x = 1, .ofs_y = 7, .width = 8,
+    .ofs_x = 1, .ofs_y = 7, .width = 8, .flags = MENUITEM_LAST_FLAGS,
     .caption = " Delete all",
     .helpcontext = " Erase the whole gallery",
     .onPaint = NULL,
@@ -247,9 +251,9 @@ const menu_item_t GalleryMenuItemDeleteAll = {
 };
 #if (DEBUG_ENABLED==1)
 const menu_item_t GalleryMenuItemDebug = {
-    .prev = &GalleryMenuItemDeleteAll,     .next = NULL,
+    .prev = &GalleryMenuItemDeleteAll,     .next = &GalleryMenuItemInfo,
     .sub = &DebugMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 8, .width = 8,
+    .ofs_x = 1, .ofs_y = 8, .width = 8, .flags = MENUITEM_TERM,
     .caption = " Debug",
     .helpcontext = " Show debug info",
     .onPaint = NULL,

@@ -49,7 +49,7 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t MainMenuItemCamera = {
-    .prev = NULL,                   .next = &MainMenuItemGallery,
+    .prev = &MainMenuItemAbout,     .next = &MainMenuItemGallery,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 10,
     .caption = " Camera",
@@ -76,9 +76,9 @@ const menu_item_t MainMenuItemSettings = {
     .result = ACTION_SETTINGS
 };
 const menu_item_t MainMenuItemAbout = {
-    .prev = &MainMenuItemSettings,   .next = NULL,
+    .prev = &MainMenuItemSettings,   .next = &MainMenuItemCamera,
     .sub = &AboutMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 10,
+    .ofs_x = 1, .ofs_y = 4, .width = 10, .flags = MENUITEM_TERM,
     .caption = " About",
     .helpcontext = " About PXLR-Studio " QUOTE(VERSION),
     .onPaint = NULL,

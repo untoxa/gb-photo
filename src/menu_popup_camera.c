@@ -36,7 +36,7 @@ typedef enum {
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t ModeSubMenuItemManual = {
-    .prev = NULL,                       .next = &ModeSubMenuItemAssisted,
+    .prev = &ModeSubMenuItemIterate,    .next = &ModeSubMenuItemAssisted,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 9,
     .caption = " Manual",
@@ -63,9 +63,9 @@ const menu_item_t ModeSubMenuItemAuto = {
     .result = ACTION_MODE_AUTO
 };
 const menu_item_t ModeSubMenuItemIterate = {
-    .prev = &ModeSubMenuItemAuto,       .next = NULL,
+    .prev = &ModeSubMenuItemAuto,       .next = &ModeSubMenuItemManual,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 9,
+    .ofs_x = 1, .ofs_y = 4, .width = 9, .flags = MENUITEM_TERM,
     .caption = " Iterate",
     .onPaint = NULL,
     .result = ACTION_MODE_ITERATE
@@ -80,7 +80,7 @@ const menu_t CameraModeSubMenu = {
 
 
 const menu_item_t TriggerSubMenuItemAButton = {
-    .prev = NULL,                       .next = &TriggerSubMenuItemTimer,
+    .prev = &TriggerSubMenuItemInterval,    .next = &TriggerSubMenuItemTimer,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .caption = " " ICON_A " button",
@@ -89,7 +89,7 @@ const menu_item_t TriggerSubMenuItemAButton = {
     .result = ACTION_TRIGGER_ABUTTON
 };
 const menu_item_t TriggerSubMenuItemTimer = {
-    .prev = &TriggerSubMenuItemAButton, .next = &TriggerSubMenuItemInterval,
+    .prev = &TriggerSubMenuItemAButton,     .next = &TriggerSubMenuItemInterval,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
     .caption = " Timer",
@@ -98,9 +98,9 @@ const menu_item_t TriggerSubMenuItemTimer = {
     .result = ACTION_TRIGGER_TIMER
 };
 const menu_item_t TriggerSubMenuItemInterval = {
-    .prev = &TriggerSubMenuItemTimer,   .next = NULL,
+    .prev = &TriggerSubMenuItemTimer,   .next = &TriggerSubMenuItemAButton,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8,
+    .ofs_x = 1, .ofs_y = 3, .width = 8,     .flags = MENUITEM_TERM,
     .caption = " Repeat",
     .helpcontext = " Make series of pictures",
     .onPaint = NULL,
@@ -116,7 +116,7 @@ const menu_t TriggerSubMenu = {
 
 
 const menu_item_t ActionSubMenuSave = {
-    .prev = NULL,                       .next = &ActionSubMenuPrint,
+    .prev = &ActionSubMenuPicNRecVideo, .next = &ActionSubMenuPrint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 10,
     .caption = " Save",
@@ -170,9 +170,9 @@ const menu_item_t ActionSubMenuPicNRec = {
     .result = ACTION_ACTION_PICNREC
 };
 const menu_item_t ActionSubMenuPicNRecVideo = {
-    .prev = &ActionSubMenuPicNRec,   .next = NULL,
+    .prev = &ActionSubMenuPicNRec,   .next = &ActionSubMenuSave,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 7, .width = 10,
+    .ofs_x = 1, .ofs_y = 7, .width = 10, .flags = MENUITEM_TERM,
     .caption = " P'n'R " ICON_REC,
     .helpcontext = " Record video using Pic'n'Rec",
     .onPaint = NULL,
