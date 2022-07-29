@@ -34,19 +34,23 @@ const camera_state_options_t default_camera_state_options = {
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
     {
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     },{
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     },{
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     },{
-        .current_exposure = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
+        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     }

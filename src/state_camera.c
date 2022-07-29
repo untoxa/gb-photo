@@ -104,7 +104,7 @@ void display_last_seen(uint8_t restore) {
 }
 
 void RENDER_CAM_REG_EDEXOPGAIN()  { SHADOW.CAM_REG_EDEXOPGAIN  = CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
-void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = exposures[SETTING(current_exposure)]; }
+void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = SETTING(current_exposure); }
 void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { SHADOW.CAM_REG_ZEROVOUT    = CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
@@ -132,8 +132,7 @@ void camera_image_save() {
         // save metadata
         image_metadata.raw_regs = SHADOW;
         image_metadata.settings = current_settings[OPTION(camera_mode)];
-        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.raw_regs, sizeof(image_metadata.raw_regs), PROTECTED_SEED);
-        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), image_metadata.crc);
+        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         // add slot to used list
         VECTOR_ADD(used_slots, slot);
@@ -425,9 +424,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection->id) {
             case idExposure:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure), 1, 0, MAX_INDEX(exposures), change_direction)) RENDER_CAM_REG_EXPTIME();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
+                    SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
+                    RENDER_CAM_REG_EXPTIME();
+                }
                 if (OPTION(camera_mode) == camera_mode_assisted) {
-                    // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure'
+                    // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure_idx'
                     // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
                 }
                 break;
@@ -483,9 +485,28 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
 #if (ENABLE_PID==1)
-        calculate_histogram();
-        sprintf(text_buffer, "%hd %hd %hd %hd", (uint8_t)(histogram[0] >> 4), (uint8_t)(histogram[1] >> 4), (uint8_t)(histogram[2] >> 4), (uint8_t)(histogram[3] >> 4));
-        menu_text_out(0, 17, 10, SOLID_BLACK, text_buffer);
+        int16_t current_histogram_error = calculate_histogram() - histogram_target_value;
+        SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
+        if (abs(current_histogram_error) > 100) { // !!! hardcoded sensivity
+            uint16_t exposure_le_value = swap_bytes(SETTING(current_exposure));
+            if (current_histogram_error < 0) {
+                // go down
+                if (exposure_le_value > 0x0F) {
+                    exposure_le_value--;
+                    SETTING(current_exposure) = swap_bytes(exposure_le_value);
+                    RENDER_CAM_REG_EXPTIME();
+                }
+            } else {
+                // go up
+                if (exposure_le_value != 0xFFFF) {
+                    exposure_le_value++;
+                    SETTING(current_exposure) = swap_bytes(exposure_le_value);
+                    RENDER_CAM_REG_EXPTIME();
+                }
+            }
+        }
+        menu_text_out(0, 17, 4, SOLID_BLACK, ltoa(EXPOSURE_VALUE_TO_US(SETTING(current_exposure)), text_buffer, 10));
+        menu_text_out(4, 17, 4, SOLID_BLACK, itoa(current_histogram_error, text_buffer, 10));
 #endif
         if (recording_video) picnrec_trigger();
         if (capture_triggered) {
@@ -527,7 +548,7 @@ uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, came
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (id) {
         case idExposure: {
-            uint16_t value = EXPOSURE_VALUE_TO_US(exposures[settings->current_exposure]) / 100;
+            uint16_t value = EXPOSURE_VALUE_TO_US(settings->current_exposure) / 100;
             uint8_t * buf = text_buffer_extra;
             uint8_t len = strlen(uitoa(value, buf, 10));
             if (len == 1) {

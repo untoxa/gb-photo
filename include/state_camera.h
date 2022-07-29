@@ -119,7 +119,8 @@ typedef struct camera_shadow_regs_t {
 } camera_shadow_regs_t;
 
 typedef struct camera_mode_settings_t {
-    int8_t current_exposure;
+    uint16_t current_exposure;
+    int8_t current_exposure_idx;
     int8_t current_gain;
     int8_t current_zero_point;
     int8_t current_edge_mode;

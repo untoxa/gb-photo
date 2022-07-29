@@ -34,7 +34,7 @@
 #define MOVE_BKG(x, y) (shadow_scx_reg = (x), shadow_scy_reg = WRAP_SCROLL_Y((y)))
 
 #define LENGTH(a) (sizeof((a))/sizeof((a)[0]))
-#define MAX_INDEX(a) (sizeof((a))/sizeof((a)[0])-1)
+#define MAX_INDEX(a) ((sizeof((a))/sizeof((a)[0]))-1)
 
 #define __ADD_CHECK__(a,b) __ADD_CHECK___(a,b)
 #define __ADD_CHECK___(a,b) __CHECK_##a##_##b
@@ -72,6 +72,10 @@ inline void set_bkg_based_tiles_ex(uint8_t x, uint8_t y, uint8_t w, uint8_t h, c
         VBK_REG = 0;
     }
     set_bkg_based_tiles(x, y, w, h, (uint8_t *)map, base_tile);
+}
+
+inline uint16_t swap_bytes(uint16_t value) {
+    return ((value >> 8) & 0xffu)| (value << 8);
 }
 
 #endif
