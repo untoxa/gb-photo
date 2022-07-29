@@ -19,6 +19,7 @@
 #include "fade_manager.h"
 #include "vector.h"
 #include "protected.h"
+#include "histogram.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -462,6 +463,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
+                RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idEdgeOperation:
                 if (redraw_selection = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
@@ -480,6 +482,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
+#if (ENABLE_PID==1)
+        calculate_histogram();
+        sprintf(text_buffer, "%hd %hd %hd %hd", (uint8_t)(histogram[0] >> 4), (uint8_t)(histogram[1] >> 4), (uint8_t)(histogram[2] >> 4), (uint8_t)(histogram[3] >> 4));
+        menu_text_out(0, 17, 10, SOLID_BLACK, text_buffer);
+#endif
         if (recording_video) picnrec_trigger();
         if (capture_triggered) {
             capture_triggered = FALSE;

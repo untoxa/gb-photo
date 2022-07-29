@@ -34,6 +34,10 @@
 #ifndef SHUTTER_SOUND
     #define SHUTTER_SOUND 0
 #endif
+// pid controller
+#ifndef ENABLE_PID
+    #define ENABLE_PID 0
+#endif
 
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text
 #define text_buffer_extra (text_buffer + (MAX_TEXT_BUFFER_SIZE / 3))
