@@ -36,7 +36,7 @@
 #endif
 // pid controller
 #ifndef ENABLE_PID
-    #define ENABLE_PID 0
+    #define ENABLE_PID 1
 #endif
 
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text

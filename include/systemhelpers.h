@@ -19,6 +19,7 @@
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define CONSTRAINT(v, min, max) MAX(MIN((v), (max)), (min))
 
 #define TO_SUBPIXEL(a) ((a) << 4u)
 #define TO_PIXEL(a) ((a) >> 4u)
@@ -39,7 +40,7 @@
 #define __ADD_CHECK__(a,b) __ADD_CHECK___(a,b)
 #define __ADD_CHECK___(a,b) __CHECK_##a##_##b
 #define CHECK_SIZE(typ,sz) typedef char __ADD_CHECK__(typ,__LINE__)[ (sizeof(typ) == (sz)) ? 1 : -1]
-#define CHECK_SIZE_LOWER(typ,sz) typedef char __ADD_CHECK__(typ,__LINE__)[ (sizeof(typ) < (sz)) ? 1 : -1]
+#define CHECK_SIZE_NOT_LARGER(typ,sz) typedef char __ADD_CHECK__(typ,__LINE__)[ (sizeof(typ) <= (sz)) ? 1 : -1]
 
 #if defined(SEGA)
     #define WRAP_SCROLL_Y(y) ((y) % 224u)

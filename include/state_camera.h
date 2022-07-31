@@ -5,6 +5,10 @@
 #include "gbcamera.h"
 #include "globals.h"
 #include "systemdetect.h"
+#include "systemhelpers.h"
+
+#define TO_EXPOSURE_VALUE(A) ((uint16_t)((A) >> 4))
+#define FROM_EXPOSURE_VALUE(A) (((uint32_t)(A)) << 4)
 
 BANKREF_EXTERN(state_camera)
 
@@ -139,6 +143,7 @@ typedef struct image_metadata_t {
     camera_mode_settings_t settings;
     uint16_t crc;
 } image_metadata_t;
+CHECK_SIZE_NOT_LARGER(image_metadata_t, CAMERA_THUMB_TILE_WIDTH * 4 * 2);   // 4 rows last rows of each last thumbnail tile 2 bytes each row
 
 #define MODE_SETTING(SET,STAT) current_settings[OPTION(STAT)].SET
 #define SETTING(SET) MODE_SETTING(SET,camera_mode)

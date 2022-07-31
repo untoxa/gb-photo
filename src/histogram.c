@@ -41,6 +41,7 @@ int16_t histogram_target_value = LENGTH(histogram_points) * 64 * 1.5;
 #else
 int16_t histogram_target_value = 0;
 #endif
+uint8_t histogram_points_count = LENGTH(histogram_points);
 
 
 static uint8_t histogram_counter;

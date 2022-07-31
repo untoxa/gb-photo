@@ -20,6 +20,7 @@
 #include "vector.h"
 #include "protected.h"
 #include "histogram.h"
+#include "math.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -60,17 +61,17 @@ camera_mode_settings_t current_settings[N_CAMERA_MODES];
 camera_shadow_regs_t SHADOW;    // camera shadow registers for reading
 
 static const uint16_t exposures[] = {
-    US_TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
-    US_TO_EXPOSURE_VALUE(304),     US_TO_EXPOSURE_VALUE(400),     US_TO_EXPOSURE_VALUE(512),     US_TO_EXPOSURE_VALUE(608),
-    US_TO_EXPOSURE_VALUE(800),     US_TO_EXPOSURE_VALUE(1008),    US_TO_EXPOSURE_VALUE(1264),    US_TO_EXPOSURE_VALUE(1504),
-    US_TO_EXPOSURE_VALUE(2000),    US_TO_EXPOSURE_VALUE(2512),    US_TO_EXPOSURE_VALUE(3008),    US_TO_EXPOSURE_VALUE(4000),
-    US_TO_EXPOSURE_VALUE(5008),    US_TO_EXPOSURE_VALUE(6000),    US_TO_EXPOSURE_VALUE(8000),    US_TO_EXPOSURE_VALUE(10000),
-    US_TO_EXPOSURE_VALUE(12512),   US_TO_EXPOSURE_VALUE(15008),   US_TO_EXPOSURE_VALUE(20000),   US_TO_EXPOSURE_VALUE(25008),
-    US_TO_EXPOSURE_VALUE(30000),   US_TO_EXPOSURE_VALUE(40000),   US_TO_EXPOSURE_VALUE(50000),   US_TO_EXPOSURE_VALUE(60000),
-    US_TO_EXPOSURE_VALUE(70000),   US_TO_EXPOSURE_VALUE(80000),   US_TO_EXPOSURE_VALUE(100000),  US_TO_EXPOSURE_VALUE(125008),
-    US_TO_EXPOSURE_VALUE(160000),  US_TO_EXPOSURE_VALUE(200000),  US_TO_EXPOSURE_VALUE(250000),  US_TO_EXPOSURE_VALUE(300000),
-    US_TO_EXPOSURE_VALUE(400000),  US_TO_EXPOSURE_VALUE(500000),  US_TO_EXPOSURE_VALUE(600000),  US_TO_EXPOSURE_VALUE(800000),
-    US_TO_EXPOSURE_VALUE(1000000), US_TO_EXPOSURE_VALUE(1048560)
+    TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
+    TO_EXPOSURE_VALUE(304),     TO_EXPOSURE_VALUE(400),     TO_EXPOSURE_VALUE(512),     TO_EXPOSURE_VALUE(608),
+    TO_EXPOSURE_VALUE(800),     TO_EXPOSURE_VALUE(1008),    TO_EXPOSURE_VALUE(1264),    TO_EXPOSURE_VALUE(1504),
+    TO_EXPOSURE_VALUE(2000),    TO_EXPOSURE_VALUE(2512),    TO_EXPOSURE_VALUE(3008),    TO_EXPOSURE_VALUE(4000),
+    TO_EXPOSURE_VALUE(5008),    TO_EXPOSURE_VALUE(6000),    TO_EXPOSURE_VALUE(8000),    TO_EXPOSURE_VALUE(10000),
+    TO_EXPOSURE_VALUE(12512),   TO_EXPOSURE_VALUE(15008),   TO_EXPOSURE_VALUE(20000),   TO_EXPOSURE_VALUE(25008),
+    TO_EXPOSURE_VALUE(30000),   TO_EXPOSURE_VALUE(40000),   TO_EXPOSURE_VALUE(50000),   TO_EXPOSURE_VALUE(60000),
+    TO_EXPOSURE_VALUE(70000),   TO_EXPOSURE_VALUE(80000),   TO_EXPOSURE_VALUE(100000),  TO_EXPOSURE_VALUE(125008),
+    TO_EXPOSURE_VALUE(160000),  TO_EXPOSURE_VALUE(200000),  TO_EXPOSURE_VALUE(250000),  TO_EXPOSURE_VALUE(300000),
+    TO_EXPOSURE_VALUE(400000),  TO_EXPOSURE_VALUE(500000),  TO_EXPOSURE_VALUE(600000),  TO_EXPOSURE_VALUE(800000),
+    TO_EXPOSURE_VALUE(1000000), TO_EXPOSURE_VALUE(1048560)
 };
 static const table_value_t gains[] = {
     { CAM01_GAIN_140, "14.0" }, { CAM01_GAIN_155, "15.5" }, { CAM01_GAIN_170, "17.0" }, { CAM01_GAIN_185, "18.5" },
@@ -104,7 +105,7 @@ void display_last_seen(uint8_t restore) {
 }
 
 void RENDER_CAM_REG_EDEXOPGAIN()  { SHADOW.CAM_REG_EDEXOPGAIN  = CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
-void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = SETTING(current_exposure); }
+void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
 void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { SHADOW.CAM_REG_ZEROVOUT    = CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
@@ -485,28 +486,30 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
 #if (ENABLE_PID==1)
-        int16_t current_histogram_error = calculate_histogram() - histogram_target_value;
+        // P component
+        int16_t error = (calculate_histogram() - histogram_target_value) / histogram_points_count;
         SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
-        if (abs(current_histogram_error) > 100) { // !!! hardcoded sensivity
-            uint16_t exposure_le_value = swap_bytes(SETTING(current_exposure));
-            if (current_histogram_error < 0) {
-                // go down
-                if (exposure_le_value > 0x0F) {
-                    exposure_le_value--;
-                    SETTING(current_exposure) = swap_bytes(exposure_le_value);
-                    RENDER_CAM_REG_EXPTIME();
-                }
-            } else {
-                // go up
-                if (exposure_le_value != 0xFFFF) {
-                    exposure_le_value++;
-                    SETTING(current_exposure) = swap_bytes(exposure_le_value);
-                    RENDER_CAM_REG_EXPTIME();
-                }
-            }
-        }
-        menu_text_out(0, 17, 4, SOLID_BLACK, ltoa(EXPOSURE_VALUE_TO_US(SETTING(current_exposure)), text_buffer, 10));
-        menu_text_out(4, 17, 4, SOLID_BLACK, itoa(current_histogram_error, text_buffer, 10));
+
+        // I component
+        static int16_t integral_error = 0;
+        integral_error = CONSTRAINT(integral_error + (error >> 4), -256, 256);
+
+        // D component
+        static int16_t old_error = 0;
+        int16_t diff_error = error - old_error;
+        old_error = error;
+
+        // kP = 1/8; kI = 1/16 * (log2(current_exposure) / 4); kD = 1/32
+        int32_t PID = (int32_t)((error >> 3) + (integral_error * (log2(SETTING(current_exposure)) >> 2)) + (diff_error >> 5));
+
+        // apply
+        SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + PID), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
+        RENDER_CAM_REG_EXPTIME();
+
+        // debug output
+        menu_text_out(0, 17, 4, SOLID_BLACK, ltoa(FROM_EXPOSURE_VALUE(SETTING(current_exposure)), text_buffer, 10));
+        menu_text_out(4, 17, 4, SOLID_BLACK, itoa(error, text_buffer, 10));
+        menu_text_out(8, 17, 4, SOLID_BLACK, ltoa(PID, text_buffer, 10));
 #endif
         if (recording_video) picnrec_trigger();
         if (capture_triggered) {
@@ -548,7 +551,7 @@ uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, came
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (id) {
         case idExposure: {
-            uint16_t value = EXPOSURE_VALUE_TO_US(settings->current_exposure) / 100;
+            uint16_t value = FROM_EXPOSURE_VALUE(settings->current_exposure) / 100;
             uint8_t * buf = text_buffer_extra;
             uint8_t len = strlen(uitoa(value, buf, 10));
             if (len == 1) {

@@ -18,7 +18,7 @@ typedef struct save_structure_t {
     camera_state_options_t state_options;
     camera_mode_settings_t mode_settings[N_CAMERA_MODES];
 } save_structure_t;
-CHECK_SIZE_LOWER(save_structure_t, FREE_SAVE_SPACE);    // compiling breaks here if sizeof(save_structure_t) becomes larger than the available amount of bytes
+CHECK_SIZE_NOT_LARGER(save_structure_t, FREE_SAVE_SPACE);   // compiling breaks here if sizeof(save_structure_t) becomes larger than the available amount of bytes
 
 save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;  // bind the structure to the top of SRAM bank
 
@@ -34,22 +34,22 @@ const camera_state_options_t default_camera_state_options = {
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
     {
-        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     },{
-        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     },{
-        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
     },{
-        .current_exposure = US_TO_EXPOSURE_VALUE(6000),
+        .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_mode = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
         .edge_exclusive = TRUE
