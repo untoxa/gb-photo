@@ -20,7 +20,7 @@ typedef struct save_structure_t {
 } save_structure_t;
 CHECK_SIZE_NOT_LARGER(save_structure_t, FREE_SAVE_SPACE);   // compiling breaks here if sizeof(save_structure_t) becomes larger than the available amount of bytes
 
-save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;  // bind the structure to the top of SRAM bank
+static save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;  // bind the structure to the top of SRAM bank
 
 const camera_state_options_t default_camera_state_options = {
     .camera_mode = camera_mode_manual,
@@ -67,17 +67,25 @@ void init_save_structure() BANKED {
     memcpy(current_settings, save_structure.mode_settings, sizeof(current_settings));
 }
 
+inline void save_wait_sram() {
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
+}
+
 void save_camera_mode_settings(camera_mode_e mode) BANKED {
+    save_wait_sram();
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     save_structure.mode_settings[mode] = current_settings[mode];
 }
 
 void restore_default_mode_settings(camera_mode_e mode) BANKED {
+    save_wait_sram();
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     current_settings[mode] = save_structure.mode_settings[mode] = default_camera_mode_settings[mode];
 }
 
 void save_camera_state() BANKED {
+    save_wait_sram();
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     save_structure.state_options = camera_state;
 }
