@@ -5,7 +5,7 @@
 
 Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link.
 
-Download `cigwin` built for Windows from [here](https://www.cygwin.com/).
+Download `Cigwin` built for Windows from [here](https://www.cygwin.com/).
 Install with the additional `make` package from `Devel` category.
 
 Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/).
