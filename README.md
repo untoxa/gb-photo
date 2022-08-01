@@ -25,7 +25,7 @@ Now from Cigwin terminal, clone this git repository to its desired destination (
 
     git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
-Change GBDK_HOME environment variable in the `Makefile` into the git folder, or set it permenently in the Windows system settings.
+Change GBDK_HOME environment variable in the `Makefile` into the git folder, or set it permanently in the Windows system settings.
 
 Run make from the Cigwin terminal in the project folder containing the `Makefile`: 
 
