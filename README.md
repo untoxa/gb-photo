@@ -12,14 +12,15 @@ Download and install `Python 3` built for Windows from [here](https://www.python
 
 Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
 
-Download `get-pip.py` from [here](https://bootstrap.pypa.io/get-pip.py)
+Download script from [here](https://bootstrap.pypa.io/get-pip.py), then run from Cigwin in the directory where `get-pip.py` is placed (cd) :
 
-From Powershell or Cigwin, run Python command line and execute `get-pip.py` to install pip installer.
+    python get-pip.py
+    python -m pip install --upgrade pip
 
-Then install Pillow and wave libraries under Python command line: 
+Then install Pillow and wave libraries: 
 
-    pip install Pillow
-    pip install wave
+    python -m pip install --upgrade Pillow
+    python -m pip install --upgrade wave
 
 Now from Cigwin terminal, clone this git repository to its desired destination (default is `/home/USER`): 
 
