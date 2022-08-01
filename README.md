@@ -22,17 +22,12 @@ Then install Pillow and wave libraries :
     pip install wave
 
 Now from Cigwin terminal, clone this git repository to its desired destination: 
-    
-    cd (root of your repository directory)
-    git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
-Change the Home directory into the git Makefile:
-
-    cd (your cloned repository directory)
+git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
 Set GBDK_HOME environment variable from the `Makefile` into the git folder, or set it permenently in the Windows system settings.
 
-Run make in the Cigwin terminal: 
+Run make from the Cigwin terminal in the project folder containing the `Makefile`: 
 
     make
 
