@@ -5,24 +5,23 @@
 
 Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link.
 
-Download and install `MSYS2` built for Windows from [here](https://www.msys2.org/).
+Download `cigwin` built for Windows from [here](https://www.cygwin.com/).
+Install with the additional `make` package from `Devel` category.
 
-Then run in MSYS2 command line: 
+Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/).
 
-    pacman -S python
-    pacman -S make
-   
-It installs `Python 3`, make. For whatever the reason, installing pip is always a pain, so get this little script and run it:
+Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
 
-    wget https://bootstrap.pypa.io/get-pip.py
-    python3 get-pip.py
-    
-Install few other dependancies:
+Download `get-pip.py` from [here](https://bootstrap.pypa.io/get-pip.py)
 
-    python3 -m pip install --upgrade Pillow
-    python3 -m pip install --upgrade wave
-    
-Clone this git repository to its desired destination: 
+From Powershell or Cigwin, run Python and execute `get-pip.py` to install pip.
+
+Then install Pillow and wave libraries : 
+
+    pip install Pillow
+    pip install wave
+
+Now from Cigwin terminal, clone this git repository to its desired destination: 
     
     cd (root of your repository directory)
     git clone https://github.com/untoxa/2bit-pxlr-studio-next
@@ -31,13 +30,9 @@ Change the Home directory into the git Makefile:
 
     cd (your cloned repository directory)
 
-Set GBDK_HOME environment variable:
+Set GBDK_HOME environment variable from the `Makefile` into the git folder, or set it permenently in the Windows system settings.
 
-    set GBDK_HOME=(path to GBDK-2020 directory)
-
-or set it permenently in the Windows system settings
-
-Run make in the MSYS2 command line: 
+Run make in the Cigwin terminal: 
 
     make
 
