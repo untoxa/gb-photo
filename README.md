@@ -12,7 +12,7 @@ Download and install `Python 3` built for Windows from [here](https://www.python
 
 Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
 
-Download script from [here](https://bootstrap.pypa.io/get-pip.py), then run from Cigwin in the directory where `get-pip.py` is placed (cd) :
+Download script from [here](https://bootstrap.pypa.io/get-pip.py), then run from Cigwin in the directory where `get-pip.py` is placed:
 
     python get-pip.py
     python -m pip install --upgrade pip
