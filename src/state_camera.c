@@ -239,6 +239,36 @@ const menu_t CameraMenuAssisted = {
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
 
+// --- Auto menu -------------------------------------
+const menu_item_t CameraMenuItemAutoContrast = {
+    .prev = &CameraMenuItemAutoDither,          .next = &CameraMenuItemAutoDither,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 0, .ofs_y = 0, .width = 5,
+    .id = idContrast,
+    .caption = " " ICON_CONTRAST "\t%d",
+    .helpcontext = " Contrast level",
+    .onPaint = onCameraMenuItemPaint,
+    .result = MENU_RESULT_NONE
+};
+const menu_item_t CameraMenuItemAutoDither = {
+    .prev = &CameraMenuItemAutoContrast,    .next = &CameraMenuItemAutoContrast,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 5, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
+    .id = idDither,
+    .caption = " " ICON_DITHER "\t%s",
+    .helpcontext = " Dithering on/off",
+    .onPaint = onCameraMenuItemPaint,
+    .result = MENU_RESULT_NONE
+};
+
+const menu_t CameraMenuAuto = {
+    .x = 0, .y = 0, .width = 0, .height = 0,
+    .flags = MENU_INVERSE,
+    .items = &CameraMenuItemAutoContrast,
+    .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
+    .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
+};
+
 // --- Manual menu -----------------------------------
 const menu_item_t CameraMenuItemManualExposure = {
     .prev = &CameraMenuItemManualEdgeExclusive, .next = &CameraMenuItemManualGain,
@@ -486,32 +516,36 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
 #if (ENABLE_PID==1)
-        // P component
-        int16_t error = (calculate_histogram() - histogram_target_value) / histogram_points_count;
-        SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
+        if (OPTION(camera_mode) == camera_mode_auto) {
+            // P component
+            int16_t error = (calculate_histogram() - histogram_target_value) / histogram_points_count;
+            SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
 
-#define PID_P ((error >> 4) * (log2(SETTING(current_exposure)) >> 2))
+            int8_t log2_exposure = log2(SETTING(current_exposure));
+            log2_exposure = MAX(log2_exposure, 1);
 
-        // I component
+#define PID_P ((error >> 4) * (log2_exposure >> 2))
+
+            // I component
 #if (PID_ENABLE_I==1)
-        static int16_t integral_error = 0;
-        integral_error = CONSTRAINT(integral_error + error, -4096, 4096);
+            static int16_t integral_error = 0;
+            integral_error = CONSTRAINT(integral_error + error, -4096, 4096);
 
-        static int16_t old_error = 0;
-        if ((old_error ^ error) < 0) integral_error = 0; // error sign changed? reset integral component
-        old_error = error;
+            static int16_t old_error = 0;
+            if ((old_error ^ error) < 0) integral_error = 0; // error sign changed? reset integral component
+            old_error = error;
 
-#define PID_I ((integral_error >> 6) * (log2(SETTING(current_exposure)) << 1))
+#define PID_I ((integral_error >> 6) * (log2_exposure << 1))
 
 #else
 #define PID_I 0
 #endif
 
-        // D component
+            // D component
 #if (PID_ENABLE_D==1)
-        static int16_t old_error = 0;
-        int16_t diff_error = error - old_error;
-        old_error = error;
+            static int16_t old_error = 0;
+            int16_t diff_error = error - old_error;
+            old_error = error;
 
 #define PID_D (diff_error >> 5)
 
@@ -519,14 +553,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 #define PID_D 0
 #endif
 
-        // apply
-        SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
-        RENDER_CAM_REG_EXPTIME();
-
-        // debug output
-        menu_text_out(0, 17, 5, SOLID_BLACK, ltoa(FROM_EXPOSURE_VALUE(SETTING(current_exposure)), text_buffer, 10));
-        menu_text_out(5, 17, 4, SOLID_BLACK, itoa(error, text_buffer, 10));
-        menu_text_out(9, 17, 4, SOLID_BLACK, itoa((PID_P + PID_I + PID_D), text_buffer, 10));
+            // apply
+            SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
+            RENDER_CAM_REG_EXPTIME();
+            // display
+            menu_text_out(15, 0, 5, SOLID_BLACK, camera_render_item_text(idExposure, "%sms", &CURRENT_SETTINGS));
+        }
 #endif
         if (recording_video) picnrec_trigger();
         if (capture_triggered) {
@@ -646,10 +678,12 @@ uint8_t UPDATE_state_camera() BANKED {
         case camera_mode_manual:
             menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
-        case camera_mode_assisted:
-        case camera_mode_auto:
         case camera_mode_iterate:
+        case camera_mode_assisted:
             menu_result = menu_execute(&CameraMenuAssisted, NULL, last_menu_items[OPTION(camera_mode)]);
+            break;
+        case camera_mode_auto:
+            menu_result = menu_execute(&CameraMenuAuto, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
         default:
             // error, must not get here
