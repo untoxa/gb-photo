@@ -30,13 +30,19 @@
 #ifndef PICNREC_ENABLED
     #define PICNREC_ENABLED 1
 #endif
-// shutter sound
+// shutter sound index
 #ifndef SHUTTER_SOUND
     #define SHUTTER_SOUND 0
 #endif
 // pid controller
 #ifndef ENABLE_PID
     #define ENABLE_PID 1
+    #ifndef PID_ENABLE_I
+        #define PID_ENABLE_I 1
+    #endif
+    #ifndef PID_ENABLE_D
+        #define PID_ENABLE_D 0
+    #endif
 #endif
 
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text

@@ -490,26 +490,43 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         int16_t error = (calculate_histogram() - histogram_target_value) / histogram_points_count;
         SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
 
+#define PID_P ((error >> 4) * (log2(SETTING(current_exposure)) >> 2))
+
         // I component
+#if (PID_ENABLE_I==1)
         static int16_t integral_error = 0;
-        integral_error = CONSTRAINT(integral_error + (error >> 4), -256, 256);
+        integral_error = CONSTRAINT(integral_error + error, -4096, 4096);
+
+        static int16_t old_error = 0;
+        if ((old_error ^ error) < 0) integral_error = 0; // error sign changed? reset integral component
+        old_error = error;
+
+#define PID_I ((integral_error >> 6) * (log2(SETTING(current_exposure)) << 1))
+
+#else
+#define PID_I 0
+#endif
 
         // D component
+#if (PID_ENABLE_D==1)
         static int16_t old_error = 0;
         int16_t diff_error = error - old_error;
         old_error = error;
 
-        // kP = 1/8; kI = 1/16 * (log2(current_exposure) / 4); kD = 1/32
-        int32_t PID = (int32_t)((error >> 3) + (integral_error * (log2(SETTING(current_exposure)) >> 2)) + (diff_error >> 5));
+#define PID_D (diff_error >> 5)
+
+#else
+#define PID_D 0
+#endif
 
         // apply
-        SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + PID), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
+        SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
         RENDER_CAM_REG_EXPTIME();
 
         // debug output
-        menu_text_out(0, 17, 4, SOLID_BLACK, ltoa(FROM_EXPOSURE_VALUE(SETTING(current_exposure)), text_buffer, 10));
-        menu_text_out(4, 17, 4, SOLID_BLACK, itoa(error, text_buffer, 10));
-        menu_text_out(8, 17, 4, SOLID_BLACK, ltoa(PID, text_buffer, 10));
+        menu_text_out(0, 17, 5, SOLID_BLACK, ltoa(FROM_EXPOSURE_VALUE(SETTING(current_exposure)), text_buffer, 10));
+        menu_text_out(5, 17, 4, SOLID_BLACK, itoa(error, text_buffer, 10));
+        menu_text_out(9, 17, 4, SOLID_BLACK, itoa((PID_P + PID_I + PID_D), text_buffer, 10));
 #endif
         if (recording_video) picnrec_trigger();
         if (capture_triggered) {
