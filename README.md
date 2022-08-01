@@ -2,42 +2,33 @@
 
 # Fast compiling guide for Windows users 
 
+Basic requirement: 20 minutes without any disturbance.
 
-Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link.
+Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link an unzip it into the desired directory.
 
-Download and install `MSYS2` built for Windows from [here](https://www.msys2.org/).
+Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category.
 
-Then run in MSYS2 command line: 
+Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/).
 
-    pacman -S python
-    pacman -S make
-   
-It installs `Python 3`, make. For whatever the reason, installing pip is always a pain, so get this little script and run it:
+Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
 
-    wget https://bootstrap.pypa.io/get-pip.py
-    python3 get-pip.py
-    
-Install few other dependancies:
+Download a Python script from [here](https://bootstrap.pypa.io/get-pip.py), then run from Cygwin in the directory where `get-pip.py` is placed:
 
-    python3 -m pip install --upgrade Pillow
-    python3 -m pip install --upgrade wave
-    
-Clone this git repository to its desired destination: 
-    
-    cd (root of your repository directory)
+    python get-pip.py
+    python -m pip install --upgrade pip
+
+Then install Pillow and wave libraries: 
+
+    python -m pip install --upgrade Pillow
+    python -m pip install --upgrade wave
+
+Now from Cygwin terminal, clone this git repository to its desired destination (default is `/home/USER`): 
+
     git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
-Change the Home directory into the git Makefile:
+Change GBDK_HOME environment variable in the `Makefile` into the git folder, or set it permanently in the Windows system settings.
 
-    cd (your cloned repository directory)
-
-Set GBDK_HOME environment variable:
-
-    set GBDK_HOME=(path to GBDK-2020 directory)
-
-or set it permenently in the Windows system settings
-
-Run make in the MSYS2 command line: 
+Run make from the Cygwin terminal in the project folder containing the `Makefile`: 
 
     make
 
