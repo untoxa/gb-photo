@@ -14,9 +14,9 @@ Download and install `Git` built for Windows from [here](https://git-scm.com/dow
 
 Download `get-pip.py` from [here](https://bootstrap.pypa.io/get-pip.py)
 
-From Powershell or Cigwin, run Python and execute `get-pip.py` to install pip.
+From Powershell or Cigwin, run Python command line and execute `get-pip.py` to install pip installer.
 
-Then install Pillow and wave libraries : 
+Then install Pillow and wave libraries under Python command line: 
 
     pip install Pillow
     pip install wave
