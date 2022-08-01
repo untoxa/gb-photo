@@ -188,6 +188,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
+uint8_t * renderItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings);
 
 // --- Assisted menu ---------------------------------
 const menu_item_t CameraMenuItemAssistedExposure = {
@@ -557,7 +558,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
             RENDER_CAM_REG_EXPTIME();
             // display
-            menu_text_out(15, 0, 5, SOLID_BLACK, camera_render_item_text(idExposure, "%sms", &CURRENT_SETTINGS));
+            menu_text_out(15, 0, 5, SOLID_BLACK, renderItemText(idExposure, "%sms", &CURRENT_SETTINGS));
         }
 #endif
         if (recording_video) picnrec_trigger();
@@ -594,7 +595,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
 }
-uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED {
+uint8_t * renderItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) {
     static const uint8_t * const on_off[]   = {"Off",    "On"} ;
     static const uint8_t * const low_high[] = {"Low",    "High"};
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
@@ -659,13 +660,17 @@ uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, came
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    return camera_render_item_text(self->id, self->caption, &CURRENT_SETTINGS);
+    return renderItemText(self->id, self->caption, &CURRENT_SETTINGS);
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
     return 0;
+}
+
+uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED {
+    return renderItemText(id, format, settings);
 }
 
 uint8_t UPDATE_state_camera() BANKED {
