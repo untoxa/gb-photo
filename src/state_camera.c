@@ -96,14 +96,6 @@ static const table_value_t edge_operations[] = {
     { CAM01_EDGEOP_2D, "2D" }, { CAM01_EDGEOP_HORIZ, "Horiz" }, { CAM01_EDGEOP_VERT, "Vert" },{ CAM01_EDGEOP_NONE, "None" }
 };
 
-
-void display_last_seen(uint8_t restore) {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
-    uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
-    screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
-    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
-}
-
 void RENDER_CAM_REG_EDEXOPGAIN()  { SHADOW.CAM_REG_EDEXOPGAIN  = CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
 void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
 void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
@@ -117,6 +109,48 @@ void RENDER_CAM_REGISTERS() {
     RENDER_CAM_REG_EDRAINVVREF();
     RENDER_CAM_REG_ZEROVOUT();
     RENDER_CAM_REG_DITHERPATTERN();
+}
+
+void RENDER_REGS_FROM_EXPOSURE() {
+    // Gain 32.0 | vRef 0.480 | No edge Operation    | Exposure time range from 1048ms to 394ms
+    // Gain 26.0 | vRef 0.416 | 2-D edge mode        | Exposure time range from  573ms to 164ms
+    // Gain 20.0 | vRef 0.224 | 2-D edge mode        | Exposure time range from  282ms to  32ms
+    // Gain 14.0 | vRef 0.192 | 2-D edge mode        | Exposure time range from   67ms to 0.8ms
+    // Gain 14.0 | vRef 0.160 | Horizontal edge mode | Exposure time range from  0.5ms to 0.3ms
+    uint16_t exposure = SETTING(current_exposure);
+    if (exposure < TO_EXPOSURE_VALUE(512)) {
+        SETTING(edge_operation) = 1;    // CAM01_EDGEOP_HORIZ
+        SETTING(voltage_out)    = 160;
+        SETTING(current_gain)   = 0;    // CAM01_GAIN_140
+    } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
+        SETTING(edge_operation) = 0;    // CAM01_EDGEOP_2D
+        SETTING(voltage_out)    = 192;
+        SETTING(current_gain)   = 0;    // CAM01_GAIN_140
+    } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
+        SETTING(edge_operation) = 0;    // CAM01_EDGEOP_2D
+        SETTING(voltage_out)    = 224;
+        SETTING(current_gain)   = 4;    // CAM01_GAIN_200
+    } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
+        SETTING(edge_operation) = 0;    // CAM01_EDGEOP_2D
+        SETTING(voltage_out)    = 416;
+        SETTING(current_gain)   = 8;    // CAM01_GAIN_260
+    } else {
+        SETTING(edge_operation) = 3;    // CAM01_EDGEOP_NONE
+        SETTING(voltage_out)    = 480;
+        SETTING(current_gain)   = 12;   // CAM01_GAIN_32
+    }
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    RENDER_CAM_REG_EDEXOPGAIN();
+    RENDER_CAM_REG_ZEROVOUT();
+    RENDER_CAM_REG_EXPTIME();
+}
+
+
+void display_last_seen(uint8_t restore) {
+    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
+    screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
+    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
 void camera_image_save() {
@@ -458,11 +492,16 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case idExposure:
                 if (redraw_selection = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
                     SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
-                    RENDER_CAM_REG_EXPTIME();
-                }
-                if (OPTION(camera_mode) == camera_mode_assisted) {
-                    // ToDo: Adjust other registers ("N", Edge Operation, Output Ref Voltage, Analog output gain) based on index of 'current_exposure_idx'
-                    // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
+                    switch (OPTION(camera_mode)) {
+                        case camera_mode_assisted:
+                            // ToDo: Adjust other registers ("N", Output Ref Voltage) based on index of 'current_exposure_idx'
+                            // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
+                            RENDER_REGS_FROM_EXPOSURE();    // Voltage Out, Gain, Edge Operation
+                            break;
+                        default:
+                            RENDER_CAM_REG_EXPTIME();
+                            break;
+                    }
                 }
                 break;
             case idGain:
@@ -556,7 +595,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
             // apply
             SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
-            RENDER_CAM_REG_EXPTIME();
+            RENDER_REGS_FROM_EXPOSURE();
             // display
             menu_text_out(15, 0, 5, SOLID_BLACK, renderItemText(idExposure, "%sms", &CURRENT_SETTINGS));
         }
