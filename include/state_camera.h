@@ -127,7 +127,7 @@ typedef struct camera_mode_settings_t {
     int8_t current_exposure_idx;
     int8_t current_gain;
     int8_t current_zero_point;
-    int8_t current_edge_mode;
+    int8_t current_edge_ratio;
     int8_t current_voltage_ref;
     int16_t voltage_out;
     uint8_t dithering;

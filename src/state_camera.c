@@ -98,7 +98,7 @@ static const table_value_t edge_operations[] = {
 
 void RENDER_CAM_REG_EDEXOPGAIN()  { SHADOW.CAM_REG_EDEXOPGAIN  = CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
 void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
-void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_mode)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
+void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_ratio)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
 void RENDER_CAM_REG_ZEROVOUT()    { SHADOW.CAM_REG_ZEROVOUT    = CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
@@ -549,7 +549,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (redraw_selection = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeRatio:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_mode), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
@@ -700,7 +700,7 @@ uint8_t * renderItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             sprintf(text_buffer, format, voltage_refs[settings->current_voltage_ref].caption);
             break;
         case idEdgeRatio:
-            sprintf(text_buffer, format, edge_ratios[settings->current_edge_mode].caption);
+            sprintf(text_buffer, format, edge_ratios[settings->current_edge_ratio].caption);
             break;
         case idEdgeExclusive:
             sprintf(text_buffer, format, on_off[((settings->edge_exclusive) ? 1 : 0)]);
