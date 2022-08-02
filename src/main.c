@@ -23,6 +23,7 @@
 // graphic assets
 #include "cursors.h"
 #include "font_proportional.h"
+#include "font_fancy.h"
 #include "camera_sgb_border.h"
 
 // audio assets
@@ -132,6 +133,7 @@ void main() {
 //        if (joy & J_START)  music_pause(music_paused = (!music_paused));
 
     vwf_load_font(0, font_proportional, BANK(font_proportional));
+    vwf_load_font(1, font_fancy, BANK(font_fancy));
     vwf_activate_font(0);
 //    vwf_set_colors(2, 1);
 
