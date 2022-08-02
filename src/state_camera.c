@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -18,6 +19,7 @@
 #include "linkcable.h"
 #include "fade_manager.h"
 #include "vector.h"
+#include "counter.h"
 #include "protected.h"
 #include "histogram.h"
 #include "math.h"
@@ -57,7 +59,9 @@ camera_state_options_t camera_state;
 uint8_t image_live_preview = TRUE;
 uint8_t recording_video = FALSE;
 uint8_t camera_do_shutter = FALSE;
-uint8_t camera_shutter_timer = 0;
+
+COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
+COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
@@ -123,40 +127,40 @@ void RENDER_REGS_FROM_EXPOSURE() {
     uint8_t apply_dither;
     uint16_t exposure = SETTING(current_exposure);
     if (exposure < TO_EXPOSURE_VALUE(512)) {
-        SETTING(edge_exclusive)     = FALSE;    // CAM01F_EDGEEXCL_V_OFF
+        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
         SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
         SETTING(voltage_out)        = 160;
         SETTING(current_gain)       = 0;        // CAM01_GAIN_140
         if (apply_dither = (SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = FALSE;// dither HIGH
+            SETTING(ditheringHighLight) = false;// dither HIGH
     } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
-        SETTING(edge_exclusive)     = TRUE;     // CAM01F_EDGEEXCL_V_ON
+        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
         SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
         SETTING(voltage_out)        = 192;
         SETTING(current_gain)       = 0;        // CAM01_GAIN_140
         if (apply_dither = (SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = FALSE;// dither HIGH
+            SETTING(ditheringHighLight) = false;// dither HIGH
     } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
-        SETTING(edge_exclusive)     = TRUE;     // CAM01F_EDGEEXCL_V_ON
+        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
         SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
         SETTING(voltage_out)        = 224;
         SETTING(current_gain)       = 4;        // CAM01_GAIN_200
         if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = TRUE; // dither LOW
+            SETTING(ditheringHighLight) = true; // dither LOW
     } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
-        SETTING(edge_exclusive)     = TRUE;     // CAM01F_EDGEEXCL_V_ON
+        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
         SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
         SETTING(voltage_out)        = 416;
         SETTING(current_gain)       = 8;        // CAM01_GAIN_260
         if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = TRUE; // dither LOW
+            SETTING(ditheringHighLight) = true; // dither LOW
     } else {
-        SETTING(edge_exclusive)     = FALSE;    // CAM01F_EDGEEXCL_V_OFF
+        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
         SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
         SETTING(voltage_out)        = 480;
         SETTING(current_gain)       = 12;       // CAM01_GAIN_32
         if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = TRUE; // dither LOW
+            SETTING(ditheringHighLight) = true; // dither LOW
     }
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
@@ -222,7 +226,8 @@ static uint8_t onPrinterProgress() BANKED {
 static uint8_t seconds_counter = 0;
 
 inline void camera_charge_timer(uint8_t value) {
-    camera_shutter_timer = value, seconds_counter = 60;
+    COUNTER_SET(camera_shutter_timer, value);
+    seconds_counter = 60;
 }
 
 void shutter_VBL_ISR() NONBANKED {
@@ -248,6 +253,9 @@ uint8_t ENTER_state_camera() BANKED {
 #endif
     refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
+    // reset capture timers and counters
+    COUNTER_RESET(camera_shutter_timer);
+    COUNTER_RESET(camera_repeat_counter);
     // load some initial settings
     RENDER_CAM_REGISTERS();
     SHADOW.CAM_REG_CAPTURE = 0;
@@ -487,7 +495,6 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     static change_direction_e change_direction;
     static uint8_t capture_triggered = FALSE;       // state of static variable persists between calls
-    static uint8_t old_camera_shutter_timer = 0;
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
@@ -495,10 +502,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (KEY_PRESSED(J_A)) {
         // A is a "shutter" button
         switch (OPTION(trigger_mode)) {
-            case trigger_mode_timer:
             case trigger_mode_interval:
+                COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
+            case trigger_mode_timer:
                 camera_charge_timer(OPTION(shutter_timer));
-                old_camera_shutter_timer = 0xFF;
                 break;
             default:
                 switch (OPTION(after_action)) {
@@ -598,13 +605,25 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     }
 
     // process the timer
-    if (old_camera_shutter_timer != camera_shutter_timer) {
-        old_camera_shutter_timer = camera_shutter_timer;
+    if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
             sprintf(text_buffer, " %hd", (uint8_t)camera_shutter_timer);
             menu_text_out(18, 16, 2, SOLID_BLACK, text_buffer);
-        } else screen_clear_rect(18, 16, 2, 1, SOLID_BLACK);
+        } else {
+            screen_clear_rect(18, 16, 2, 1, SOLID_BLACK);
+            if (COUNTER(camera_repeat_counter)) {
+                if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
+            }
+        }
+    }
+
+    // process the repeat counter
+    if (COUNTER_CHANGED(camera_repeat_counter)) {
+        if (camera_repeat_counter) {
+            sprintf(text_buffer, " %hd", (uint8_t)camera_repeat_counter);
+            menu_text_out(18, 15, 2, SOLID_BLACK, text_buffer);
+        } else screen_clear_rect(18, 15, 2, 1, SOLID_BLACK);
     }
 
     // make the picture if not in progress yet
@@ -732,13 +751,13 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             sprintf(text_buffer, format, settings->current_contrast);
             break;
         case idDither:
-            sprintf(text_buffer, format, on_off[((settings->dithering) ? 1 : 0)]);
+            sprintf(text_buffer, format, on_off[settings->dithering]);
             break;
         case idDitherLight:
-            sprintf(text_buffer, format, low_high[((settings->ditheringHighLight) ? 1 : 0)]);
+            sprintf(text_buffer, format, low_high[settings->ditheringHighLight]);
             break;
         case idInvOutput:
-            sprintf(text_buffer, format, norm_inv[((settings->invertOutput) ? 1 : 0)]);
+            sprintf(text_buffer, format, norm_inv[settings->invertOutput]);
             break;
         case idZeroPoint:
             sprintf(text_buffer, format, zero_points[settings->current_zero_point].caption);
@@ -750,7 +769,7 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             sprintf(text_buffer, format, edge_ratios[settings->current_edge_ratio].caption);
             break;
         case idEdgeExclusive:
-            sprintf(text_buffer, format, on_off[((settings->edge_exclusive) ? 1 : 0)]);
+            sprintf(text_buffer, format, on_off[settings->edge_exclusive]);
             break;
         case idEdgeOperation:
             sprintf(text_buffer, format, edge_operations[settings->edge_operation].caption);

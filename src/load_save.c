@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -28,32 +29,33 @@ const camera_state_options_t default_camera_state_options = {
     .after_action = after_action_save,
     .gallery_picture_idx = 0,
     .print_frame_idx = 0,
-    .print_fast = FALSE,
+    .print_fast = false,
     .shutter_sound = shutter_sound_0,
-    .shutter_timer = 10
+    .shutter_timer = 10,
+    .shutter_counter = 5
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
     {
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
+        .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .edge_exclusive = true
     },{
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
+        .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .edge_exclusive = true
     },{
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
+        .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .edge_exclusive = true
     },{
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
-        .voltage_out = 192, .dithering = TRUE, .ditheringHighLight = TRUE, .current_contrast = 9, .invertOutput = FALSE,
-        .edge_exclusive = TRUE
+        .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .edge_exclusive = true
     }
 };
 

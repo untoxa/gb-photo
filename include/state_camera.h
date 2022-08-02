@@ -2,6 +2,7 @@
 #define __STATE_CAMERA_H_INCLUDE__
 
 #include <gbdk/platform.h>
+#include <stdbool.h>
 #include "gbcamera.h"
 #include "globals.h"
 #include "systemdetect.h"
@@ -107,9 +108,10 @@ typedef struct camera_state_options_t {
     after_action_e after_action;
     uint8_t gallery_picture_idx;
     uint8_t print_frame_idx;
-    uint8_t print_fast;
+    bool print_fast;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
+    uint8_t shutter_counter;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT
@@ -131,12 +133,12 @@ typedef struct camera_mode_settings_t {
     int8_t current_edge_ratio;
     int8_t current_voltage_ref;
     int16_t voltage_out;
-    uint8_t dithering;
-    uint8_t ditheringHighLight;
     uint8_t current_contrast;
-    uint8_t invertOutput;
-    uint8_t edge_exclusive;
     uint8_t edge_operation;
+    bool dithering              : 1;
+    bool ditheringHighLight     : 1;
+    bool invertOutput           : 1;
+    bool edge_exclusive         : 1;
 } camera_mode_settings_t;
 
 typedef struct image_metadata_t {
