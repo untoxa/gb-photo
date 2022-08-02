@@ -49,6 +49,9 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         set_bkg_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
     }
 
+    // call onShow handler if present
+    if (menu->onShow) menu->onShow(menu, param);
+
     // draw menu items
     for (const menu_item_t * current_item = menu->items; (current_item); current_item = current_item->next) {
         if (current_item == selection) {
@@ -59,8 +62,6 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         }
         if (current_item->flags & MENUITEM_TERM) break;
     }
-
-    if (menu->onShow) menu->onShow(menu, param);
 
     do {
         // process input

@@ -9,6 +9,11 @@
 #define CORNER_DR           0xfdu
 #define CORNER_DL           0xfcu
 
+#define ICON_SPIN_UP        "\x06"
+#define ICON_SPIN_DOWN      "\x07"
+#define ICON_MULTIPLE       "\x08"
+#define ICON_CLOCK          "\x0b"
+
 // profress bar
 #define ICON_PROG_START     '\x0c'
 #define ICON_PROG_FULL      '\x0d'

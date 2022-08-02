@@ -223,16 +223,16 @@ static uint8_t onPrinterProgress() BANKED {
 }
 
 
-static uint8_t seconds_counter = 0;
+static uint8_t vbl_frames_counter = 0;
 
 inline void camera_charge_timer(uint8_t value) {
     COUNTER_SET(camera_shutter_timer, value);
-    seconds_counter = 60;
+    vbl_frames_counter = 60;
 }
 
 void shutter_VBL_ISR() NONBANKED {
-    if (!seconds_counter--) {
-        seconds_counter = 60;
+    if (!vbl_frames_counter--) {
+        vbl_frames_counter = 60;
         if (COUNTER(camera_shutter_timer)) {
             if (!--COUNTER(camera_shutter_timer)) camera_do_shutter = TRUE;
         }
@@ -483,7 +483,7 @@ static const menu_item_t * last_menu_items[N_CAMERA_MODES] = { NULL, NULL, NULL,
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
-    return (value & 0b11110000) | ((value << 1) & 0b00000100) | ((value >> 1) & 0b00000010) | ((value << 3) & 0b00001000) | ((value >> 3) & 0b00000001);
+    return joypad_swap_dpad(value);
 }
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
@@ -521,6 +521,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 }
                 break;
         }
+    } else if (KEY_PRESSED(J_B)) {
+        // cancel timers
+        COUNTER_RESET(camera_shutter_timer);
+        COUNTER_RESET(camera_repeat_counter);
+        screen_clear_rect(18, 13, 2, 4, SOLID_BLACK);
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
         capture_triggered = FALSE;
@@ -608,10 +613,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
+            menu_text_out(18, 15, 0, SOLID_BLACK, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
             menu_text_out(18, 16, 2, SOLID_BLACK, text_buffer);
         } else {
-            screen_clear_rect(18, 16, 2, 1, SOLID_BLACK);
+            screen_clear_rect(18, 15, 2, 2, SOLID_BLACK);
             if (COUNTER(camera_repeat_counter)) {
                 if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
             }
@@ -621,9 +627,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (camera_repeat_counter) {
+            menu_text_out(18, 13, 0, SOLID_BLACK, " " ICON_MULTIPLE);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-            menu_text_out(18, 15, 2, SOLID_BLACK, text_buffer);
-        } else screen_clear_rect(18, 15, 2, 1, SOLID_BLACK);
+            menu_text_out(18, 14, 2, SOLID_BLACK, text_buffer);
+        } else screen_clear_rect(18, 13, 2, 2, SOLID_BLACK);
     }
 
     // make the picture if not in progress yet
@@ -833,7 +840,11 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
         case ACTION_MAIN_MENU:
             recording_video = FALSE;
-            if (!menu_main_execute()) refresh_screen();
+            if (!menu_main_execute()) {
+                COUNTER_RESET(camera_shutter_timer);
+                COUNTER_RESET(camera_repeat_counter);
+                refresh_screen();
+            }
             break;
         case ACTION_CAMERA_SUBMENU: {
             recording_video = FALSE;
@@ -875,6 +886,8 @@ uint8_t UPDATE_state_camera() BANKED {
                     break;
             }
             save_camera_state();
+            COUNTER_RESET(camera_shutter_timer);
+            COUNTER_RESET(camera_repeat_counter);
             refresh_screen();
             break;
         }

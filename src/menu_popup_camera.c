@@ -15,6 +15,7 @@
 #include "menus.h"
 #include "menu_codes.h"
 #include "menu_yesno.h"
+#include "menu_spinedit.h"
 
 #if (PICNREC_ENABLED==1)
     #define MENUITEM_PICNREC_NEXT &ActionSubMenuPicNRec
@@ -44,7 +45,9 @@ typedef enum {
     idPopupCameraRestore,
     idPopupCameraMode,
     idPopupCameraTrigger,
-    idPopupCameraAction
+    idPopupCameraAction,
+    idPopupTimerValue,
+    idPopupTimerCounter
 } camera_popup_menu_e;
 
 
@@ -95,6 +98,21 @@ const menu_t CameraModeSubMenu = {
 };
 
 
+uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+static uint8_t spinedit_timer_value;
+static uint8_t spinedit_counter_value;
+const spinedit_params_t TimerSpinEditParams = {
+    .caption = "Timer:",
+    .min_value = 1,
+    .max_value = 99,
+    .value = &spinedit_timer_value
+};
+const spinedit_params_t CounterSpinEditParams = {
+    .caption = "Counter:",
+    .min_value = 1,
+    .max_value = 30,
+    .value = &spinedit_counter_value
+};
 const menu_item_t TriggerSubMenuItemAButton = {
     .prev = &TriggerSubMenuItemInterval,    .next = &TriggerSubMenuItemTimer,
     .sub = NULL, .sub_params = NULL,
@@ -106,8 +124,9 @@ const menu_item_t TriggerSubMenuItemAButton = {
 };
 const menu_item_t TriggerSubMenuItemTimer = {
     .prev = &TriggerSubMenuItemAButton,     .next = &TriggerSubMenuItemInterval,
-    .sub = NULL, .sub_params = NULL,
+    .sub = &SpinEditMenu, .sub_params = (uint8_t *)&TimerSpinEditParams,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
+    .id = idPopupTimerValue,
     .caption = " Timer",
     .helpcontext = " Use shutter timer",
     .onPaint = NULL,
@@ -115,8 +134,9 @@ const menu_item_t TriggerSubMenuItemTimer = {
 };
 const menu_item_t TriggerSubMenuItemInterval = {
     .prev = &TriggerSubMenuItemTimer,       .next = &TriggerSubMenuItemAButton,
-    .sub = NULL, .sub_params = NULL,
+    .sub = &SpinEditMenu, .sub_params = (uint8_t *)&CounterSpinEditParams,
     .ofs_x = 1, .ofs_y = 3, .width = 8,     .flags = MENUITEM_TERM,
+    .id = idPopupTimerCounter,
     .caption = " Repeat",
     .helpcontext = " Make series of pictures",
     .onPaint = NULL,
@@ -127,8 +147,19 @@ const menu_t TriggerSubMenu = {
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &TriggerSubMenuItemAButton,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
-    .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultTriggerSubMenu
 };
+uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu;
+    switch (self->id) {
+        case idPopupTimerValue:
+        case idPopupTimerCounter:
+            return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+        default:
+            break;
+    }
+    return value;
+}
 
 
 const menu_item_t ActionSubMenuSave = {
@@ -202,9 +233,9 @@ const menu_t ActionSubMenu = {
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
+
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
-
 const menu_item_t CameraMenuItemMode = {
     .prev = &CameraMenuItemReset,           .next = &CameraMenuItemTrigger,
     .sub = &CameraModeSubMenu, .sub_params = NULL,
@@ -245,7 +276,6 @@ const menu_item_t CameraMenuItemReset = {
     .onPaint = onCameraPopupMenuItemPaint,
     .result = ACTION_RESTORE_DEFAULTS
 };
-
 const menu_t CameraPopupMenu = {
     .x = 1, .y = 3, .width = 15, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
@@ -255,8 +285,11 @@ const menu_t CameraPopupMenu = {
 };
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
-    if (self->id == idPopupCameraRestore) {
-        return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+    switch (self->id) {
+        case idPopupCameraRestore:
+            return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+        default:
+            break;
     }
     return value;
 }
@@ -314,7 +347,21 @@ uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t *
     return 0;
 }
 
+
 uint8_t menu_popup_camera_execute() BANKED {
-    return menu_execute(&CameraPopupMenu, NULL, NULL);
+    spinedit_timer_value = OPTION(shutter_timer);
+    spinedit_counter_value = OPTION(shutter_counter);
+    uint8_t menu_result;
+    switch (menu_result = menu_execute(&CameraPopupMenu, NULL, NULL)) {
+        case ACTION_TRIGGER_TIMER:
+            OPTION(shutter_timer) = spinedit_timer_value;
+            break;
+        case ACTION_TRIGGER_INTERVAL:
+            OPTION(shutter_counter) = spinedit_counter_value;
+            break;
+        default:
+            break;
+    }
+    return menu_result;
 }
 
