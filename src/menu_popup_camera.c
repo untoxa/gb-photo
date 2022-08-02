@@ -17,11 +17,26 @@
 #include "menu_yesno.h"
 
 #if (PICNREC_ENABLED==1)
-    #define MENUITEM_PICNREC &ActionSubMenuPicNRec
+    #define MENUITEM_PICNREC_NEXT &ActionSubMenuPicNRec
+    #define MENUITEM_PICNREC_PREV &ActionSubMenuPicNRecVideo
+    #define MENUITEM_PICNREC_TERM 0
     #define ACTION_SUBMENU_HEIGHT 9
 #else
-    #define MENUITEM_PICNREC NULL
+    #define MENUITEM_PICNREC_NEXT &ActionSubMenuSave
+    #define MENUITEM_PICNREC_PREV &ActionSubMenuSaveAndTransfer
+    #define MENUITEM_PICNREC_TERM MENUITEM_TERM
     #define ACTION_SUBMENU_HEIGHT 7
+#endif
+#if (ITERATE_ENABLED==1)
+    #define MENUITEM_MODES_NEXT &ModeSubMenuItemIterate
+    #define MENUITEM_MODES_PREV &ModeSubMenuItemIterate
+    #define MENUITEM_MODES_TERM 0
+    #define MODES_SUBMENU_HEIGHT 6
+#else
+    #define MENUITEM_MODES_NEXT &ModeSubMenuItemManual
+    #define MENUITEM_MODES_PREV &ModeSubMenuItemAuto
+    #define MENUITEM_MODES_TERM MENUITEM_TERM
+    #define MODES_SUBMENU_HEIGHT 5
 #endif
 
 typedef enum {
@@ -36,7 +51,7 @@ typedef enum {
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t ModeSubMenuItemManual = {
-    .prev = &ModeSubMenuItemIterate,    .next = &ModeSubMenuItemAssisted,
+    .prev = MENUITEM_MODES_PREV,        .next = &ModeSubMenuItemAssisted,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 9,
     .caption = " Manual",
@@ -54,9 +69,9 @@ const menu_item_t ModeSubMenuItemAssisted = {
     .result = ACTION_MODE_ASSISTED
 };
 const menu_item_t ModeSubMenuItemAuto = {
-    .prev = &ModeSubMenuItemAssisted,   .next = &ModeSubMenuItemIterate,
+    .prev = &ModeSubMenuItemAssisted,   .next = MENUITEM_MODES_NEXT,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 9,
+    .ofs_x = 1, .ofs_y = 3, .width = 9, .flags = MENUITEM_MODES_TERM,
     .caption = " Auto",
     .helpcontext = " Full automatic mode",
     .onPaint = NULL,
@@ -67,11 +82,12 @@ const menu_item_t ModeSubMenuItemIterate = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 9, .flags = MENUITEM_TERM,
     .caption = " Iterate",
+    .helpcontext = " Make series of images",
     .onPaint = NULL,
     .result = ACTION_MODE_ITERATE
 };
 const menu_t CameraModeSubMenu = {
-    .x = 5, .y = 4, .width = 11, .height = 6,
+    .x = 5, .y = 4, .width = 11, .height = MODES_SUBMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ModeSubMenuItemManual,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -98,7 +114,7 @@ const menu_item_t TriggerSubMenuItemTimer = {
     .result = ACTION_TRIGGER_TIMER
 };
 const menu_item_t TriggerSubMenuItemInterval = {
-    .prev = &TriggerSubMenuItemTimer,   .next = &TriggerSubMenuItemAButton,
+    .prev = &TriggerSubMenuItemTimer,       .next = &TriggerSubMenuItemAButton,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8,     .flags = MENUITEM_TERM,
     .caption = " Repeat",
@@ -116,7 +132,7 @@ const menu_t TriggerSubMenu = {
 
 
 const menu_item_t ActionSubMenuSave = {
-    .prev = &ActionSubMenuPicNRecVideo, .next = &ActionSubMenuPrint,
+    .prev = MENUITEM_PICNREC_PREV,          .next = &ActionSubMenuPrint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 10,
     .caption = " Save",
@@ -125,7 +141,7 @@ const menu_item_t ActionSubMenuSave = {
     .result = ACTION_ACTION_SAVE
 };
 const menu_item_t ActionSubMenuPrint = {
-    .prev = &ActionSubMenuSave,         .next = &ActionSubMenuSaveAndPrint,
+    .prev = &ActionSubMenuSave,             .next = &ActionSubMenuSaveAndPrint,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 10,
     .caption = " Print",
@@ -134,7 +150,7 @@ const menu_item_t ActionSubMenuPrint = {
     .result = ACTION_ACTION_PRINT
 };
 const menu_item_t ActionSubMenuSaveAndPrint = {
-    .prev = &ActionSubMenuPrint,        .next = &ActionSubMenuTransfer,
+    .prev = &ActionSubMenuPrint,            .next = &ActionSubMenuTransfer,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 10,
     .caption = " Save & Print",
@@ -143,7 +159,7 @@ const menu_item_t ActionSubMenuSaveAndPrint = {
     .result = ACTION_ACTION_SAVEPRINT
 };
 const menu_item_t ActionSubMenuTransfer = {
-    .prev = &ActionSubMenuSaveAndPrint, .next = &ActionSubMenuSaveAndTransfer,
+    .prev = &ActionSubMenuSaveAndPrint,     .next = &ActionSubMenuSaveAndTransfer,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 10,
     .caption = " Transfer",
@@ -152,16 +168,16 @@ const menu_item_t ActionSubMenuTransfer = {
     .result = ACTION_ACTION_TRANSFER
 };
 const menu_item_t ActionSubMenuSaveAndTransfer = {
-    .prev = &ActionSubMenuTransfer,     .next = MENUITEM_PICNREC,
+    .prev = &ActionSubMenuTransfer,         .next = MENUITEM_PICNREC_NEXT,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 5, .width = 10,
+    .ofs_x = 1, .ofs_y = 5, .width = 10, .flags = MENUITEM_PICNREC_TERM,
     .caption = " Save & Transfer",
     .helpcontext = " Save then Transfer",
     .onPaint = NULL,
     .result = ACTION_ACTION_SAVETRANSFER
 };
 const menu_item_t ActionSubMenuPicNRec = {
-    .prev = &ActionSubMenuSaveAndTransfer, .next = &ActionSubMenuPicNRecVideo,
+    .prev = &ActionSubMenuSaveAndTransfer,  .next = &ActionSubMenuPicNRecVideo,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 6, .width = 10,
     .caption = " P'n'R",
@@ -170,7 +186,7 @@ const menu_item_t ActionSubMenuPicNRec = {
     .result = ACTION_ACTION_PICNREC
 };
 const menu_item_t ActionSubMenuPicNRecVideo = {
-    .prev = &ActionSubMenuPicNRec,   .next = &ActionSubMenuSave,
+    .prev = &ActionSubMenuPicNRec,          .next = &ActionSubMenuSave,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 7, .width = 10, .flags = MENUITEM_TERM,
     .caption = " P'n'R " ICON_REC,
@@ -190,7 +206,7 @@ uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 
 const menu_item_t CameraMenuItemMode = {
-    .prev = &CameraMenuItemReset,   .next = &CameraMenuItemTrigger,
+    .prev = &CameraMenuItemReset,           .next = &CameraMenuItemTrigger,
     .sub = &CameraModeSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 13,
     .id = idPopupCameraMode,
@@ -200,7 +216,7 @@ const menu_item_t CameraMenuItemMode = {
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemTrigger = {
-    .prev = &CameraMenuItemMode,    .next = &CameraMenuItemAction,
+    .prev = &CameraMenuItemMode,            .next = &CameraMenuItemAction,
     .sub = &TriggerSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 13,
     .id = idPopupCameraTrigger,
@@ -210,7 +226,7 @@ const menu_item_t CameraMenuItemTrigger = {
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemAction = {
-    .prev = &CameraMenuItemTrigger, .next = &CameraMenuItemReset,
+    .prev = &CameraMenuItemTrigger,         .next = &CameraMenuItemReset,
     .sub = &ActionSubMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 13,
     .id = idPopupCameraAction,
@@ -220,7 +236,7 @@ const menu_item_t CameraMenuItemAction = {
     .result = MENU_RESULT_NONE
 };
 const menu_item_t CameraMenuItemReset = {
-    .prev = &CameraMenuItemAction, .next = &CameraMenuItemMode,
+    .prev = &CameraMenuItemAction,          .next = &CameraMenuItemMode,
     .sub = &YesNoMenu, .sub_params = "Restore defaults?",
     .ofs_x = 1, .ofs_y = 4, .width = 13, .flags = MENUITEM_TERM,
     .id = idPopupCameraRestore,

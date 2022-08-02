@@ -233,8 +233,8 @@ inline void camera_charge_timer(uint8_t value) {
 void shutter_VBL_ISR() NONBANKED {
     if (!seconds_counter--) {
         seconds_counter = 60;
-        if (camera_shutter_timer) {
-            if (!--camera_shutter_timer) camera_do_shutter = TRUE;
+        if (COUNTER(camera_shutter_timer)) {
+            if (!--COUNTER(camera_shutter_timer)) camera_do_shutter = TRUE;
         }
     }
 }
@@ -608,7 +608,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
-            sprintf(text_buffer, " %hd", (uint8_t)camera_shutter_timer);
+            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
             menu_text_out(18, 16, 2, SOLID_BLACK, text_buffer);
         } else {
             screen_clear_rect(18, 16, 2, 1, SOLID_BLACK);
@@ -621,7 +621,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (camera_repeat_counter) {
-            sprintf(text_buffer, " %hd", (uint8_t)camera_repeat_counter);
+            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
             menu_text_out(18, 15, 2, SOLID_BLACK, text_buffer);
         } else screen_clear_rect(18, 15, 2, 1, SOLID_BLACK);
     }

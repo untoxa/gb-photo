@@ -44,6 +44,10 @@
         #define PID_ENABLE_D 0
     #endif
 #endif
+// iterate mode
+#ifndef ITERATE_ENABLED
+    #define ITERATE_ENABLED 0
+#endif
 
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text
 #define text_buffer_extra (text_buffer + (MAX_TEXT_BUFFER_SIZE / 3))
