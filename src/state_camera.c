@@ -34,6 +34,7 @@
 #include "sound_ok.h"
 #include "sound_error.h"
 #include "sound_menu_alter.h"
+#include "sound_timer.h"
 #include "shutter01.h"
 #include "shutter02.h"
 
@@ -55,6 +56,8 @@ camera_state_options_t camera_state;
 
 uint8_t image_live_preview = TRUE;
 uint8_t recording_video = FALSE;
+uint8_t camera_do_shutter = FALSE;
+uint8_t camera_shutter_timer = 0;
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
@@ -139,21 +142,21 @@ void RENDER_REGS_FROM_EXPOSURE() {
         SETTING(voltage_out)        = 224;
         SETTING(current_gain)       = 4;        // CAM01_GAIN_200
         if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = TRUE; // dither LIGHT
+            SETTING(ditheringHighLight) = TRUE; // dither LOW
     } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
         SETTING(edge_exclusive)     = TRUE;     // CAM01F_EDGEEXCL_V_ON
         SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
         SETTING(voltage_out)        = 416;
         SETTING(current_gain)       = 8;        // CAM01_GAIN_260
         if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = TRUE; // dither LIGHT
+            SETTING(ditheringHighLight) = TRUE; // dither LOW
     } else {
         SETTING(edge_exclusive)     = FALSE;    // CAM01F_EDGEEXCL_V_OFF
         SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
         SETTING(voltage_out)        = 480;
         SETTING(current_gain)       = 12;       // CAM01_GAIN_32
         if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = TRUE; // dither LIGHT
+            SETTING(ditheringHighLight) = TRUE; // dither LOW
     }
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
@@ -216,7 +219,26 @@ static uint8_t onPrinterProgress() BANKED {
 }
 
 
+static uint8_t seconds_counter = 0;
+
+inline void camera_charge_timer(uint8_t value) {
+    camera_shutter_timer = value, seconds_counter = 60;
+}
+
+void shutter_VBL_ISR() NONBANKED {
+    if (!seconds_counter--) {
+        seconds_counter = 60;
+        if (camera_shutter_timer) {
+            if (!--camera_shutter_timer) camera_do_shutter = TRUE;
+        }
+    }
+}
+
+
 uint8_t INIT_state_camera() BANKED {
+    CRITICAL {
+        add_VBL(shutter_VBL_ISR);
+    }
     return 0;
 }
 
@@ -239,7 +261,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
-uint8_t * renderItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings);
+uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings);
 
 // --- Assisted menu ---------------------------------
 const menu_item_t CameraMenuItemAssistedExposure = {
@@ -465,24 +487,30 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     static change_direction_e change_direction;
     static uint8_t capture_triggered = FALSE;       // state of static variable persists between calls
+    static uint8_t old_camera_shutter_timer = 0;
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
     if (KEY_PRESSED(J_A)) {
         // A is a "shutter" button
-        switch (OPTION(after_action)) {
-            case after_action_picnrec_video:
-                // toggle recording and start image capture
-                recording_video = !recording_video;
-                if (recording_video && !is_capturing()) image_capture();
-                refresh_usage_indicator();
+        switch (OPTION(trigger_mode)) {
+            case trigger_mode_timer:
+            case trigger_mode_interval:
+                camera_charge_timer(OPTION(shutter_timer));
+                old_camera_shutter_timer = 0xFF;
                 break;
             default:
-                if (!capture_triggered) {
-                    music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask);
-                    if (!is_capturing()) image_capture();
-                    capture_triggered = TRUE;
+                switch (OPTION(after_action)) {
+                    case after_action_picnrec_video:
+                        // toggle recording and start image capture
+                        recording_video = !recording_video;
+                        if (recording_video && !is_capturing()) image_capture();
+                        refresh_usage_indicator();
+                        break;
+                    default:
+                        camera_do_shutter = TRUE;
+                        break;
                 }
                 break;
         }
@@ -512,8 +540,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     switch (OPTION(camera_mode)) {
                         case camera_mode_assisted:
                             // ToDo: Adjust other registers ("N", Output Ref Voltage) based on index of 'current_exposure_idx'
-                            // ToDo: Adjust dither light level /High/Low) `->idDitherLight`
-                            RENDER_REGS_FROM_EXPOSURE();    // Voltage Out, Gain, Edge Operation
+                            RENDER_REGS_FROM_EXPOSURE();    // Voltage Out, Gain, Edge Operation, DitherLight
                             break;
                         default:
                             RENDER_CAM_REG_EXPTIME();
@@ -570,6 +597,26 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
     }
 
+    // process the timer
+    if (old_camera_shutter_timer != camera_shutter_timer) {
+        old_camera_shutter_timer = camera_shutter_timer;
+        if (camera_shutter_timer) {
+            music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
+            sprintf(text_buffer, " %hd", (uint8_t)camera_shutter_timer);
+            menu_text_out(18, 16, 2, SOLID_BLACK, text_buffer);
+        } else screen_clear_rect(18, 16, 2, 1, SOLID_BLACK);
+    }
+
+    // make the picture if not in progress yet
+    if (camera_do_shutter) {
+        if (!capture_triggered) {
+            music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask);
+            if (!is_capturing()) image_capture();
+            capture_triggered = TRUE;
+        }
+        camera_do_shutter = FALSE;
+    }
+
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
 #if (ENABLE_PID==1)
@@ -614,7 +661,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
             RENDER_REGS_FROM_EXPOSURE();
             // display
-            menu_text_out(15, 0, 5, SOLID_BLACK, renderItemText(idExposure, "%sms", &CURRENT_SETTINGS));
+            menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS));
         }
 #endif
         if (recording_video) picnrec_trigger();
@@ -651,7 +698,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
 }
-uint8_t * renderItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) {
+uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) {
     static const uint8_t * const on_off[]   = {"Off",    "On"} ;
     static const uint8_t * const low_high[] = {"Low",    "High"};
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
@@ -716,7 +763,7 @@ uint8_t * renderItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    return renderItemText(self->id, self->caption, &CURRENT_SETTINGS);
+    return formatItemText(self->id, self->caption, &CURRENT_SETTINGS);
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
@@ -725,8 +772,8 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     return 0;
 }
 
-uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED {
-    return renderItemText(id, format, settings);
+uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED {
+    return formatItemText(id, format, settings);
 }
 
 uint8_t UPDATE_state_camera() BANKED {

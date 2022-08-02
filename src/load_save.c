@@ -29,7 +29,8 @@ const camera_state_options_t default_camera_state_options = {
     .gallery_picture_idx = 0,
     .print_frame_idx = 0,
     .print_fast = FALSE,
-    .shutter_sound = shutter_sound_0
+    .shutter_sound = shutter_sound_0,
+    .shutter_timer = 10
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {

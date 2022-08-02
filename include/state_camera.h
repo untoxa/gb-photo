@@ -109,6 +109,7 @@ typedef struct camera_state_options_t {
     uint8_t print_frame_idx;
     uint8_t print_fast;
     shutter_sound_e shutter_sound;
+    uint8_t shutter_timer;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT
@@ -170,6 +171,6 @@ inline void image_capture() {
     SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
 }
 
-uint8_t * camera_render_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;
+uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;
 
 #endif
