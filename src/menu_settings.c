@@ -32,7 +32,8 @@ typedef enum {
     idPrintFrame1,
     idPrintFrame2,
     idSettingsPrintFrame,
-    idSettingsPrintFast
+    idSettingsPrintFast,
+    idSettingsAltBorder
 } settings_menu_e;
 
 
@@ -79,7 +80,7 @@ const menu_t PrinterFramesMenu = {
 
 
 const menu_item_t SettingsMenuItemPrintFrame = {
-    .prev = &SettingsMenuItemPrintFast,     .next = &SettingsMenuItemPrintFast,
+    .prev = &SettingsMenuItemAltBorder,     .next = &SettingsMenuItemPrintFast,
     .sub = &PrinterFramesMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 13,
     .id = idSettingsPrintFrame,
@@ -89,17 +90,27 @@ const menu_item_t SettingsMenuItemPrintFrame = {
     .result = ACTION_NONE
 };
 const menu_item_t SettingsMenuItemPrintFast = {
-    .prev = &SettingsMenuItemPrintFrame,    .next = &SettingsMenuItemPrintFrame,
+    .prev = &SettingsMenuItemPrintFrame,    .next = &SettingsMenuItemAltBorder,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 13, .flags = MENUITEM_TERM,
+    .ofs_x = 1, .ofs_y = 2, .width = 13,
     .id = idSettingsPrintFast,
     .caption = " Fast printing\t\t\t%s",
     .helpcontext = " Enable CGB fast transfer",
     .onPaint = onSettingsMenuItemPaint,
     .result = ACTION_SETTINGS_PRINT_FAST
 };
+const menu_item_t SettingsMenuItemAltBorder = {
+    .prev = &SettingsMenuItemPrintFast,     .next = &SettingsMenuItemPrintFrame,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 3, .width = 13, .flags = MENUITEM_TERM,
+    .id = idSettingsAltBorder,
+    .caption = " Alt. SGB border\t\t%s",
+    .helpcontext = " Switch different SGB borders",
+    .onPaint = onSettingsMenuItemPaint,
+    .result = ACTION_SETTINGS_ALT_BORDER
+};
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 5,
+    .x = 3, .y = 5, .width = 15, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &SettingsMenuItemPrintFrame,
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -138,7 +149,10 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             sprintf(text_buffer, self->caption, text_buffer_extra);
             break;
         case idSettingsPrintFast:
-            sprintf(text_buffer, self->caption, checkbox[(OPTION(print_fast)) ? 1 : 0]);
+            sprintf(text_buffer, self->caption, checkbox[OPTION(print_fast)]);
+            break;
+        case idSettingsAltBorder:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(fancy_sgb_border)]);
             break;
         default:
             *text_buffer = 0;
@@ -158,6 +172,10 @@ void menu_settings_execute() BANKED {
             break;
         case ACTION_SETTINGS_PRINT_FAST:
             OPTION(print_fast) = !OPTION(print_fast);
+            save_camera_state();
+            break;
+        case ACTION_SETTINGS_ALT_BORDER:
+            OPTION(fancy_sgb_border) = !OPTION(fancy_sgb_border);
             save_camera_state();
             break;
         default:

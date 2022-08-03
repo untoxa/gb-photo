@@ -9,4 +9,5 @@ _picnrec_trigger::
         ei
         halt
         halt
+        halt
         ret

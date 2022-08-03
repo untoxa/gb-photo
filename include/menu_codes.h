@@ -21,6 +21,7 @@
 
 // settings
 #define ACTION_SETTINGS_PRINT_FAST  20
+#define ACTION_SETTINGS_ALT_BORDER  21
 
 // state switching actions
 #define ACTION_GALLERY              30

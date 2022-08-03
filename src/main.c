@@ -25,6 +25,7 @@
 #include "font_proportional.h"
 #include "font_fancy.h"
 #include "camera_sgb_border.h"
+#include "camera_sgb_border_pxlr.h"
 
 // audio assets
 #include "music.h"
@@ -68,16 +69,26 @@ void main() {
 
     detect_system();    // detect system compatibility
 
+    ENABLE_RAM;
+    init_save_structure();
+
     if (_is_SUPER) {
         // For SGB on PAL SNES this delay is required on startup, otherwise borders don't show up
         for (uint8_t i = 4; i != 0; i--) wait_vbl_done();
-        set_sgb_border(camera_sgb_border_tiles, sizeof(camera_sgb_border_tiles),
-                       camera_sgb_border_map, sizeof(camera_sgb_border_map),
-                       camera_sgb_border_palettes, sizeof(camera_sgb_border_palettes),
-                       BANK(camera_sgb_border));
+        if (OPTION(fancy_sgb_border)) {
+            set_sgb_border(camera_sgb_border_tiles, sizeof(camera_sgb_border_tiles),
+                           camera_sgb_border_map, sizeof(camera_sgb_border_map),
+                           camera_sgb_border_palettes, sizeof(camera_sgb_border_palettes),
+                           BANK(camera_sgb_border));
+
+        } else {
+            set_sgb_border(camera_sgb_border_pxlr_tiles, sizeof(camera_sgb_border_pxlr_tiles),
+                           camera_sgb_border_pxlr_map, sizeof(camera_sgb_border_pxlr_map),
+                           camera_sgb_border_pxlr_palettes, sizeof(camera_sgb_border_pxlr_palettes),
+                           BANK(camera_sgb_border_pxlr));
+        }
     }
 
-    ENABLE_RAM;
     DISPLAY_OFF;
 
     palette_init();
@@ -91,8 +102,6 @@ void main() {
 #if (USE_CGB_DOUBLE_SPEED==1)
     CPU_FAST();
 #endif
-
-    init_save_structure();
 
     music_init();
     CRITICAL {
