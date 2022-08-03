@@ -52,15 +52,12 @@ STATE OLD_PROGRAM_STATE = N_STATES, CURRENT_PROGRAM_STATE = DEFAULT_STATE;
 void hUGETrackerRoutine(unsigned char ch, unsigned char param, unsigned char tick) NONBANKED OLDCALL {
     ch; param; tick;
 }
+void VBL_ISR() {
+    LCDC_REG &= ~LCDCF_BG8000;
+}
 void LCD_ISR() {
-    if (LYC_REG == 95) {
-        while (STAT_REG & STATF_BUSY);
-        LCDC_REG |= LCDCF_BG8000;
-        LYC_REG = 150;
-    } else {
-        LCDC_REG &= ~LCDCF_BG8000;
-        LYC_REG = 95;
-    }
+    while (STAT_REG & STATF_BUSY);
+    LCDC_REG |= LCDCF_BG8000;
 }
 #endif
 
@@ -106,8 +103,9 @@ void main() {
     music_init();
     CRITICAL {
 #if defined(NINTENDO)
-        LYC_REG = 144, STAT_REG |= STATF_LYC;
+        LYC_REG = 95, STAT_REG |= STATF_LYC;
         add_LCD(LCD_ISR);
+        add_VBL(VBL_ISR);
 #endif
         music_setup_timer_ex(_is_CPU_FAST);
         add_low_priority_TIM(music_play_isr);
@@ -136,15 +134,15 @@ void main() {
     SHOW_BKG; SHOW_SPRITES; SPRITES_8x8;
     DISPLAY_ON;
 
-//        if (joy & J_UP)     music_play_sfx(BANK(sound_effect1), sound_effect1, SFX_MUTE_MASK(sound_effect1));
-//        if (joy & J_LEFT)   music_play_sfx(BANK(wave_icq_message), wave_icq_message, SFX_MUTE_MASK(wave_icq_message));
 //        if (joy & J_SELECT) music_stop(), music_pause(music_paused = FALSE);
 //        if (joy & J_START)  music_pause(music_paused = (!music_paused));
 
     vwf_load_font(0, font_proportional, BANK(font_proportional));
     vwf_load_font(1, font_fancy, BANK(font_fancy));
     vwf_activate_font(0);
-//    vwf_set_colors(2, 1);
+#if !defined(NINTENDO)
+    vwf_set_colors(2, 1);
+#endif
 
     // call init for each state
     for (uint8_t i = 0; i != N_STATES; i++) call_far(&PROGRAM_STATES[i].INIT);
