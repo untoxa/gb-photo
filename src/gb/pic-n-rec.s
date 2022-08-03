@@ -7,7 +7,8 @@
         .org 0x60
 _picnrec_trigger::
         ei
-        halt
-        halt
-        halt
-        ret
+        .rept 3
+            halt
+            nop
+        .endm
+        reti

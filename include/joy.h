@@ -4,16 +4,14 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
-#include "remote.h"
+#include "globals.h"
 
-#ifndef INT_DRIVEN_JOYPAD
-    #define INT_DRIVEN_JOYPAD 1
-#endif
+#include "remote.h"
 
 #define AUTOREPEAT_RATE 15
 
 #if (INT_DRIVEN_JOYPAD==1)
-#define COOLDOWN_RATE 10
+#define COOLDOWN_RATE 12
 
 extern volatile uint8_t joy_isr_value;
 #endif

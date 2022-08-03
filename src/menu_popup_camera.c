@@ -211,7 +211,7 @@ const menu_item_t ActionSubMenuPicNRec = {
     .prev = &ActionSubMenuSaveAndTransfer,  .next = &ActionSubMenuPicNRecVideo,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 6, .width = 10,
-    .caption = " P'n'R",
+    .caption = " Pic'n'Rec",
     .helpcontext = " Save images to Pic'n'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC
@@ -220,7 +220,7 @@ const menu_item_t ActionSubMenuPicNRecVideo = {
     .prev = &ActionSubMenuPicNRec,          .next = &ActionSubMenuSave,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 7, .width = 10, .flags = MENUITEM_TERM,
-    .caption = " P'n'R " ICON_REC,
+    .caption = " Pic'n'Rec " ICON_REC,
     .helpcontext = " Record video using Pic'n'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC_VIDEO
@@ -312,7 +312,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [after_action_printsave]     = "[S & P]",
         [after_action_transfer]      = "[Transfer]",
         [after_action_transfersave]  = "[S & T]",
-        [after_action_picnrec]       = "[P'n'R]",
+        [after_action_picnrec]       = "[Pic'n'Rec]",
         [after_action_picnrec_video] = "[P'n'R " ICON_REC "]"
     };
     switch ((camera_popup_menu_e)self->id) {

@@ -48,6 +48,10 @@
 #ifndef ITERATE_ENABLED
     #define ITERATE_ENABLED 0
 #endif
+// use interrupts to update joypad state
+#ifndef INT_DRIVEN_JOYPAD
+    #define INT_DRIVEN_JOYPAD 1
+#endif
 
 extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rendering of text
 #define text_buffer_extra (text_buffer + (MAX_TEXT_BUFFER_SIZE / 3))
