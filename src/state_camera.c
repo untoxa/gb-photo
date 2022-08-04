@@ -690,13 +690,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS));
         }
 #endif
-        if (recording_video) picnrec_trigger();
+        if ((recording_video) || ((capture_triggered) && (OPTION(after_action) == after_action_picnrec))) picnrec_trigger();
+        display_last_seen(FALSE);
         if (capture_triggered) {
             capture_triggered = FALSE;
             switch (OPTION(after_action)) {
-                case after_action_picnrec:
-                    picnrec_trigger();
-                    break;
                 case after_action_save:
                     camera_image_save();
                     refresh_usage_indicator();
@@ -705,19 +703,15 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     camera_image_save();
                     refresh_usage_indicator();
                 case after_action_print:
-                    display_last_seen(FALSE);
                     return ACTION_CAMERA_PRINT;
-                    break;
                 case after_action_transfersave:
                     camera_image_save();
                     refresh_usage_indicator();
                 case after_action_transfer:
-                    display_last_seen(FALSE);
                     return ACTION_CAMERA_TRANSFER;
             }
         }
-        display_last_seen(FALSE);
-        if (image_live_preview || recording_video) image_capture();
+        if ((image_live_preview) || (recording_video)) image_capture();
     }
 
     // wait for VBlank if not capturing (avoid HALT CPU state)
@@ -806,7 +800,7 @@ uint8_t UPDATE_state_camera() BANKED {
     static uint8_t menu_result;
     JOYPAD_RESET();
     // start capturing of the image
-    if (image_live_preview) image_capture();
+    if ((image_live_preview) || (recording_video)) image_capture();
     // execute menu for the mode
     switch (OPTION(camera_mode)) {
         case camera_mode_manual:
