@@ -46,19 +46,57 @@ const uint8_t screen_tile_map[360] = {
     0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77
 };
 
+uint8_t * set_data_ex(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+    dest; sour; count;
+    __asm
+.macro .WAIT_STAT_00 ?lbl
+lbl:
+        ldh a, (_STAT_REG)
+        and #STATF_BUSY
+        jr nz, lbl
+.endm
+        ldhl sp, #2
+        ld a, (hl)
+
+        ld h, d
+        ld l, e
+
+        ld d, a     ; d == count
+
+1$:
+        .rept 8
+            ld a, (bc)
+            inc bc
+            ld e, a
+            .WAIT_STAT_00
+            ld (hl), e
+            inc l
+            ld a, (bc)
+            ld (hl+), a
+            inc bc
+        .endm
+
+        dec d
+        jr nz, 1$
+
+        pop hl
+        inc sp
+        jp (hl)
+    __endasm;
+}
+
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
-    static uint8_t **addr, *data, i;
+    uint8_t **addr, *data;
 
     data = picture;
     addr = (uint8_t **)(screen_tile_addresses + y);
 
-    for (i = 0; i != h; i++, data += (w << 4))
-        set_data(*addr++ + (x << 4), data, (w << 4));
+    for (uint8_t i = 0; i != h; i++)
+        data = set_data_ex(*addr++ + (x << 4), data, w);
 }
 
 void screen_copy_thumbnail_row(uint8_t * dest, uint8_t * sour) NAKED {
     dest; sour;
-#ifdef NINTENDO
     __asm
 .macro .WAIT_STAT_01 ?lbl
 lbl:
@@ -96,14 +134,10 @@ lbl:
         ld (de), a
         ret
     __endasm;
-#else
-    __asm__("ret");
-#endif
 }
 
 void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) NAKED {
-    dest;
-#ifdef NINTENDO
+    dest; fill;
     __asm
 .macro .WAIT_STAT_02 ?lbl
 lbl:
@@ -135,9 +169,6 @@ lbl:
         ld (de), a
         ret
     __endasm;
-#else
-    __asm__("ret");
-#endif
 }
 
 
