@@ -71,6 +71,7 @@ void main() {
     init_save_structure();
 
     if (_is_SUPER) {
+        // set selected SGB border
         if (OPTION(fancy_sgb_border)) {
             set_sgb_border(camera_sgb_border_tiles, sizeof(camera_sgb_border_tiles),
                            camera_sgb_border_map, sizeof(camera_sgb_border_map),
@@ -83,10 +84,11 @@ void main() {
                            camera_sgb_border_pxlr_palettes, sizeof(camera_sgb_border_pxlr_palettes),
                            BANK(camera_sgb_border_pxlr));
         }
+        // force set SGB palette
         static const uint8_t sgb_palette[] = {
             SGB_PKT(SGB_PAL_01),
-            SNES_COLOR(RGB_WHITE),  SNES_COLOR(RGB_LIGHTGRAY),  SNES_COLOR(RGB_DARKGRAY),   SNES_COLOR(RGB_BLACK),
-                                    SNES_COLOR(RGB_LIGHTGRAY),  SNES_COLOR(RGB_DARKGRAY),   SNES_COLOR(RGB_BLACK)
+            SNES_LE(SNES_WHITE), SNES_LE(SNES_LIGHTGRAY), SNES_LE(SNES_DARKGRAY), SNES_LE(SNES_BLACK),
+                                 SNES_LE(SNES_LIGHTGRAY), SNES_LE(SNES_DARKGRAY), SNES_LE(SNES_BLACK)
         };
         sgb_transfer(sgb_palette);
     }
