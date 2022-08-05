@@ -34,8 +34,8 @@
     #define MENUITEM_MODES_TERM 0
     #define MODES_SUBMENU_HEIGHT 6
 #else
-    #define MENUITEM_MODES_NEXT &ModeSubMenuItemManual
-    #define MENUITEM_MODES_PREV &ModeSubMenuItemAuto
+    #define MENUITEM_MODES_NEXT &ModeSubMenuItemAuto
+    #define MENUITEM_MODES_PREV &ModeSubMenuItemManual
     #define MENUITEM_MODES_TERM MENUITEM_TERM
     #define MODES_SUBMENU_HEIGHT 5
 #endif
@@ -53,17 +53,17 @@ typedef enum {
 
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
-const menu_item_t ModeSubMenuItemManual = {
-    .prev = MENUITEM_MODES_PREV,        .next = &ModeSubMenuItemAssisted,
+const menu_item_t ModeSubMenuItemAuto = {
+    .prev = MENUITEM_MODES_PREV,   .next = &ModeSubMenuItemAssisted,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 9,
-    .caption = " Manual",
-    .helpcontext = " Expert mode",
+    .caption = " Auto",
+    .helpcontext = " Full automatic mode",
     .onPaint = NULL,
-    .result = ACTION_MODE_MANUAL
+    .result = ACTION_MODE_AUTO
 };
 const menu_item_t ModeSubMenuItemAssisted = {
-    .prev = &ModeSubMenuItemManual,     .next = &ModeSubMenuItemAuto,
+    .prev = &ModeSubMenuItemAuto,     .next = &ModeSubMenuItemManual,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 9,
     .caption = " Assisted",
@@ -71,17 +71,17 @@ const menu_item_t ModeSubMenuItemAssisted = {
     .onPaint = NULL,
     .result = ACTION_MODE_ASSISTED
 };
-const menu_item_t ModeSubMenuItemAuto = {
+const menu_item_t ModeSubMenuItemManual = {
     .prev = &ModeSubMenuItemAssisted,   .next = MENUITEM_MODES_NEXT,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 9, .flags = MENUITEM_MODES_TERM,
-    .caption = " Auto",
-    .helpcontext = " Full automatic mode",
+    .caption = " Manual",
+    .helpcontext = " Expert mode",
     .onPaint = NULL,
-    .result = ACTION_MODE_AUTO
+    .result = ACTION_MODE_MANUAL
 };
 const menu_item_t ModeSubMenuItemIterate = {
-    .prev = &ModeSubMenuItemAuto,       .next = &ModeSubMenuItemManual,
+    .prev = &ModeSubMenuItemManual,     .next = &ModeSubMenuItemAuto,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 9, .flags = MENUITEM_TERM,
     .caption = " Iterate",
@@ -92,7 +92,7 @@ const menu_item_t ModeSubMenuItemIterate = {
 const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = MODES_SUBMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &ModeSubMenuItemManual,
+    .items = &ModeSubMenuItemAuto,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
