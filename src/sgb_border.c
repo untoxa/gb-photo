@@ -12,6 +12,8 @@
 
 #define SGB_TRANSFER(A,B) map_buf[0]=(A),map_buf[1]=(B),sgb_transfer(map_buf)
 
+#define MIN(A,B) ((A)<(B)?(A):(B))
+
 void set_sgb_border(uint8_t * tiledata, size_t tiledata_size,
                     uint8_t * tilemap, size_t tilemap_size,
                     uint8_t * palette, size_t palette_size,
@@ -30,13 +32,12 @@ void set_sgb_border(uint8_t * tiledata, size_t tiledata_size,
 
     uint8_t tmp_lcdc = LCDC_REG;
 
-    HIDE_SPRITES, HIDE_WIN, SHOW_BKG;
-    DISPLAY_ON;
+    LCDC_REG =  LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON | LCDCF_ON;
+
     // prepare tilemap for SGB_BORDER_CHR_TRN (should display all 256 tiles)
-    uint8_t i = 0U;
-    for (uint8_t y = 0; y != 14U; ++y) {
-        uint8_t * dout = map_buf;
-        for (uint8_t x = 0U; x != 20U; ++x) {
+    uint8_t i = 0;
+    for (uint8_t y = 0; y != 14; y++) {
+        for (uint8_t x = 20, * dout = map_buf; (x); x--) {
             *dout++ = i++;
         }
         set_bkg_tiles(0, y, 20, 1, map_buf);
@@ -44,27 +45,22 @@ void set_sgb_border(uint8_t * tiledata, size_t tiledata_size,
     memset(map_buf, 0, sizeof(map_buf));
 
     // transfer tile data
-    uint8_t ntiles = (tiledata_size > 256 * 32) ? 0 : tiledata_size >> 5;
-    if ((!ntiles) || (ntiles > 128U)) {
-        set_bkg_data(0, 0, tiledata);
-        SGB_TRANSFER((SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK0);
-        if (ntiles) ntiles -= 128U;
-        tiledata += (128 * 32);
-        set_bkg_data(0, ntiles << 1, tiledata);
+    vmemcpy(_VRAM8000, tiledata, MIN(tiledata_size, 0x1000));
+    SGB_TRANSFER((SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK0);
+    if (tiledata_size > 0x1000) {
+        vmemcpy(_VRAM8000, tiledata + 0x1000, tiledata_size - 0x1000);
         SGB_TRANSFER((SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK1);
-    } else {
-        set_bkg_data(0, ntiles << 1, tiledata);
-        SGB_TRANSFER((SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK0);
     }
 
     // transfer map and palettes
-    set_bkg_data(0, (uint8_t)(tilemap_size >> 4), tilemap);
-    set_bkg_data(128, (uint8_t)(palette_size >> 4), palette);
+    vmemcpy(_VRAM8000, tilemap, tilemap_size);
+    vmemset(_VRAM8800, 0, (4 * 16 * 2));
+    vmemcpy(_VRAM8800, palette, palette_size);
     SGB_TRANSFER((SGB_PCT_TRN << 3) | 1, 0);
 
     // clear SCREEN
-    memset(map_buf, 0, sizeof(map_buf));
-    set_bkg_data(0, 1, map_buf);
+    vmemset(_VRAM8000, 0, 16);
+    vmemset(_VRAM9000, 0, 16);
     fill_bkg_rect(0, 0, 20, 18, 0);
 
     LCDC_REG = tmp_lcdc;

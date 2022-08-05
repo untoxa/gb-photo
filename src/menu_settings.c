@@ -110,7 +110,7 @@ const menu_item_t SettingsMenuItemAltBorder = {
     .result = ACTION_SETTINGS_ALT_BORDER
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 6,
+    .x = 3, .y = 5, .width = 15, .height = 5,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &SettingsMenuItemPrintFrame,
     .onShow = NULL, .onHelpContext = onHelpSettings,
