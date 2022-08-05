@@ -64,14 +64,13 @@ void LCD_ISR() {
 void main() {
     static uint8_t music_paused = FALSE;
 
+    sgb_pal_delay();    // For SGB on PAL SNES this delay is required on startup, otherwise borders don't show up
     detect_system();    // detect system compatibility
 
     ENABLE_RAM;
     init_save_structure();
 
     if (_is_SUPER) {
-        // For SGB on PAL SNES this delay is required on startup, otherwise borders don't show up
-        for (uint8_t i = 4; i != 0; i--) wait_vbl_done();
         if (OPTION(fancy_sgb_border)) {
             set_sgb_border(camera_sgb_border_tiles, sizeof(camera_sgb_border_tiles),
                            camera_sgb_border_map, sizeof(camera_sgb_border_map),
@@ -84,6 +83,12 @@ void main() {
                            camera_sgb_border_pxlr_palettes, sizeof(camera_sgb_border_pxlr_palettes),
                            BANK(camera_sgb_border_pxlr));
         }
+        static const uint8_t sgb_palette[] = {
+            SGB_PKT(SGB_PAL_01),
+            SNES_COLOR(RGB_WHITE),  SNES_COLOR(RGB_LIGHTGRAY),  SNES_COLOR(RGB_DARKGRAY),   SNES_COLOR(RGB_BLACK),
+                                    SNES_COLOR(RGB_LIGHTGRAY),  SNES_COLOR(RGB_DARKGRAY),   SNES_COLOR(RGB_BLACK)
+        };
+        sgb_transfer(sgb_palette);
     }
 
     DISPLAY_OFF;
