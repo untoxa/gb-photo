@@ -16,6 +16,9 @@
 #include "menu_yesno.h"
 #include "menu_settings.h"
 
+// graphics assets
+#include "logo_about.h"
+
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"
@@ -28,30 +31,32 @@ const menu_item_t AboutMenuItems[] = {
     {
         .prev = NULL, .next = NULL,
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 11, .ofs_y = 16, .width = 4,
+        .ofs_x = 13, .ofs_y = 16, .width = 4,
         .caption = " " ICON_A " Ok",
         .onPaint = NULL,
         .result = MENU_RESULT_OK
     }
 };
 const menu_t AboutMenu = {
-    .x = 2, .y = 0, .width = 16, .height = 18,
+    .x = 1, .y = 0, .width = 18, .height = 18,
     .items = AboutMenuItems,
     .onShow = onShowAbout, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     param;
-    menu_text_out(self->x + 1, self->y +  1, 0, SOLID_WHITE, "2Bit-PXLR-Studio Next");
+    screen_load_image_banked(self->x, self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
+    screen_restore_rect(self->x, self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
-    menu_text_out(self->x + 1, self->y +  3, 0, SOLID_WHITE, "Original idea:");
-    menu_text_out(self->x + 2, self->y +  4, 0, SOLID_WHITE, "Andreas Hahn");
-    menu_text_out(self->x + 1, self->y +  5, 0, SOLID_WHITE, "Development:");
-    menu_text_out(self->x + 2, self->y +  6, 0, SOLID_WHITE, "Toxa, Andreas Hahn");
-    menu_text_out(self->x + 2, self->y +  7, 0, SOLID_WHITE, "Raphael-Boichot");
-    menu_text_out(self->x + 1, self->y +  8, 0, SOLID_WHITE, "Sound:");
-    menu_text_out(self->x + 2, self->y +  9, 0, SOLID_WHITE, "Tronimal");
-    menu_text_out(self->x + 1, self->y + 10, 0, SOLID_WHITE, "Art:");
-    menu_text_out(self->x + 2, self->y + 11, 0, SOLID_WHITE, "rembrandx, 2BitPit");
+    menu_text_out(self->x + 1, self->y +  2, 0, SOLID_WHITE, "Original idea:");
+    menu_text_out(self->x + 2, self->y +  3, 0, SOLID_WHITE, "Andreas Hahn");
+    menu_text_out(self->x + 1, self->y +  4, 0, SOLID_WHITE, "Development:");
+    menu_text_out(self->x + 2, self->y +  5, 0, SOLID_WHITE, "Toxa, Andreas Hahn");
+    menu_text_out(self->x + 2, self->y +  6, 0, SOLID_WHITE, "Raphael-Boichot");
+    menu_text_out(self->x + 1, self->y +  7, 0, SOLID_WHITE, "Sound:");
+    menu_text_out(self->x + 2, self->y +  8, 0, SOLID_WHITE, "Tronimal");
+    menu_text_out(self->x + 1, self->y +  9, 0, SOLID_WHITE, "Art:");
+    menu_text_out(self->x + 2, self->y + 10, 0, SOLID_WHITE, "rembrandx, 2BitPit");
+    menu_text_out(self->x + 2, self->y + 11, 0, SOLID_WHITE, "NeoRame");
     menu_text_out(self->x + 1, self->y + 12, 0, SOLID_WHITE, "Special thanks:");
     menu_text_out(self->x + 2, self->y + 13, 0, SOLID_WHITE, "bbbbbr, AlexiG, HDR,");
     menu_text_out(self->x + 2, self->y + 14, 0, SOLID_WHITE, "crizzlycruz, christianr");

@@ -95,6 +95,13 @@ void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * pic
         data = set_data_ex(*addr++ + (x << 4), data, w);
 }
 
+void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank) {
+    uint8_t save = _current_bank;
+    SWITCH_ROM(bank);
+    screen_load_image(x, y, w, h, picture);
+    SWITCH_ROM(save);
+}
+
 void screen_copy_thumbnail_row(uint8_t * dest, uint8_t * sour) NAKED {
     dest; sour;
     __asm
