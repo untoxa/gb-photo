@@ -1,5 +1,9 @@
 # 2bit-pxlr-studio-next
 
+**[The latest release version may be downloaded here](https://github.com/untoxa/2bit-pxlr-studio-next/releases/latest/)**
+
+This project requires the reflashable Game Boy Camera cart, PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/)
+
 # Fast compiling guide for Windows users 
 
 Basic requirement: 20 minutes without any disturbance.
