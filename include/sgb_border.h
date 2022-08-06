@@ -43,18 +43,9 @@
     for (uint8_t i = 4; i != 0; i--) wait_vbl_done();
     \endcode
 */
-void set_sgb_border(uint8_t * tiledata, size_t tiledata_size,
-                    uint8_t * tilemap, size_t tilemap_size,
-                    uint8_t * palette, size_t palette_size,
+void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
+                    const uint8_t * tilemap,  size_t tilemap_size,
+                    const uint8_t * palette,  size_t palette_size,
                     uint8_t bank) NONBANKED;
-
-/** SGB PAL delay
-
-    For SGB on PAL SNES this delay is required on startup,
-    otherwise borders don't show up
-*/
-inline void sgb_pal_delay() {
-    for (uint8_t i = 0; i != 4; i++) wait_vbl_done();
-}
 
 #endif

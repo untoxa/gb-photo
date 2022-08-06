@@ -1,1 +1,1 @@
--keep_duplicate_tiles -noflip -keep_palette_order
+-tiles_only -keep_duplicate_tiles -noflip -keep_palette_order

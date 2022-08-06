@@ -14,9 +14,9 @@
 
 #define MIN(A,B) ((A)<(B)?(A):(B))
 
-void set_sgb_border(uint8_t * tiledata, size_t tiledata_size,
-                    uint8_t * tilemap, size_t tilemap_size,
-                    uint8_t * palette, size_t palette_size,
+void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
+                    const uint8_t * tilemap,  size_t tilemap_size,
+                    const uint8_t * palette,  size_t palette_size,
                     uint8_t bank) NONBANKED {
 
     uint8_t save = _current_bank;
