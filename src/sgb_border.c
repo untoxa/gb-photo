@@ -59,10 +59,10 @@ void set_sgb_border(uint8_t * tiledata, size_t tiledata_size,
     SGB_TRANSFER((SGB_PCT_TRN << 3) | 1, 0);
 
     // clear SCREEN
-    vmemset(_VRAM8000, 0, 16);
-    vmemset(_VRAM9000, 0, 16);
-    fill_bkg_rect(0, 0, 20, 18, 0);
+    vmemset(_VRAM8800, 0, 16);
+    fill_bkg_rect(0, 0, 20, 18, 0x80);
 
+    wait_vbl_done();
     LCDC_REG = tmp_lcdc;
 
     SGB_TRANSFER((SGB_MASK_EN << 3) | 1, SGB_SCR_UNFREEZE);

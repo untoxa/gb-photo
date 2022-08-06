@@ -52,9 +52,9 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 2, self->y +  9, 0, SOLID_WHITE, "Tronimal");
     menu_text_out(self->x + 1, self->y + 10, 0, SOLID_WHITE, "Art:");
     menu_text_out(self->x + 2, self->y + 11, 0, SOLID_WHITE, "rembrandx, 2BitPit");
-    menu_text_out(self->x + 1, self->y + 12, 0, SOLID_WHITE, "Thanks:");
-    menu_text_out(self->x + 2, self->y + 13, 0, SOLID_WHITE, "christianr, AlexiG, HDR,");
-    menu_text_out(self->x + 2, self->y + 14, 0, SOLID_WHITE, "crizzlycruz");
+    menu_text_out(self->x + 1, self->y + 12, 0, SOLID_WHITE, "Special thanks:");
+    menu_text_out(self->x + 2, self->y + 13, 0, SOLID_WHITE, "bbbbbr, AlexiG, HDR,");
+    menu_text_out(self->x + 2, self->y + 14, 0, SOLID_WHITE, "crizzlycruz, christianr");
     vwf_activate_font(0);
     return 0;
 }
