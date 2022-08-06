@@ -45,17 +45,17 @@ void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
     memset(map_buf, 0, sizeof(map_buf));
 
     // transfer tile data
-    vmemcpy(_VRAM8000, tiledata, MIN(tiledata_size, 0x1000));
+    vmemcpy(_VRAM8000, (uint8_t *)tiledata, MIN(tiledata_size, 0x1000));
     SGB_TRANSFER((SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK0);
     if (tiledata_size > 0x1000) {
-        vmemcpy(_VRAM8000, tiledata + 0x1000, tiledata_size - 0x1000);
+        vmemcpy(_VRAM8000, (uint8_t *)(tiledata + 0x1000), tiledata_size - 0x1000);
         SGB_TRANSFER((SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK1);
     }
 
     // transfer map and palettes
-    vmemcpy(_VRAM8000, tilemap, tilemap_size);
+    vmemcpy(_VRAM8000, (uint8_t *)tilemap, tilemap_size);
     vmemset(_VRAM8800, 0, (4 * 16 * 2));
-    vmemcpy(_VRAM8800, palette, palette_size);
+    vmemcpy(_VRAM8800, (uint8_t *)palette, palette_size);
     SGB_TRANSFER((SGB_PCT_TRN << 3) | 1, 0);
 
     // clear SCREEN
