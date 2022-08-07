@@ -1,4 +1,5 @@
 #include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -37,6 +38,8 @@ const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t *
 uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
     const menu_item_t * selection;
     uint8_t result = 0;
+
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
 
     selection = (select) ? select : (menu->items);
 

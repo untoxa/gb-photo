@@ -21,6 +21,7 @@ inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture);
 void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank);
+void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank);
 
 void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill);
 

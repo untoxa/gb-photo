@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -23,6 +24,7 @@
 #include "protected.h"
 #include "histogram.h"
 #include "math.h"
+#include "scrollbar.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -66,6 +68,15 @@ COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 camera_shadow_regs_t SHADOW;    // camera shadow registers for reading
+
+#define SS_BRIGHTNESS_X 1
+#define SS_BRIGHTNESS_Y 2
+#define SS_BRIGHTNESS_LEN 14
+#define SS_CONTRAST_X 2
+#define SS_CONTRAST_Y 16
+#define SS_CONTRAST_LEN 16
+
+static scrollbar_t ss_brightness, ss_contrast;
 
 static const uint16_t exposures[] = {
     TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
@@ -177,6 +188,14 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
+inline void camera_scrollbars_reinit() {
+    scrollbar_destroy_all();
+    if (OPTION(camera_mode) == camera_mode_auto) {
+        scrollbar_add(&ss_brightness, SS_BRIGHTNESS_X, SS_BRIGHTNESS_Y, SS_BRIGHTNESS_LEN, true);
+        scrollbar_add(&ss_contrast, SS_CONTRAST_X, SS_CONTRAST_Y, SS_CONTRAST_LEN, false);
+    }
+}
+
 void camera_image_save() {
     static image_metadata_t image_metadata;
     uint8_t n_images = images_taken();
@@ -214,6 +233,7 @@ static void refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
     display_last_seen(TRUE);
     refresh_usage_indicator();
+    scrollbar_repaint_all();
 }
 
 static uint8_t onPrinterProgress() BANKED {
@@ -251,7 +271,11 @@ uint8_t ENTER_state_camera() BANKED {
 #if (USE_CGB_DOUBLE_SPEED==1)
     music_setup_timer_ex(CPU_SLOW());
 #endif
+    // scrollbars
+    camera_scrollbars_reinit();
+    // repaint screen
     refresh_screen();
+    // set printer progress handler
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
     // reset capture timers and counters
     COUNTER_RESET(camera_shutter_timer);
@@ -714,6 +738,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if ((image_live_preview) || (recording_video)) image_capture();
     }
 
+    // render all present scrollbars
+    hide_sprites_range(scrollbar_render_all(0), MAX_HARDWARE_SPRITES);
+
     // wait for VBlank if not capturing (avoid HALT CPU state)
     if (!is_capturing() && !recording_video) wait_vbl_done();
     return 0;
@@ -850,6 +877,7 @@ uint8_t UPDATE_state_camera() BANKED {
                     static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_iterate};
                     OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
                     RENDER_CAM_REGISTERS();
+                    camera_scrollbars_reinit();
                     break;
                 }
                 case ACTION_TRIGGER_ABUTTON:
@@ -899,5 +927,6 @@ uint8_t LEAVE_state_camera() BANKED {
 #endif
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
+    scrollbar_destroy_all();
     return 0;
 }
