@@ -15,8 +15,8 @@ static const uint8_t sgb_palette_gray[] = {
 };
 static const uint8_t sgb_palette_red[] = {
     SGB_PKT(SGB_PAL_01),
-    SNES_LE(SNES_WHITE), SNES_LE(0x10fc),         SNES_LE(0x10d4),        SNES_LE(SNES_BLACK),
-                         SNES_LE(SNES_LIGHTGRAY), SNES_LE(SNES_DARKGRAY), SNES_LE(SNES_BLACK)
+    SNES_LE(RGB8(0xf3, 0xf8, 0xc3)), SNES_LE(RGB8(0xd1, 0xe4, 0x10)), SNES_LE(RGB8(0xe4, 0x3d, 0x20)), SNES_LE(SNES_BLACK),
+                                     SNES_LE(SNES_LIGHTGRAY),         SNES_LE(SNES_DARKGRAY),          SNES_LE(SNES_BLACK)
 };
 
 static const uint8_t * const sgb_palettes[] = { sgb_palette_gray, sgb_palette_red };
