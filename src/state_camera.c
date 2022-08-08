@@ -702,10 +702,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             int8_t log2_exposure = log2(SETTING(current_exposure));
             log2_exposure = MAX(log2_exposure, 1);
 
-#define PID_P ((error >> 4) * (log2_exposure >> 2))
+    #define PID_P ((error >> 4) * MAX((log2_exposure >> 2), 1))
 
             // I component
-#if (PID_ENABLE_I==1)
+    #if (PID_ENABLE_I==1)
             static int16_t integral_error = 0;
             integral_error = CONSTRAINT(integral_error + error, -4096, 4096);
 
@@ -713,29 +713,34 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             if ((old_error ^ error) < 0) integral_error = 0; // error sign changed? reset integral component
             old_error = error;
 
-#define PID_I ((integral_error >> 6) * (log2_exposure << 1))
+        #define PID_I ((integral_error >> 6) * (log2_exposure << 1))
 
-#else
-#define PID_I 0
-#endif
+    #else
+        #define PID_I 0
+    #endif
 
             // D component
-#if (PID_ENABLE_D==1)
+    #if (PID_ENABLE_D==1)
             static int16_t old_error = 0;
             int16_t diff_error = error - old_error;
             old_error = error;
 
-#define PID_D (diff_error >> 5)
+        #define PID_D (diff_error >> 5)
 
-#else
-#define PID_D 0
-#endif
+    #else
+        #define PID_D 0
+    #endif
 
             // apply
             SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
-            RENDER_REGS_FROM_EXPOSURE();
-            // display
+    #if (RENDER_ALL_REGS==0)
+            RENDER_CAM_REG_EXPTIME();
+    #else
+            RENDER_REGS_FROM_EXPOSURE();    // use the same rules as in assisted mode
+    #endif
+    #if (DEBUG_PID==1)
             menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS));
+    #endif
         }
 #endif
         if ((recording_video) || ((capture_triggered) && (OPTION(after_action) == after_action_picnrec))) picnrec_trigger();

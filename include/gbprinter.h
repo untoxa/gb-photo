@@ -18,8 +18,7 @@
     Any command sequence begins by these
 */
 #define PRN_MAGIC               0x3388
-#define PRN_MAGIC_1             PRN_LOW(PRN_MAGIC)
-#define PRN_MAGIC_2             PRN_HIGH(PRN_MAGIC)
+#define PRN_LE(A)               PRN_LOW(A),PRN_HIGH(A)
 
 /** INIT command is mandatory to initialize communication protocol with the printer
     Two consecutive linked commands must never be more than 150 ms apart except the INIT command which is valid at least 10 seconds

@@ -9,9 +9,9 @@
 // 0b10000011 - start, CGB double speed, internal clock
 #define START_TRANSFER_FAST 0x83
 
-static const uint8_t LNK_PKT_INIT[]  = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT,0x00,0x00,0x00,0x01,0x00,0x00,0x00 };
-static const uint8_t LNK_DATA_HDR[]  = { PRN_MAGIC_1,PRN_MAGIC_2,PRN_CMD_INIT << 4,0x00, PRN_LOW(CAMERA_IMAGE_SIZE),PRN_HIGH(CAMERA_IMAGE_SIZE) };
-static const uint8_t LNK_DATA_FTR[]  = { 0x00,0x00,0x00,0x00 };
+static const uint8_t LNK_PKT_INIT[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT), PRN_LE(0), PRN_LE(0x01), PRN_LE(0) };
+static const uint8_t LNK_DATA_HDR[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT << 4), PRN_LE(CAMERA_IMAGE_SIZE) };
+static const uint8_t LNK_DATA_FTR[]  = { PRN_LE(0), PRN_LE(0) };
 
 void linkcable_send_string(const uint8_t * data, uint8_t len) {
 #ifdef NINTENDO
@@ -53,9 +53,7 @@ lbl:
         ret
     __endasm;
 #else
-    __asm
-        ret
-    __endasm;
+    __asm__("ret");
 #endif
 }
 
