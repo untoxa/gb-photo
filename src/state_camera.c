@@ -69,14 +69,19 @@ camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
 
-#define SS_BRIGHTNESS_X 1
-#define SS_BRIGHTNESS_Y 2
-#define SS_BRIGHTNESS_LEN 14
+#define SHUTTER_REPEAT_X    18
+#define SHUTTER_REPEAT_Y    12
+#define SHUTTER_TIMER_X     18
+#define SHUTTER_TIMER_Y     14
+
+#define SS_BRIGHTNESS_X     1
+#define SS_BRIGHTNESS_Y     2
+#define SS_BRIGHTNESS_LEN   14
 static scrollbar_t ss_brightness;
 
-#define SS_CONTRAST_X 2
-#define SS_CONTRAST_Y 16
-#define SS_CONTRAST_LEN 16
+#define SS_CONTRAST_X       2
+#define SS_CONTRAST_Y       16
+#define SS_CONTRAST_LEN     16
 static scrollbar_t ss_contrast;
 
 static const uint16_t exposures[] = {
@@ -542,8 +547,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     } else if (KEY_PRESSED(J_B)) {
         // cancel timers
         COUNTER_RESET(camera_shutter_timer);
+        screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
         COUNTER_RESET(camera_repeat_counter);
-        screen_clear_rect(18, 13, 2, 4, SOLID_BLACK);
+        screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
         capture_triggered = FALSE;
@@ -652,11 +658,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
-            menu_text_out(18, 15, 0, SOLID_BLACK, " " ICON_CLOCK);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, SOLID_BLACK, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
-            menu_text_out(18, 16, 2, SOLID_BLACK, text_buffer);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, SOLID_BLACK, text_buffer);
         } else {
-            screen_clear_rect(18, 15, 2, 2, SOLID_BLACK);
+            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
             if (COUNTER(camera_repeat_counter)) {
                 if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
             }
@@ -666,10 +672,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (camera_repeat_counter) {
-            menu_text_out(18, 13, 0, SOLID_BLACK, " " ICON_MULTIPLE);
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, SOLID_BLACK, " " ICON_MULTIPLE);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-            menu_text_out(18, 14, 2, SOLID_BLACK, text_buffer);
-        } else screen_clear_rect(18, 13, 2, 2, SOLID_BLACK);
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, text_buffer);
+        } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
     }
 
     // make the picture if not in progress yet
