@@ -9,6 +9,7 @@
 #include "systemhelpers.h"
 #include "state_camera.h"
 #include "load_save.h"
+#include "histogram.h"
 
 #define MAGIC_VALUE 0x45564153
 
@@ -40,21 +41,25 @@ const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .current_brightness = HISTOGRAM_TARGET_VALUE,
         .edge_exclusive = true
     },{
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .current_brightness = HISTOGRAM_TARGET_VALUE,
         .edge_exclusive = true
     },{
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .current_brightness = HISTOGRAM_TARGET_VALUE,
         .edge_exclusive = true
     },{
         .current_exposure = TO_EXPOSURE_VALUE(6000),
         .current_exposure_idx = 14, .current_gain = 0, .current_zero_point = 1, .current_edge_ratio = 0, .current_voltage_ref = 3,
         .voltage_out = 192, .dithering = true, .ditheringHighLight = true, .current_contrast = 9, .invertOutput = false,
+        .current_brightness = HISTOGRAM_TARGET_VALUE,
         .edge_exclusive = true
     }
 };

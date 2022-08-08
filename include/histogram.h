@@ -3,9 +3,15 @@
 
 #include <stdint.h>
 
+#define HISTOGRAM_TARGET_VALUE ((int16_t)&__histogram_target_value)
+#define HISTOGRAM_MAX_VALUE ((int16_t)&__histogram_max_value)
+#define HISTOGRAM_POINTS_COUNT ((uint8_t)&__histogram_points_count)
+
 extern uint16_t histogram[4];
-extern int16_t histogram_target_value;     // not a constant just to not deal with banks
-extern uint8_t histogram_points_count;     // not a constant just to not deal with banks
+
+extern void __histogram_target_value;
+extern void __histogram_max_value;
+extern void __histogram_points_count;
 
 int16_t calculate_histogram() BANKED;
 

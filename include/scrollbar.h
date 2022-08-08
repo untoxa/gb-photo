@@ -26,5 +26,6 @@ inline void scrollbar_destroy_all() {
 
 uint8_t scrollbar_render_all(uint8_t hiwater);
 void scrollbar_repaint_all() BANKED;
+void scrollbar_set_position(scrollbar_t * ss, uint16_t value, uint16_t min, uint16_t max) BANKED;
 
 #endif

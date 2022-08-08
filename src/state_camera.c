@@ -67,16 +67,17 @@ COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
-camera_shadow_regs_t SHADOW;    // camera shadow registers for reading
+camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
 
 #define SS_BRIGHTNESS_X 1
 #define SS_BRIGHTNESS_Y 2
 #define SS_BRIGHTNESS_LEN 14
+static scrollbar_t ss_brightness;
+
 #define SS_CONTRAST_X 2
 #define SS_CONTRAST_Y 16
 #define SS_CONTRAST_LEN 16
-
-static scrollbar_t ss_brightness, ss_contrast;
+static scrollbar_t ss_contrast;
 
 static const uint16_t exposures[] = {
     TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
@@ -191,8 +192,12 @@ void display_last_seen(uint8_t restore) {
 inline void camera_scrollbars_reinit() {
     scrollbar_destroy_all();
     if (OPTION(camera_mode) == camera_mode_auto) {
+        // init and set brightness scrollbar
         scrollbar_add(&ss_brightness, SS_BRIGHTNESS_X, SS_BRIGHTNESS_Y, SS_BRIGHTNESS_LEN, true);
+        scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
+        // init and set contrast scrollbar
         scrollbar_add(&ss_contrast, SS_CONTRAST_X, SS_CONTRAST_Y, SS_CONTRAST_LEN, false);
+        scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
     }
 }
 
@@ -346,23 +351,12 @@ const menu_t CameraMenuAssisted = {
 };
 
 // --- Auto menu -------------------------------------
-const menu_item_t CameraMenuItemAutoContrast = {
-    .prev = &CameraMenuItemAutoDither,          .next = &CameraMenuItemAutoDither,
+const menu_item_t CameraMenuItemAutoIndicator = {
+    .prev = NULL,    .next = NULL,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 5,
-    .id = idContrast,
-    .caption = " " ICON_CONTRAST "\t%d",
-    .helpcontext = " Contrast level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemAutoDither = {
-    .prev = &CameraMenuItemAutoContrast,    .next = &CameraMenuItemAutoContrast,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
-    .id = idDither,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering on/off",
+    .ofs_x = 0, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
+    .id = idNone,
+    .caption = NULL, .helpcontext = NULL,
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
@@ -370,7 +364,7 @@ const menu_item_t CameraMenuItemAutoDither = {
 const menu_t CameraMenuAuto = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .flags = MENU_INVERSE,
-    .items = &CameraMenuItemAutoContrast,
+    .items = &CameraMenuItemAutoIndicator,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
@@ -559,17 +553,30 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         capture_triggered = FALSE;
         return ACTION_MAIN_MENU;
     }
+
+    static uint8_t selection_item_id;
+    selection_item_id = selection->id;
+
     // !!! d-pad keys are translated
-    if (KEY_PRESSED(J_RIGHT)) change_direction = changeDecrease;
-    else if (KEY_PRESSED(J_LEFT)) change_direction = changeIncrease;
-    else change_direction = changeNone;
+    if (OPTION(camera_mode) == camera_mode_auto) {
+        // in automatic mode menu items are "synthetic"
+        if (KEY_PRESSED(J_RIGHT))       change_direction = changeIncrease, selection_item_id = idBrightness;
+        else if (KEY_PRESSED(J_LEFT))   change_direction = changeDecrease, selection_item_id = idBrightness;
+        else if (KEY_PRESSED(J_DOWN))   change_direction = changeIncrease, selection_item_id = idContrast;
+        else if (KEY_PRESSED(J_UP))     change_direction = changeDecrease, selection_item_id = idContrast;
+        else change_direction = changeNone;
+    } else {
+        if (KEY_PRESSED(J_RIGHT))       change_direction = changeDecrease;
+        else if (KEY_PRESSED(J_LEFT))   change_direction = changeIncrease;
+        else change_direction = changeNone;
+    }
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
         static uint8_t redraw_selection;
         redraw_selection = TRUE;
         // perform changes when pressing UP/DOWN while menu item with some ID is active
-        switch (selection->id) {
+        switch (selection_item_id) {
             case idExposure:
                 if (redraw_selection = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
                     SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
@@ -599,7 +606,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idContrast:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) RENDER_CAM_REG_DITHERPATTERN();
+                if (redraw_selection = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) {
+                    RENDER_CAM_REG_DITHERPATTERN();
+                    scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
+                }
                 break;
             case idInvOutput:
                 SETTING(invertOutput) = !SETTING(invertOutput);
@@ -620,6 +630,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
             case idEdgeOperation:
                 if (redraw_selection = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                break;
+            case idBrightness:
+                if (redraw_selection = inc_dec_int16(&SETTING(current_brightness), 64, 0, HISTOGRAM_MAX_VALUE, change_direction)) {
+                    scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
+                }
                 break;
             default:
                 redraw_selection = FALSE;
@@ -672,7 +687,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 #if (ENABLE_PID==1)
         if (OPTION(camera_mode) == camera_mode_auto) {
             // P component
-            int16_t error = (calculate_histogram() - histogram_target_value) / histogram_points_count;
+            int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
             SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
 
             int8_t log2_exposure = log2(SETTING(current_exposure));
