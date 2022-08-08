@@ -518,7 +518,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     };
 
     static change_direction_e change_direction;
-    static uint8_t capture_triggered = FALSE;       // state of static variable persists between calls
+    static bool capture_triggered = false;       // state of static variable persists between calls
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
@@ -553,11 +553,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
-        capture_triggered = FALSE;
+        capture_triggered = false;
         return ACTION_CAMERA_SUBMENU;
     } else if (KEY_PRESSED(J_START)) {
         // start open main menu
-        capture_triggered = FALSE;
+        capture_triggered = false;
         return ACTION_MAIN_MENU;
     }
 
@@ -580,12 +580,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
-        static uint8_t redraw_selection;
-        redraw_selection = TRUE;
+        static bool settings_changed, redraw_selection;
+        redraw_selection = settings_changed = true;
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection_item_id) {
             case idExposure:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
+                if (settings_changed = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
                     SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
                     switch (OPTION(camera_mode)) {
                         case camera_mode_assisted:
@@ -599,10 +599,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 }
                 break;
             case idGain:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (settings_changed = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idVOut:
-                if (redraw_selection = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (settings_changed = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
                 SETTING(dithering) = !SETTING(dithering);
@@ -613,9 +613,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idContrast:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) {
+                if (settings_changed = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) {
                     RENDER_CAM_REG_DITHERPATTERN();
                     scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
+                    redraw_selection = (OPTION(camera_mode) != camera_mode_auto);
                 }
                 break;
             case idInvOutput:
@@ -623,35 +624,36 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idZeroPoint:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_zero_point), 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (settings_changed = inc_dec_int8(&SETTING(current_zero_point), 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idVoltageRef:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (settings_changed = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeRatio:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (settings_changed = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
                 RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idEdgeOperation:
-                if (redraw_selection = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (settings_changed = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idBrightness:
-                if (redraw_selection = inc_dec_int16(&SETTING(current_brightness), 64, 0, HISTOGRAM_MAX_VALUE, change_direction)) {
+                if (settings_changed = inc_dec_int16(&SETTING(current_brightness), 64, 0, HISTOGRAM_MAX_VALUE, change_direction)) {
                     scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
+                    redraw_selection = (OPTION(camera_mode) != camera_mode_auto);
                 }
                 break;
             default:
-                redraw_selection = FALSE;
+                settings_changed = false;
                 break;
         }
         // redraw selection if requested
-        if (redraw_selection) {
+        if (settings_changed) {
             music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
             save_camera_mode_settings(OPTION(camera_mode));
-            menu_move_selection(menu, NULL, selection);
+            if (redraw_selection) menu_move_selection(menu, NULL, selection);
         }
     }
 
@@ -684,7 +686,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (!capture_triggered) {
             music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask);
             if (!is_capturing()) image_capture();
-            capture_triggered = TRUE;
+            capture_triggered = true;
         }
         camera_do_shutter = FALSE;
     }
@@ -739,7 +741,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if ((recording_video) || ((capture_triggered) && (OPTION(after_action) == after_action_picnrec))) picnrec_trigger();
         display_last_seen(FALSE);
         if (capture_triggered) {
-            capture_triggered = FALSE;
+            capture_triggered = false;
             switch (OPTION(after_action)) {
                 case after_action_save:
                     camera_image_save();
