@@ -361,7 +361,8 @@ const menu_item_t CameraMenuItemAutoIndicator = {
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 0, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
     .id = idNone,
-    .caption = NULL, .helpcontext = NULL,
+    .caption = " Auto",
+    .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " & "ICON_CONTRAST,
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
