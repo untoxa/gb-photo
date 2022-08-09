@@ -359,17 +359,17 @@ const menu_t CameraMenuAssisted = {
 const menu_item_t CameraMenuItemAutoIndicator = {
     .prev = NULL,    .next = NULL,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
+    .ofs_x = 0, .ofs_y = 0, .width = 0, .flags = MENUITEM_TERM,
     .id = idNone,
-    .caption = " Auto",
-    .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " & "ICON_CONTRAST,
+    .caption = " Automatic mode",
+    .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " and "ICON_CONTRAST,
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 
 const menu_t CameraMenuAuto = {
     .x = 0, .y = 0, .width = 0, .height = 0,
-    .flags = MENU_INVERSE,
+    .flags = 0,
     .items = &CameraMenuItemAutoIndicator,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
