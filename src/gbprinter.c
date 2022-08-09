@@ -12,6 +12,8 @@
 
 #include "state_camera.h"
 
+#define REINIT_SEIKO
+
 #define START_TRANSFER 0x81
 #if (CGB_FAST_TRANSFER==1)
     // 0b10000011 - start, CGB double speed, internal clock
@@ -20,12 +22,13 @@
     // 0b10000001 - start, internal clock
     #define START_TRANSFER_FAST 0x81
 #endif
-#define PRN_BUSY_TIMEOUT        2
-#define PRN_COMPLETION_TIMEOUT  20
+#define PRN_BUSY_TIMEOUT        PRN_SECONDS(2)
+#define PRN_COMPLETION_TIMEOUT  PRN_SECONDS(20)
+#define PRN_SEIKO_RESET_TIMEOUT 10
 
 #define PRN_FINAL_MARGIN        0x03
 
-static const uint8_t LNK_PKT_INIT[]    = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT),   PRN_LE(0), PRN_LE(0x01), PRN_LE(0) };
+static const uint8_t PRN_PKT_INIT[]    = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT),   PRN_LE(0), PRN_LE(0x01), PRN_LE(0) };
 static const uint8_t PRN_PKT_STATUS[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_STATUS), PRN_LE(0), PRN_LE(0x0F), PRN_LE(0) };
 static const uint8_t PRN_PKT_EOF[]     = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_DATA),   PRN_LE(0), PRN_LE(0x04), PRN_LE(0) };
 
@@ -84,7 +87,7 @@ uint8_t printer_print_tile(const uint8_t *tiledata) {
 
 inline void printer_init() {
     printer_tile_num = 0;
-    PRINTER_SEND_COMMAND(LNK_PKT_INIT);
+    PRINTER_SEND_COMMAND(PRN_PKT_INIT);
 }
 
 uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
@@ -143,8 +146,13 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 gbprinter_set_print_params((y == (rows - 1)) ? PRN_FINAL_MARGIN : PRN_NO_MARGINS, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
-                if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
-                if ((error = printer_wait(PRN_SECONDS(PRN_COMPLETION_TIMEOUT), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_BUSY_TIMEOUT, PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_COMPLETION_TIMEOUT, PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+#ifdef REINIT_SEIKO
+                // reinit printer (required by Seiko?)
+                PRINTER_SEND_COMMAND(PRN_PKT_INIT);
+                if (error = printer_wait(PRN_SEIKO_RESET_TIMEOUT, PRN_STATUS_MASK_ANY, PRN_STATUS_OK)) return error;
+#endif
                 // call printer progress callback
                 uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / rows);
                 if (printer_completion != current_progress) {
@@ -159,8 +167,8 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
         gbprinter_set_print_params(PRN_FINAL_MARGIN, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
         PRINTER_SEND_COMMAND(PRN_PKT_START);
         // query printer status
-        if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
-        if ((error = printer_wait(PRN_SECONDS(PRN_COMPLETION_TIMEOUT), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+        if ((error = printer_wait(PRN_BUSY_TIMEOUT, PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+        if ((error = printer_wait(PRN_COMPLETION_TIMEOUT, PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
         // call printer progress: indicate 100% completion
         printer_completion = PRN_MAX_PROGRESS, call_far(&printer_progress_handler);
     }
@@ -192,8 +200,13 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
                 gbprinter_set_print_params((y == (rows - 1)) ? PRN_FINAL_MARGIN : PRN_NO_MARGINS, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
-                if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
-                if ((error = printer_wait(PRN_SECONDS(PRN_COMPLETION_TIMEOUT), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_BUSY_TIMEOUT, PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+                if ((error = printer_wait(PRN_COMPLETION_TIMEOUT, PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+#ifdef REINIT_SEIKO
+                // reinit printer (required by Seiko?)
+                PRINTER_SEND_COMMAND(PRN_PKT_INIT);
+                if (error = printer_wait(PRN_SEIKO_RESET_TIMEOUT, PRN_STATUS_MASK_ANY, PRN_STATUS_OK)) return error;
+#endif
                 // call printer progress callback
                 uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / rows);
                 if (printer_completion != current_progress) {
@@ -208,8 +221,8 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
         gbprinter_set_print_params(PRN_FINAL_MARGIN, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
         PRINTER_SEND_COMMAND(PRN_PKT_START);
         // query printer status
-        if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
-        if ((error = printer_wait(PRN_SECONDS(PRN_COMPLETION_TIMEOUT), PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
+        if ((error = printer_wait(PRN_BUSY_TIMEOUT, PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
+        if ((error = printer_wait(PRN_COMPLETION_TIMEOUT, PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
         // indicate 100% completion
         printer_completion = PRN_MAX_PROGRESS, call_far(&printer_progress_handler);
     }
