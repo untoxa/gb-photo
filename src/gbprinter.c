@@ -23,6 +23,8 @@
 #define PRN_BUSY_TIMEOUT        2
 #define PRN_COMPLETION_TIMEOUT  20
 
+#define PRN_FINAL_MARGIN        0x03
+
 static const uint8_t LNK_PKT_INIT[]    = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT),   PRN_LE(0), PRN_LE(0x01), PRN_LE(0) };
 static const uint8_t PRN_PKT_STATUS[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_STATUS), PRN_LE(0), PRN_LE(0x0F), PRN_LE(0) };
 static const uint8_t PRN_PKT_EOF[]     = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_DATA),   PRN_LE(0), PRN_LE(0x04), PRN_LE(0) };
@@ -138,7 +140,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 pkt_count = 0;
                 PRINTER_SEND_COMMAND(PRN_PKT_EOF);
                 // setup margin if last packet
-                if (y == (rows - 1)) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+                if (y == (rows - 1)) gbprinter_set_print_params(PRN_NO_MARGINS, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
                 if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
@@ -154,7 +156,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
     if (pkt_count) {
         PRINTER_SEND_COMMAND(PRN_PKT_EOF);
         // setup printing if required
-        gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+        gbprinter_set_print_params(PRN_FINAL_MARGIN, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
         PRINTER_SEND_COMMAND(PRN_PKT_START);
         // query printer status
         if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
@@ -188,7 +190,7 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
                 pkt_count = 0;
                 PRINTER_SEND_COMMAND(PRN_PKT_EOF);
                 // setup margin if last packet
-                if (y == (rows - 1)) gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+                if (y == (rows - 1)) gbprinter_set_print_params(PRN_NO_MARGINS, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
                 PRINTER_SEND_COMMAND(PRN_PKT_START);
                 // query printer status
                 if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;
@@ -204,7 +206,7 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
     if (pkt_count) {
         PRINTER_SEND_COMMAND(PRN_PKT_EOF);
         // setup printing if required
-        gbprinter_set_print_params(3, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
+        gbprinter_set_print_params(PRN_FINAL_MARGIN, PRN_PALETTE_NORMAL, PRN_EXPOSURE_DARK);
         PRINTER_SEND_COMMAND(PRN_PKT_START);
         // query printer status
         if ((error = printer_wait(PRN_SECONDS(PRN_BUSY_TIMEOUT), PRN_STATUS_BUSY, PRN_STATUS_BUSY)) & PRN_STATUS_MASK_ERRORS) return error;

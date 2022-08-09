@@ -56,6 +56,10 @@
 #define PRN_PALETTE_NORMAL      0b11100100u
 #define PRN_PALETTE_INV         0b00011011u
 
+/** Don't use margins
+*/
+#define PRN_NO_MARGINS          0x00
+
 /** Exposure: 0x40 is default value, values from 0x80 to 0xFF act as 0x40
     Determines the time used by the printer head to heat the thermal paper
 */
