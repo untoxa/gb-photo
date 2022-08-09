@@ -67,16 +67,22 @@ COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
-camera_shadow_regs_t SHADOW;    // camera shadow registers for reading
+camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
 
-#define SS_BRIGHTNESS_X 1
-#define SS_BRIGHTNESS_Y 2
-#define SS_BRIGHTNESS_LEN 14
-#define SS_CONTRAST_X 2
-#define SS_CONTRAST_Y 16
-#define SS_CONTRAST_LEN 16
+#define SHUTTER_REPEAT_X    18
+#define SHUTTER_REPEAT_Y    12
+#define SHUTTER_TIMER_X     18
+#define SHUTTER_TIMER_Y     14
 
-static scrollbar_t ss_brightness, ss_contrast;
+#define SS_BRIGHTNESS_X     1
+#define SS_BRIGHTNESS_Y     2
+#define SS_BRIGHTNESS_LEN   14
+static scrollbar_t ss_brightness;
+
+#define SS_CONTRAST_X       2
+#define SS_CONTRAST_Y       16
+#define SS_CONTRAST_LEN     16
+static scrollbar_t ss_contrast;
 
 static const uint16_t exposures[] = {
     TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
@@ -191,8 +197,12 @@ void display_last_seen(uint8_t restore) {
 inline void camera_scrollbars_reinit() {
     scrollbar_destroy_all();
     if (OPTION(camera_mode) == camera_mode_auto) {
+        // init and set brightness scrollbar
         scrollbar_add(&ss_brightness, SS_BRIGHTNESS_X, SS_BRIGHTNESS_Y, SS_BRIGHTNESS_LEN, true);
+        scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
+        // init and set contrast scrollbar
         scrollbar_add(&ss_contrast, SS_CONTRAST_X, SS_CONTRAST_Y, SS_CONTRAST_LEN, false);
+        scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
     }
 }
 
@@ -346,31 +356,21 @@ const menu_t CameraMenuAssisted = {
 };
 
 // --- Auto menu -------------------------------------
-const menu_item_t CameraMenuItemAutoContrast = {
-    .prev = &CameraMenuItemAutoDither,          .next = &CameraMenuItemAutoDither,
+const menu_item_t CameraMenuItemAutoIndicator = {
+    .prev = NULL,    .next = NULL,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 5,
-    .id = idContrast,
-    .caption = " " ICON_CONTRAST "\t%d",
-    .helpcontext = " Contrast level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemAutoDither = {
-    .prev = &CameraMenuItemAutoContrast,    .next = &CameraMenuItemAutoContrast,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
-    .id = idDither,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering on/off",
+    .ofs_x = 0, .ofs_y = 0, .width = 0, .flags = MENUITEM_TERM,
+    .id = idNone,
+    .caption = " Automatic mode",
+    .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " and "ICON_CONTRAST,
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
 
 const menu_t CameraMenuAuto = {
     .x = 0, .y = 0, .width = 0, .height = 0,
-    .flags = MENU_INVERSE,
-    .items = &CameraMenuItemAutoContrast,
+    .flags = 0,
+    .items = &CameraMenuItemAutoIndicator,
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
@@ -518,7 +518,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     };
 
     static change_direction_e change_direction;
-    static uint8_t capture_triggered = FALSE;       // state of static variable persists between calls
+    static bool capture_triggered = false;       // state of static variable persists between calls
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
@@ -548,30 +548,44 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     } else if (KEY_PRESSED(J_B)) {
         // cancel timers
         COUNTER_RESET(camera_shutter_timer);
+        screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
         COUNTER_RESET(camera_repeat_counter);
-        screen_clear_rect(18, 13, 2, 4, SOLID_BLACK);
+        screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
-        capture_triggered = FALSE;
+        capture_triggered = false;
         return ACTION_CAMERA_SUBMENU;
     } else if (KEY_PRESSED(J_START)) {
         // start open main menu
-        capture_triggered = FALSE;
+        capture_triggered = false;
         return ACTION_MAIN_MENU;
     }
+
+    static uint8_t selection_item_id;
+    selection_item_id = selection->id;
+
     // !!! d-pad keys are translated
-    if (KEY_PRESSED(J_RIGHT)) change_direction = changeDecrease;
-    else if (KEY_PRESSED(J_LEFT)) change_direction = changeIncrease;
-    else change_direction = changeNone;
+    if (OPTION(camera_mode) == camera_mode_auto) {
+        // in automatic mode menu items are "synthetic"
+        if (KEY_PRESSED(J_RIGHT))       change_direction = changeIncrease, selection_item_id = idBrightness;
+        else if (KEY_PRESSED(J_LEFT))   change_direction = changeDecrease, selection_item_id = idBrightness;
+        else if (KEY_PRESSED(J_DOWN))   change_direction = changeIncrease, selection_item_id = idContrast;
+        else if (KEY_PRESSED(J_UP))     change_direction = changeDecrease, selection_item_id = idContrast;
+        else change_direction = changeNone;
+    } else {
+        if (KEY_PRESSED(J_RIGHT))       change_direction = changeDecrease;
+        else if (KEY_PRESSED(J_LEFT))   change_direction = changeIncrease;
+        else change_direction = changeNone;
+    }
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
-        static uint8_t redraw_selection;
-        redraw_selection = TRUE;
+        static bool settings_changed, redraw_selection;
+        redraw_selection = settings_changed = true;
         // perform changes when pressing UP/DOWN while menu item with some ID is active
-        switch (selection->id) {
+        switch (selection_item_id) {
             case idExposure:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
+                if (settings_changed = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
                     SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
                     switch (OPTION(camera_mode)) {
                         case camera_mode_assisted:
@@ -585,10 +599,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 }
                 break;
             case idGain:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (settings_changed = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idVOut:
-                if (redraw_selection = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (settings_changed = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
                 SETTING(dithering) = !SETTING(dithering);
@@ -599,37 +613,47 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idContrast:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) RENDER_CAM_REG_DITHERPATTERN();
+                if (settings_changed = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) {
+                    RENDER_CAM_REG_DITHERPATTERN();
+                    scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
+                    redraw_selection = (OPTION(camera_mode) != camera_mode_auto);
+                }
                 break;
             case idInvOutput:
                 SETTING(invertOutput) = !SETTING(invertOutput);
                 RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idZeroPoint:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_zero_point), 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (settings_changed = inc_dec_int8(&SETTING(current_zero_point), 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idVoltageRef:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (settings_changed = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeRatio:
-                if (redraw_selection = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (settings_changed = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
                 RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idEdgeOperation:
-                if (redraw_selection = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (settings_changed = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                break;
+            case idBrightness:
+                if (settings_changed = inc_dec_int16(&SETTING(current_brightness), 64, 0, HISTOGRAM_MAX_VALUE, change_direction)) {
+                    scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
+                    redraw_selection = (OPTION(camera_mode) != camera_mode_auto);
+                }
                 break;
             default:
-                redraw_selection = FALSE;
+                settings_changed = false;
                 break;
         }
         // redraw selection if requested
-        if (redraw_selection) {
+        if (settings_changed) {
             music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
             save_camera_mode_settings(OPTION(camera_mode));
-            menu_move_selection(menu, NULL, selection);
+            if (redraw_selection) menu_move_selection(menu, NULL, selection);
         }
     }
 
@@ -637,11 +661,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
-            menu_text_out(18, 15, 0, SOLID_BLACK, " " ICON_CLOCK);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, SOLID_BLACK, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
-            menu_text_out(18, 16, 2, SOLID_BLACK, text_buffer);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, SOLID_BLACK, text_buffer);
         } else {
-            screen_clear_rect(18, 15, 2, 2, SOLID_BLACK);
+            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
             if (COUNTER(camera_repeat_counter)) {
                 if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
             }
@@ -651,10 +675,10 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (camera_repeat_counter) {
-            menu_text_out(18, 13, 0, SOLID_BLACK, " " ICON_MULTIPLE);
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, SOLID_BLACK, " " ICON_MULTIPLE);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-            menu_text_out(18, 14, 2, SOLID_BLACK, text_buffer);
-        } else screen_clear_rect(18, 13, 2, 2, SOLID_BLACK);
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, text_buffer);
+        } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
     }
 
     // make the picture if not in progress yet
@@ -662,7 +686,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (!capture_triggered) {
             music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask);
             if (!is_capturing()) image_capture();
-            capture_triggered = TRUE;
+            capture_triggered = true;
         }
         camera_do_shutter = FALSE;
     }
@@ -672,16 +696,16 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 #if (ENABLE_PID==1)
         if (OPTION(camera_mode) == camera_mode_auto) {
             // P component
-            int16_t error = (calculate_histogram() - histogram_target_value) / histogram_points_count;
+            int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
             SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
 
             int8_t log2_exposure = log2(SETTING(current_exposure));
             log2_exposure = MAX(log2_exposure, 1);
 
-#define PID_P ((error >> 4) * (log2_exposure >> 2))
+    #define PID_P ((error >> 4) * MAX((log2_exposure >> 2), 1))
 
             // I component
-#if (PID_ENABLE_I==1)
+    #if (PID_ENABLE_I==1)
             static int16_t integral_error = 0;
             integral_error = CONSTRAINT(integral_error + error, -4096, 4096);
 
@@ -689,35 +713,40 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             if ((old_error ^ error) < 0) integral_error = 0; // error sign changed? reset integral component
             old_error = error;
 
-#define PID_I ((integral_error >> 6) * (log2_exposure << 1))
+        #define PID_I ((integral_error >> 6) * (log2_exposure << 1))
 
-#else
-#define PID_I 0
-#endif
+    #else
+        #define PID_I 0
+    #endif
 
             // D component
-#if (PID_ENABLE_D==1)
+    #if (PID_ENABLE_D==1)
             static int16_t old_error = 0;
             int16_t diff_error = error - old_error;
             old_error = error;
 
-#define PID_D (diff_error >> 5)
+        #define PID_D (diff_error >> 5)
 
-#else
-#define PID_D 0
-#endif
+    #else
+        #define PID_D 0
+    #endif
 
             // apply
             SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
-            RENDER_REGS_FROM_EXPOSURE();
-            // display
+    #if (RENDER_ALL_REGS==0)
+            RENDER_CAM_REG_EXPTIME();
+    #else
+            RENDER_REGS_FROM_EXPOSURE();    // use the same rules as in assisted mode
+    #endif
+    #if (DEBUG_PID==1)
             menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS));
+    #endif
         }
 #endif
         if ((recording_video) || ((capture_triggered) && (OPTION(after_action) == after_action_picnrec))) picnrec_trigger();
         display_last_seen(FALSE);
         if (capture_triggered) {
-            capture_triggered = FALSE;
+            capture_triggered = false;
             switch (OPTION(after_action)) {
                 case after_action_save:
                     camera_image_save();

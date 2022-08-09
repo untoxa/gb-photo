@@ -51,3 +51,7 @@ void scrollbar_repaint_all() BANKED {
         current = current->prev;
     }
 }
+
+void scrollbar_set_position(scrollbar_t * ss, uint16_t value, uint16_t min, uint16_t max) BANKED {
+    ss->position = (((uint32_t)(ss->len - 3) << 3) * (value - min)) / (max - min);
+}

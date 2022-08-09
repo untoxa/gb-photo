@@ -18,8 +18,7 @@
     Any command sequence begins by these
 */
 #define PRN_MAGIC               0x3388
-#define PRN_MAGIC_1             PRN_LOW(PRN_MAGIC)
-#define PRN_MAGIC_2             PRN_HIGH(PRN_MAGIC)
+#define PRN_LE(A)               PRN_LOW(A),PRN_HIGH(A)
 
 /** INIT command is mandatory to initialize communication protocol with the printer
     Two consecutive linked commands must never be more than 150 ms apart except the INIT command which is valid at least 10 seconds
@@ -56,6 +55,10 @@
 */
 #define PRN_PALETTE_NORMAL      0b11100100u
 #define PRN_PALETTE_INV         0b00011011u
+
+/** Don't use margins
+*/
+#define PRN_NO_MARGINS          0x00
 
 /** Exposure: 0x40 is default value, values from 0x80 to 0xFF act as 0x40
     Determines the time used by the printer head to heat the thermal paper

@@ -37,11 +37,12 @@ static const uint8_t * const histogram_points[] = {
 #endif
 
 #if (USE_DIFFERENCE==0)
-int16_t histogram_target_value = LENGTH(histogram_points) * 64 * 1.5;
+void AT(LENGTH(histogram_points) * 64 * 1.5) __histogram_target_value;
 #else
-int16_t histogram_target_value = 0;
+int16_t __histogram_target_value = 0;
 #endif
-uint8_t histogram_points_count = LENGTH(histogram_points);
+void AT(LENGTH(histogram_points)) __histogram_points_count;
+void AT(LENGTH(histogram_points) * 64 * 3) __histogram_max_value;
 
 
 static uint8_t histogram_counter;

@@ -9,6 +9,8 @@
 #define CORNER_DR           0xfdu
 #define CORNER_DL           0xfcu
 
+#define ICON_BRIGHTNESS     "\x05"
+
 #define ICON_SPIN_UP        "\x06"
 #define ICON_SPIN_DOWN      "\x07"
 #define ICON_MULTIPLE       "\x08"

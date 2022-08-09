@@ -58,7 +58,8 @@ typedef enum {
     idVoltageRef,
     idEdgeRatio,
     idEdgeExclusive,
-    idEdgeOperation
+    idEdgeOperation,
+    idBrightness
 } camera_menu_e;
 
 typedef struct table_value_t {
@@ -106,6 +107,7 @@ typedef struct camera_mode_settings_t {
     int16_t voltage_out;
     uint8_t current_contrast;
     uint8_t edge_operation;
+    int16_t current_brightness;
     bool dithering              : 1;
     bool ditheringHighLight     : 1;
     bool invertOutput           : 1;
