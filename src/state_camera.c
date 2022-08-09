@@ -640,7 +640,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (settings_changed = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idBrightness:
-                if (settings_changed = inc_dec_int16(&SETTING(current_brightness), 64, 0, HISTOGRAM_MAX_VALUE, change_direction)) {
+                if (settings_changed = inc_dec_int16(&SETTING(current_brightness), (HISTOGRAM_MAX_VALUE >> 5), 0, HISTOGRAM_MAX_VALUE, change_direction)) {
                     scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
                     redraw_selection = (OPTION(camera_mode) != camera_mode_auto);
                 }
