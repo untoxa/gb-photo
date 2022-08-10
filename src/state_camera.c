@@ -85,17 +85,25 @@ static scrollbar_t ss_brightness;
 static scrollbar_t ss_contrast;
 
 static const uint16_t exposures[] = {
-    TO_EXPOSURE_VALUE(208),  // does this setting actually work on the real hardware?
-    TO_EXPOSURE_VALUE(304),     TO_EXPOSURE_VALUE(400),     TO_EXPOSURE_VALUE(512),     TO_EXPOSURE_VALUE(608),
-    TO_EXPOSURE_VALUE(800),     TO_EXPOSURE_VALUE(1008),    TO_EXPOSURE_VALUE(1264),    TO_EXPOSURE_VALUE(1504),
-    TO_EXPOSURE_VALUE(2000),    TO_EXPOSURE_VALUE(2512),    TO_EXPOSURE_VALUE(3008),    TO_EXPOSURE_VALUE(4000),
-    TO_EXPOSURE_VALUE(5008),    TO_EXPOSURE_VALUE(6000),    TO_EXPOSURE_VALUE(8000),    TO_EXPOSURE_VALUE(10000),
-    TO_EXPOSURE_VALUE(12512),   TO_EXPOSURE_VALUE(15008),   TO_EXPOSURE_VALUE(20000),   TO_EXPOSURE_VALUE(25008),
-    TO_EXPOSURE_VALUE(30000),   TO_EXPOSURE_VALUE(40000),   TO_EXPOSURE_VALUE(50000),   TO_EXPOSURE_VALUE(60000),
-    TO_EXPOSURE_VALUE(70000),   TO_EXPOSURE_VALUE(80000),   TO_EXPOSURE_VALUE(100000),  TO_EXPOSURE_VALUE(125008),
-    TO_EXPOSURE_VALUE(160000),  TO_EXPOSURE_VALUE(200000),  TO_EXPOSURE_VALUE(250000),  TO_EXPOSURE_VALUE(300000),
-    TO_EXPOSURE_VALUE(400000),  TO_EXPOSURE_VALUE(500000),  TO_EXPOSURE_VALUE(600000),  TO_EXPOSURE_VALUE(800000),
-    TO_EXPOSURE_VALUE(1000000), TO_EXPOSURE_VALUE(1048560)
+    TO_EXPOSURE_VALUE(208),     TO_EXPOSURE_VALUE(256),     TO_EXPOSURE_VALUE(304),     TO_EXPOSURE_VALUE(352),
+    TO_EXPOSURE_VALUE(400),     TO_EXPOSURE_VALUE(464),     TO_EXPOSURE_VALUE(512),     TO_EXPOSURE_VALUE(560),
+    TO_EXPOSURE_VALUE(608),     TO_EXPOSURE_VALUE(704),     TO_EXPOSURE_VALUE(800),     TO_EXPOSURE_VALUE(912),
+    TO_EXPOSURE_VALUE(1008),    TO_EXPOSURE_VALUE(1136),    TO_EXPOSURE_VALUE(1264),    TO_EXPOSURE_VALUE(1376),
+    TO_EXPOSURE_VALUE(1504),    TO_EXPOSURE_VALUE(1744),    TO_EXPOSURE_VALUE(2000),    TO_EXPOSURE_VALUE(2256),
+    TO_EXPOSURE_VALUE(2512),    TO_EXPOSURE_VALUE(2752),    TO_EXPOSURE_VALUE(3008),    TO_EXPOSURE_VALUE(3504),
+    TO_EXPOSURE_VALUE(4000),    TO_EXPOSURE_VALUE(4496),    TO_EXPOSURE_VALUE(5008),    TO_EXPOSURE_VALUE(5504),
+    TO_EXPOSURE_VALUE(6000),    TO_EXPOSURE_VALUE(7008),    TO_EXPOSURE_VALUE(8000),    TO_EXPOSURE_VALUE(9008),
+    TO_EXPOSURE_VALUE(10000),   TO_EXPOSURE_VALUE(11264),   TO_EXPOSURE_VALUE(12512),   TO_EXPOSURE_VALUE(13760),
+    TO_EXPOSURE_VALUE(15008),   TO_EXPOSURE_VALUE(17504),   TO_EXPOSURE_VALUE(20000),   TO_EXPOSURE_VALUE(22496),
+    TO_EXPOSURE_VALUE(25008),   TO_EXPOSURE_VALUE(27504),   TO_EXPOSURE_VALUE(30000),   TO_EXPOSURE_VALUE(35008),
+    TO_EXPOSURE_VALUE(40000),   TO_EXPOSURE_VALUE(45008),   TO_EXPOSURE_VALUE(50000),   TO_EXPOSURE_VALUE(55008),
+    TO_EXPOSURE_VALUE(60000),   TO_EXPOSURE_VALUE(65008),   TO_EXPOSURE_VALUE(70000),   TO_EXPOSURE_VALUE(75008),
+    TO_EXPOSURE_VALUE(80000),   TO_EXPOSURE_VALUE(90000),   TO_EXPOSURE_VALUE(100000),  TO_EXPOSURE_VALUE(112496),
+    TO_EXPOSURE_VALUE(125008),  TO_EXPOSURE_VALUE(142496),  TO_EXPOSURE_VALUE(160000),  TO_EXPOSURE_VALUE(180000),
+    TO_EXPOSURE_VALUE(200000),  TO_EXPOSURE_VALUE(225008),  TO_EXPOSURE_VALUE(250000),  TO_EXPOSURE_VALUE(275008),
+    TO_EXPOSURE_VALUE(300000),  TO_EXPOSURE_VALUE(350000),  TO_EXPOSURE_VALUE(400000),  TO_EXPOSURE_VALUE(450000),
+    TO_EXPOSURE_VALUE(500000),  TO_EXPOSURE_VALUE(550000),  TO_EXPOSURE_VALUE(600000),  TO_EXPOSURE_VALUE(700000),
+    TO_EXPOSURE_VALUE(800000),  TO_EXPOSURE_VALUE(900000),  TO_EXPOSURE_VALUE(1000000), TO_EXPOSURE_VALUE(1048560)
 };
 static const table_value_t gains[] = {
     { CAM01_GAIN_140, "14.0" }, { CAM01_GAIN_155, "15.5" }, { CAM01_GAIN_170, "17.0" }, { CAM01_GAIN_185, "18.5" },
@@ -585,7 +593,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection_item_id) {
             case idExposure:
-                if (settings_changed = inc_dec_int8(&SETTING(current_exposure_idx), 1, 0, MAX_INDEX(exposures), change_direction)) {
+                if (settings_changed = inc_dec_int8(&SETTING(current_exposure_idx), (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2, 0, MAX_INDEX(exposures), change_direction)) {
                     SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
                     switch (OPTION(camera_mode)) {
                         case camera_mode_assisted:
@@ -780,21 +788,28 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (id) {
         case idExposure: {
-            uint16_t value = FROM_EXPOSURE_VALUE(settings->current_exposure) / 100;
+            uint32_t value = FROM_EXPOSURE_VALUE(settings->current_exposure) / 10;
             uint8_t * buf = text_buffer_extra;
-            uint8_t len = strlen(uitoa(value, buf, 10));
-            if (len == 1) {
-                *--buf = ',';
-                *--buf = '0';
-            } else {
-                uint8_t * tail = buf + len - 1;
-                len = *tail;
-                if (len != '0') {
-                    *tail++ = ',';
-                    *tail++ = len;
-                }
-                *tail = 0;
+            uint8_t len = strlen(ultoa(value, buf, 10));
+            // if too short value, add leading zeroes
+            while (len < 3) {
+                *--buf = '0', len++;
             }
+            // insert comma
+            len++;
+            uint8_t * tail = buf + len;
+            *tail-- = 0;
+            *tail-- = *(tail - 1);
+            *tail-- = *(tail - 1);
+            *tail = ',';
+            // cut trailing zeroes
+            if (value < 1000) {
+                tail = buf + len - 1;
+                if (*tail == '0') *tail-- = 0;
+                if (*tail == '0') *tail-- = 0;
+                if (*tail == ',') *tail = 0;
+            } else *tail = 0;
+            // render
             sprintf(text_buffer, format, buf);
             break;
         }
