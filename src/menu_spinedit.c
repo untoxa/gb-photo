@@ -75,7 +75,7 @@ uint8_t onIdleSpinEdit(const struct menu_t * menu, const struct menu_item_t * se
 
     if ((change_direction != changeNone) && (spinedit_current_params)) {
         if (inc_dec_int8(spinedit_current_params->value, 1, spinedit_current_params->min_value, spinedit_current_params->max_value, change_direction)) {
-            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
             menu_move_selection(menu, NULL, selection);
         }
     }

@@ -61,8 +61,16 @@ inline void music_stop() {
 
 #define MUTE_MASK_WAVE MUSIC_CH_3
 
-inline void music_play_sfx(uint8_t bank, const uint8_t * sample, uint8_t mute_mask) {
+#define MUSIC_SFX_PRIORITY_MINIMAL  0
+#define MUSIC_SFX_PRIORITY_NORMAL   4
+#define MUSIC_SFX_PRIORITY_HIGH     8
+
+extern uint8_t music_sfx_priority;
+
+inline void music_play_sfx(uint8_t bank, const uint8_t * sample, uint8_t mute_mask, uint8_t priority) {
+    if (priority < music_sfx_priority) return;
     sfx_play_bank = SFX_STOP_BANK;
+    music_sfx_priority = priority;
     music_sound_cut_mask(music_mute_mask);
     music_mute_mask = mute_mask;
     sfx_set_sample(bank, sample);

@@ -179,7 +179,7 @@ void menu_settings_execute() BANKED {
             save_camera_state();
             break;
         default:
-            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             break;
     }
 }

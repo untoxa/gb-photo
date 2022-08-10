@@ -331,7 +331,7 @@ uint8_t UPDATE_state_gallery() BANKED {
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
         // next image
         if (images_taken() > 1) {
-            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
             if (++OPTION(gallery_picture_idx) == images_taken()) OPTION(gallery_picture_idx) = 0;
             gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
             save_camera_state();
@@ -339,7 +339,7 @@ uint8_t UPDATE_state_gallery() BANKED {
     } else if (KEY_PRESSED(J_DOWN) || KEY_PRESSED(J_LEFT)) {
         // previous image
         if (images_taken() > 1) {
-            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
             if (OPTION(gallery_picture_idx)) --OPTION(gallery_picture_idx); else OPTION(gallery_picture_idx) = images_taken() - 1;
             gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
             save_camera_state();
@@ -347,7 +347,7 @@ uint8_t UPDATE_state_gallery() BANKED {
     } else if (KEY_PRESSED(J_A)) {
         // switch to thumbnail view
         if (images_taken()) {
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
             CHANGE_STATE(state_thumbnails);
             return FALSE;
         }
@@ -360,8 +360,8 @@ uint8_t UPDATE_state_gallery() BANKED {
                         protected_modify_slot(i - 1, CAMERA_IMAGE_DELETED);
                         VECTOR_ADD(free_slots, i - 1);
                     }
-                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
-                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 break;
             case ACTION_ERASE_IMAGE:
                 if ((images_taken()) && (OPTION(gallery_picture_idx) < images_taken())) {
@@ -370,8 +370,8 @@ uint8_t UPDATE_state_gallery() BANKED {
                     protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
                     VECTOR_ADD(free_slots, elem);
                     protected_pack(used_slots);
-                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
-                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 break;
             case ACTION_UNERASE_GALLERY:
                 while (VECTOR_LEN(free_slots)) {
@@ -380,16 +380,12 @@ uint8_t UPDATE_state_gallery() BANKED {
                     VECTOR_ADD(used_slots, elem);
                 }
                 break;
-            case ACTION_DISPLAY_INFO:
-                // TODO: display image info
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
-                break;
             case ACTION_TRANSFER_IMAGE:
-                music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit));
+                music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit), MUSIC_SFX_PRIORITY_MINIMAL);
                 remote_activate(REMOTE_DISABLED);
                 linkcable_transfer_reset();
                 if (!gallery_transfer_picture(OPTION(gallery_picture_idx))) {
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 }
                 remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
@@ -397,7 +393,7 @@ uint8_t UPDATE_state_gallery() BANKED {
             case ACTION_PRINT_IMAGE:
                 remote_activate(REMOTE_DISABLED);
                 if (!gallery_print_picture(OPTION(gallery_picture_idx), OPTION(print_frame_idx))) {
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 }
                 remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
@@ -408,13 +404,13 @@ uint8_t UPDATE_state_gallery() BANKED {
                 remote_activate(REMOTE_DISABLED);
                 if (menu_result == ACTION_TRANSFER_GALLERY) {
                     linkcable_transfer_reset();
-                    music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit));
+                    music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit), MUSIC_SFX_PRIORITY_MINIMAL);
                 }
                 uint8_t transfer_completion = 0, image_count = images_taken();
                 show_progressbar(0, 0, PRN_MAX_PROGRESS);
                 for (uint8_t i = 0; i != images_taken(); i++) {
                     if (!((menu_result == ACTION_TRANSFER_GALLERY) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
-                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                         break;
                     }
                     uint8_t current_progress = (((uint16_t)i * PRN_MAX_PROGRESS) / image_count);
@@ -430,14 +426,14 @@ uint8_t UPDATE_state_gallery() BANKED {
             case ACTION_PRINT_INFO:
                 remote_activate(REMOTE_DISABLED);
                 if (!gbprinter_print_screen_rect(ImageInfoMenu.x + 1, ImageInfoMenu.y + 1, ImageInfoMenu.width - 2, ImageInfoMenu.height - 3, TRUE)) {
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 }
                 remote_activate(REMOTE_ENABLED);
                 JOYPAD_RESET();
                 break;
             default:
                 // error, must not get here
-                music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 break;
         }
         OPTION(gallery_picture_idx) = refresh_screen();

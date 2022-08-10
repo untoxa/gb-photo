@@ -127,11 +127,11 @@ uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t menu_main_execute() BANKED {
     switch (menu_execute(&MainMenu, NULL, NULL)) {
         case ACTION_CAMERA:
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
             CHANGE_STATE(state_camera);
             return STATE_CHANGED();
         case ACTION_GALLERY:
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok));
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
             CHANGE_STATE(state_gallery);
             return STATE_CHANGED();         // don't refresh screen if state changed
         case ACTION_SETTINGS:
@@ -142,7 +142,7 @@ uint8_t menu_main_execute() BANKED {
             break;
         default:
             // default action
-            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             break;
     }
     return FALSE;

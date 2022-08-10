@@ -85,7 +85,7 @@ static scrollbar_t ss_brightness;
 static scrollbar_t ss_contrast;
 
 static const uint16_t exposures[] = {
-    TO_EXPOSURE_VALUE(208),     TO_EXPOSURE_VALUE(256),     TO_EXPOSURE_VALUE(304),     TO_EXPOSURE_VALUE(352),
+    TO_EXPOSURE_VALUE(256),     TO_EXPOSURE_VALUE(272),     TO_EXPOSURE_VALUE(304),     TO_EXPOSURE_VALUE(352),
     TO_EXPOSURE_VALUE(400),     TO_EXPOSURE_VALUE(464),     TO_EXPOSURE_VALUE(512),     TO_EXPOSURE_VALUE(560),
     TO_EXPOSURE_VALUE(608),     TO_EXPOSURE_VALUE(704),     TO_EXPOSURE_VALUE(800),     TO_EXPOSURE_VALUE(912),
     TO_EXPOSURE_VALUE(1008),    TO_EXPOSURE_VALUE(1136),    TO_EXPOSURE_VALUE(1264),    TO_EXPOSURE_VALUE(1376),
@@ -232,7 +232,7 @@ void camera_image_save() {
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         // add slot to used list
         VECTOR_ADD(used_slots, slot);
-    } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+    } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
 }
 
 static void refresh_usage_indicator() {
@@ -659,7 +659,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
         // redraw selection if requested
         if (settings_changed) {
-            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter));
+            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
             save_camera_mode_settings(OPTION(camera_mode));
             if (redraw_selection) menu_move_selection(menu, NULL, selection);
         }
@@ -668,7 +668,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the timer
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
-            music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer));
+            music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer), MUSIC_SFX_PRIORITY_MINIMAL);
             menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, SOLID_BLACK, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
             menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, SOLID_BLACK, text_buffer);
@@ -692,7 +692,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // make the picture if not in progress yet
     if (camera_do_shutter) {
         if (!capture_triggered) {
-            music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask);
+            music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask, MUSIC_SFX_PRIORITY_NORMAL);
             if (!is_capturing()) image_capture();
             capture_triggered = true;
         }
@@ -894,7 +894,7 @@ uint8_t UPDATE_state_camera() BANKED {
             remote_activate(REMOTE_DISABLED);
             if (gbprinter_detect(10) == PRN_STATUS_OK) {
                 gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames));
-            } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+            } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             remote_activate(REMOTE_ENABLED);
             break;
         case ACTION_CAMERA_TRANSFER:
@@ -948,7 +948,7 @@ uint8_t UPDATE_state_camera() BANKED {
                     break;
                 default:
                     // error, must not get here
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                     break;
             }
             save_camera_state();
@@ -958,7 +958,7 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
         }
         default:
-            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error));
+            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             break;
     }
     return FALSE;
