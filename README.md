@@ -37,3 +37,21 @@ Run make from the Cygwin terminal in the project folder containing the `Makefile
     make
 
 Your roms will be in `./build` folders, enjoy ! 
+
+# Remote control packet format
+
+The packet format is very simple and consist of one byte.
+```
+0bS0IPXXXX  
+    S - stop, I - identifier, P - parity, XXXX - 4 Button or D-Pad bits
+    Stop bit is always 1.
+    Identifier is 1 for upper (buttons) and 0 for lower (D-Pad)
+    Parity bit is 1 when the count of 1's in XXXX bits is odd, 0 when even.
+```
+Sender is a master device for the game boy.
+
+# Transfer image protocol
+
+"Transfer Image" feature protocol is very similar to printing. Only two packets are used, and the game boy does not expect receiving anything in response, we just send the raw image data as quick as possible. 
+
+First, the game boy sends the standard printer INIT packet, and then sends the new `0x10` packet that is the same as DATA, but the data length is always 3585 bytes (16x14 tiles) and CRC bytes are always 0. On CGB the transfer rate is 32KB/s, on the DMG the transfer rate is 1KB/s.
