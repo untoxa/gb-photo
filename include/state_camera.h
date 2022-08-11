@@ -36,6 +36,7 @@ typedef enum {
     after_action_transfersave,
     after_action_picnrec,
     after_action_picnrec_video,
+    after_action_transfer_video,
     N_AFTER_ACTIONS
 } after_action_e;
 

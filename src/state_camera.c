@@ -238,6 +238,7 @@ void camera_image_save() {
 static void refresh_usage_indicator() {
     switch (OPTION(after_action)) {
         case after_action_picnrec_video:
+        case after_action_transfer_video:
             if (recording_video) strcpy(text_buffer, ICON_REC); else *text_buffer = 0;
             break;
         default:
@@ -542,6 +543,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             default:
                 switch (OPTION(after_action)) {
                     case after_action_picnrec_video:
+                    case after_action_transfer_video:
                         // toggle recording and start image capture
                         recording_video = !recording_video;
                         if (recording_video && !is_capturing()) image_capture();
@@ -756,7 +758,24 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     #endif
         }
 #endif
-        if ((recording_video) || ((capture_triggered) && (OPTION(after_action) == after_action_picnrec))) picnrec_trigger();
+        switch (OPTION(after_action)) {
+            case after_action_picnrec:
+                if (capture_triggered) picnrec_trigger();
+                break;
+            case after_action_picnrec_video:
+                if (recording_video) picnrec_trigger();
+                break;
+            case after_action_transfer_video:
+                if (recording_video) {
+                    remote_activate(REMOTE_DISABLED);
+                    linkcable_transfer_reset();
+                    linkcable_transfer_image(last_seen, CAMERA_BANK_LAST_SEEN);
+                    remote_activate(REMOTE_ENABLED);
+                }
+                break;
+            default:
+                break;
+        }
         display_last_seen(FALSE);
         if (capture_triggered) {
             capture_triggered = false;
@@ -942,8 +961,13 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_ACTION_TRANSFER:
                 case ACTION_ACTION_SAVETRANSFER:
                 case ACTION_ACTION_PICNREC:
-                case ACTION_ACTION_PICNREC_VIDEO: {
-                    static const after_action_e aactions[] = {after_action_save, after_action_print, after_action_printsave, after_action_transfer, after_action_transfersave, after_action_picnrec, after_action_picnrec_video};
+                case ACTION_ACTION_PICNREC_VIDEO:
+                case ACTION_ACTION_TRANSF_VIDEO: {
+                    static const after_action_e aactions[] = {
+                        after_action_save, after_action_print, after_action_printsave,
+                        after_action_transfer, after_action_transfersave, after_action_picnrec,
+                        after_action_picnrec_video, after_action_transfer_video
+                    };
                     OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                     break;
                 }

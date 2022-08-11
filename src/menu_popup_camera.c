@@ -21,12 +21,12 @@
     #define MENUITEM_PICNREC_NEXT &ActionSubMenuPicNRec
     #define MENUITEM_PICNREC_PREV &ActionSubMenuPicNRecVideo
     #define MENUITEM_PICNREC_TERM 0
-    #define ACTION_SUBMENU_HEIGHT 9
+    #define ACTION_SUBMENU_HEIGHT 10
 #else
     #define MENUITEM_PICNREC_NEXT &ActionSubMenuSave
     #define MENUITEM_PICNREC_PREV &ActionSubMenuSaveAndTransfer
     #define MENUITEM_PICNREC_TERM MENUITEM_TERM
-    #define ACTION_SUBMENU_HEIGHT 7
+    #define ACTION_SUBMENU_HEIGHT 8
 #endif
 #if (ITERATE_ENABLED==1)
     #define MENUITEM_MODES_NEXT &ModeSubMenuItemIterate
@@ -195,7 +195,7 @@ const menu_item_t ActionSubMenuSaveAndPrint = {
     .result = ACTION_ACTION_SAVEPRINT
 };
 const menu_item_t ActionSubMenuTransfer = {
-    .prev = &ActionSubMenuSaveAndPrint,     .next = &ActionSubMenuSaveAndTransfer,
+    .prev = &ActionSubMenuSaveAndPrint,     .next = &ActionSubMenuTransferVideo,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 10,
     .caption = " Transfer",
@@ -203,10 +203,19 @@ const menu_item_t ActionSubMenuTransfer = {
     .onPaint = NULL,
     .result = ACTION_ACTION_TRANSFER
 };
-const menu_item_t ActionSubMenuSaveAndTransfer = {
-    .prev = &ActionSubMenuTransfer,         .next = MENUITEM_PICNREC_NEXT,
+const menu_item_t ActionSubMenuTransferVideo = {
+    .prev = &ActionSubMenuTransfer,         .next = &ActionSubMenuSaveAndTransfer,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 5, .width = 10, .flags = MENUITEM_PICNREC_TERM,
+    .ofs_x = 1, .ofs_y = 5, .width = 10,
+    .caption = " Transfer " ICON_REC,
+    .helpcontext = " Transfer video by link cable",
+    .onPaint = NULL,
+    .result = ACTION_ACTION_TRANSF_VIDEO
+};
+const menu_item_t ActionSubMenuSaveAndTransfer = {
+    .prev = &ActionSubMenuTransferVideo,    .next = MENUITEM_PICNREC_NEXT,
+    .sub = NULL, .sub_params = NULL,
+    .ofs_x = 1, .ofs_y = 6, .width = 10, .flags = MENUITEM_PICNREC_TERM,
     .caption = " Save & Transfer",
     .helpcontext = " Save then Transfer",
     .onPaint = NULL,
@@ -215,7 +224,7 @@ const menu_item_t ActionSubMenuSaveAndTransfer = {
 const menu_item_t ActionSubMenuPicNRec = {
     .prev = &ActionSubMenuSaveAndTransfer,  .next = &ActionSubMenuPicNRecVideo,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 6, .width = 10,
+    .ofs_x = 1, .ofs_y = 7, .width = 10,
     .caption = " Pic'n'Rec",
     .helpcontext = " Save images to Pic'n'Rec",
     .onPaint = NULL,
@@ -224,14 +233,14 @@ const menu_item_t ActionSubMenuPicNRec = {
 const menu_item_t ActionSubMenuPicNRecVideo = {
     .prev = &ActionSubMenuPicNRec,          .next = &ActionSubMenuSave,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 7, .width = 10, .flags = MENUITEM_TERM,
+    .ofs_x = 1, .ofs_y = 8, .width = 10, .flags = MENUITEM_TERM,
     .caption = " Pic'n'Rec " ICON_REC,
     .helpcontext = " Record video using Pic'n'Rec",
     .onPaint = NULL,
     .result = ACTION_ACTION_PICNREC_VIDEO
 };
 const menu_t ActionSubMenu = {
-    .x = 5, .y = 6, .width = 12, .height = ACTION_SUBMENU_HEIGHT,
+    .x = 5, .y = 4, .width = 12, .height = ACTION_SUBMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &ActionSubMenuSave,
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -301,24 +310,25 @@ uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     static const uint8_t * const camera_modes[N_CAMERA_MODES]  = {
-        [camera_mode_manual]         = "[Manual]",
-        [camera_mode_assisted]       = "[Assisted]",
-        [camera_mode_auto]           = "[Auto]",
-        [camera_mode_iterate]        = "[Iterate]"
+        [camera_mode_manual]            = "[Manual]",
+        [camera_mode_assisted]          = "[Assisted]",
+        [camera_mode_auto]              = "[Auto]",
+        [camera_mode_iterate]           = "[Iterate]"
     };
     static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
-        [trigger_mode_abutton]       = "[" ICON_A " button]",
-        [trigger_mode_timer]         = "[Timer]",
-        [trigger_mode_interval]      = "[Repeat]"
+        [trigger_mode_abutton]          = "[" ICON_A " button]",
+        [trigger_mode_timer]            = "[Timer]",
+        [trigger_mode_interval]         = "[Repeat]"
     };
     static const uint8_t * const after_actions[N_AFTER_ACTIONS] = {
-        [after_action_save]          = "[Save]",
-        [after_action_print]         = "[Print]",
-        [after_action_printsave]     = "[S & P]",
-        [after_action_transfer]      = "[Transfer]",
-        [after_action_transfersave]  = "[S & T]",
-        [after_action_picnrec]       = "[Pic'n'Rec]",
-        [after_action_picnrec_video] = "[P'n'R " ICON_REC "]"
+        [after_action_save]             = "[Save]",
+        [after_action_print]            = "[Print]",
+        [after_action_printsave]        = "[S & P]",
+        [after_action_transfer]         = "[Transfer]",
+        [after_action_transfersave]     = "[S & T]",
+        [after_action_picnrec]          = "[Pic'n'Rec]",
+        [after_action_picnrec_video]    = "[P'n'R " ICON_REC "]",
+        [after_action_transfer_video]   = "[Trn " ICON_REC"]"
     };
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
