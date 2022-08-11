@@ -107,11 +107,16 @@ const spinedit_params_t TimerSpinEditParams = {
     .max_value = 99,
     .value = &spinedit_timer_value
 };
+const spinedit_value_names_t CounterSpinEditInfinite = {
+    .next = NULL,
+    .value = COUNTER_INFINITE_VALUE, .name = " " ICON_SPIN_UP " Inf\t" ICON_SPIN_DOWN
+};
 const spinedit_params_t CounterSpinEditParams = {
     .caption = "Counter:",
     .min_value = 1,
-    .max_value = 30,
-    .value = &spinedit_counter_value
+    .max_value = 31,
+    .value = &spinedit_counter_value,
+    .names = &CounterSpinEditInfinite
 };
 const menu_item_t TriggerSubMenuItemAButton = {
     .prev = &TriggerSubMenuItemInterval,    .next = &TriggerSubMenuItemTimer,

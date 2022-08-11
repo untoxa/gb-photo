@@ -148,4 +148,6 @@ inline void image_capture() {
 
 uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;
 
+#define COUNTER_INFINITE_VALUE 31
+
 #endif

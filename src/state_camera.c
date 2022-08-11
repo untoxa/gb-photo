@@ -676,6 +676,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
             if (COUNTER(camera_repeat_counter)) {
                 if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
+                if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) COUNTER_SET(camera_repeat_counter, COUNTER_INFINITE_VALUE);
             }
         }
     }
@@ -684,8 +685,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (camera_repeat_counter) {
             menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, SOLID_BLACK, " " ICON_MULTIPLE);
-            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, text_buffer);
+            if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, " Inf");
+            } else {
+                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, text_buffer);
+            }
         } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
     }
 

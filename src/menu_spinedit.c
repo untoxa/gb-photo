@@ -1,4 +1,5 @@
 #include <gbdk/platform.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -40,7 +41,13 @@ const menu_t SpinEditMenu = {
 uint8_t * onSpineditMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     if (spinedit_current_params) {
-        sprintf(text_buffer, self->caption, *spinedit_current_params->value);
+        uint8_t value = *spinedit_current_params->value;
+        const spinedit_value_names_t * current_name = spinedit_current_params->names;
+        while (current_name) {
+            if (current_name->value == value) return strcpy(text_buffer, current_name->name);
+            current_name = current_name->next;
+        }
+        sprintf(text_buffer, self->caption, value);
         return text_buffer;
     }
     return 0;
