@@ -128,11 +128,13 @@ void main() {
         VBK_REG = 0;
     }
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
-    SHOW_BKG; SHOW_SPRITES; SPRITES_8x8;
-    DISPLAY_ON;
 
-//        if (joy & J_SELECT) music_stop(), music_pause(music_paused = FALSE);
-//        if (joy & J_START)  music_pause(music_paused = (!music_paused));
+    // set LCDC and switch on display
+    LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ16);
+
+//    // music is not used by now, examples for start/stop/pause are commented out and left for the reference
+//    if (joy & J_SELECT) music_stop(), music_pause(music_paused = FALSE);
+//    if (joy & J_START)  music_pause(music_paused = (!music_paused));
 
     // initialize the VWF subsystem
     vwf_load_font(0, font_proportional, BANK(font_proportional));
