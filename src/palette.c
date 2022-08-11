@@ -11,7 +11,7 @@ palette_entry_t SprPalette[8];
 palette_entry_t BkgPalette[8];
 
 static palette_entry_t cgb_palette[] = {
-    CGB_PALETTE(RGB(31, 31, 31), RGB(21, 21, 21), RGB(10, 10, 10), RGB(0, 0, 0))
+    CGB_PALETTE(RGB_WHITE, RGB_LIGHTGRAY, RGB_DARKGRAY, RGB_BLACK)
 };
 
 void palette_init() BANKED {
@@ -22,8 +22,8 @@ void palette_init() BANKED {
         memcpy(SprPalette, cgb_palette, sizeof(cgb_palette));
         return;
     }
-    DMG_palette[0] = DMG_palette[2] = DMG_PALETTE(0, 1, 2, 3);
-    DMG_palette[1] = DMG_PALETTE(0, 0, 2, 3);
+    DMG_palette[0] = DMG_palette[2] = DMG_PALETTE(DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY, DMG_BLACK);
+    DMG_palette[1] = DMG_PALETTE(DMG_WHITE, DMG_WHITE, DMG_DARK_GRAY, DMG_BLACK);
 }
 
 void palette_cgb_zero(uint8_t reg) OLDCALL BANKED NAKED {
