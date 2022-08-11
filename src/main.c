@@ -65,11 +65,12 @@ void main() {
     sgb_pal_delay();    // For SGB on PAL SNES this delay is required on startup, otherwise borders don't show up
     detect_system();    // detect system compatibility
 
+    // enable battery backed-up SRAM and load/initialize program settings
     ENABLE_RAM;
     init_save_structure();
 
+    // load the SGB borders and palettes if SGB detected
     if (_is_SUPER) {
-        // set selected SGB border
         if (OPTION(fancy_sgb_border)) {
             sgb_assets_set_border(SGB_BORDER_FANCY);
             sgb_assets_set_palette(SGB_PALETTE_RED);
@@ -93,6 +94,7 @@ void main() {
     CPU_FAST();
 #endif
 
+    // initialize the music/SFX driver and other ISR's
     music_init();
     CRITICAL {
 #if defined(NINTENDO)
@@ -112,10 +114,12 @@ void main() {
 
     JOYPAD_INIT;
 
+    // initialize the remote control
     remote_init();
     remote_activate(REMOTE_ENABLED);
 
-    misc_assets_init(); // load some assets (menu corners, solid black/white blocks)
+    // load some assets to VRAM: menu corners, solid black/white blocks, sprites
+    misc_assets_init();
 
     // initialize the screen
     if (_is_COLOR) {
@@ -130,6 +134,7 @@ void main() {
 //        if (joy & J_SELECT) music_stop(), music_pause(music_paused = FALSE);
 //        if (joy & J_START)  music_pause(music_paused = (!music_paused));
 
+    // initialize the VWF subsystem
     vwf_load_font(0, font_proportional, BANK(font_proportional));
     vwf_load_font(1, font_fancy, BANK(font_fancy));
     vwf_activate_font(0);
@@ -137,15 +142,19 @@ void main() {
     vwf_set_colors(2, 1);
 #endif
 
-    // call init for each state
+    // call init for the each state
     for (uint8_t i = 0; i != N_STATES; i++) call_far(&PROGRAM_STATES[i].INIT);
 
-    // main program loop
+    // the main program loop
     while (TRUE) {
+        // check if state had changed
         if (OLD_PROGRAM_STATE != CURRENT_PROGRAM_STATE) {
+            // leave the old state if valid
             if (OLD_PROGRAM_STATE < N_STATES) call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE].LEAVE);
+            // enter the new state
             call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE = CURRENT_PROGRAM_STATE].ENTER);
         }
+        // call state update and wait for VBlank if requested
         if (call_far(&PROGRAM_STATES[CURRENT_PROGRAM_STATE].UPDATE)) wait_vbl_done();
     }
 }

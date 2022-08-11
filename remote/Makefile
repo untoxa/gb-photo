@@ -1,6 +1,9 @@
 # If you move this project you can change the directory
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
+ifndef GBDK_HOME
 GBDK_HOME = ../../../../gbdk-2020/build/gbdk/
+endif
+
 LCC = $(GBDK_HOME)bin/lcc
 PNG2ASSETS = $(GBDK_HOME)bin/png2asset
 
