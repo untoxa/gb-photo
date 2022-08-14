@@ -3,7 +3,43 @@
 **[The latest release version may be downloaded here](https://github.com/untoxa/2bit-pxlr-studio-next/releases/latest/)**
 This project requires the reflashable Game Boy Camera cart, PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/)
 
-# Project Genesis
+This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed. This project allows printing with all known models of Game Boy printer and Game Boy printer emulator.
+
+# User Manual
+
+After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings**.
+
+## Camera Mode
+
+***Mode menu
+- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All other registered used are fixed.
+- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
+- The **Manual Mode** allows **modifying all the parameters** of the sensor, except registers P, M and X which are not configurable.
+
+***Trigger menu
+- **A Button** is the most simple action: press A once to get an **Action**.
+- **Timer** launch a remote timer between 1 and 99 seconds and trigger and **Action**. 
+- **Repeat** allows triggering and **Action** repetitively, it is cumulative with **Timer**. 
+
+**Timer** and **Repeat** can be cancelled with B button.
+
+***Action menu
+- **Save** just save image in one of the 30 memory slots of the Camera save ram. If memory is full, it will display an error sound.
+- **Print** sends the image with the chosen border directly to the printer without saving.
+- **Save and Print** cumulates the two features but continues to print if the memory slots are all occupied.
+- **Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
+- **Transfer REC** allows continuous tranmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
+- **Save Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
+- **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
+- **Pic'n'rec REC** allows continuous tranmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/) 
+
+***Restore Default menu
+- Allow to come bach to factory settings.
+
+## Image Gallery
+
+## Settings
+
 
 # Some technical considerations
 The Mitsubishi M64282FP artificial retina is a one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of [masked pixels](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20M64282FP_detail%20of%20light%20sensors.png) uses to measure the voltage response of sensor in full darkness. The [sensor documentation](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20Integrated%20Circuit%20M64282FP%20Image%20Sensor.pdf) is notorious for being unfinished and fuzzy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
