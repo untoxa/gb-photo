@@ -12,7 +12,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 
 ## Camera Mode
 ### Mode menu
-- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All other registered used are fixed.
+- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All others camera  registers used are fixed.
 - The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
 - The **Manual Mode** allows **modifying all the parameters** of the sensor, except registers P, M and X which are not configurable.
 
