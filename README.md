@@ -48,7 +48,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 
 ## Settings
 - **Frame** allows selecting no frame, normal frame or wild frames.
-- **Fast Printing** allows switching all print mode from 8 kHz to 256 kHz by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
+- **Fast Printing** allows switching all print mode from 8 kHz (1 kB/s) to 256 kHz (32 kB/s) by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
 - **Alt. SGB borders** allows switching between two Super Game Boy borders.
 
 ## About
