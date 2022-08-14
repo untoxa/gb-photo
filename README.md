@@ -11,19 +11,19 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 
 ## Camera Mode
 
-#*Mode menu
+### Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All other registered used are fixed.
 - The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
 - The **Manual Mode** allows **modifying all the parameters** of the sensor, except registers P, M and X which are not configurable.
 
-***Trigger menu
+# Trigger menu
 - **A Button** is the most simple action: press A once to get an **Action**.
 - **Timer** launch a remote timer between 1 and 99 seconds and trigger and **Action**. 
 - **Repeat** allows triggering and **Action** repetitively, it is cumulative with **Timer**. 
 
 **Timer** and **Repeat** can be cancelled with B button.
 
-***Action menu
+# Action menu
 - **Save** just save image in one of the 30 memory slots of the Camera save ram. If memory is full, it will display an error sound.
 - **Print** sends the image with the chosen border directly to the printer without saving.
 - **Save and Print** cumulates the two features but continues to print if the memory slots are all occupied.
@@ -33,7 +33,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
 - **Pic'n'rec REC** allows continuous tranmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/) 
 
-***Restore Default menu
+# Restore Default menu
 - Allow to come bach to factory settings.
 
 ## Image Gallery
