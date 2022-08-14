@@ -6,6 +6,9 @@ This project requires the reflashable Game Boy Camera cart. PCB's and build inst
 
 This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with all known models of Game Boy printer and Game Boy printer emulator. The project features Game Boy And Game Boy Color versions.
 
+# 2bit PXLR Studio Next Camera with its remote controller
+[Showcase](doc/Showcase.png)
+
 # User Manual
 
 After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings**.
