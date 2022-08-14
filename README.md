@@ -13,7 +13,7 @@ The save format used here is retro-compatible with any version of the Game Boy C
 
 # User Manual
 
-After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings** for tuning general parameters. To use the remote controller feature, just plug a serial cable connected to a Game Boy playing the 'pxlr2-remote.gb' rom.
+After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings** for tuning general parameters. To use the remote controller feature, just plug a serial cable connected to a Game Boy playing the `pxlr2-remote.gb or .gbc` rom.
 
 ## Camera Mode
 ### Mode menu
