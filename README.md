@@ -126,7 +126,7 @@ Your roms will be in `./build` folders, enjoy !
 # Resources
 - Mitsubishi M64282FP [Sensor Datasheet](doc/M64282FP-datasheet.pdf)
 - Mitsubishi M64283FP [Sensor Datasheet](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf)
-- Game Boy [programming manual](doc/Game%20Boy%20Programming%20Manual.pdf)
+- Game Boy [Pan Docs](https://gbdev.io/pandocs/)
 - [AntonioND](https://github.com/AntonioND) for the outstanding [Documentation regarding the camera's sensor](https://github.com/AntonioND/gbcam-rev-engineer) / [PDF](https://github.com/AntonioND/gbcam-rev-engineer/blob/master/doc/gb_camera_doc_v1_1_1.pdf)
 
 # Author contribution
