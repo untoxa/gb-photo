@@ -7,7 +7,7 @@ This project requires the reflashable Game Boy Camera cart. PCB's and build inst
 This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with all known models of Game Boy printer and Game Boy printer emulator. The project features Game Boy And Game Boy Color versions.
 
 # 2bit PXLR Studio Next Camera with its remote controller
-[Showcase](doc/Showcase.png)
+![Showcase](doc/Showcase.png)
 
 # User Manual
 
@@ -15,7 +15,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 
 ## Camera Mode
 ### Mode menu
-- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All others camera  registers used are fixed.
+- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All others camera  registers used are fixed.
 - The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
 - The **Manual Mode** allows **modifying all the parameters** of the camera sensor, except registers P, M and X which are not configurable.
 
@@ -61,10 +61,10 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 Just the hall of fames.
 
 # Some technical considerations
-The Mitsubishi M64282FP artificial retina is a one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of [masked pixels](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20M64282FP_detail%20of%20light%20sensors.png) uses to measure the voltage response of sensor in full darkness. The [sensor documentation](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20Integrated%20Circuit%20M64282FP%20Image%20Sensor.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
+The Mitsubishi M64282FP artificial retina is a one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of [masked pixels](doc/Mitsubishi%20M64282FP_detail%20of%20light%20sensors.png) uses to measure the voltage response of sensor in full darkness. The [sensor documentation](doc/M64282FP-datasheet.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
 
 ## Effect of the main adressable parameters
-The M64282FP is tuned by sending 8 one byte registers to the sensor. The MAC-GBD itself, mapper of the Game Boy Camera, can receive only 5 one byte registers so 3 registers are not modifiable (P, M and X, called **Filtering Kernels**). The mapping between sensor registers and MAC-GBD registers is given [here](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/6ed3a2be47de49948a968bbfd31cbd49072a1213/include/gbcamera.h#L86).
+The M64282FP is tuned by sending 8 one byte registers to the sensor. The MAC-GBD itself, mapper of the Game Boy Camera, can receive only 5 one byte registers so 3 registers are not modifiable (P, M and X, called **Filtering Kernels**). The mapping between sensor registers and MAC-GBD registers is given [here](include/gbcamera.h#L86).
 
 - The **Exposure Time** (registers C) is the time each pixel of the sensor will receive photons and convert the integral photon quantity to voltage. The longer the exposure time, the higher the output voltage, the higher the signal to noise ratio, but the higher the motion blur. Sensor can saturate for too long exposure time/too high flux of photons. This sensor allows exposure time from 16 µseconds to 1.044 seconds. Exposure times below 256 µseconds lead to strong vertical artifacts. Using varying exposure time creates vertical (low exposure times) and horizontal (high exposure times) artifacts which are intrinsic to the sensor. The total voltage range between dark and saturated sensor is about 2 volts.
 - The **Sensor Gain** (register G) is a multiplier applied between the quantity of photons received and the output voltage. To make an analogy with film camera, gain is similar to the ISOs of the film. However calculating the real corresponding ISOs for each gain value is out of reach with the current documentation of the sensor. Like film cameras, high gains (ISOs) and low exposure times gives noisy images, low gains (ISOs) and high exposure times gives smooth images. The gain used in the Game Boy camera rom varies very little compared to what the sensor is able to in Manual Mode.
@@ -73,7 +73,7 @@ The M64282FP is tuned by sending 8 one byte registers to the sensor. The MAC-GBD
 - The **Inverse Output** (register I) performs an hardware negative image.
 - The **Edge enhancement** is performed by playing on the **Sensor Edge Operation** (register VH), the **Sensor Edge Ratio** (register E) and the **Sensor Edge Exclusive** (register N).
 
-Surprisingly, the **Contrast** is not modified by the sensor itself but is set by the MAC-GBD by using [dithering matrices](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/master/src/dither_patterns.c) derived from [Bayer matrices](https://en.wikipedia.org/wiki/Ordered_dithering).
+Surprisingly, the **Contrast** is not modified by the sensor itself but is set by the MAC-GBD by using [dithering matrices](src/dither_patterns.c) derived from [Bayer matrices](https://en.wikipedia.org/wiki/Ordered_dithering).
 
 ## Remote control packet format
 
@@ -122,15 +122,15 @@ Run make from the Cygwin terminal in the project folder containing the `Makefile
 Your roms will be in `./build` folders, enjoy ! 
 
 # Resources
-- Mitsubishi M64282FP [Sensor Datasheet]([https://pdf1.alldatasheet.com/datasheet-pdf/view/146598/MITSUBISHI/M64282FP.html](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20Integrated%20Circuit%20M64282FP%20Image%20Sensor.pdf)
-- Mitsubishi M64283FP [Sensor Datasheet](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf)
-- Game Boy [programming manual](https://github.com/Raphael-Boichot/Play-with-the-Game-Boy-Camera-Mitsubishi-M64282FP-sensor/blob/main/Additionnal%20informations/Game%20Boy%20Programming%20Manual.pdf)
+- Mitsubishi M64282FP [Sensor Datasheet](doc/M64282FP-datasheet.pdf)
+- Mitsubishi M64283FP [Sensor Datasheet](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf)
+- Game Boy [programming manual](doc/Game%20Boy%20Programming%20Manual.pdf)
+- [AntonioND](https://github.com/AntonioND) for the outstanding [Documentation regarding the camera's sensor](https://github.com/AntonioND/gbcam-rev-engineer) / [PDF](https://github.com/AntonioND/gbcam-rev-engineer/blob/master/doc/gb_camera_doc_v1_1_1.pdf)
 
 # Author contribution
-* [Toxa](https://github.com/untoxa) and [Andreas Hahn](https://github.com/HerrZatacke) lead programmers. 
-* [@rembrandx](https://www.instagram.com/rembrandx/) for the Logo/Splashcreen 
-* [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves)
-* [AntonioND](https://github.com/AntonioND) for the outstanding [Documentation regarding the camera's sensor](https://github.com/AntonioND/gbcam-rev-engineer) / [PDF](https://github.com/AntonioND/gbcam-rev-engineer/blob/master/doc/gb_camera_doc_v1_1_1.pdf)
-* [Christian Reinbacher](https://github.com/reini1305) for the [print function](https://github.com/HerrZatacke/custom-camera-rom/commit/5976b47e6b6d577c954e2b678affa9925824f5b5) and general help with some C concepts
-* [Alex (insidegadgets)](https://github.com/insidegadgets) for figuring out the flickering issue and more
-* [All the folks from Game Boy Gamera Club Discord](https://discord.gg/C7WFJHG) for their support and ideas
+- [Toxa](https://github.com/untoxa) and [Andreas Hahn](https://github.com/HerrZatacke) lead programmers. 
+- [@rembrandx](https://www.instagram.com/rembrandx/) for the Logo/Splashcreen 
+- [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves)
+- [Christian Reinbacher](https://github.com/reini1305) for the [print function](https://github.com/HerrZatacke/custom-camera-rom/commit/5976b47e6b6d577c954e2b678affa9925824f5b5) and general help with some C concepts
+- [Alex (insidegadgets)](https://github.com/insidegadgets) for figuring out the flickering issue and more
+- [All the folks from Game Boy Gamera Club Discord](https://discord.gg/C7WFJHG) for their support and ideas
