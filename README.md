@@ -2,7 +2,7 @@
 
 **[The latest release version may be downloaded here](https://github.com/untoxa/2bit-pxlr-studio-next/releases/latest/)**.
 
-This project requires the reflashable Game Boy Camera cart. PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/).
+This project requires the reflashable Game Boy Camera cart. PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/). Additionnaly, a generic flashable cartridge is necessary to remote control the camera via serial cable.
 
 This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with known models of Game Boy printer and Game Boy printer emulator. The project features two roms for Game Boy And Game Boy Color. Using the Game Boy color version gives access to improved features.
 
@@ -28,6 +28,9 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 - **Print** sends the image with the chosen border directly to the printer without saving.
 - **Save & Print** cumulates the two features but continues to print if the memory slots are all occupied.
 - **Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
+
+The **Transfer** protocol is very similar to standard printing. Only two packets are used, and the game boy does not expect receiving anything in response, we just send the raw image data as quick as possible. First, the Game Boy sends the standard printer INIT packet, and then sends the new `0x10` packet that is the same as DATA, but the data length is always 3585 bytes (16x14 tiles) and CRC bytes are always 0. On CGB the transfer rate is 32KB/s, on the DMG the transfer rate is 1KB/s.
+
 - **Transfer REC** allows continuous tranmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
@@ -80,12 +83,6 @@ The packet format is very simple and consist of one byte.
     Parity bit is 1 when the count of 1's in XXXX bits is odd, 0 when even.
 ```
 Sender is a master device for the game boy.
-
-## Transfer image protocol
-
-"Transfer Image" feature protocol is very similar to printing. Only two packets are used, and the game boy does not expect receiving anything in response, we just send the raw image data as quick as possible. 
-
-First, the game boy sends the standard printer INIT packet, and then sends the new `0x10` packet that is the same as DATA, but the data length is always 3585 bytes (16x14 tiles) and CRC bytes are always 0. On CGB the transfer rate is 32KB/s, on the DMG the transfer rate is 1KB/s.
 
 # Fast compiling guide for Windows users 
 
