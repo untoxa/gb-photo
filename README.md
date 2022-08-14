@@ -129,7 +129,7 @@ Your roms will be in `./build` folders, enjoy !
 
 # Author contribution
 - [Toxa](https://github.com/untoxa) and [Andreas Hahn](https://github.com/HerrZatacke) lead programmers. 
-- [@rembrandx](https://www.instagram.com/rembrandx/) for the Logo/Splashcreen 
+- [@rembrandx](https://www.instagram.com/rembrandx/) for the Logo/Splashcreen.
 - [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves)
 - [Christian Reinbacher](https://github.com/reini1305) for the [print function](https://github.com/HerrZatacke/custom-camera-rom/commit/5976b47e6b6d577c954e2b678affa9925824f5b5) and general help with some C concepts
 - [Alex (insidegadgets)](https://github.com/insidegadgets) for figuring out the flickering issue and more
