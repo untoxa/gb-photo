@@ -14,7 +14,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 ### Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All others camera  registers used are fixed.
 - The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
-- The **Manual Mode** allows **modifying all the parameters** of the sensor, except registers P, M and X which are not configurable.
+- The **Manual Mode** allows **modifying all the parameters** of the camera sensor, except registers P, M and X which are not configurable.
 
 ### Trigger menu
 - **A Button** is the most simple action: press A once to get an **Action**.
@@ -26,22 +26,22 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 ### Action menu
 - **Save** just save image in one of the 30 memory slots of the Camera save ram. If memory is full, it will display an error sound.
 - **Print** sends the image with the chosen border directly to the printer without saving.
-- **Save and Print** cumulates the two features but continues to print if the memory slots are all occupied.
+- **Save & Print** cumulates the two features but continues to print if the memory slots are all occupied.
 - **Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Transfer REC** allows continuous tranmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
-- **Save Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
+- **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
 - **Pic'n'rec REC** allows continuous tranmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/) 
 
 ### Restore Default menu
-- Allow to come bach to factory settings.
+- Allow to come back to factory settings, in particular if all is becoming messy in **Manual Mode**.
 
 ## Image Gallery
-- **Info** displays a thumbnail and the registers used. It allows printing the informations too.
-- **Print** prints the current displayed image with the chosen border with a clock frequency of 8 kHz. This is the printing mode of the stock Game Boy Camera.
-- **Print All** prints all the images in memory with the chosen border with a clock frequency of 8 kHz. This is the printing mode of the stock Game Boy Camera.
-- **Transfer** prints the current displayed image without border with a clock frequency of 256 kHz. This mode is supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer). **Compatible witn Game Boy Color only !**
-- **Transfer All** prints all the images in memory without border with a clock frequency of 256 kHz. This mode is supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer). **Compatible witn Game Boy Color only !**
+- **Info** displays a thumbnail and the camera registers used. It allows printing these informations too.
+- **Print** prints the current displayed image with the chosen border with a clock frequency of 8 kHz (1kB/s) or 26 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
+- **Print All** prints all the images in memory with the chosen border with a clock frequency of 8 kHz (1kB/s) or 26 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
+- **Transfer** prints the current displayed image without border with a clock frequency of 256 kHz (32kB/s) by default. This mode is supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer). **Compatible witn Game Boy Color only !**
+- **Transfer All** prints all the images in memory without border and with a clock frequency of 256 kHz (32kB/s). This mode is supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer). **Compatible witn Game Boy Color only !**
 - **Delete** declares the memory slot of the displayed image as free.
 - **Delete All** declares all the memory slots as free.
 - **Undelete All** declares all the memory slots as containing an image.
