@@ -4,7 +4,7 @@
 
 This project requires the reflashable Game Boy Camera cart. PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/). Additionnaly, a generic flashable cartridge is necessary to remote control the camera via serial cable.
 
-This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with known models of Game Boy printer and Game Boy printer emulator. The project features two roms for Game Boy And Game Boy Color. Using the Game Boy color version gives access to improved features.
+This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with all known models of Game Boy printer and Game Boy printer emulator. The project features Game Boy And Game Boy Color versions.
 
 # User Manual
 
