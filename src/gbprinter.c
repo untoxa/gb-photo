@@ -9,6 +9,7 @@
 #include "bankdata.h"
 #include "states.h"
 #include "globals.h"
+#include "joy.h"
 
 #include "state_camera.h"
 
@@ -90,9 +91,15 @@ inline void printer_init() {
     PRINTER_SEND_COMMAND(PRN_PKT_INIT);
 }
 
+inline bool printer_check_cancel() {
+    PROCESS_INPUT();
+    return (KEY_PRESSED(J_B));
+}
+
 uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
     uint8_t error;
     while (((error = PRINTER_SEND_COMMAND(PRN_PKT_STATUS)) & mask) != value) {
+        if (printer_check_cancel()) return PRN_STATUS_ER2;
         if (timeout-- == 0) return PRN_STATUS_MASK_ERRORS;
         if (error & PRN_STATUS_MASK_ERRORS) break;
         wait_vbl_done();
@@ -138,7 +145,10 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 memcpy(tile_data, img + ((((y - current_frame.image_y) << 4) + (x - current_frame.image_x)) << 4), sizeof(tile_data));
             }
             // print the resulting tile
-            if (printer_print_tile(tile_data)) pkt_count++;
+            if (printer_print_tile(tile_data)) {
+                pkt_count++;
+                if (printer_check_cancel()) return PRN_STATUS_ER2;
+            }
             if (pkt_count == 9) {
                 pkt_count = 0;
                 PRINTER_SEND_COMMAND(PRN_PKT_EOF);
@@ -193,7 +203,10 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
                 uint8_t * source = (((y + sy) > 11) || (tile > 127)) ? _VRAM8000 : _VRAM9000;
                 vmemcpy(tile_data, source + ((uint16_t)tile << 4), sizeof(tile_data));
             } else memset(tile_data, 0x00, sizeof(tile_data));
-            if (printer_print_tile(tile_data)) pkt_count++;
+            if (printer_print_tile(tile_data)) {
+                pkt_count++;
+                if (printer_check_cancel()) return PRN_STATUS_ER2;
+            }
             if (pkt_count == 9) {
                 pkt_count = 0;
                 PRINTER_SEND_COMMAND(PRN_PKT_EOF);

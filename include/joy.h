@@ -37,7 +37,7 @@ inline void PROCESS_INPUT() {
 }
 
 inline uint8_t KEY_PRESSED(uint8_t key) {
-    return (((old_joy ^ joy) & (key)) && (joy & (key)));
+    return (((old_joy ^ joy) & key) && (joy & key));
 }
 
 inline void JOYPAD_RESET() {

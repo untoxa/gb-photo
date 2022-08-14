@@ -561,6 +561,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
         COUNTER_RESET(camera_repeat_counter);
         screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
+        camera_do_shutter = FALSE;
+        capture_triggered = false;
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
         capture_triggered = false;
@@ -917,7 +919,14 @@ uint8_t UPDATE_state_camera() BANKED {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
             if (gbprinter_detect(10) == PRN_STATUS_OK) {
-                gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames));
+                if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_ER2) {
+                    // cancel button pressed while printing
+                    COUNTER_RESET(camera_shutter_timer);
+                    screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
+                    COUNTER_RESET(camera_repeat_counter);
+                    screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
+                    camera_do_shutter = FALSE;
+                };
             } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             remote_activate(REMOTE_ENABLED);
             break;
