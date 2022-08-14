@@ -3,14 +3,13 @@
 **[The latest release version may be downloaded here](https://github.com/untoxa/2bit-pxlr-studio-next/releases/latest/)**
 This project requires the reflashable Game Boy Camera cart, PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/)
 
-This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed. This project allows printing with all known models of Game Boy printer and Game Boy printer emulator.
+This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with known models of Game Boy printer and Game Boy printer emulator.
 
 # User Manual
 
 After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings**.
 
 ## Camera Mode
-
 ### Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and set the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](https://github.com/Raphael-Boichot/2bit-pxlr-studio-next/blob/7989a02edea34fd0d14175afaa6b7f5f17aebba6/src/state_camera.c#L147). All other registered used are fixed.
 - The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
