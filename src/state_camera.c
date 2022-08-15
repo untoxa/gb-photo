@@ -149,7 +149,7 @@ void RENDER_REGS_FROM_EXPOSURE() {
     // Gain 20.0 | vRef 0.224 | 2-D edge mode        | Exposure time range from  282ms to  32ms
     // Gain 14.0 | vRef 0.192 | 2-D edge mode        | Exposure time range from   67ms to 0.8ms
     // Gain 14.0 | vRef 0.160 | Horizontal edge mode | Exposure time range from  0.5ms to 0.3ms
-    uint8_t apply_dither;
+    bool apply_dither;
     uint16_t exposure = SETTING(current_exposure);
     if (exposure < TO_EXPOSURE_VALUE(512)) {
         SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
@@ -194,6 +194,28 @@ void RENDER_REGS_FROM_EXPOSURE() {
     if (apply_dither) RENDER_CAM_REG_DITHERPATTERN();
 }
 
+void RENDER_EDGE_FROM_EXPOSURE() {
+    uint16_t exposure = SETTING(current_exposure);
+    if (exposure < TO_EXPOSURE_VALUE(512)) {
+        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+        SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
+    } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
+        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+    } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
+        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+    } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
+        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+    } else {
+        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+        SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
+    }
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    RENDER_CAM_REG_EDEXOPGAIN();
+    RENDER_CAM_REG_EXPTIME();
+}
 
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
@@ -719,7 +741,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             int8_t log2_exposure = log2(SETTING(current_exposure));
             log2_exposure = MAX(log2_exposure, 1);
 
-    #define PID_P ((error >> 4) * MAX((log2_exposure >> 2), 1))
+    #define PID_P ((error >> 4) * MAX((log2_exposure >> 3), 1))
 
             // I component
     #if (PID_ENABLE_I==1)
@@ -750,11 +772,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
             // apply
             SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
-    #if (RENDER_ALL_REGS==0)
-            RENDER_CAM_REG_EXPTIME();
-    #else
-            RENDER_REGS_FROM_EXPOSURE();    // use the same rules as in assisted mode
-    #endif
+            RENDER_EDGE_FROM_EXPOSURE();
     #if (DEBUG_PID==1)
             menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS));
     #endif
@@ -919,7 +937,7 @@ uint8_t UPDATE_state_camera() BANKED {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
             if (gbprinter_detect(10) == PRN_STATUS_OK) {
-                if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_ER2) {
+                if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
                     // cancel button pressed while printing
                     COUNTER_RESET(camera_shutter_timer);
                     screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);

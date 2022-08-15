@@ -102,7 +102,7 @@ uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
     while (((error = PRINTER_SEND_COMMAND(PRN_PKT_STATUS)) & mask) != value) {
         if (printer_check_cancel()) {
             PRINTER_SEND_COMMAND(PRN_PKT_CANCEL);
-            return PRN_STATUS_ER2;
+            return PRN_STATUS_CANCELLED;
         }
         if (timeout-- == 0) return PRN_STATUS_MASK_ERRORS;
         if (error & PRN_STATUS_MASK_ERRORS) break;
@@ -153,7 +153,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 pkt_count++;
                 if (printer_check_cancel()) {
                     PRINTER_SEND_COMMAND(PRN_PKT_CANCEL);
-                    return PRN_STATUS_ER2;
+                    return PRN_STATUS_CANCELLED;
                 }
             }
             if (pkt_count == 9) {
@@ -214,7 +214,7 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
                 pkt_count++;
                 if (printer_check_cancel()) {
                     PRINTER_SEND_COMMAND(PRN_PKT_CANCEL);
-                    return PRN_STATUS_ER2;
+                    return PRN_STATUS_CANCELLED;
                 }
             }
             if (pkt_count == 9) {

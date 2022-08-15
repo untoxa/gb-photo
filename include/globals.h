@@ -43,7 +43,6 @@
     #ifndef PID_ENABLE_D
         #define PID_ENABLE_D 0
     #endif
-    #define RENDER_ALL_REGS 0
     #define DEBUG_PID 0
 #endif
 // bracketing mode

@@ -111,8 +111,10 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
     if (image_no < images_taken()) {
         uint8_t image_index = VECTOR_GET(used_slots, image_no);
         if (gbprinter_detect(10) == PRN_STATUS_OK) {
-            gbprinter_print_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1, print_frames + frame_no, BANK(print_frames));
-            return TRUE;
+            return (gbprinter_print_image(((image_index & 1) ? image_second : image_first),
+                                          (image_index >> 1) + 1,
+                                          print_frames + frame_no,
+                                          BANK(print_frames)) == PRN_STATUS_CANCELLED) ? FALSE : TRUE;
         }
     }
     return FALSE;

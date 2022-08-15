@@ -113,6 +113,8 @@
 
 #define PRN_MAX_PROGRESS        8
 
+#define PRN_STATUS_CANCELLED    PRN_STATUS_ER2
+
 typedef struct start_print_pkt_t {
     uint16_t magic;
     uint16_t command;
