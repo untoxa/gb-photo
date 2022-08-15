@@ -130,7 +130,7 @@ void main() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
 
     // set LCDC and switch on display
-    LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ16);
+    LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8);
 
 //    // music is not used by now, examples for start/stop/pause are commented out and left for the reference
 //    if (joy & J_SELECT) music_stop(), music_pause(music_paused = FALSE);
