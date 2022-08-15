@@ -903,7 +903,7 @@ uint8_t UPDATE_state_camera() BANKED {
         case camera_mode_manual:
             menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
-        case camera_mode_iterate:
+        case camera_mode_bracketing:
         case camera_mode_assisted:
             menu_result = menu_execute(&CameraMenuAssisted, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
@@ -950,8 +950,8 @@ uint8_t UPDATE_state_camera() BANKED {
                 case ACTION_MODE_MANUAL:
                 case ACTION_MODE_ASSISTED:
                 case ACTION_MODE_AUTO:
-                case ACTION_MODE_ITERATE: {
-                    static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_iterate};
+                case ACTION_MODE_BRACKETING: {
+                    static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_bracketing};
                     OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
                     RENDER_CAM_REGISTERS();
                     camera_scrollbars_reinit();

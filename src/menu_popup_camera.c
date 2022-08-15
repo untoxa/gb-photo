@@ -28,9 +28,9 @@
     #define MENUITEM_PICNREC_TERM MENUITEM_TERM
     #define ACTION_SUBMENU_HEIGHT 8
 #endif
-#if (ITERATE_ENABLED==1)
-    #define MENUITEM_MODES_NEXT &ModeSubMenuItemIterate
-    #define MENUITEM_MODES_PREV &ModeSubMenuItemIterate
+#if (BRACKETING_ENABLED==1)
+    #define MENUITEM_MODES_NEXT &ModeSubMenuItemBracketing
+    #define MENUITEM_MODES_PREV &ModeSubMenuItemBracketing
     #define MENUITEM_MODES_TERM 0
     #define MODES_SUBMENU_HEIGHT 6
 #else
@@ -54,7 +54,7 @@ typedef enum {
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection);
 const menu_item_t ModeSubMenuItemAuto = {
-    .prev = MENUITEM_MODES_PREV,   .next = &ModeSubMenuItemAssisted,
+    .prev = MENUITEM_MODES_PREV,        .next = &ModeSubMenuItemAssisted,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 9,
     .caption = " Auto",
@@ -63,7 +63,7 @@ const menu_item_t ModeSubMenuItemAuto = {
     .result = ACTION_MODE_AUTO
 };
 const menu_item_t ModeSubMenuItemAssisted = {
-    .prev = &ModeSubMenuItemAuto,     .next = &ModeSubMenuItemManual,
+    .prev = &ModeSubMenuItemAuto,       .next = &ModeSubMenuItemManual,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 9,
     .caption = " Assisted",
@@ -80,14 +80,14 @@ const menu_item_t ModeSubMenuItemManual = {
     .onPaint = NULL,
     .result = ACTION_MODE_MANUAL
 };
-const menu_item_t ModeSubMenuItemIterate = {
+const menu_item_t ModeSubMenuItemBracketing = {
     .prev = &ModeSubMenuItemManual,     .next = &ModeSubMenuItemAuto,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 4, .width = 9, .flags = MENUITEM_TERM,
-    .caption = " Iterate",
+    .caption = " Bracketing",
     .helpcontext = " Make series of images",
     .onPaint = NULL,
-    .result = ACTION_MODE_ITERATE
+    .result = ACTION_MODE_BRACKETING
 };
 const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = MODES_SUBMENU_HEIGHT,
@@ -313,7 +313,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [camera_mode_manual]            = "[Manual]",
         [camera_mode_assisted]          = "[Assisted]",
         [camera_mode_auto]              = "[Auto]",
-        [camera_mode_iterate]           = "[Iterate]"
+        [camera_mode_bracketing]        = "[Bracketing]"
     };
     static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
         [trigger_mode_abutton]          = "[" ICON_A " button]",

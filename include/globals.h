@@ -46,9 +46,9 @@
     #define RENDER_ALL_REGS 0
     #define DEBUG_PID 0
 #endif
-// iterate mode
-#ifndef ITERATE_ENABLED
-    #define ITERATE_ENABLED 0
+// bracketing mode
+#ifndef BRACKETING_ENABLED
+    #define BRACKETING_ENABLED 0
 #endif
 // use interrupts to update joypad state
 #ifndef INT_DRIVEN_JOYPAD

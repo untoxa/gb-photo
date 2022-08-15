@@ -31,7 +31,7 @@
 #define ACTION_MODE_MANUAL          40
 #define ACTION_MODE_ASSISTED        41
 #define ACTION_MODE_AUTO            42
-#define ACTION_MODE_ITERATE         43
+#define ACTION_MODE_BRACKETING      43
 #define ACTION_TRIGGER_ABUTTON      44
 #define ACTION_TRIGGER_TIMER        45
 #define ACTION_TRIGGER_INTERVAL     46
