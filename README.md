@@ -36,7 +36,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 
 The **Transfer** protocol is very similar to standard printing. Only two packets are used, and the Game Boy does not expect receiving anything in response, we just send the raw image data as quick as possible. First, the Game Boy sends the standard printer INIT packet, and then sends the new `0x10` packet that is the same as DATA, but the data length is always 3584 bytes (16x14 tiles) and CRC bytes are always 0. On CGB the transfer rate is 32KB/s, on the DMG the transfer rate is 1KB/s.
 
-- **Transfer REC** allows continuous tranmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
+- **Transfer REC** allows continuous transmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
 - **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/) 
@@ -46,8 +46,8 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 ## Image Gallery
 - **Info** displays a thumbnail and the camera registers used. It allows printing these informations too.
-- **Print** prints the current displayed image with the chosen border at a clock frequency of 8 kHz (1kB/s) or 26 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
-- **Print All** prints all the images in memory with the chosen border at a clock frequency of 8 kHz (1kB/s) or 26 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
+- **Print** prints the current displayed image with the chosen border at a clock frequency of 8 kHz (1kB/s) or 256 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
+- **Print All** prints all the images in memory with the chosen border at a clock frequency of 8 kHz (1kB/s) or 256 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
 - **Transfer** prints the current displayed image without border at a clock frequency of 256 kHz (32kB/s) by default. This mode is supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer). **Compatible with Game Boy Color only !**
 - **Transfer All** prints all the images in memory without border and with a clock frequency of 256 kHz (32kB/s). This mode is supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer). **Compatible with Game Boy Color only !**
 - **Delete** declares the memory slot of the displayed image as free (without erasing data).
