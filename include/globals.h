@@ -34,17 +34,9 @@
 #ifndef SHUTTER_SOUND
     #define SHUTTER_SOUND 0
 #endif
-// pid controller
-#ifndef ENABLE_PID
-    #define ENABLE_PID 1
-    #ifndef PID_ENABLE_I
-        #define PID_ENABLE_I 1
-    #endif
-    #ifndef PID_ENABLE_D
-        #define PID_ENABLE_D 0
-    #endif
-    #define DEBUG_PID 0
-#endif
+// auto-exposure
+#define DEBUG_AUTOEXP 0
+#define ENABLE_AUTOEXP 1
 // bracketing mode
 #ifndef BRACKETING_ENABLED
     #define BRACKETING_ENABLED 0

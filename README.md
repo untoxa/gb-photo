@@ -115,7 +115,7 @@ Now from the Cygwin terminal, clone this git repository to its desired destinati
 
     git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
-Set the `GBDK_HOME` environment variable, which points to the GBDK-2020 folder in the Windows system settings (recommended) or edit the path in the beginning of the `Makefile` in the root of the `2bit-pxlr-studio-next` repository.
+Create a `GBDK_HOME` environment variable which targets your GBDK-2020 folder in the Windows system settings, close and reopen Cygwin.
 
 Run make from the Cygwin terminal in the project folder containing the `Makefile`: 
 
