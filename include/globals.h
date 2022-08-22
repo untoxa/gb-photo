@@ -35,8 +35,10 @@
     #define SHUTTER_SOUND 0
 #endif
 // auto-exposure
-#define DEBUG_AUTOEXP 0
-#define ENABLE_AUTOEXP 1
+#define ENABLE_AUTOEXP
+#ifdef ENABLE_AUTOEXP
+    #define DEBUG_AUTOEXP 0
+#endif
 // bracketing mode
 #ifndef BRACKETING_ENABLED
     #define BRACKETING_ENABLED 0
