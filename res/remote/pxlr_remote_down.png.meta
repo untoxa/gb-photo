@@ -1,1 +1,1 @@
--map -noflip -source_tileset ../res/remote/pxlr_remote.png
+-keep_palette_order -map -noflip -source_tileset ../res/remote/pxlr_remote.png
