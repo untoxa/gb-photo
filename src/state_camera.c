@@ -738,13 +738,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
             if (abs_error > 95) {
                 // raw tuning +- 1EV
-                if (error_negative) new_exposure = current_exposure >> 1; else new_exposure = current_exposure << 1;
+                new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
             } else if (abs_error > 20) {
                 // intermediate tuning +- 1/8 EV
-                new_exposure = current_exposure + ((error_negative) ? -MAX((current_exposure >> 3), 1) : MAX((current_exposure >> 3), 1));
+                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
             } else if (abs_error > 10) {
                 // fine tuning +- 1/16 EV
-                new_exposure = current_exposure + ((error_negative) ? -MAX((current_exposure >> 4), 1) : MAX((current_exposure >> 4), 1));
+                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
             } else if (abs_error > 5) {
                 // very fine tuning +- 1 in C register
                 new_exposure = current_exposure + ((error_negative) ? -1 : 1);
