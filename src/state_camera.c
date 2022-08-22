@@ -726,49 +726,50 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
-#if (ENABLE_PID==1)
+#if (ENABLE_AUTOEXP==1)
         if (OPTION(camera_mode) == camera_mode_auto) {
-            // P component
             int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
             SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
 
-            int8_t log2_exposure = log2(SETTING(current_exposure));
-            log2_exposure = MAX(log2_exposure, 1);
-
-    #define PID_P ((error >> 4) * MAX((log2_exposure >> 3), 1))
-
-            // I component
-    #if (PID_ENABLE_I==1)
-            static int16_t integral_error = 0;
-            integral_error = CONSTRAINT(integral_error + error, -4096, 4096);
-
-            static int16_t old_error = 0;
-            if ((old_error ^ error) < 0) integral_error = 0; // error sign changed? reset integral component
-            old_error = error;
-
-        #define PID_I ((integral_error >> 6) * (log2_exposure << 1))
-
-    #else
-        #define PID_I 0
-    #endif
-
-            // D component
-    #if (PID_ENABLE_D==1)
-            static int16_t old_error = 0;
-            int16_t diff_error = error - old_error;
-            old_error = error;
-
-        #define PID_D (diff_error >> 5)
-
-    #else
-        #define PID_D 0
-    #endif
-
-            // apply
-            SETTING(current_exposure) = CONSTRAINT(((int32_t)SETTING(current_exposure) + (PID_P + PID_I + PID_D)), CAM02_MIN_VALUE, CAM02_MAX_VALUE);
+            int32_t old_exposure=SETTING(current_exposure);
+            int32_t new_exposure=old_exposure;
+            //raw tuning +- 1EV
+            if (error>95){
+                new_exposure=old_exposure<<1;
+                }
+            if (error<-95){
+                new_exposure=old_exposure>>1;
+                }//-1EV
+            //intermediate tuning +- 1/8 EV
+            if ((error<=95)&&(error>20)){
+              new_exposure=old_exposure+MAX((old_exposure>>3),1);
+                }
+            if ((error>=-95)&&(error<-20)){
+              new_exposure=old_exposure-MAX((old_exposure>>3),1);
+                }
+            //fine tuning +- 1/16 EV
+            if ((error<=20)&&(error>10)){
+              new_exposure=old_exposure+MAX((old_exposure>>4),1);
+                }
+            if ((error>=-20)&&(error<-10)){
+              new_exposure=old_exposure-MAX((old_exposure>>4),1);
+                }
+            //very fine tuning +- 1 in C register
+            if ((error<=10)&&(error>5)){
+              new_exposure=old_exposure+1;
+                    }
+            if ((error>=-10)&&(error<-5)){
+              new_exposure=old_exposure-1;
+                }
+            SETTING(current_exposure) = CONSTRAINT(new_exposure, CAM02_MIN_VALUE, CAM02_MAX_VALUE);
             RENDER_EDGE_FROM_EXPOSURE();
-    #if (DEBUG_PID==1)
-            menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS));
+
+    #if (DEBUG_AUTOEXP==1)
+            sprintf(text_buffer, "%d", (uint16_t)error);
+            menu_text_out(15, 0, 5, SOLID_BLACK, text_buffer);
+            sprintf(text_buffer, "%X", (uint32_t)new_exposure);
+            menu_text_out(15, 1, 5, SOLID_BLACK, text_buffer);
+            //menu_text_out(15, 0, 5, SOLID_BLACK, formatItemText(error, "%sms", &CURRENT_SETTINGS));
     #endif
         }
 #endif
