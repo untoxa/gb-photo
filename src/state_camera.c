@@ -199,12 +199,6 @@ void RENDER_EDGE_FROM_EXPOSURE() {
     if (exposure < TO_EXPOSURE_VALUE(512)) {
         SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
         SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-    } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
-        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-    } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
-        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
     } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
         SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
         SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
