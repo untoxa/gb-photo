@@ -43,11 +43,6 @@ STATE OLD_PROGRAM_STATE = N_STATES, CURRENT_PROGRAM_STATE = DEFAULT_STATE;
 
 
 void main() {
-    // For the SGB + PAL SNES setup this delay is required on startup, otherwise borders don't show up
-    for (uint8_t i = 0; i != 4; i++) wait_vbl_done();
-    // detect system compatibility
-    detect_system();
-
 #if (USE_CGB_DOUBLE_SPEED==1)
     CPU_FAST();
 #endif
