@@ -50,6 +50,11 @@
 #define ACTION_CAMERA_TRANSFER      61
 #define ACTION_CAMERA_SUBMENU       62
 
+// thumbnail actions
+#define ACTION_DELETE_SELECTED      70
+#define ACTION_PRINT_SELECTED       71
+#define ACTION_TRANSFER_SELECTED    72
+
 // printer frames
 #define ACTION_PRINT_FRAME0         80
 #define ACTION_PRINT_FRAME1         81

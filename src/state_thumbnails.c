@@ -2,6 +2,9 @@
 
 #include <gbdk/platform.h>
 #include <gbdk/metasprites.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "musicmanager.h"
@@ -12,6 +15,8 @@
 #include "vector.h"
 #include "load_save.h"
 #include "fade_manager.h"
+#include "protected.h"
+#include "vwf.h"
 
 #include "state_camera.h"
 #include "state_thumbnails.h"
@@ -28,8 +33,11 @@
 #include "menus.h"
 #include "menu_codes.h"
 #include "menu_main.h"
+#include "menu_yesno.h"
 
 BANKREF(state_thumbnails)
+
+bool selected_images[CAMERA_MAX_IMAGE_SLOTS];
 
 static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, cx = 0, cy = 0, cursor_anim = 0;
 
@@ -58,9 +66,79 @@ const thumb_coord_t thumbnail_coords[MAX_PREVIEW_THUMBNAILS] = {
 
 };
 
+uint8_t onHelpThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * selection);
+uint8_t onTranslateSubResultThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+const menu_item_t ThumbnailMenuItemDelete = {
+    .prev = &ThumbnailMenuItemTransfer, .next = &ThumbnailMenuItemPrint,
+    .sub = &YesNoMenu, .sub_params = "Delete selected?",
+    .ofs_x = 1, .ofs_y = 1, .width = 11,
+    .caption = " Delete selected",
+    .helpcontext = " Delete selected images",
+    .onPaint = NULL,
+    .result = ACTION_DELETE_SELECTED
+};
+const menu_item_t ThumbnailMenuItemPrint = {
+    .prev = &ThumbnailMenuItemDelete,   .next = &ThumbnailMenuItemTransfer,
+    .sub = &YesNoMenu, .sub_params = "Print selected?",
+    .ofs_x = 1, .ofs_y = 2, .width = 11,
+    .caption = " Print selected",
+    .helpcontext = " Print selected images",
+    .onPaint = NULL,
+    .result = ACTION_PRINT_SELECTED
+};
+const menu_item_t ThumbnailMenuItemTransfer = {
+    .prev = &ThumbnailMenuItemPrint,    .next = &ThumbnailMenuItemDelete,
+    .sub = &YesNoMenu, .sub_params = "Transfer selected?",
+    .ofs_x = 1, .ofs_y = 3, .width = 11, .flags = MENUITEM_TERM,
+    .caption = " Transfer selected",
+    .helpcontext = " Transfer selected images",
+    .onPaint = NULL,
+    .result = ACTION_PRINT_SELECTED
+};
+const menu_t ThumbnailMenu = {
+    .x = 1, .y = 4, .width = 13, .height = 5,
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .items = &ThumbnailMenuItemDelete,
+    .onShow = NULL, .onHelpContext = onHelpThumbnailMenu,
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultThumbnailMenu
+};
+
+uint8_t onTranslateSubResultThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu;
+    if (self->sub == &YesNoMenu) {
+        return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+    }
+    return value;
+}
+uint8_t onHelpThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    return 0;
+}
+
+
+inline uint8_t coords_to_index(uint8_t x, uint8_t y) {
+    return (thumbnails_page_no << 4) | (y << 2) | x;
+}
 inline uint8_t coords_to_picture_no(uint8_t x, uint8_t y) {
-    uint8_t no = (thumbnails_page_no << 4) | (y << 2) | x;
-    return (no < CAMERA_MAX_IMAGE_SLOTS) ? no : (CAMERA_MAX_IMAGE_SLOTS - 1);
+    uint8_t image_count = VECTOR_LEN(used_slots);
+    if (image_count) {
+        uint8_t no = coords_to_index(x, y);
+        return (no < image_count) ? no : (image_count - 1);
+    } else return 0;
+}
+
+void tumbnail_refresh(uint8_t index) {
+    uint8_t pos = index - (thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+    if (index < VECTOR_LEN(used_slots)) {
+        uint8_t slot = VECTOR_GET(used_slots, index);
+        SWITCH_RAM((slot >> 1) + 1);
+        screen_load_thumbnail(thumbnail_coords[pos].x, thumbnail_coords[pos].y, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0xFF);
+        if (selected_images[index]) menu_text_out(thumbnail_coords[pos].x + 3, thumbnail_coords[pos].y + 3, 0, SOLID_BLACK, ICON_CBX_CHECKED);
+        screen_restore_rect(thumbnail_coords[pos].x, thumbnail_coords[pos].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
+    } else {
+        screen_clear_rect(thumbnail_coords[pos].x, thumbnail_coords[pos].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT, SOLID_BLACK);
+    }
 }
 
 uint8_t tumbnails_diaplay(uint8_t start) {
@@ -70,7 +148,7 @@ uint8_t tumbnails_diaplay(uint8_t start) {
         uint8_t slot = VECTOR_GET(used_slots, i);
         SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(thumbnail_coords[j].x, thumbnail_coords[j].y, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0xFF);
-        wait_vbl_done();
+        if (selected_images[i]) menu_text_out(thumbnail_coords[j].x + 3, thumbnail_coords[j].y + 3, 0, SOLID_BLACK, ICON_CBX_CHECKED);
         screen_restore_rect(thumbnail_coords[j].x, thumbnail_coords[j].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     }
     return TRUE;
@@ -98,6 +176,8 @@ uint8_t ENTER_state_thumbnails() BANKED {
 
     cx = OPTION(gallery_picture_idx) & 0x03, cy = (OPTION(gallery_picture_idx) >> 2) & 0x03;
 
+    memset(selected_images, 0, sizeof(selected_images));
+
     refresh_screen();
     fade_in_modal();
     JOYPAD_RESET();
@@ -105,6 +185,7 @@ uint8_t ENTER_state_thumbnails() BANKED {
 }
 
 uint8_t UPDATE_state_thumbnails() BANKED {
+    static uint8_t menu_result;
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP)) {
         if (cy) --cy, music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
@@ -139,9 +220,45 @@ uint8_t UPDATE_state_thumbnails() BANKED {
         CHANGE_STATE(state_gallery);
         return 0;
     } else if (KEY_PRESSED(J_B)) {
-        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
-        CHANGE_STATE(state_gallery);
-        return 0;
+        uint8_t idx = coords_to_index(cx, cy);
+        if (idx < VECTOR_LEN(used_slots)) {
+            selected_images[idx] = !selected_images[idx];
+            tumbnail_refresh(idx);
+        } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+    } else if (KEY_PRESSED(J_SELECT)) {
+        switch (menu_result = menu_execute(&ThumbnailMenu, NULL, NULL)) {
+            case ACTION_DELETE_SELECTED:
+                for (int8_t i = CAMERA_MAX_IMAGE_SLOTS - 1; i >= 0; i--) {
+                    if (selected_images[i]) {
+                        uint8_t elem = VECTOR_GET(used_slots, i);
+                        VECTOR_DEL(used_slots, i);
+                        protected_modify_slot(elem, CAMERA_IMAGE_DELETED);
+                        VECTOR_ADD(free_slots, elem);
+                    }
+                }
+                protected_pack(used_slots);
+
+                // update page count
+                thumbnails_num_pages = VECTOR_LEN(used_slots) >> 4;
+                if (VECTOR_LEN(used_slots) & 0x0f) thumbnails_num_pages++;
+                // update page no
+                thumbnails_page_no = (coords_to_picture_no(cx, cy) >> 4);
+
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                break;
+            case ACTION_PRINT_SELECTED:
+            case ACTION_TRANSFER_SELECTED:
+                menu_execute(&YesNoMenu, "Not implemented...", NULL);
+                break;
+            default:
+                // error, must not get here
+                music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                break;
+        }
+        // clear selection
+        memset(selected_images, 0, sizeof(selected_images));
+
+        refresh_screen();
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
