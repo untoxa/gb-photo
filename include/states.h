@@ -27,7 +27,6 @@ typedef struct far_ptr_t {
 } far_ptr_t;
 
 typedef struct state_desc_t {
-    far_ptr_t INIT;
     far_ptr_t ENTER;
     far_ptr_t UPDATE;
     far_ptr_t LEAVE;

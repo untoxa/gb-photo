@@ -19,8 +19,4 @@ typedef enum {
 } MODULE;
 #undef _MODULE
 
-typedef struct module_desc_t {
-    far_ptr_t INIT;
-} module_desc_t;
-
 #endif
