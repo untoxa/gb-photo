@@ -913,6 +913,9 @@ uint8_t UPDATE_state_camera() BANKED {
             menu_result = ACTION_CAMERA_SUBMENU;
             break;
     }
+    // wait until capturing process is finished
+    while (is_capturing());
+    // process menu result
     switch (menu_result) {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
