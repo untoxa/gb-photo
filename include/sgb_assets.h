@@ -10,16 +10,8 @@
 #define SGB_PALETTE_GRAY    0
 #define SGB_PALETTE_RED     1
 
-/** SGB PAL delay
+BANKREF_EXTERN(module_sgb_assets)
 
-    For SGB on PAL SNES this delay is required on startup,
-    otherwise borders don't show up
-*/
-inline void sgb_pal_delay() {
-    for (uint8_t i = 0; i != 4; i++) wait_vbl_done();
-}
-
-void sgb_assets_set_palette(uint8_t palette_index) BANKED;
-void sgb_assets_set_border(uint8_t border_index) BANKED;
+uint8_t INIT_module_sgb_assets() BANKED;
 
 #endif

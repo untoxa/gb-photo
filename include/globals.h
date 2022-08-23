@@ -52,6 +52,20 @@ extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rend
 #define text_buffer_extra (text_buffer + (MAX_TEXT_BUFFER_SIZE / 3))
 #define text_buffer_extra_ex (text_buffer + ((MAX_TEXT_BUFFER_SIZE / 3) * 2))
 
+// define modules: initialization order is important
+#define MODULES \
+_MODULE(module_load_save)\
+_MODULE(module_sgb_assets)\
+_MODULE(module_joy)\
+_MODULE(module_palette)\
+_MODULE(module_music)\
+_MODULE(module_screen)\
+_MODULE(module_remote)\
+_MODULE(module_misc_assets)\
+_MODULE(module_vwf)\
+MODULE_DEF_END
+
+// define program states
 #define STATES \
 _STATE(state_logo)\
 _STATE(state_gallery)\

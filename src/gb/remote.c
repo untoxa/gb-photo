@@ -4,6 +4,8 @@
 
 #define WATCHDOG_DELAY 2
 
+BANKREF(module_remote)
+
 volatile uint8_t remote_keys;
 volatile uint8_t remote_watchdog;
 
@@ -37,7 +39,7 @@ __asm
         .endm
         xor e
         and #1
-        jr nz, 1$           ; check parity bit (result must be 0 when parity matches)      
+        jr nz, 1$           ; check parity bit (result must be 0 when parity matches)
 
         bit 1, e
         jr nz, 2$
@@ -74,22 +76,7 @@ void isr_remote_VBL() NONBANKED {
         if ((++remote_watchdog) == WATCHDOG_DELAY) {
             SIO_cancel_transfer();
             SIO_request_transfer();
-        } 
-    }
-}
-
-void remote_init() BANKED {
-    CRITICAL {
-        // reinstall SIO handler (receive data)
-        remove_SIO(isr_remote_SIO);
-        add_SIO(isr_remote_SIO);
-
-        // reinstall VBL handler (watchdog)
-        remove_VBL(isr_remote_VBL);
-        add_VBL(isr_remote_VBL);
-
-        remote_watchdog = 0;
-        remote_keys = 0;
+        }
     }
 }
 
@@ -104,4 +91,21 @@ uint8_t remote_activate(uint8_t value) BANKED {
     }
     remote_keys = 0;
     return value;
+}
+
+uint8_t INIT_module_remote() BANKED {
+    CRITICAL {
+        // reinstall SIO handler (receive data)
+        remove_SIO(isr_remote_SIO);
+        add_SIO(isr_remote_SIO);
+
+        // reinstall VBL handler (watchdog)
+        remove_VBL(isr_remote_VBL);
+        add_VBL(isr_remote_VBL);
+
+        remote_watchdog = 0;
+        remote_keys = 0;
+    }
+    remote_activate(REMOTE_ENABLED);
+    return 0;
 }

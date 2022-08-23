@@ -4,6 +4,8 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+BANKREF_EXTERN(module_palette)
+
 #define DMG_BLACK 0x03
 #define DMG_DARK_GRAY 0x02
 #define DMG_LITE_GRAY 0x01
@@ -27,7 +29,8 @@ extern uint8_t DMG_palette[3];
 extern palette_entry_t SprPalette[8];
 extern palette_entry_t BkgPalette[8];
 
-void palette_init() BANKED;
 void palette_cgb_zero(UBYTE reg) OLDCALL BANKED;
+
+uint8_t INIT_module_palette() BANKED;
 
 #endif

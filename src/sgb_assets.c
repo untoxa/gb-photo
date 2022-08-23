@@ -3,10 +3,16 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "systemdetect.h"
 #include "sgb_border.h"
+#include "sgb_assets.h"
+
+#include "state_camera.h"
 
 #include "camera_sgb_border.h"
 #include "camera_sgb_border_pxlr.h"
+
+BANKREF(module_sgb_assets)
 
 static const uint8_t sgb_palette_gray[] = {
     SGB_PKT(SGB_PAL_01),
@@ -21,7 +27,7 @@ static const uint8_t sgb_palette_red[] = {
 
 static const uint8_t * const sgb_palettes[] = { sgb_palette_gray, sgb_palette_red };
 
-void sgb_assets_set_palette(uint8_t palette_index) BANKED {
+void sgb_assets_set_palette(uint8_t palette_index) {
     sgb_transfer((uint8_t *)sgb_palettes[palette_index]);
 }
 
@@ -49,9 +55,23 @@ static const border_descriptor_t sgb_borders[] = {
     }
 };
 
-void sgb_assets_set_border(uint8_t border_index) BANKED {
+void sgb_assets_set_border(uint8_t border_index) {
     set_sgb_border(sgb_borders[border_index].tiles,     sgb_borders[border_index].tiles_size,
                    sgb_borders[border_index].map,       sgb_borders[border_index].map_size,
                    sgb_borders[border_index].palettes,  sgb_borders[border_index].palettes_size,
                    sgb_borders[border_index].bank);
+}
+
+// load the SGB borders and palettes if SGB detected
+uint8_t INIT_module_sgb_assets() BANKED {
+    if (_is_SUPER) {
+        if (OPTION(fancy_sgb_border)) {
+            sgb_assets_set_border(SGB_BORDER_FANCY);
+            sgb_assets_set_palette(SGB_PALETTE_RED);
+        } else {
+            sgb_assets_set_border(SGB_BORDER_DEFAULT);
+            sgb_assets_set_palette(SGB_PALETTE_GRAY);
+        }
+    }
+    return 0;
 }

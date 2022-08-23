@@ -7,6 +7,8 @@
 #define REMOTE_ENABLED  TRUE
 #define REMOTE_DISABLED FALSE
 
+BANKREF_EXTERN(module_remote)
+
 extern volatile uint8_t remote_keys;
 
 inline uint8_t remote_joypad() {
@@ -15,16 +17,15 @@ inline uint8_t remote_joypad() {
 
 #if defined(NINTENDO)
 
-void remote_init() BANKED;
 uint8_t remote_activate(uint8_t value) BANKED;
+uint8_t INIT_module_remote() BANKED;
 
 #else
-
-inline void remote_init() {};
 
 uint8_t remote_activate(uint8_t value) {
     return REMOTE_DISABLED;
 };
+uint8_t INIT_module_remote() BANKED;
 
 #endif
 

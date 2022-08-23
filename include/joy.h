@@ -8,6 +8,8 @@
 
 #include "remote.h"
 
+BANKREF_EXTERN(module_joy)
+
 #define AUTOREPEAT_RATE 15
 
 #if (INT_DRIVEN_JOYPAD==1)
@@ -66,5 +68,7 @@ inline uint8_t joypad_swap_dpad(uint8_t value) {
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
     return (value & 0b11110000) | ((value << 1) & 0b00000100) | ((value >> 1) & 0b00000010) | ((value << 3) & 0b00001000) | ((value >> 3) & 0b00000001);
 }
+
+uint8_t INIT_module_joy() BANKED;
 
 #endif

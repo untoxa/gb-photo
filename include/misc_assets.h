@@ -40,6 +40,8 @@
 #define ICON_SELECT         "\x1c\x1d"
 #define ICON_START          "\x1e\x1f"
 
+BANKREF_EXTERN(module_misc_assets)
+
 inline void misc_render_progressbar(uint8_t value, uint8_t size, uint8_t * buffer) {
     // printer progress callback handler
     uint8_t * ptr = buffer;
@@ -51,6 +53,6 @@ inline void misc_render_progressbar(uint8_t value, uint8_t size, uint8_t * buffe
     *ptr = 0;
 }
 
-void misc_assets_init() BANKED;
+uint8_t INIT_module_misc_assets() BANKED;
 
 #endif

@@ -3,6 +3,9 @@
 
 #include "screen.h"
 #include "gbcamera.h"
+#include "systemdetect.h"
+
+BANKREF(module_screen)
 
 const uint8_t * const screen_tile_addresses[18] = {
     TO_TILE_ADDRESS(_VRAM8800, 0x80),
@@ -197,4 +200,29 @@ void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill
             screen_copy_thumbnail_row(dest, sour);
         }
     }
+}
+
+
+void VBL_ISR() NONBANKED {
+    LCDC_REG &= ~LCDCF_BG8000;
+}
+
+void LCD_ISR() NONBANKED {
+    while (STAT_REG & STATF_BUSY);
+    LCDC_REG |= LCDCF_BG8000;
+}
+
+uint8_t INIT_module_screen() BANKED {
+    CRITICAL {
+        LYC_REG = 95, STAT_REG |= STATF_LYC;
+        add_LCD(LCD_ISR);
+        add_VBL(VBL_ISR);
+    }
+    set_interrupts(IE_REG | LCD_IFLAG);
+    if (_is_COLOR) {
+        VBK_REG = 1;
+        fill_bkg_rect(0, 0, 20, 18, 0);
+        VBK_REG = 0;
+    }
+    screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
 }

@@ -11,6 +11,8 @@
 #include "load_save.h"
 #include "histogram.h"
 
+BANKREF(module_load_save)
+
 #define MAGIC_VALUE 0x45564153
 
 #define FREE_SAVE_SPACE 72
@@ -64,17 +66,6 @@ const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
     }
 };
 
-void init_save_structure() BANKED {
-    SWITCH_RAM(LOAD_SAVE_DATA_BANK);
-    if (save_structure.MAGIC != MAGIC_VALUE) {
-        save_structure.MAGIC = MAGIC_VALUE;
-        save_structure.state_options = default_camera_state_options;
-        memcpy(save_structure.mode_settings, default_camera_mode_settings, sizeof(save_structure.mode_settings));
-    }
-    camera_state = save_structure.state_options;
-    memcpy(current_settings, save_structure.mode_settings, sizeof(current_settings));
-}
-
 inline void save_wait_sram() {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
@@ -96,4 +87,18 @@ void save_camera_state() BANKED {
     save_wait_sram();
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     save_structure.state_options = camera_state;
+}
+
+// enable battery backed-up SRAM and load/initialize program settings
+uint8_t INIT_module_load_save() BANKED {
+    ENABLE_RAM;
+    SWITCH_RAM(LOAD_SAVE_DATA_BANK);
+    if (save_structure.MAGIC != MAGIC_VALUE) {
+        save_structure.MAGIC = MAGIC_VALUE;
+        save_structure.state_options = default_camera_state_options;
+        memcpy(save_structure.mode_settings, default_camera_mode_settings, sizeof(save_structure.mode_settings));
+    }
+    camera_state = save_structure.state_options;
+    memcpy(current_settings, save_structure.mode_settings, sizeof(current_settings));
+    return 0;
 }
