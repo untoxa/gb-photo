@@ -48,8 +48,6 @@ void main() {
     // detect system compatibility
     detect_system();
 
-    DISPLAY_OFF;
-
 #if (USE_CGB_DOUBLE_SPEED==1)
     CPU_FAST();
 #endif
@@ -59,9 +57,6 @@ void main() {
 
     // call init for the each state
     for (uint8_t i = 0; i != N_STATES; i++) call_far(&PROGRAM_STATES[i].INIT);
-
-    // set LCDC and switch on display
-    LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8);
 
     // the main program loop
     while (TRUE) {

@@ -6,6 +6,8 @@
 #include "systemdetect.h"
 
 BANKREF(module_screen)
+BANKREF(module_display_off)
+BANKREF(module_display_on)
 
 const uint8_t * const screen_tile_addresses[18] = {
     TO_TILE_ADDRESS(_VRAM8800, 0x80),
@@ -225,4 +227,14 @@ uint8_t INIT_module_screen() BANKED {
         VBK_REG = 0;
     }
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
+}
+
+// switch display off
+uint8_t INIT_module_display_off() BANKED {
+    DISPLAY_OFF;
+}
+
+// set LCDC and switch on display
+uint8_t INIT_module_display_on() BANKED {
+    LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8);
 }

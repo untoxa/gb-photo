@@ -10,6 +10,8 @@
 #define TO_TILE_ADDRESS(BASE, NO) ((BASE) + ((NO) << 4))
 
 BANKREF_EXTERN(module_screen)
+BANKREF_EXTERN(module_display_off)
+BANKREF_EXTERN(module_display_on)
 
 extern const uint8_t * const screen_tile_addresses[18];
 extern const uint8_t screen_tile_map[360];
@@ -37,5 +39,7 @@ inline uint8_t screen_text_out(uint8_t x, uint8_t y, const uint8_t * text) {
 }
 
 uint8_t INIT_module_screen() BANKED;
+uint8_t INIT_module_display_off() BANKED;
+uint8_t INIT_module_display_on() BANKED;
 
 #endif
