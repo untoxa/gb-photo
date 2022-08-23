@@ -1,14 +1,11 @@
 #include <gbdk/platform.h>
-#include <gbdk/metasprites.h>
 #include <stdint.h>
-#include <string.h>
+
+#include "bankdata.h"
 
 #include "globals.h"
-#include "states.h"
 #include "modules.h"
-
-#include "systemdetect.h"
-#include "bankdata.h"
+#include "states.h"
 
 // program MODULES
 #define _MODULE(MODULE_ID) DECLARE_MODULE(MODULE_ID)
@@ -26,7 +23,7 @@ const module_desc_t PROGRAM_MODULES[] = {
 // program STATES
 #define _STATE(STATE_ID) DECLARE_STATE(STATE_ID)
 STATES
-#undef _STATE   
+#undef _STATE
 
 #define _STATE(STATE_ID) { \
     .INIT   = { .SEG = BANK(STATE_ID), .OFS = (void *)INIT_##STATE_ID   }, \
