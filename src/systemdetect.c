@@ -28,18 +28,10 @@ uint8_t INIT_module_detect_system() BANKED {
     return 0;
 }
 
-uint8_t CPU_FAST() NONBANKED {
-#if (USE_CGB_DOUBLE_SPEED==1)
-    _is_CPU_FAST = (_is_COLOR) ? (cpu_fast(), TRUE) : FALSE;
-    return _is_CPU_FAST;
-#else
-    return (_is_CPU_FAST = FALSE);
-#endif
+uint8_t CPU_FAST() BANKED {
+    return (_is_CPU_FAST = (_is_COLOR) ? (cpu_fast(), TRUE) : FALSE);
 }
 
-uint8_t CPU_SLOW() NONBANKED {
-#if (USE_CGB_DOUBLE_SPEED==1)
-    if (_is_COLOR) cpu_slow();
-#endif
-    return (_is_CPU_FAST = FALSE);
+void CPU_SLOW() BANKED {
+    if (_is_COLOR) _is_CPU_FAST = (cpu_slow(), FALSE);
 }

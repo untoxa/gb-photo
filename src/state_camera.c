@@ -303,9 +303,6 @@ uint8_t INIT_state_camera() BANKED {
 }
 
 uint8_t ENTER_state_camera() BANKED {
-#if (USE_CGB_DOUBLE_SPEED==1)
-    music_setup_timer_ex(CPU_SLOW());
-#endif
     // scrollbars
     camera_scrollbars_reinit();
     // repaint screen
@@ -1005,9 +1002,6 @@ uint8_t UPDATE_state_camera() BANKED {
 
 uint8_t LEAVE_state_camera() BANKED {
     fade_out_modal();
-#if (USE_CGB_DOUBLE_SPEED==1)
-    music_setup_timer_ex(CPU_FAST());
-#endif
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
     scrollbar_destroy_all();

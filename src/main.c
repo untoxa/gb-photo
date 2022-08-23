@@ -26,7 +26,7 @@ const module_desc_t PROGRAM_MODULES[] = {
 // program STATES
 #define _STATE(STATE_ID) DECLARE_STATE(STATE_ID)
 STATES
-#undef _STATE
+#undef _STATE   
 
 #define _STATE(STATE_ID) { \
     .INIT   = { .SEG = BANK(STATE_ID), .OFS = (void *)INIT_##STATE_ID   }, \
@@ -43,10 +43,6 @@ STATE OLD_PROGRAM_STATE = N_STATES, CURRENT_PROGRAM_STATE = DEFAULT_STATE;
 
 
 void main() {
-#if (USE_CGB_DOUBLE_SPEED==1)
-    CPU_FAST();
-#endif
-
     // call init for the each module
     for (uint8_t i = 0; i != N_MODULES; i++) call_far(&PROGRAM_MODULES[i].INIT);
 

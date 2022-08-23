@@ -227,14 +227,17 @@ uint8_t INIT_module_screen() BANKED {
         VBK_REG = 0;
     }
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
+    return 0;
 }
 
 // switch display off
 uint8_t INIT_module_display_off() BANKED {
     DISPLAY_OFF;
+    return 0;
 }
 
 // set LCDC and switch on display
 uint8_t INIT_module_display_on() BANKED {
     LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8);
+    return 0;
 }

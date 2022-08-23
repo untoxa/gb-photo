@@ -12,7 +12,7 @@ extern uint8_t _is_SUPER, _is_COLOR, _is_ADVANCE;
 extern uint8_t _is_CPU_FAST;
 
 uint8_t CPU_FAST() BANKED;
-uint8_t CPU_SLOW() BANKED;
+void CPU_SLOW() BANKED;
 
 uint8_t INIT_module_detect_system() BANKED;
 
