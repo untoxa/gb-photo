@@ -95,7 +95,7 @@ const menu_item_t SettingsMenuItemPrintFast = {
     .ofs_x = 1, .ofs_y = 2, .width = 13,
     .id = idSettingsPrintFast,
     .caption = " Fast printing\t\t\t%s",
-    .helpcontext = " Enable CGB fast transfer",
+    .helpcontext = " Enable CGB 32Kb/s printing",
     .onPaint = onSettingsMenuItemPaint,
     .result = ACTION_SETTINGS_PRINT_FAST
 };
