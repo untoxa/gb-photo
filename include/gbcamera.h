@@ -162,7 +162,7 @@ static volatile uint8_t AT(0xA001) CAM_REG_EDEXOPGAIN;
 #define US_TO_EXPOSURE_VALUE(A) ((uint16_t)((((A) >> 4) >> 8) | ((((A) >> 4) & 0xFF) << 8)))
 #define EXPOSURE_VALUE_TO_US(A) ((uint32_t)(((A) >> 8) | (((A) & 0xFF) << 8)) << 4)
 
-#define CAM02_MIN_VALUE     0x10
+#define CAM02_MIN_VALUE     0x30
 #define CAM02_MAX_VALUE     0xFFFF
 
 static volatile uint16_t AT(0xA002) CAM02_REG;
