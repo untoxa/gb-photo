@@ -34,6 +34,8 @@
 #define ENABLE_AUTOEXP
 #ifdef ENABLE_AUTOEXP
     #define DEBUG_AUTOEXP 0
+    #define AUTOEXP_LOW_LIMIT TO_EXPOSURE_VALUE(768)
+    #define AUTOEXP_HIGH_LIMIT CAM02_MAX_VALUE
 #endif
 // bracketing mode
 #ifndef BRACKETING_ENABLED

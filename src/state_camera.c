@@ -128,10 +128,10 @@ static const table_value_t edge_operations[] = {
     { CAM01_EDGEOP_2D, "2D" }, { CAM01_EDGEOP_HORIZ, "Horiz" }, { CAM01_EDGEOP_VERT, "Vert" },{ CAM01_EDGEOP_NONE, "None" }
 };
 
-void RENDER_CAM_REG_EDEXOPGAIN()  { SHADOW.CAM_REG_EDEXOPGAIN  = CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
-void RENDER_CAM_REG_EXPTIME()     { SHADOW.CAM_REG_EXPTIME     = CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
-void RENDER_CAM_REG_EDRAINVVREF() { SHADOW.CAM_REG_EDRAINVVREF = CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_ratio)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
-void RENDER_CAM_REG_ZEROVOUT()    { SHADOW.CAM_REG_ZEROVOUT    = CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
+void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = SHADOW.CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
+void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = SHADOW.CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
+void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = SHADOW.CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_ratio)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
+void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = SHADOW.CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
 inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
 void RENDER_CAM_REGISTERS() {
@@ -151,7 +151,7 @@ void RENDER_REGS_FROM_EXPOSURE() {
     // Gain 14.0 | vRef 0.160 | Horizontal edge mode | Exposure time range from  0.5ms to 0.3ms
     bool apply_dither;
     uint16_t exposure = SETTING(current_exposure);
-    if (exposure < TO_EXPOSURE_VALUE(512)) {
+    if (exposure < TO_EXPOSURE_VALUE(768)) {
         SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
         SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
         SETTING(voltage_out)        = 160;
@@ -196,7 +196,7 @@ void RENDER_REGS_FROM_EXPOSURE() {
 
 void RENDER_EDGE_FROM_EXPOSURE() {
     uint16_t exposure = SETTING(current_exposure);
-    if (exposure < TO_EXPOSURE_VALUE(512)) {
+    if (exposure < TO_EXPOSURE_VALUE(768)) {
         SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
         SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
     } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
@@ -569,13 +569,21 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     } else if (KEY_PRESSED(J_B)) {
-        // cancel timers
-        COUNTER_RESET(camera_shutter_timer);
-        screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
-        COUNTER_RESET(camera_repeat_counter);
-        screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
-        camera_do_shutter = FALSE;
-        capture_triggered = false;
+        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter)) {
+            // cancel timers
+            COUNTER_RESET(camera_shutter_timer);
+            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
+            COUNTER_RESET(camera_repeat_counter);
+            screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
+            camera_do_shutter = FALSE;
+            capture_triggered = false;
+        } else {
+            if (OPTION(camera_mode) == camera_mode_auto) {
+                music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+                scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
+                save_camera_mode_settings(OPTION(camera_mode));
+            }
+        }
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
         capture_triggered = false;
@@ -747,7 +755,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 new_exposure = current_exposure + ((error_negative) ? -1 : 1);
             } else new_exposure = current_exposure;
 
-            SETTING(current_exposure) = CONSTRAINT(new_exposure, CAM02_MIN_VALUE, CAM02_MAX_VALUE);
+            SETTING(current_exposure) = CONSTRAINT(new_exposure, AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
             RENDER_EDGE_FROM_EXPOSURE();
 
     #if (DEBUG_AUTOEXP==1)
@@ -955,7 +963,6 @@ uint8_t UPDATE_state_camera() BANKED {
                     static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_bracketing};
                     OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
                     RENDER_CAM_REGISTERS();
-                    camera_scrollbars_reinit();
                     break;
                 }
                 case ACTION_TRIGGER_ABUTTON:
@@ -993,6 +1000,7 @@ uint8_t UPDATE_state_camera() BANKED {
             save_camera_state();
             COUNTER_RESET(camera_shutter_timer);
             COUNTER_RESET(camera_repeat_counter);
+            camera_scrollbars_reinit();
             refresh_screen();
             break;
         }
