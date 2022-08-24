@@ -107,7 +107,7 @@ uint8_t gallery_show_position(uint8_t image_no) {
     return image_no;
 }
 
-uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
+uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) BANKED {
     if (image_no < images_taken()) {
         uint8_t image_index = VECTOR_GET(used_slots, image_no);
         if (gbprinter_detect(10) == PRN_STATUS_OK) {
@@ -120,7 +120,7 @@ uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) {
     return FALSE;
 }
 
-uint8_t gallery_transfer_picture(uint8_t image_no) {
+uint8_t gallery_transfer_picture(uint8_t image_no) BANKED {
     if (image_no < images_taken()) {
         uint8_t image_index = VECTOR_GET(used_slots, image_no);
         linkcable_transfer_image(((image_index & 1) ? image_second : image_first), (image_index >> 1) + 1);
@@ -129,14 +129,9 @@ uint8_t gallery_transfer_picture(uint8_t image_no) {
     return FALSE;
 }
 
-inline void show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
-    misc_render_progressbar(value, size, text_buffer);
-    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
-}
-
 static uint8_t onPrinterProgress() BANKED {
     // printer progress callback handler
-    show_progressbar(0, printer_completion, PRN_MAX_PROGRESS);
+    gallery_show_progressbar(0, printer_completion, PRN_MAX_PROGRESS);
     return 0;
 }
 
@@ -409,16 +404,16 @@ uint8_t UPDATE_state_gallery() BANKED {
                     music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit), MUSIC_SFX_PRIORITY_MINIMAL);
                 }
                 uint8_t transfer_completion = 0, image_count = images_taken();
-                show_progressbar(0, 0, PRN_MAX_PROGRESS);
+                gallery_show_progressbar(0, 0, PRN_MAX_PROGRESS);
                 for (uint8_t i = 0; i != images_taken(); i++) {
                     if (!((menu_result == ACTION_TRANSFER_GALLERY) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                         break;
                     }
-                    uint8_t current_progress = (((uint16_t)i * PRN_MAX_PROGRESS) / image_count);
+                    uint8_t current_progress = (((uint16_t)(i + 1) * PRN_MAX_PROGRESS) / image_count);
                     if (transfer_completion != current_progress) {
                         transfer_completion = current_progress;
-                        show_progressbar(0, current_progress, PRN_MAX_PROGRESS);
+                        gallery_show_progressbar(0, current_progress, PRN_MAX_PROGRESS);
                     }
                 }
                 remote_activate(REMOTE_ENABLED);

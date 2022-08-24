@@ -10,6 +10,8 @@
 #include "musicmanager.h"
 #include "joy.h"
 #include "gbcamera.h"
+#include "gbprinter.h"
+#include "linkcable.h"
 #include "screen.h"
 #include "states.h"
 #include "vector.h"
@@ -27,6 +29,7 @@
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"
+#include "sound_transmit.h"
 #include "sound_menu_alter.h"
 
 // menus
@@ -79,7 +82,7 @@ const menu_item_t ThumbnailMenuItemDelete = {
 };
 const menu_item_t ThumbnailMenuItemPrint = {
     .prev = &ThumbnailMenuItemDelete,   .next = &ThumbnailMenuItemTransfer,
-    .sub = &YesNoMenu, .sub_params = "Print selected?",
+    .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 11,
     .caption = " Print selected",
     .helpcontext = " Print selected images",
@@ -88,12 +91,12 @@ const menu_item_t ThumbnailMenuItemPrint = {
 };
 const menu_item_t ThumbnailMenuItemTransfer = {
     .prev = &ThumbnailMenuItemPrint,    .next = &ThumbnailMenuItemDelete,
-    .sub = &YesNoMenu, .sub_params = "Transfer selected?",
+    .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 11, .flags = MENUITEM_TERM,
     .caption = " Transfer selected",
     .helpcontext = " Transfer selected images",
     .onPaint = NULL,
-    .result = ACTION_PRINT_SELECTED
+    .result = ACTION_TRANSFER_SELECTED
 };
 const menu_t ThumbnailMenu = {
     .x = 1, .y = 4, .width = 13, .height = 5,
@@ -178,6 +181,8 @@ uint8_t ENTER_state_thumbnails() BANKED {
 
     memset(selected_images, 0, sizeof(selected_images));
 
+    gbprinter_set_handler(NULL, 0);
+
     refresh_screen();
     fade_in_modal();
     JOYPAD_RESET();
@@ -247,9 +252,37 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
                 break;
             case ACTION_PRINT_SELECTED:
-            case ACTION_TRANSFER_SELECTED:
-                menu_execute(&YesNoMenu, "Not implemented...", NULL);
+            case ACTION_TRANSFER_SELECTED: {
+                uint8_t transfer_completion = 0, image_count = 0;
+                // count selected images
+                for (uint8_t i = 0; i != images_taken(); i++) image_count += (selected_images[i]);
+                if (image_count == 0) {
+                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                    break;
+                }
+                // print or transfer selected images
+                remote_activate(REMOTE_DISABLED);
+                if (menu_result == ACTION_TRANSFER_SELECTED) {
+                    linkcable_transfer_reset();
+                    music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit), MUSIC_SFX_PRIORITY_MINIMAL);
+                }
+                gallery_show_progressbar(0, 0, PRN_MAX_PROGRESS);
+                for (uint8_t i = 0, j = 0; i != images_taken(); i++) {
+                    if (!(selected_images[i])) continue;
+                    if (!((menu_result == ACTION_TRANSFER_SELECTED) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                        break;
+                    }
+                    uint8_t current_progress = (((uint16_t)++j * PRN_MAX_PROGRESS) / image_count);
+                    if (transfer_completion != current_progress) {
+                        transfer_completion = current_progress;
+                        gallery_show_progressbar(0, current_progress, PRN_MAX_PROGRESS);
+                    }
+                }
+                remote_activate(REMOTE_ENABLED);
+                JOYPAD_RESET();
                 break;
+            }
             default:
                 // error, must not get here
                 music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);

@@ -5,6 +5,9 @@
 
 #include "gbcamera.h"
 #include "vector.h"
+#include "menus.h"
+
+#include "globals.h"
 
 BANKREF_EXTERN(state_gallery)
 
@@ -22,5 +25,14 @@ inline uint8_t images_total() {
 inline uint8_t images_free() {
     return VECTOR_LEN(free_slots);
 }
+
+inline void gallery_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
+    misc_render_progressbar(value, size, text_buffer);
+    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+}
+
+uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) BANKED;
+uint8_t gallery_transfer_picture(uint8_t image_no) BANKED;
+
 
 #endif
