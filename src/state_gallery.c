@@ -302,6 +302,14 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
     return 0;
 }
 
+
+uint8_t gallery_print_info() {
+    if (gbprinter_detect(10) == PRN_STATUS_OK) {
+        return (gbprinter_print_screen_rect(ImageInfoMenu.x + 1, ImageInfoMenu.y + 1, ImageInfoMenu.width - 2, ImageInfoMenu.height - 3, TRUE) == PRN_STATUS_CANCELLED) ? FALSE : TRUE;
+    }
+    return FALSE;
+}
+
 static uint8_t refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
     menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
@@ -422,7 +430,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 break;
             case ACTION_PRINT_INFO:
                 remote_activate(REMOTE_DISABLED);
-                if (!gbprinter_print_screen_rect(ImageInfoMenu.x + 1, ImageInfoMenu.y + 1, ImageInfoMenu.width - 2, ImageInfoMenu.height - 3, TRUE)) {
+                if (!gallery_print_info()) {
                     music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                 }
                 remote_activate(REMOTE_ENABLED);
