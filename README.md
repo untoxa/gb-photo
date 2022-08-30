@@ -18,13 +18,13 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 ## Camera Mode
 ### Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
-- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. 
+- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time.
 - The **Manual Mode** allows **modifying all the parameters** of the camera sensor that can be sent to the MAC-GBD.
 
 ### Trigger menu
 - **A Button** is the most simple action: press A once to get an **Action**.
-- **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**. 
-- **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**. 
+- **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**.
+- **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**.
 
 **Timer** and **Repeat** can be cancelled by pressing B button.
 
@@ -39,7 +39,7 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 - **Transfer REC** allows continuous transmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
-- **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/) 
+- **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/)
 
 ### Restore Default menu
 - Allows to come back to factory settings, in particular if situation is becoming messy in **Manual Mode**.
@@ -66,7 +66,7 @@ Just the hall of fames.
 The Mitsubishi M64282FP artificial retina is one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of [masked pixels](doc/Mitsubishi%20M64282FP_detail%20of%20light%20sensors.png) uses to measure the voltage response of sensor in full darkness. The [sensor documentation](doc/M64282FP-datasheet.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
 
 ## Effect of the main adressable parameters
-The M64282FP working parameters are set by 8 bytes (plus their 3-bits addresses) containing various registers. The MAC-GBD itself, mapper of the Game Boy Camera, can only receive 5 bytes of data to tune the sensor so 3 equivalent-bytes of data are not modifiable on the Game Boy Camera (more precisely P, M and X, 3x8 bits, registers also called **Filtering Kernels** are never modified). The mapping between sensor registers and MAC-GBD registers is given [as comment in the project code](include/gbcamera.h#L86). Here is a detailed description of the registers that can be modified: 
+The M64282FP working parameters are set by 8 bytes (plus their 3-bits addresses) containing various registers. The MAC-GBD itself, mapper of the Game Boy Camera, can only receive 5 bytes of data to tune the sensor so 3 equivalent-bytes of data are not modifiable on the Game Boy Camera (more precisely P, M and X, 3x8 bits, registers also called **Filtering Kernels** are never modified). The mapping between sensor registers and MAC-GBD registers is given [as comment in the project code](include/gbcamera.h#L86). Here is a detailed description of the registers that can be modified:
 
 - The **Exposure Time** (registers C, 16 bits) is the time that each pixel of the sensor will receive photons and convert the integral photon quantity to voltage. The longer the exposure time, the higher the output voltage, the higher the signal to noise ratio, but the higher the motion blur. Sensor can saturate for too long exposure time/too high flux of photons. This sensor allows exposure time from 16 µseconds to 1.044 seconds. Exposure times below 256 µseconds lead to strong vertical artifacts. Using varying exposure time creates vertical (low exposure times) and horizontal (high exposure times) artifacts which are intrinsic to the sensor. The total voltage range between dark and saturated sensor is about 2 volts.
 - The **Sensor Gain** (register G, 5 bits) is a multiplier applied between the quantity of photons received and the output voltage. To make an analogy with film camera, gain is similar to the ISOs of the film. However calculating the real corresponding ISOs for each gain value is out of reach with the current documentation of the sensor. Like film cameras, high gains (ISOs) and low exposure times gives noisy images, low gains (ISOs) and high exposure times gives smooth images. The gain used in the Game Boy camera rom varies very little compared to what the sensor is able to in Manual Mode.
@@ -89,7 +89,7 @@ The packet format is very simple and consist of one byte.
 ```
 Sender is a master device for the game boy.
 
-# Fast compiling guide for Windows users 
+# Fast compiling guide for Windows users
 
 Basic requirement: 20 minutes without any disturbance.
 
@@ -106,22 +106,22 @@ Download a Python script from [here](https://bootstrap.pypa.io/get-pip.py), then
     python get-pip.py
     python -m pip install --upgrade pip
 
-Then install Pillow and wave libraries: 
+Then install Pillow and wave libraries:
 
     python -m pip install --upgrade Pillow
     python -m pip install --upgrade wave
 
-Now from the Cygwin terminal, clone this git repository to its desired destination (default is `/home/USER`), but may be any: 
+Now from the Cygwin terminal, clone this git repository to its desired destination (default is `/home/USER`), but may be any:
 
     git clone https://github.com/untoxa/2bit-pxlr-studio-next
 
 Create a `GBDK_HOME` environment variable which targets your GBDK-2020 folder in the Windows system settings, close and reopen Cygwin.
 
-Run make from the Cygwin terminal in the project folder containing the `Makefile`: 
+Run make from the Cygwin terminal in the project folder containing the `Makefile`:
 
     make
 
-Your roms will be in `./build` folders, enjoy ! 
+Your roms will be in `./build` folders, enjoy !
 
 # Resources
 - Mitsubishi M64282FP [Sensor Datasheet](doc/M64282FP-datasheet.pdf)
@@ -130,8 +130,8 @@ Your roms will be in `./build` folders, enjoy !
 - [AntonioND](https://github.com/AntonioND) for the outstanding [Documentation regarding the camera's sensor](https://github.com/AntonioND/gbcam-rev-engineer) / [PDF](https://github.com/AntonioND/gbcam-rev-engineer/blob/master/doc/gb_camera_doc_v1_1_1.pdf)
 
 # Author contribution
-- [Toxa](https://github.com/untoxa) and [Andreas Hahn](https://github.com/HerrZatacke) lead programmers. 
-- [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks.
+- [Toxa](https://github.com/untoxa) and [Andreas Hahn](https://github.com/HerrZatacke) lead programmers.
+- [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks. THX [Hatch](https://github.com/hatchman)for your frames and the permission to use and change your graphics (Zebra and PCB)
 - [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves).
 - [Tronimal](https://tronimal.de/game-boy-music-software/) for sound engine.
 - [Cristofer Cruz](https://github.com/cristofercruz) for debugging and feature ideas.
