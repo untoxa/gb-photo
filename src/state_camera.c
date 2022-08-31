@@ -740,7 +740,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
             bool error_negative = (error < 0) ? true : false;
             uint16_t abs_error = abs(error);
-
+            
+        //real camera uses a very similar autoexposure mechanism with steps of 
+        //1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
+        //1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
+        //jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
+        //algorithm here is globally faster and simplier than a real camera
+            
             if (abs_error > 95) {
                 // raw tuning +- 1EV
                 new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
