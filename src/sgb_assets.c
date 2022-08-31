@@ -10,7 +10,7 @@
 #include "state_camera.h"
 
 #include "camera_sgb_border.h"
-#include "camera_sgb_border_pxlr.h"
+#include "camera_sgb_border_default.h"
 
 BANKREF(module_sgb_assets)
 
@@ -43,10 +43,10 @@ typedef struct border_descriptor_t {
 
 static const border_descriptor_t sgb_borders[] = {
     {
-        .tiles = camera_sgb_border_pxlr_tiles,          .tiles_size = sizeof(camera_sgb_border_pxlr_tiles),
-        .map = camera_sgb_border_pxlr_map,              .map_size = sizeof(camera_sgb_border_pxlr_map),
-        .palettes = camera_sgb_border_pxlr_palettes,    .palettes_size = sizeof(camera_sgb_border_pxlr_palettes),
-        .bank = BANK(camera_sgb_border_pxlr)
+        .tiles = camera_sgb_border_default_tiles,       .tiles_size = sizeof(camera_sgb_border_default_tiles),
+        .map = camera_sgb_border_default_map,           .map_size = sizeof(camera_sgb_border_default_map),
+        .palettes = camera_sgb_border_default_palettes, .palettes_size = sizeof(camera_sgb_border_default_palettes),
+        .bank = BANK(camera_sgb_border_default)
     }, {
         .tiles = camera_sgb_border_tiles,               .tiles_size = sizeof(camera_sgb_border_tiles),
         .map = camera_sgb_border_map,                   .map_size = sizeof(camera_sgb_border_map),

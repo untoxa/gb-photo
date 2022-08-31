@@ -29,7 +29,7 @@ LCCFLAGS += -Wm-yS -Wl-j -Wm-yoA -autobank -Wb-ext=.rel -Wb-v # MBC + Autobankin
 CFLAGS += -Iinclude -I$(OBJDIR) -DSYSTEM_$(TYP)
 
 # You can set the name of the ROM file here
-PROJECTNAME = pxlr2-remote
+PROJECTNAME = photo-remote
 
 # EXT?=gb # Only sets extension to default (game boy .gb) if not populated
 SRCDIR      = src

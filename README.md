@@ -1,6 +1,6 @@
-# 2bit PXLR Studio Next
+# Photo!
 
-**[The latest release version may be downloaded here](https://github.com/untoxa/2bit-pxlr-studio-next/releases/latest/)**.
+**[The latest release version may be downloaded here](https://github.com/untoxa/gb-photo/releases/latest/)**.
 
 This project requires the reflashable Game Boy Camera cart. PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/). Additionnaly, a generic flashable cartridge is necessary to remote control the camera via serial cable.
 
@@ -8,12 +8,12 @@ This project is a homebrew enhancing the capabilities of the Game Boy Camera by 
 
 The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data.
 
-# 2bit PXLR Studio Next with its serial remote controller
+# Photo! with its serial remote controller
 ![Showcase](doc/Showcase.png)
 
 # User Manual
 
-After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings** for tuning general parameters. To use the remote controller feature, just plug a serial cable connected to a Game Boy playing the `pxlr2-remote.gb or .gbc` rom.
+After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings** for tuning general parameters. To use the remote controller feature, just plug a serial cable connected to a Game Boy playing the `photo-remote.gb or .gbc` rom.
 
 ## Camera Mode
 ### Mode menu
@@ -113,7 +113,7 @@ Then install Pillow and wave libraries:
 
 Now from the Cygwin terminal, clone this git repository to its desired destination (default is `/home/USER`), but may be any:
 
-    git clone https://github.com/untoxa/2bit-pxlr-studio-next
+    git clone https://github.com/untoxa/gb-photo
 
 Create a `GBDK_HOME` environment variable which targets your GBDK-2020 folder in the Windows system settings, close and reopen Cygwin.
 

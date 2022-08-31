@@ -1,8 +1,8 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
-#include "pxlr_remote.h"
-#include "pxlr_remote_down.h"
+#include "remote.h"
+#include "remote_down.h"
 
 inline void send_data(uint8_t b) {
     SB_REG = b;
@@ -41,9 +41,9 @@ const submap_t btn[] = {
 void update_joy(uint8_t joy, const submap_t * coords) {
     for (const submap_t * b = coords; (b); b = b->next, joy >>= 1) {
         if (joy & 0x01) {
-            set_bkg_submap(DEVICE_SCREEN_X_OFFSET + b->x, DEVICE_SCREEN_Y_OFFSET + b->y, b->w, b->h, pxlr_remote_down_map, (pxlr_remote_down_WIDTH / pxlr_remote_down_TILE_W));
+            set_bkg_submap(DEVICE_SCREEN_X_OFFSET + b->x, DEVICE_SCREEN_Y_OFFSET + b->y, b->w, b->h, remote_down_map, (remote_down_WIDTH / remote_down_TILE_W));
         } else {
-            set_bkg_submap(DEVICE_SCREEN_X_OFFSET + b->x, DEVICE_SCREEN_Y_OFFSET + b->y, b->w, b->h, pxlr_remote_map, (pxlr_remote_WIDTH / pxlr_remote_TILE_W));
+            set_bkg_submap(DEVICE_SCREEN_X_OFFSET + b->x, DEVICE_SCREEN_Y_OFFSET + b->y, b->w, b->h, remote_map, (remote_WIDTH / remote_TILE_W));
         }
     }
 }
@@ -51,14 +51,14 @@ void update_joy(uint8_t joy, const submap_t * coords) {
 void main(void) {
     DISPLAY_OFF;
     if (_cpu == CGB_TYPE) cgb_compatibility();
-    set_bkg_data(0, pxlr_remote_TILE_COUNT, pxlr_remote_tiles);
-    set_bkg_data(pxlr_remote_TILE_COUNT, pxlr_remote_down_TILE_COUNT, pxlr_remote_down_tiles);
-    set_bkg_tiles(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, pxlr_remote_WIDTH / pxlr_remote_TILE_W, pxlr_remote_HEIGHT / pxlr_remote_TILE_H, pxlr_remote_map);
+    set_bkg_data(0, remote_TILE_COUNT, remote_tiles);
+    set_bkg_data(remote_TILE_COUNT, remote_down_TILE_COUNT, remote_down_tiles);
+    set_bkg_tiles(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, remote_WIDTH / remote_TILE_W, remote_HEIGHT / remote_TILE_H, remote_map);
     SHOW_BKG;
     DISPLAY_ON;
 
     for (uint8_t i = 30; i != 0; i--) wait_vbl_done();
-    set_bkg_submap(DEVICE_SCREEN_X_OFFSET + 2, DEVICE_SCREEN_Y_OFFSET + 4, 3, 2, pxlr_remote_down_map, (pxlr_remote_WIDTH / pxlr_remote_TILE_W));
+    set_bkg_submap(DEVICE_SCREEN_X_OFFSET + 2, DEVICE_SCREEN_Y_OFFSET + 4, 3, 2, remote_down_map, (remote_WIDTH / remote_TILE_W));
 
     static uint8_t joy = 0, old_joy;
     while(TRUE) {

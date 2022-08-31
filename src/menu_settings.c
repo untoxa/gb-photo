@@ -41,7 +41,7 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 
 const menu_item_t FrameMenuItemNoFrame = {
-    .prev = &FrameMenuItemWild,     .next = &FrameMenuItemPxlr,
+    .prev = &FrameMenuItemWild,     .next = &FrameMenuItemPhoto,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 8,
     .id = idPrintFrame0,
@@ -50,7 +50,7 @@ const menu_item_t FrameMenuItemNoFrame = {
     .onPaint = onSettingsMenuItemPaint,
     .result = ACTION_PRINT_FRAME0
 };
-const menu_item_t FrameMenuItemPxlr = {
+const menu_item_t FrameMenuItemPhoto = {
     .prev = &FrameMenuItemNoFrame,  .next = &FrameMenuItemWild,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 2, .width = 8,
@@ -61,7 +61,7 @@ const menu_item_t FrameMenuItemPxlr = {
     .result = ACTION_PRINT_FRAME1
 };
 const menu_item_t FrameMenuItemWild = {
-    .prev = &FrameMenuItemPxlr,     .next = &FrameMenuItemNoFrame,
+    .prev = &FrameMenuItemPhoto,    .next = &FrameMenuItemNoFrame,
     .sub = NULL, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 3, .width = 8, .flags = MENUITEM_TERM,
     .id = idPrintFrame2,

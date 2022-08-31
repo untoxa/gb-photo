@@ -1,7 +1,7 @@
 #include "print_frames.h"
 
-#include "pxlr_frame.h"
-#include "wild_frame.h"
+#include "frame_photo.h"
+#include "frame_wild.h"
 
 BANKREF(print_frames)
 
@@ -17,21 +17,21 @@ const frame_desc_t print_frames[] = {
         .caption = "No Frame",
         .desc = "Print without frame"
     },{
-        .height = pxlr_frame_HEIGHT / pxlr_frame_TILE_H,
-        .map = pxlr_frame_map,
-        .map_bank = BANK(pxlr_frame),
-        .tiles = pxlr_frame_tiles,
-        .tiles_bank = BANK(pxlr_frame),
+        .height = frame_photo_HEIGHT / frame_photo_TILE_H,
+        .map = frame_photo_map,
+        .map_bank = BANK(frame_photo),
+        .tiles = frame_photo_tiles,
+        .tiles_bank = BANK(frame_photo),
         .image_y = 2,
         .image_x = 2,
-        .caption = "PXLR Studio",
-        .desc = "\"PXLR Studio\" frame",
+        .caption = "Photo! frame",
+        .desc = "\"Photo!\" frame",
     },{
-        .height = wild_frame_HEIGHT / wild_frame_TILE_H,
-        .map = wild_frame_map,
-        .map_bank = BANK(wild_frame),
-        .tiles = wild_frame_tiles,
-        .tiles_bank = BANK(wild_frame),
+        .height = frame_wild_HEIGHT / frame_wild_TILE_H,
+        .map = frame_wild_map,
+        .map_bank = BANK(frame_wild),
+        .tiles = frame_wild_tiles,
+        .tiles_bank = BANK(frame_wild),
         .image_y = 14,
         .image_x = 2,
         .caption = "GB Camera",

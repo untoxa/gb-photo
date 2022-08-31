@@ -43,7 +43,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # You can set the name of the ROM file here
-PROJECTNAME = pxlr2
+PROJECTNAME = photo
 
 # EXT?=gb # Only sets extension to default (game boy .gb) if not populated
 SRCDIR      = src
@@ -167,7 +167,7 @@ $(OBJDIR)/%.o:	$(SRCPORT)/%.s
 # Link the compiled object files into a .gb ROM file
 $(BINS):	$(RESOBJ) $(OBJS)
 	$(LCC) $(LCCFLAGS) $(CFLAGS) -o $(BINDIR)/$(PROJECTNAME).$(EXT) $^
-	cp assets/pxlr.sav $(BINDIR)/pxlr2.sav
+	cp assets/photo.sav $(BINDIR)/photo.sav
 
 remote:
 	$(MAKE) -C remote
