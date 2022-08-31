@@ -130,7 +130,8 @@ Your roms will be in `./build` folders, enjoy !
 - [AntonioND](https://github.com/AntonioND) for the outstanding [Documentation regarding the camera's sensor](https://github.com/AntonioND/gbcam-rev-engineer) / [PDF](https://github.com/AntonioND/gbcam-rev-engineer/blob/master/doc/gb_camera_doc_v1_1_1.pdf)
 
 # Author contribution
-- [Toxa](https://github.com/untoxa) and [Andreas Hahn](https://github.com/HerrZatacke) lead programmers.
+- [Andreas Hahn](https://github.com/HerrZatacke) - original idea. 
+- [Toxa](https://github.com/untoxa) lead developer.
 - [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks. THX [Hatch](https://github.com/hatchman)for your frames and the permission to use and change your graphics (Zebra and PCB)
 - [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves).
 - [Tronimal](https://tronimal.de/game-boy-music-software/) for sound engine.
