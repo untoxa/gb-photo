@@ -9,7 +9,7 @@ This project is a homebrew enhancing the capabilities of the Game Boy Camera by 
 The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data.
 
 # Photo! with its serial remote controller
-![Showcase](doc/Showcase.png)
+![Showcase](doc/Showcase.jpg)
 
 # User Manual
 
