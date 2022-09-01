@@ -132,9 +132,9 @@ Your roms will be in `./build` folders, enjoy !
 # Author contribution
 - [Andreas Hahn](https://github.com/HerrZatacke) - original idea. 
 - [Toxa](https://github.com/untoxa) lead developer.
-- [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks. THX [Hatch](https://github.com/hatchman)for your frames and the permission to use and change your graphics (Zebra and PCB)
+- [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks. THX [Hatch](https://github.com/hatchman) for your frames and the permission to use and change your graphics (Zebra and PCB)
 - [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves).
-- [Tronimal](https://tronimal.de/game-boy-music-software/) for sound engine.
+- [Tronimal](https://tronimal.de/game-boy-music-software/) for the original SFX effects.
 - [Cristofer Cruz](https://github.com/cristofercruz) for debugging and feature ideas.
 - [bbbbbr](https://github.com/bbbbbr) for support in programming.
 - [Christian Reinbacher](https://github.com/reini1305) for the [print function](https://github.com/HerrZatacke/custom-camera-rom/commit/5976b47e6b6d577c954e2b678affa9925824f5b5) and general help with some C concepts.
