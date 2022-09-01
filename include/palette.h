@@ -31,6 +31,7 @@ extern palette_entry_t BkgPalette[8];
 
 void palette_cgb_zero(UBYTE reg) OLDCALL BANKED;
 
+void palette_reload() BANKED;
 uint8_t INIT_module_palette() BANKED;
 
 #endif

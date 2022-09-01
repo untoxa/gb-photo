@@ -11,6 +11,9 @@
 #include "bankdata.h"
 #include "print_frames.h"
 #include "load_save.h"
+#include "palette.h"
+#include "fade_manager.h"
+#include "joy.h"
 
 #include "state_camera.h"
 
@@ -21,6 +24,7 @@
 #include "menu_codes.h"
 #include "menu_yesno.h"
 #include "menu_settings.h"
+#include "menu_spinedit.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -33,10 +37,12 @@ typedef enum {
     idPrintFrame2,
     idSettingsPrintFrame,
     idSettingsPrintFast,
-    idSettingsAltBorder
+    idSettingsAltBorder,
+    idSettingsCGBPalette
 } settings_menu_e;
 
 
+uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 
@@ -78,13 +84,31 @@ const menu_t PrinterFramesMenu = {
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
+static uint8_t spinedit_palette_value = 0;
+const spinedit_value_names_t PaletteSpinEditNames[] = {
+    { .next = PaletteSpinEditNames + 1, .value = 0, .name = " Arctic\t\t" },
+    { .next = PaletteSpinEditNames + 2, .value = 1, .name = " Cyan\t\t"   },
+    { .next = PaletteSpinEditNames + 3, .value = 2, .name = " Thermal\t"  },
+    { .next = PaletteSpinEditNames + 4, .value = 3, .name = " Circuits\t" },
+    { .next = PaletteSpinEditNames + 5, .value = 4, .name = " Grape\t\t"  },
+    { .next = PaletteSpinEditNames + 6, .value = 5, .name = " Japan\t\t"  },
+    { .next = NULL,                     .value = 6, .name = " Bavaria\t"  }
+};
+const spinedit_params_t PaletteSpinEditParams = {
+    .caption = "Palette:",
+    .min_value = 0,
+    .max_value = MAX_INDEX(PaletteSpinEditNames),
+    .value = &spinedit_palette_value,
+    .names = PaletteSpinEditNames
+};
+const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits", "Grape", "Japan", "Bavaria" };
 
 const menu_item_t SettingsMenuItemPrintFrame = {
-    .prev = &SettingsMenuItemAltBorder,     .next = &SettingsMenuItemPrintFast,
+    .prev = &SettingsMenuItemCGBPal,        .next = &SettingsMenuItemPrintFast,
     .sub = &PrinterFramesMenu, .sub_params = NULL,
     .ofs_x = 1, .ofs_y = 1, .width = 13,
     .id = idSettingsPrintFrame,
-    .caption = " Frame\t[%s]",
+    .caption = " Frame\t\t[%s]",
     .helpcontext = " Select frame for printing",
     .onPaint = onSettingsMenuItemPaint,
     .result = ACTION_NONE
@@ -100,23 +124,43 @@ const menu_item_t SettingsMenuItemPrintFast = {
     .result = ACTION_SETTINGS_PRINT_FAST
 };
 const menu_item_t SettingsMenuItemAltBorder = {
-    .prev = &SettingsMenuItemPrintFast,     .next = &SettingsMenuItemPrintFrame,
+    .prev = &SettingsMenuItemPrintFast,     .next = &SettingsMenuItemCGBPal,
     .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 13, .flags = MENUITEM_TERM,
+    .ofs_x = 1, .ofs_y = 3, .width = 13,
     .id = idSettingsAltBorder,
     .caption = " Alt. SGB border\t\t%s",
     .helpcontext = " Switch different SGB borders",
     .onPaint = onSettingsMenuItemPaint,
     .result = ACTION_SETTINGS_ALT_BORDER
 };
+const menu_item_t SettingsMenuItemCGBPal = {
+    .prev = &SettingsMenuItemAltBorder,     .next = &SettingsMenuItemPrintFrame,
+    .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+    .ofs_x = 1, .ofs_y = 4, .width = 13, .flags = MENUITEM_TERM,
+    .id = idSettingsCGBPalette,
+    .caption = " Palette\t[%s]",
+    .helpcontext = " Select CGB palette",
+    .onPaint = onSettingsMenuItemPaint,
+    .result = ACTION_SETTINGS_CGB_PALETTE
+};
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 5,
+    .x = 3, .y = 5, .width = 15, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = &SettingsMenuItemPrintFrame,
     .onShow = NULL, .onHelpContext = onHelpSettings,
-    .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultSettings
 };
 
+uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu;
+    switch (self->id) {
+        case idSettingsCGBPalette:
+            return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+        default:
+            break;
+    }
+    return value;
+}
 uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
@@ -154,6 +198,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsAltBorder:
             sprintf(text_buffer, self->caption, checkbox[OPTION(fancy_sgb_border)]);
             break;
+        case idSettingsCGBPalette:
+            sprintf(text_buffer, self->caption, PaletteNames[OPTION(cgb_palette_idx)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -163,6 +210,7 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
 
 void menu_settings_execute() BANKED {
     uint8_t menu_result;
+    spinedit_palette_value = OPTION(cgb_palette_idx);
     switch (menu_result = menu_execute(&GlobalSettingsMenu, NULL, NULL)) {
         case ACTION_PRINT_FRAME0:
         case ACTION_PRINT_FRAME1:
@@ -177,6 +225,14 @@ void menu_settings_execute() BANKED {
         case ACTION_SETTINGS_ALT_BORDER:
             OPTION(fancy_sgb_border) = !OPTION(fancy_sgb_border);
             save_camera_state();
+            break;
+        case ACTION_SETTINGS_CGB_PALETTE:
+            OPTION(cgb_palette_idx) = spinedit_palette_value;
+            save_camera_state();
+            if (_is_COLOR) {
+                palette_reload();
+                fade_apply_palette_change_color(FADED_IN_FRAME);
+            }
             break;
         default:
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);

@@ -7,9 +7,6 @@
 #include "fade_manager.h"
 #include "palette.h"
 
-#define FADED_OUT_FRAME 5
-#define FADED_IN_FRAME 0
-
 uint8_t fade_running;
 uint8_t fade_frames_per_step;
 uint8_t fade_timer;
@@ -133,7 +130,7 @@ __endasm;
 #endif
 }
 
-static void ApplyPaletteChangeColor(uint8_t index) {
+void fade_apply_palette_change_color(uint8_t index) BANKED {
     if (fade_style) {
         CGBFadeToBlackStep(BkgPalette, BCPS_REG_ADDR, index);
         CGBFadeToBlackStep(SprPalette, OCPS_REG_ADDR, index);
@@ -222,7 +219,7 @@ __endasm;
 #endif
 }
 
-static void ApplyPaletteChangeDMG(uint8_t index) {
+void fade_apply_palette_change_dmg(uint8_t index) BANKED {
     if (index > 4) index = 4;
     if (!fade_style) {
         BGP_REG = DMGFadeToWhiteStep(DMG_palette[0], index);
@@ -240,10 +237,10 @@ void fade_init() BANKED {
     fade_timer = FADED_OUT_FRAME;
     fade_running = FALSE;
     if (_is_COLOR) {
-        ApplyPaletteChangeColor(fade_timer);
+        fade_apply_palette_change_color(fade_timer);
         return;
     }
-    ApplyPaletteChangeDMG(FADED_OUT_FRAME);
+    fade_apply_palette_change_dmg(FADED_OUT_FRAME);
 }
 
 static void fade_in() {
@@ -255,10 +252,10 @@ static void fade_in() {
     fade_running = TRUE;
     fade_timer = FADED_OUT_FRAME;
     if (_is_COLOR) {
-        ApplyPaletteChangeColor(FADED_OUT_FRAME);
+        fade_apply_palette_change_color(FADED_OUT_FRAME);
         return;
     }
-    ApplyPaletteChangeDMG(FADED_OUT_FRAME);
+    fade_apply_palette_change_dmg(FADED_OUT_FRAME);
 }
 
 static void fade_out() {
@@ -270,10 +267,10 @@ static void fade_out() {
     fade_running = TRUE;
     fade_timer = FADED_IN_FRAME;
     if (_is_COLOR) {
-        ApplyPaletteChangeColor(fade_timer);
+        fade_apply_palette_change_color(fade_timer);
         return;
     }
-    ApplyPaletteChangeDMG(FADED_IN_FRAME);
+    fade_apply_palette_change_dmg(FADED_IN_FRAME);
 }
 
 static void fade_update() {
@@ -287,10 +284,10 @@ static void fade_update() {
                 if (fade_timer == FADED_OUT_FRAME) fade_running = FALSE;
             }
             if (_is_COLOR) {
-                ApplyPaletteChangeColor(fade_timer);
+                fade_apply_palette_change_color(fade_timer);
                 return;
             }
-            ApplyPaletteChangeDMG(fade_timer);
+            fade_apply_palette_change_dmg(fade_timer);
         }
     }
 }

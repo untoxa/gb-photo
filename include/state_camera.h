@@ -85,6 +85,7 @@ typedef struct camera_state_options_t {
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
+    uint8_t cgb_palette_idx;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT

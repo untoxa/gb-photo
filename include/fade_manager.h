@@ -4,6 +4,9 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#define FADED_OUT_FRAME 5
+#define FADED_IN_FRAME 0
+
 #define FADE_SPEED_MASK 0x3F
 #define FADE_IN_FLAG 0x40
 #define FADE_ENABLED_FLAG 0x80
@@ -35,5 +38,17 @@ void fade_in_modal() BANKED;
  * Fade out and wait until complete
  */
 void fade_out_modal() BANKED;
+
+/**
+ * Applies palette change on CGB
+ * @param index palette step
+ */
+void fade_apply_palette_change_color(uint8_t index) BANKED;
+
+/**
+ * Applies palette change on DMG
+ * @param index palette step
+ */
+void fade_apply_palette_change_dmg(uint8_t index) BANKED;
 
 #endif

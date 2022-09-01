@@ -35,7 +35,8 @@ const camera_state_options_t default_camera_state_options = {
     .print_fast = false,
     .shutter_sound = shutter_sound_0,
     .shutter_timer = 10,
-    .shutter_counter = 5
+    .shutter_counter = 5,
+    .cgb_palette_idx = 0
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
