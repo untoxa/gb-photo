@@ -51,7 +51,7 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 2, self->y +  3, 0, SOLID_WHITE, "Andreas Hahn");
     menu_text_out(self->x + 1, self->y +  4, 0, SOLID_WHITE, "Development:");
     menu_text_out(self->x + 2, self->y +  5, 0, SOLID_WHITE, "Toxa, Andreas Hahn");
-    menu_text_out(self->x + 2, self->y +  6, 0, SOLID_WHITE, "Raphael-Boichot");
+    menu_text_out(self->x + 2, self->y +  6, 0, SOLID_WHITE, "Raphael Boichot");
     menu_text_out(self->x + 1, self->y +  7, 0, SOLID_WHITE, "Sound:");
     menu_text_out(self->x + 2, self->y +  8, 0, SOLID_WHITE, "Tronimal");
     menu_text_out(self->x + 1, self->y +  9, 0, SOLID_WHITE, "Art:");
