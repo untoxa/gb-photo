@@ -55,7 +55,7 @@ void palette_reload() BANKED {
         memset(SprPalette, 0, sizeof(SprPalette));
         const palette_entry_t * pal = cgb_palette + (OPTION(cgb_palette_idx) % LENGTH(cgb_palette));
         memcpy(BkgPalette, pal, sizeof(palette_entry_t));
-        memcpy(SprPalette, pal, sizeof(palette_entry_t));
+        memcpy(&SprPalette[0].c1, pal, sizeof(palette_entry_t) - sizeof(SprPalette[0].c1));
     } else {
         DMG_palette[0] = DMG_palette[2] = DMG_PALETTE(DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY, DMG_BLACK);
         DMG_palette[1] = DMG_PALETTE(DMG_WHITE, DMG_WHITE, DMG_DARK_GRAY, DMG_BLACK);
