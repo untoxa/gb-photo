@@ -113,6 +113,11 @@ static const table_value_t gains[] = {
     { CAM01_GAIN_440, "44.0" }, { CAM01_GAIN_455, "45.5" }, { CAM01_GAIN_470, "47.0" }, { CAM01_GAIN_515, "51.5" },
     { CAM01_GAIN_575, "57.5" }
 };
+static const table_value_t dither_patterns[NUM_ONOFF_SETS] = {
+    { 0, "Off" },  { 1, "Def"},   { 2, "Alt"},   { 3, "Diag"},
+    { 4, "vWav"},  { 5, "vBrk"},  { 6, "hWav"},  { 7, "hBrk"},
+    { 8, "Hori"},  { 10, "Htch"}
+};
 static const table_value_t zero_points[] = {
     { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
 };
@@ -354,7 +359,7 @@ const menu_item_t CameraMenuItemAssistedDither = {
     .ofs_x = 10, .ofs_y = 0, .width = 5,
     .id = idDither,
     .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering on/off",
+    .helpcontext = " Dithering pattern",
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
@@ -424,7 +429,7 @@ const menu_item_t CameraMenuItemManualDither = {
     .ofs_x = 10, .ofs_y = 0, .width = 5,
     .id = idDither,
     .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering on/off",
+    .helpcontext = " Dithering pattern",
     .onPaint = onCameraMenuItemPaint,
     .result = MENU_RESULT_NONE
 };
@@ -613,6 +618,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
+        static uint8_t temp_uint8;
         static bool settings_changed, redraw_selection;
         redraw_selection = settings_changed = true;
         // perform changes when pressing UP/DOWN while menu item with some ID is active
@@ -638,8 +644,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (settings_changed = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idDither:
-                SETTING(dithering) = !SETTING(dithering);
-                RENDER_CAM_REG_DITHERPATTERN();
+                temp_uint8 = SETTING(dithering);
+                if (settings_changed = inc_dec_int8(&temp_uint8, 1, 0, NUM_ONOFF_SETS - 1, change_direction)) {
+                    SETTING(dithering) = temp_uint8;
+                    RENDER_CAM_REG_DITHERPATTERN();
+                }
                 break;
             case idDitherLight:
                 SETTING(ditheringHighLight) = !SETTING(ditheringHighLight);
@@ -740,13 +749,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
             bool error_negative = (error < 0) ? true : false;
             uint16_t abs_error = abs(error);
-            
-        //real camera uses a very similar autoexposure mechanism with steps of 
+
+        //real camera uses a very similar autoexposure mechanism with steps of
         //1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
         //1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
         //jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
         //algorithm here is globally faster and simplier than a real camera
-            
+
             if (abs_error > 95) {
                 // raw tuning +- 1EV
                 new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
@@ -861,7 +870,7 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             sprintf(text_buffer, format, settings->current_contrast);
             break;
         case idDither:
-            sprintf(text_buffer, format, on_off[settings->dithering]);
+            sprintf(text_buffer, format, dither_patterns[settings->dithering].caption);
             break;
         case idDitherLight:
             sprintf(text_buffer, format, low_high[settings->ditheringHighLight]);

@@ -110,7 +110,7 @@ typedef struct camera_mode_settings_t {
     uint8_t current_contrast;
     uint8_t edge_operation;
     int16_t current_brightness;
-    bool dithering              : 1;
+    uint8_t dithering           : 4;
     bool ditheringHighLight     : 1;
     bool invertOutput           : 1;
     bool edge_exclusive         : 1;
