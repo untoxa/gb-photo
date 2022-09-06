@@ -115,7 +115,7 @@ static const table_value_t gains[] = {
 };
 static const table_value_t dither_patterns[NUM_ONOFF_SETS] = {
     { 0, "Off" },  { 1, "Def"},   { 2, "2x2"},   { 3, "Grid"},
-    { 4, "Digi"},  { 5, "Nest"},  { 6, "Fuzz"},  { 7, "Vert"},
+    { 4, "Maze"},  { 5, "Nest"},  { 6, "Fuzz"},  { 7, "Vert"},
     { 8, "Hori"},  { 10, "Mix"}
 };
 static const table_value_t zero_points[] = {
