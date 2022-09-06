@@ -114,9 +114,9 @@ static const table_value_t gains[] = {
     { CAM01_GAIN_575, "57.5" }
 };
 static const table_value_t dither_patterns[NUM_ONOFF_SETS] = {
-    { 0, "Off" },  { 1, "Def"},   { 2, "Alt"},   { 3, "Diag"},
-    { 4, "vWav"},  { 5, "vBrk"},  { 6, "hWav"},  { 7, "hBrk"},
-    { 8, "Hori"},  { 10, "Htch"}
+    { 0, "Off" },  { 1, "Def"},   { 2, "2x2"},   { 3, "Grid"},
+    { 4, "Maze"},  { 5, "Nest"},  { 6, "Fuzz"},  { 7, "Vert"},
+    { 8, "Hori"},  { 10, "Mix"}
 };
 static const table_value_t zero_points[] = {
     { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
