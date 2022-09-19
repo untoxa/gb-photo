@@ -6,9 +6,6 @@
 typedef struct menu_t;
 typedef struct menu_item_t;
 
-#define MENUITEM_NONE 0
-#define MENUITEM_TERM 1
-
 #define MENU_INVERSE  1
 
 typedef uint8_t menu_handler_t (const struct menu_t * self, uint8_t * param);
@@ -17,14 +14,11 @@ typedef uint8_t menu_translate_t (const struct menu_t * menu, const struct menu_
 typedef uint8_t * item_handler_t (const struct menu_t * menu, const struct menu_item_t * self);
 
 typedef struct menu_item_t {
-    struct menu_item_t * prev;
-    struct menu_item_t * next;
     struct menu_t * sub;
     uint8_t * sub_params;
     uint8_t ofs_x;
     uint8_t ofs_y;
     uint8_t width;
-    uint8_t flags;
     uint8_t id;
     const uint8_t * caption;
     const uint8_t * helpcontext;
@@ -41,6 +35,7 @@ typedef struct menu_t {
     uint8_t cancel_result;
     uint8_t flags;
     menu_item_t * items;
+    menu_item_t * last_item;
     menu_handler_t * onShow;
     idle_handler_t * onIdle;
     idle_handler_t * onHelpContext;

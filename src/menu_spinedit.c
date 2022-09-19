@@ -7,6 +7,7 @@
 #include "screen.h"
 #include "joy.h"
 #include "globals.h"
+#include "systemhelpers.h"
 
 #include "misc_assets.h"
 
@@ -22,19 +23,20 @@ uint8_t onShowSpinEdit(const struct menu_t * self, uint8_t * param);
 uint8_t onTranslateKeySpinEdit(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onHelpSpinEdit(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onIdleSpinEdit(const struct menu_t * menu, const struct menu_item_t * selection);
-const menu_item_t SpinEditMenuItem = {
-    .prev = NULL, .next = NULL,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 7, .ofs_y = 1, .width = 3, .flags = MENUITEM_TERM,
-    .caption = " " ICON_SPIN_UP " %d\t" ICON_SPIN_DOWN,
-    .helpcontext = " D-Pad Edit, " ICON_A " Ok " ICON_B " Cancel",
-    .onPaint = onSpineditMenuItemPaint,
-    .result = MENU_RESULT_YES
+const menu_item_t SpinEditMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 7, .ofs_y = 1, .width = 3,
+        .caption = " " ICON_SPIN_UP " %d\t" ICON_SPIN_DOWN,
+        .helpcontext = " D-Pad Edit, " ICON_A " Ok " ICON_B " Cancel",
+        .onPaint = onSpineditMenuItemPaint,
+        .result = MENU_RESULT_YES
+    }
 };
 const menu_t SpinEditMenu = {
     .x = 4, .y = 8, .width = 14, .height = 3,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
-    .items = &SpinEditMenuItem,
+    .items = SpinEditMenuItems, .last_item = LAST_ITEM(SpinEditMenuItems),
     .onShow = onShowSpinEdit, .onIdle = onIdleSpinEdit, .onHelpContext = onHelpSpinEdit,
     .onTranslateKey = onTranslateKeySpinEdit, .onTranslateSubResult = NULL
 };

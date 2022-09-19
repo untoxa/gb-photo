@@ -82,6 +82,7 @@ typedef struct camera_state_options_t {
     uint8_t print_frame_idx;
     bool print_fast             : 1;
     bool fancy_sgb_border       : 1;
+    bool show_grid              : 1;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;

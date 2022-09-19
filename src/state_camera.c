@@ -333,200 +333,176 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings);
 
 // --- Assisted menu ---------------------------------
-const menu_item_t CameraMenuItemAssistedExposure = {
-    .prev = &CameraMenuItemAssistedDitherLight, .next = &CameraMenuItemAssistedContrast,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 5,
-    .id = idExposure,
-    .caption = " %sms",
-    .helpcontext = " Exposure time",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemAssistedContrast = {
-    .prev = &CameraMenuItemAssistedExposure,    .next = &CameraMenuItemAssistedDither,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 0, .width = 5,
-    .id = idContrast,
-    .caption = " " ICON_CONTRAST "\t%d",
-    .helpcontext = " Contrast level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemAssistedDither = {
-    .prev = &CameraMenuItemAssistedContrast,     .next = &CameraMenuItemAssistedDitherLight,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 10, .ofs_y = 0, .width = 5,
-    .id = idDither,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering pattern",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemAssistedDitherLight = { // ToDo: remove this menu option when it's being set automatically via `.id = idExposure`
-    .prev = &CameraMenuItemAssistedDither,     .next = &CameraMenuItemAssistedExposure,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 15, .ofs_y = 0, .width = 5, .flags = MENUITEM_TERM,
-    .id = idDitherLight,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering light level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
+const menu_item_t CameraMenuItemsAssisted[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 0, .width = 5,
+        .id = idExposure,
+        .caption = " %sms",
+        .helpcontext = " Exposure time",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 0, .width = 5,
+        .id = idContrast,
+        .caption = " " ICON_CONTRAST "\t%d",
+        .helpcontext = " Contrast level",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 10, .ofs_y = 0, .width = 5,
+        .id = idDither,
+        .caption = " " ICON_DITHER "\t%s",
+        .helpcontext = " Dithering pattern",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        // ToDo: remove this menu option when it's being set automatically via `.id = idExposure`
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 15, .ofs_y = 0, .width = 5,
+        .id = idDitherLight,
+        .caption = " " ICON_DITHER "\t%s",
+        .helpcontext = " Dithering light level",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }
 };
 
 const menu_t CameraMenuAssisted = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .flags = MENU_INVERSE,
-    .items = &CameraMenuItemAssistedExposure,
+    .items = CameraMenuItemsAssisted, .last_item = LAST_ITEM(CameraMenuItemsAssisted),
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
 
 // --- Auto menu -------------------------------------
-const menu_item_t CameraMenuItemAutoIndicator = {
-    .prev = NULL,    .next = NULL,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 0, .flags = MENUITEM_TERM,
-    .id = idNone,
-    .caption = " Automatic mode",
-    .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " and "ICON_CONTRAST,
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
+const menu_item_t CameraMenuItemsAuto[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 0, .width = 0,
+        .id = idNone,
+        .caption = " Automatic mode",
+        .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " and "ICON_CONTRAST,
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }
 };
 
 const menu_t CameraMenuAuto = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .flags = 0,
-    .items = &CameraMenuItemAutoIndicator,
+    .items = CameraMenuItemsAuto, .last_item = LAST_ITEM(CameraMenuItemsAuto),
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
 
 // --- Manual menu -----------------------------------
-const menu_item_t CameraMenuItemManualExposure = {
-    .prev = &CameraMenuItemManualEdgeExclusive, .next = &CameraMenuItemManualGain,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 0, .width = 5,
-    .id = idExposure,
-    .caption = " %sms",
-    .helpcontext = " Exposure time",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualGain = {
-    .prev = &CameraMenuItemManualExposure,      .next = &CameraMenuItemManualDither,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 0, .width = 5,
-    .id = idGain,
-    .caption = " " ICON_GAIN "\t%s",
-    .helpcontext = " Sensor gain",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualDither = {
-    .prev = &CameraMenuItemManualGain,          .next = &CameraMenuItemManualDitherLight,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 10, .ofs_y = 0, .width = 5,
-    .id = idDither,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering pattern",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualDitherLight = {
-    .prev = &CameraMenuItemManualDither,        .next = &CameraMenuItemManualContrast,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 15, .ofs_y = 0, .width = 5,
-    .id = idDitherLight,
-    .caption = " " ICON_DITHER "\t%s",
-    .helpcontext = " Dithering light level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualContrast = {
-    .prev = &CameraMenuItemManualDitherLight,   .next = &CameraMenuItemManualZeroPoint,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 1, .width = 5,
-    .id = idContrast,
-    .caption = " " ICON_CONTRAST "\t%d",
-    .helpcontext = " Contrast level",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualZeroPoint = {
-    .prev = &CameraMenuItemManualContrast,      .next = &CameraMenuItemManualVOut,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 1, .width = 5,
-    .id = idZeroPoint,
-    .caption = " %s",
-    .helpcontext = " Sensor zero point",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualVOut = {
-    .prev = &CameraMenuItemManualZeroPoint,     .next = &CameraMenuItemManualVoltRef,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 10, .ofs_y = 1, .width = 5,
-    .id = idVOut,
-    .caption = " %dmv",
-    .helpcontext = " Sensor voltage out",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualVoltRef = {
-    .prev = &CameraMenuItemManualVOut,          .next = &CameraMenuItemInvertedOutput,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 15, .ofs_y = 1, .width = 5,
-    .id = idVoltageRef,
-    .caption = " " ICON_VOLTAGE "\t%sv",
-    .helpcontext = " Sensor voltage reference",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemInvertedOutput = {
-    .prev = &CameraMenuItemManualVoltRef,       .next = &CameraMenuItemEdgeOperation,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 0, .ofs_y = 2, .width = 5,
-    .id = idInvOutput,
-    .caption = " %s",
-    .helpcontext = " Inverse output",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemEdgeOperation = {
-    .prev = &CameraMenuItemInvertedOutput,      .next = &CameraMenuItemEdgeRatio,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 5, .ofs_y = 2, .width = 5,
-    .id = idEdgeOperation,
-    .caption = " " ICON_EDGE "\t%s",
-    .helpcontext = " Sensor edge operation",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemEdgeRatio = {
-    .prev = &CameraMenuItemEdgeOperation,   .next = &CameraMenuItemManualEdgeExclusive,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 10, .ofs_y = 2, .width = 5,
-    .id = idEdgeRatio,
-    .caption = " " ICON_EDGE "\t%s",
-    .helpcontext = " Sensor edge ratio",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
-};
-const menu_item_t CameraMenuItemManualEdgeExclusive = {
-    .prev = &CameraMenuItemEdgeRatio,        .next = &CameraMenuItemManualExposure,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 15, .ofs_y = 2, .width = 5, .flags = MENUITEM_TERM,
-    .id = idEdgeExclusive,
-    .caption = " " ICON_EDGE "\t%s",
-    .helpcontext = "Sensor edge exclusive",
-    .onPaint = onCameraMenuItemPaint,
-    .result = MENU_RESULT_NONE
+const menu_item_t CameraMenuItemsManual[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 0, .width = 5,
+        .id = idExposure,
+        .caption = " %sms",
+        .helpcontext = " Exposure time",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 0, .width = 5,
+        .id = idGain,
+        .caption = " " ICON_GAIN "\t%s",
+        .helpcontext = " Sensor gain",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 10, .ofs_y = 0, .width = 5,
+        .id = idDither,
+        .caption = " " ICON_DITHER "\t%s",
+        .helpcontext = " Dithering pattern",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 15, .ofs_y = 0, .width = 5,
+        .id = idDitherLight,
+        .caption = " " ICON_DITHER "\t%s",
+        .helpcontext = " Dithering light level",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 1, .width = 5,
+        .id = idContrast,
+        .caption = " " ICON_CONTRAST "\t%d",
+        .helpcontext = " Contrast level",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 1, .width = 5,
+        .id = idZeroPoint,
+        .caption = " %s",
+        .helpcontext = " Sensor zero point",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 10, .ofs_y = 1, .width = 5,
+        .id = idVOut,
+        .caption = " %dmv",
+        .helpcontext = " Sensor voltage out",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 15, .ofs_y = 1, .width = 5,
+        .id = idVoltageRef,
+        .caption = " " ICON_VOLTAGE "\t%sv",
+        .helpcontext = " Sensor voltage reference",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 2, .width = 5,
+        .id = idInvOutput,
+        .caption = " %s",
+        .helpcontext = " Inverse output",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 2, .width = 5,
+        .id = idEdgeOperation,
+        .caption = " " ICON_EDGE "\t%s",
+        .helpcontext = " Sensor edge operation",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 10, .ofs_y = 2, .width = 5,
+        .id = idEdgeRatio,
+        .caption = " " ICON_EDGE "\t%s",
+        .helpcontext = " Sensor edge ratio",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 15, .ofs_y = 2, .width = 5,
+        .id = idEdgeExclusive,
+        .caption = " " ICON_EDGE "\t%s",
+        .helpcontext = "Sensor edge exclusive",
+        .onPaint = onCameraMenuItemPaint,
+        .result = MENU_RESULT_NONE
+    }
 };
 const menu_t CameraMenuManual = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .flags = MENU_INVERSE,
-    .items = &CameraMenuItemManualExposure,
+    .items = CameraMenuItemsManual, .last_item = LAST_ITEM(CameraMenuItemsManual),
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };

@@ -36,6 +36,7 @@
 
 #define LENGTH(a) (sizeof((a))/sizeof((a)[0]))
 #define MAX_INDEX(a) ((sizeof((a))/sizeof((a)[0]))-1)
+#define LAST_ITEM(a) (a+MAX_INDEX(a))
 
 #define __ADD_CHECK__(a,b) __ADD_CHECK___(a,b)
 #define __ADD_CHECK___(a,b) __CHECK_##a##_##b
