@@ -34,6 +34,8 @@
 
 #include "misc_assets.h"
 
+#include "cursors.h"
+
 // audio assets
 #include "sound_ok.h"
 #include "sound_error.h"
@@ -282,6 +284,20 @@ static uint8_t onPrinterProgress() BANKED {
     return 0;
 }
 
+const metasprite_t grid_metasprite[] = {
+    METASPR_ITEM(-4, -4, 2, 0),       METASPR_ITEM(35, 43, 2, 0), METASPR_ITEM(0, 43, 2, 0),         METASPR_ITEM(-35, 43, 2, 0),
+    METASPR_ITEM(35 + 43, -43, 2, 0), METASPR_ITEM(35, 43, 2, 0), METASPR_ITEM(-35, -43 - 43, 2, 0), METASPR_ITEM(35, -43, 2, 0),
+    METASPR_TERM
+};
+uint8_t grid_render(uint8_t hw) {
+    if (OPTION(show_grid)) {
+        return (hw + move_metasprite(grid_metasprite, (0x80 - cursors_TILE_COUNT), hw,
+                                     DEVICE_SPRITE_PX_OFFSET_X + 16,
+                                     ((OPTION(camera_mode) == camera_mode_manual) ? 8 : 0) + DEVICE_SPRITE_PX_OFFSET_Y + 16));
+    }
+    return 0;
+}
+
 
 static uint8_t vbl_frames_counter = 0;
 
@@ -369,7 +385,6 @@ const menu_item_t CameraMenuItemsAssisted[] = {
         .result = MENU_RESULT_NONE
     }
 };
-
 const menu_t CameraMenuAssisted = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .flags = MENU_INVERSE,
@@ -390,7 +405,6 @@ const menu_item_t CameraMenuItemsAuto[] = {
         .result = MENU_RESULT_NONE
     }
 };
-
 const menu_t CameraMenuAuto = {
     .x = 0, .y = 0, .width = 0, .height = 0,
     .flags = 0,
@@ -798,8 +812,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if ((image_live_preview) || (recording_video)) image_capture();
     }
 
-    // render all present scrollbars
-    hide_sprites_range(scrollbar_render_all(0), MAX_HARDWARE_SPRITES);
+    // render grid and all present scrollbars
+    hide_sprites_range(scrollbar_render_all(grid_render(0)), MAX_HARDWARE_SPRITES);
 
     // wait for VBlank if not capturing (avoid HALT CPU state)
     if (!is_capturing() && !recording_video) wait_vbl_done();
