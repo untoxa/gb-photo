@@ -22,6 +22,7 @@
 #define ACTION_SETTINGS_PRINT_FAST  20
 #define ACTION_SETTINGS_ALT_BORDER  21
 #define ACTION_SETTINGS_CGB_PALETTE 22
+#define ACTION_SETTINGS_SHOW_GRID   23
 
 // state switching actions
 #define ACTION_GALLERY              30

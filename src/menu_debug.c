@@ -6,6 +6,7 @@
 #include "vwf.h"
 #include "screen.h"
 #include "globals.h"
+#include "systemhelpers.h"
 
 #include "misc_assets.h"
 
@@ -20,7 +21,6 @@ static const uint8_t head_string[] = "Git: " QUOTE(BRANCH) "/" QUOTE(COMMIT);
 uint8_t onShowDebug(const struct menu_t * self, uint8_t * param);
 const menu_item_t DebugMenuItems[] = {
     {
-        .prev = NULL, .next = NULL,
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 12, .ofs_y = 13, .width = 0,
         .caption = " " ICON_A " Ok ",
@@ -30,7 +30,7 @@ const menu_item_t DebugMenuItems[] = {
 };
 const menu_t DebugMenu = {
     .x = 3, .y = 2, .width = 17, .height = 15,
-    .items = DebugMenuItems,
+    .items = DebugMenuItems, .last_item = LAST_ITEM(DebugMenuItems),
     .onShow = onShowDebug, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 

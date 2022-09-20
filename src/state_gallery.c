@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "systemhelpers.h"
 #include "musicmanager.h"
 #include "joy.h"
 #include "gbcamera.h"
@@ -42,14 +43,8 @@
 #include "print_frames.h"
 
 #if (DEBUG_ENABLED==1)
-    #define MENUITEM_DEBUG_NEXT GalleryMenuItemDebug
-    #define MENUITEM_FIRST_PREV GalleryMenuItemDebug
-    #define MENUITEM_LAST_FLAGS 0
     #define GALLERYMENU_HEIGHT 11
 #else
-    #define MENUITEM_DEBUG_NEXT GalleryMenuItemInfo
-    #define MENUITEM_FIRST_PREV GalleryMenuItemUndeleteAll
-    #define MENUITEM_LAST_FLAGS MENUITEM_TERM
     #define GALLERYMENU_HEIGHT 10
 #endif
 
@@ -137,25 +132,24 @@ static uint8_t onPrinterProgress() BANKED {
 
 uint8_t onShowImageInfo(const struct menu_t * self, uint8_t * param);
 uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-const menu_item_t ImageInfoMenuItemOk = {
-    .prev = &ImageInfoMenuItemPrint,    .next = &ImageInfoMenuItemPrint,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 12, .ofs_y = 14, .width = 0,
-    .caption = " " ICON_A " OK ",
-    .onPaint = NULL,
-    .result = MENU_RESULT_CLOSE
-};
-const menu_item_t ImageInfoMenuItemPrint = {
-    .prev = &ImageInfoMenuItemOk,       .next = &ImageInfoMenuItemOk,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 7, .ofs_y = 14, .width = 0, .flags = MENUITEM_TERM,
-    .caption = " Print...",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_INFO
+const menu_item_t ImageInfoMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 12, .ofs_y = 14, .width = 0,
+        .caption = " " ICON_A " OK ",
+        .onPaint = NULL,
+        .result = MENU_RESULT_CLOSE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 7, .ofs_y = 14, .width = 0,
+        .caption = " Print...",
+        .onPaint = NULL,
+        .result = ACTION_PRINT_INFO
+    }
 };
 const menu_t ImageInfoMenu = {
     .x = 3, .y = 1, .width = 17, .height = 16,
-    .items = &ImageInfoMenuItemOk,
+    .items = ImageInfoMenuItems, .last_item = LAST_ITEM(ImageInfoMenuItems),
     .onShow = onShowImageInfo, .onTranslateKey = onTranslateKeyImageInfo, .onTranslateSubResult = NULL
 };
 uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
@@ -197,93 +191,78 @@ uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_it
 
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-const menu_item_t GalleryMenuItemInfo = {
-    .prev = &MENUITEM_FIRST_PREV,           .next = &GalleryMenuItemPrint,
-    .sub = &ImageInfoMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 8,
-    .caption = " Info",
-    .helpcontext = " View image metadata",
-    .onPaint = NULL,
-    .result = MENU_RESULT_CLOSE
-};
-const menu_item_t GalleryMenuItemPrint = {
-    .prev = &GalleryMenuItemInfo,           .next = &GalleryMenuItemPrintAll,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 8,
-    .caption = " Print",
-    .helpcontext = " Print current image",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_IMAGE
-};
-const menu_item_t GalleryMenuItemPrintAll = {
-    .prev = &GalleryMenuItemPrint,          .next = &GalleryMenuItemTransfer,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8,
-    .caption = " Print all",
-    .helpcontext = " Print the whole gallery",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_GALLERY
-};
-const menu_item_t GalleryMenuItemTransfer = {
-    .prev = &GalleryMenuItemPrintAll,       .next = &GalleryMenuItemTransferAll,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 8,
-    .caption = " Transfer",
-    .helpcontext = " Transfer using link cable",
-    .onPaint = NULL,
-    .result = ACTION_TRANSFER_IMAGE
-};
-const menu_item_t GalleryMenuItemTransferAll = {
-    .prev = &GalleryMenuItemTransfer,       .next = &GalleryMenuItemDelete,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 5, .width = 8,
-    .caption = " Transfer all",
-    .helpcontext = " Transfer the whole gallery",
-    .onPaint = NULL,
-    .result = ACTION_TRANSFER_GALLERY
-};
-const menu_item_t GalleryMenuItemDelete = {
-    .prev = &GalleryMenuItemTransferAll,    .next = &GalleryMenuItemDeleteAll,
-    .sub = &YesNoMenu, .sub_params = "Are you sure?",
-    .ofs_x = 1, .ofs_y = 6, .width = 8,
-    .caption = " Delete",
-    .helpcontext = " Delete current image",
-    .onPaint = NULL,
-    .result = ACTION_ERASE_IMAGE
-};
-const menu_item_t GalleryMenuItemDeleteAll = {
-    .prev = &GalleryMenuItemDelete,         .next = &GalleryMenuItemUndeleteAll,
-    .sub = &YesNoMenu, .sub_params = "Delete all images?",
-    .ofs_x = 1, .ofs_y = 7, .width = 8,
-    .caption = " Delete all",
-    .helpcontext = " Erase the whole gallery",
-    .onPaint = NULL,
-    .result = ACTION_ERASE_GALLERY
-};
-const menu_item_t GalleryMenuItemUndeleteAll = {
-    .prev = &GalleryMenuItemDeleteAll,      .next = &MENUITEM_DEBUG_NEXT,
-    .sub = &YesNoMenu, .sub_params = "Undelete all images?",
-    .ofs_x = 1, .ofs_y = 8, .width = 8, .flags = MENUITEM_LAST_FLAGS,
-    .caption = " Undelete all",
-    .helpcontext = " Unerase the whole gallery",
-    .onPaint = NULL,
-    .result = ACTION_UNERASE_GALLERY
-};
+const menu_item_t GalleryMenuItems[] = {
+    {
+        .sub = &ImageInfoMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 1, .width = 8,
+        .caption = " Info",
+        .helpcontext = " View image metadata",
+        .onPaint = NULL,
+        .result = MENU_RESULT_CLOSE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 8,
+        .caption = " Print",
+        .helpcontext = " Print current image",
+        .onPaint = NULL,
+        .result = ACTION_PRINT_IMAGE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 8,
+        .caption = " Print all",
+        .helpcontext = " Print the whole gallery",
+        .onPaint = NULL,
+        .result = ACTION_PRINT_GALLERY
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 8,
+        .caption = " Transfer",
+        .helpcontext = " Transfer using link cable",
+        .onPaint = NULL,
+        .result = ACTION_TRANSFER_IMAGE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 5, .width = 8,
+        .caption = " Transfer all",
+        .helpcontext = " Transfer the whole gallery",
+        .onPaint = NULL,
+        .result = ACTION_TRANSFER_GALLERY
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Are you sure?",
+        .ofs_x = 1, .ofs_y = 6, .width = 8,
+        .caption = " Delete",
+        .helpcontext = " Delete current image",
+        .onPaint = NULL,
+        .result = ACTION_ERASE_IMAGE
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Delete all images?",
+        .ofs_x = 1, .ofs_y = 7, .width = 8,
+        .caption = " Delete all",
+        .helpcontext = " Erase the whole gallery",
+        .onPaint = NULL,
+        .result = ACTION_ERASE_GALLERY
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Undelete all images?",
+        .ofs_x = 1, .ofs_y = 8, .width = 8,
+        .caption = " Undelete all",
+        .helpcontext = " Unerase the whole gallery",
+        .onPaint = NULL,
+        .result = ACTION_UNERASE_GALLERY
 #if (DEBUG_ENABLED==1)
-const menu_item_t GalleryMenuItemDebug = {
-    .prev = &GalleryMenuItemUndeleteAll,    .next = &GalleryMenuItemInfo,
-    .sub = &DebugMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 9, .width = 8, .flags = MENUITEM_TERM,
-    .caption = " Debug",
-    .helpcontext = " Show debug info",
-    .onPaint = NULL,
-    .result = MENU_RESULT_CLOSE
-};
+    }, {
+        .sub = &DebugMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 9, .width = 8,
+        .caption = " Debug",
+        .helpcontext = " Show debug info",
+        .onPaint = NULL,
+        .result = MENU_RESULT_CLOSE
 #endif
+    }
+};
 const menu_t GalleryMenu = {
     .x = 1, .y = 3, .width = 10, .height = GALLERYMENU_HEIGHT,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &GalleryMenuItemInfo,
+    .items = GalleryMenuItems, .last_item = LAST_ITEM(GalleryMenuItems),
     .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultGalleryMenu
 };

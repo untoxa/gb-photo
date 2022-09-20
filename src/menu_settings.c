@@ -14,6 +14,7 @@
 #include "palette.h"
 #include "fade_manager.h"
 #include "joy.h"
+#include "systemhelpers.h"
 
 #include "state_camera.h"
 
@@ -38,7 +39,8 @@ typedef enum {
     idSettingsPrintFrame,
     idSettingsPrintFast,
     idSettingsAltBorder,
-    idSettingsCGBPalette
+    idSettingsCGBPalette,
+    idSettingsShowGrid
 } settings_menu_e;
 
 
@@ -46,40 +48,37 @@ uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct me
 uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 
-const menu_item_t FrameMenuItemNoFrame = {
-    .prev = &FrameMenuItemWild,     .next = &FrameMenuItemPhoto,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 8,
-    .id = idPrintFrame0,
-    .caption = " %s",
-    .helpcontext = " %s",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_PRINT_FRAME0
-};
-const menu_item_t FrameMenuItemPhoto = {
-    .prev = &FrameMenuItemNoFrame,  .next = &FrameMenuItemWild,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 8,
-    .id = idPrintFrame1,
-    .caption = " %s",
-    .helpcontext = " %s",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_PRINT_FRAME1
-};
-const menu_item_t FrameMenuItemWild = {
-    .prev = &FrameMenuItemPhoto,    .next = &FrameMenuItemNoFrame,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 8, .flags = MENUITEM_TERM,
-    .id = idPrintFrame2,
-    .caption = " %s",
-    .helpcontext = " %s",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_PRINT_FRAME2
+const menu_item_t FrameMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 1, .width = 8,
+        .id = idPrintFrame0,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME0
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 8,
+        .id = idPrintFrame1,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME1
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 8,
+        .id = idPrintFrame2,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME2
+    }
 };
 const menu_t PrinterFramesMenu = {
     .x = 7, .y = 4, .width = 10, .height = 5,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &FrameMenuItemNoFrame,
+    .items = FrameMenuItems, .last_item = LAST_ITEM(FrameMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
@@ -103,50 +102,53 @@ const spinedit_params_t PaletteSpinEditParams = {
 };
 const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits", "Grape", "Japan", "Bavaria" };
 
-const menu_item_t SettingsMenuItemPrintFrame = {
-    .prev = &SettingsMenuItemCGBPal,        .next = &SettingsMenuItemPrintFast,
-    .sub = &PrinterFramesMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 13,
-    .id = idSettingsPrintFrame,
-    .caption = " Frame\t\t[%s]",
-    .helpcontext = " Select frame for printing",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_NONE
-};
-const menu_item_t SettingsMenuItemPrintFast = {
-    .prev = &SettingsMenuItemPrintFrame,    .next = &SettingsMenuItemAltBorder,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 13,
-    .id = idSettingsPrintFast,
-    .caption = " Fast printing\t\t\t%s",
-    .helpcontext = " Enable CGB 32Kb/s printing",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_SETTINGS_PRINT_FAST
-};
-const menu_item_t SettingsMenuItemAltBorder = {
-    .prev = &SettingsMenuItemPrintFast,     .next = &SettingsMenuItemCGBPal,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 13,
-    .id = idSettingsAltBorder,
-    .caption = " Alt. SGB border\t\t%s",
-    .helpcontext = " Switch different SGB borders",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_SETTINGS_ALT_BORDER
-};
-const menu_item_t SettingsMenuItemCGBPal = {
-    .prev = &SettingsMenuItemAltBorder,     .next = &SettingsMenuItemPrintFrame,
-    .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
-    .ofs_x = 1, .ofs_y = 4, .width = 13, .flags = MENUITEM_TERM,
-    .id = idSettingsCGBPalette,
-    .caption = " Palette\t[%s]",
-    .helpcontext = " Select CGB palette",
-    .onPaint = onSettingsMenuItemPaint,
-    .result = ACTION_SETTINGS_CGB_PALETTE
+const menu_item_t SettingsMenuItems[] = {
+    {
+        .sub = &PrinterFramesMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 1, .width = 13,
+        .id = idSettingsPrintFrame,
+        .caption = " Frame\t\t[%s]",
+        .helpcontext = " Select frame for printing",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 13,
+        .id = idSettingsPrintFast,
+        .caption = " Fast printing\t\t\t%s",
+        .helpcontext = " Enable CGB 32Kb/s printing",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_PRINT_FAST
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 13,
+        .id = idSettingsAltBorder,
+        .caption = " Alt. SGB border\t\t%s",
+        .helpcontext = " Switch different SGB borders",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_ALT_BORDER
+    }, {
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+        .ofs_x = 1, .ofs_y = 4, .width = 13,
+        .id = idSettingsCGBPalette,
+        .caption = " Palette\t[%s]",
+        .helpcontext = " Select CGB palette",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_CGB_PALETTE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 5, .width = 13,
+        .id = idSettingsShowGrid,
+        .caption = " Show screen grid\t\t%s",
+        .helpcontext = " Show grid on the live view",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_SHOW_GRID
+    }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 6,
+    .x = 3, .y = 5, .width = 15, .height = 7,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &SettingsMenuItemPrintFrame,
+    .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultSettings
 };
@@ -201,6 +203,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsCGBPalette:
             sprintf(text_buffer, self->caption, PaletteNames[OPTION(cgb_palette_idx)]);
             break;
+        case idSettingsShowGrid:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(show_grid)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -233,6 +238,10 @@ void menu_settings_execute() BANKED {
                 palette_reload();
                 fade_apply_palette_change_color(FADED_IN_FRAME);
             }
+            break;
+        case ACTION_SETTINGS_SHOW_GRID:
+            OPTION(show_grid) = !OPTION(show_grid);
+            save_camera_state();
             break;
         default:
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);

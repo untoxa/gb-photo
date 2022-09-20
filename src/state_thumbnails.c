@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "systemhelpers.h"
 #include "musicmanager.h"
 #include "joy.h"
 #include "gbcamera.h"
@@ -71,37 +72,34 @@ const thumb_coord_t thumbnail_coords[MAX_PREVIEW_THUMBNAILS] = {
 
 uint8_t onHelpThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-const menu_item_t ThumbnailMenuItemDelete = {
-    .prev = &ThumbnailMenuItemTransfer, .next = &ThumbnailMenuItemPrint,
-    .sub = &YesNoMenu, .sub_params = "Delete selected?",
-    .ofs_x = 1, .ofs_y = 1, .width = 11,
-    .caption = " Delete selected",
-    .helpcontext = " Delete selected images",
-    .onPaint = NULL,
-    .result = ACTION_DELETE_SELECTED
-};
-const menu_item_t ThumbnailMenuItemPrint = {
-    .prev = &ThumbnailMenuItemDelete,   .next = &ThumbnailMenuItemTransfer,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 11,
-    .caption = " Print selected",
-    .helpcontext = " Print selected images",
-    .onPaint = NULL,
-    .result = ACTION_PRINT_SELECTED
-};
-const menu_item_t ThumbnailMenuItemTransfer = {
-    .prev = &ThumbnailMenuItemPrint,    .next = &ThumbnailMenuItemDelete,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 11, .flags = MENUITEM_TERM,
-    .caption = " Transfer selected",
-    .helpcontext = " Transfer selected images",
-    .onPaint = NULL,
-    .result = ACTION_TRANSFER_SELECTED
+const menu_item_t ThumbnailMenuItems[] = {
+    {
+        .sub = &YesNoMenu, .sub_params = "Delete selected?",
+        .ofs_x = 1, .ofs_y = 1, .width = 11,
+        .caption = " Delete selected",
+        .helpcontext = " Delete selected images",
+        .onPaint = NULL,
+        .result = ACTION_DELETE_SELECTED
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 11,
+        .caption = " Print selected",
+        .helpcontext = " Print selected images",
+        .onPaint = NULL,
+        .result = ACTION_PRINT_SELECTED
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 11,
+        .caption = " Transfer selected",
+        .helpcontext = " Transfer selected images",
+        .onPaint = NULL,
+        .result = ACTION_TRANSFER_SELECTED
+    }
 };
 const menu_t ThumbnailMenu = {
     .x = 1, .y = 4, .width = 13, .height = 5,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &ThumbnailMenuItemDelete,
+    .items = ThumbnailMenuItems, .last_item = LAST_ITEM(ThumbnailMenuItems),
     .onShow = NULL, .onHelpContext = onHelpThumbnailMenu,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultThumbnailMenu
 };

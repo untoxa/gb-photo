@@ -56,14 +56,14 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     if (menu->onShow) menu->onShow(menu, param);
 
     // draw menu items
-    for (const menu_item_t * current_item = menu->items; (current_item); current_item = current_item->next) {
+
+    for (const menu_item_t * current_item = menu->items; current_item <= menu->last_item; current_item++) {
         if (current_item == selection) {
             menu_move_selection(menu, NULL, current_item);
             if (menu->onHelpContext) menu->onHelpContext(menu, selection);
         } else {
             menu_move_selection(menu, current_item, NULL);
         }
-        if (current_item->flags & MENUITEM_TERM) break;
     }
 
     do {
@@ -73,15 +73,15 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         JOYPAD_AUTOREPEAT();
         // process menu keys
         if (KEY_PRESSED(J_UP)) {
-            if (selection->prev) {
+            if (menu->items != menu->last_item) {
                 music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move), MUSIC_SFX_PRIORITY_MINIMAL);
-                selection = menu_move_selection(menu, selection, selection->prev);
+                selection = menu_move_selection(menu, selection, ((selection - 1) < menu->items) ? menu->last_item : (selection - 1));
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_DOWN)) {
-            if (selection->next) {
+            if (menu->items != menu->last_item) {
                 music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move), MUSIC_SFX_PRIORITY_MINIMAL);
-                selection = menu_move_selection(menu, selection, selection->next);
+                selection = menu_move_selection(menu, selection, ((selection + 1) > menu->last_item) ? menu->items : (selection + 1));
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_A)) {

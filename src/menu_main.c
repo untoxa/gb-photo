@@ -8,6 +8,7 @@
 #include "screen.h"
 #include "states.h"
 #include "globals.h"
+#include "systemhelpers.h"
 
 #include "misc_assets.h"
 
@@ -29,7 +30,6 @@
 uint8_t onShowAbout(const struct menu_t * self, uint8_t * param);
 const menu_item_t AboutMenuItems[] = {
     {
-        .prev = NULL, .next = NULL,
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 13, .ofs_y = 16, .width = 4,
         .caption = " " ICON_A " Ok",
@@ -39,7 +39,7 @@ const menu_item_t AboutMenuItems[] = {
 };
 const menu_t AboutMenu = {
     .x = 1, .y = 0, .width = 18, .height = 18,
-    .items = AboutMenuItems,
+    .items = AboutMenuItems, .last_item = LAST_ITEM(AboutMenuItems),
     .onShow = onShowAbout, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
@@ -66,46 +66,41 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
 
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
-const menu_item_t MainMenuItemCamera = {
-    .prev = &MainMenuItemAbout,     .next = &MainMenuItemGallery,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 1, .width = 10,
-    .caption = " Camera",
-    .helpcontext = " Make your own pictures",
-    .onPaint = NULL,
-    .result = ACTION_CAMERA
-};
-const menu_item_t MainMenuItemGallery = {
-    .prev = &MainMenuItemCamera,    .next = &MainMenuItemSettings,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 2, .width = 10,
-    .caption = " Image gallery",
-    .helpcontext = " View your image gallery",
-    .onPaint = NULL,
-    .result = ACTION_GALLERY
-};
-const menu_item_t MainMenuItemSettings = {
-    .prev = &MainMenuItemGallery,    .next = &MainMenuItemAbout,
-    .sub = NULL, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 3, .width = 10,
-    .caption = " Settings",
-    .helpcontext = " Edit program settings",
-    .onPaint = NULL,
-    .result = ACTION_SETTINGS
-};
-const menu_item_t MainMenuItemAbout = {
-    .prev = &MainMenuItemSettings,   .next = &MainMenuItemCamera,
-    .sub = &AboutMenu, .sub_params = NULL,
-    .ofs_x = 1, .ofs_y = 4, .width = 10, .flags = MENUITEM_TERM,
-    .caption = " About",
-    .helpcontext = " About Photo! " QUOTE(VERSION),
-    .onPaint = NULL,
-    .result = MENU_RESULT_OK
+const menu_item_t MainMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 1, .width = 10,
+        .caption = " Camera",
+        .helpcontext = " Make your own pictures",
+        .onPaint = NULL,
+        .result = ACTION_CAMERA
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 10,
+        .caption = " Image gallery",
+        .helpcontext = " View your image gallery",
+        .onPaint = NULL,
+        .result = ACTION_GALLERY
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 10,
+        .caption = " Settings",
+        .helpcontext = " Edit program settings",
+        .onPaint = NULL,
+        .result = ACTION_SETTINGS
+    }, {
+        .sub = &AboutMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 10,
+        .caption = " About",
+        .helpcontext = " About Photo! " QUOTE(VERSION),
+        .onPaint = NULL,
+        .result = MENU_RESULT_OK
+    }
 };
 const menu_t MainMenu = {
     .x = 1, .y = 3, .width = 12, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
-    .items = &MainMenuItemCamera,
+    .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
     .onShow = NULL, .onHelpContext = onHelpMainMenu,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultMainMenu
 };
