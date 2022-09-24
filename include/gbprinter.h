@@ -20,6 +20,10 @@
 #define PRN_MAGIC               0x3388
 #define PRN_LE(A)               PRN_LOW(A),PRN_HIGH(A)
 
+/** magic number that is sent in the reply packet by the printer before the status byte
+ */
+#define PRN_MAGIC_DETECT        0x81
+
 /** INIT command is mandatory to initialize communication protocol with the printer
     Two consecutive linked commands must never be more than 150 ms apart except the INIT command which is valid at least 10 seconds
 */

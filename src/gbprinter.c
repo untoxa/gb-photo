@@ -60,7 +60,7 @@ uint8_t printer_send_byte(uint8_t b) {
 uint8_t printer_send_command(const uint8_t *command, uint8_t length) {
     uint8_t index = 0;
     while (index++ < length) printer_send_byte(*command++);
-    return ((uint8_t)(printer_status >> 8) == 0x81) ? (uint8_t)printer_status : PRN_STATUS_MASK_ERRORS;
+    return ((uint8_t)(printer_status >> 8) == PRN_MAGIC_DETECT) ? (uint8_t)printer_status : PRN_STATUS_MASK_ERRORS;
 }
 #define PRINTER_SEND_COMMAND(CMD) printer_send_command((const uint8_t *)&(CMD), sizeof(CMD))
 
@@ -167,8 +167,10 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
                 if ((error = printer_wait(PRN_COMPLETION_TIMEOUT, PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
 #ifdef REINIT_SEIKO
                 // reinit printer (required by Seiko?)
-                PRINTER_SEND_COMMAND(PRN_PKT_INIT);
-                if (error = printer_wait(PRN_SEIKO_RESET_TIMEOUT, PRN_STATUS_MASK_ANY, PRN_STATUS_OK)) return error;
+                if (y != (rows - 1)) {
+                    PRINTER_SEND_COMMAND(PRN_PKT_INIT);
+                    if (error = printer_wait(PRN_SEIKO_RESET_TIMEOUT, PRN_STATUS_MASK_ANY, PRN_STATUS_OK)) return error;
+                }
 #endif
                 // call printer progress callback
                 uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / rows);
@@ -227,8 +229,10 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
                 if ((error = printer_wait(PRN_COMPLETION_TIMEOUT, PRN_STATUS_BUSY, 0)) & PRN_STATUS_MASK_ERRORS) return error;
 #ifdef REINIT_SEIKO
                 // reinit printer (required by Seiko?)
-                PRINTER_SEND_COMMAND(PRN_PKT_INIT);
-                if (error = printer_wait(PRN_SEIKO_RESET_TIMEOUT, PRN_STATUS_MASK_ANY, PRN_STATUS_OK)) return error;
+                if (y != (rows - 1)) {
+                    PRINTER_SEND_COMMAND(PRN_PKT_INIT);
+                    if (error = printer_wait(PRN_SEIKO_RESET_TIMEOUT, PRN_STATUS_MASK_ANY, PRN_STATUS_OK)) return error;
+                }
 #endif
                 // call printer progress callback
                 uint8_t current_progress = (((uint16_t)y * PRN_MAX_PROGRESS) / rows);
