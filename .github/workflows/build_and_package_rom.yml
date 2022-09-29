@@ -1,0 +1,77 @@
+name: Build and Package ROM
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  # Triggers the workflow on push or pull request events but only for the develop branch
+  # push:
+  #   branches: [ develop ]
+  # pull_request:
+  #   branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}  
+    strategy:
+      matrix:       
+        include:
+          - os: ubuntu-20.04
+            name: Linux-x64
+    steps:
+
+      # ==== OS Specific Dependencies ====
+      - name: Linux Depends
+        if: matrix.name == 'Linux-x64'
+        run: |
+          # Pull in GBDK-2020 4.1.0
+          curl -Lo GBDK-2020_4.1.0_Linux-x64.tar.gz https://github.com/bbbbbr/gbdk-2020-sdcc/releases/download/CI-CD-GBDK-4.1.0-PRE/GBDK-2020_4.1.0_Linux-x64.tar.gz
+          tar xvfz GBDK-2020_4.1.0_Linux-x64.tar.gz
+          python -m pip install --upgrade Pillow
+          python -m pip install --upgrade wave
+
+      # ==== Build Steps ====
+      - name: Check out Canyon Racer Source
+        uses: actions/checkout@v2
+        with:
+          path: gb-photo
+          submodules: false
+
+      # ==== Pre-Build: Set environment vars ====
+      # Needs to be in a separate step than build so that setting the environment var takes effect
+      #
+      - name: Pre-Build Linux
+        if: (matrix.name == 'Linux-x64')
+        shell: bash
+        run: |
+          echo "BUILD_PACKAGE_FILENAME=canyon_racer.zip" >> $GITHUB_ENV
+
+
+      # ==== Build ====
+      - name: Build GBDK-2020 Linux
+        if: (matrix.name == 'Linux-x64')
+        shell: bash
+        run: |
+          export GBDK_HOME=`pwd`/gbdk/
+          cd gb-photo
+          make
+          cd ..
+
+
+      # ==== Packaging ====
+      - name: Package build Linux/MacOS
+        if: (matrix.name == 'Linux-x64')
+        shell: bash
+        run: |
+          # cd gb-photo/build/gb
+          # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
+          # cd ../../..
+          ls -la gb-photo/build
+
+      - name: Store build
+        if: (matrix.name == 'Linux-x64')
+        uses: actions/upload-artifact@v2
+        with:
+          name: GB Photo! ROM Build
+          # path: gb-photo/build/gb/${{ env.BUILD_PACKAGE_FILENAME }}
+          path: gb-photo/build
+          # retention-days: 14
