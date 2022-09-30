@@ -62,10 +62,13 @@ jobs:
         if: (matrix.name == 'Linux-x64')
         shell: bash
         run: |
-          # cd gb-photo/build/gb
-          # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
-          # cd ../../..
           ls -la gb-photo/build
+          cd gb-photo/build/gb
+          # Remove debug artifacts
+          rm *.noi *.map *.sym *.ihx
+          ls -la gb-photo/build
+          # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
+          cd ../../..
 
       - name: Store build
         if: (matrix.name == 'Linux-x64')
