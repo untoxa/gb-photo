@@ -62,10 +62,17 @@ jobs:
         if: (matrix.name == 'Linux-x64')
         shell: bash
         run: |
-          # cd gb-photo/build/gb
-          # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
-          # cd ../../..
           ls -la gb-photo/build
+          ls -la gb-photo/build/gb
+          ls -la gb-photo/build/gbc
+          # Remove debug artifacts
+          rm -f gb-photo/build/gb/*.noi gb-photo/build/gb/*.map gb-photo/build/gb/*.sym gb-photo/build/gb/*.ihx
+          rm -f gb-photo/build/gbc/*.noi gb-photo/build/gbc/*.map gb-photo/build/gbc/*.sym gb-photo/build/gbc/*.ihx
+          ls -la gb-photo/build
+          ls -la gb-photo/build/gb
+          ls -la gb-photo/build/gbc
+          # Don't use zip in linux since github will created a double nested zip
+          # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
 
       - name: Store build
         if: (matrix.name == 'Linux-x64')
