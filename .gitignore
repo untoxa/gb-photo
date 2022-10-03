@@ -8,5 +8,4 @@
 *.cdb
 unused
 *.bat
-/build/gb/photo.sav
-/build/gbc/photo.sav
+/build
