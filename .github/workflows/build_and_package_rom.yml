@@ -30,7 +30,7 @@ jobs:
           python -m pip install --upgrade wave
 
       # ==== Build Steps ====
-      - name: Check out Canyon Racer Source
+      - name: Check out Source
         uses: actions/checkout@v2
         with:
           path: gb-photo
@@ -43,7 +43,7 @@ jobs:
         if: (matrix.name == 'Linux-x64')
         shell: bash
         run: |
-          echo "BUILD_PACKAGE_FILENAME=canyon_racer.zip" >> $GITHUB_ENV
+          echo "BUILD_PACKAGE_FILENAME=gb_photo.zip" >> $GITHUB_ENV
 
 
       # ==== Build ====
