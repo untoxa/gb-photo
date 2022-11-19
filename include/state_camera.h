@@ -83,6 +83,7 @@ typedef struct camera_state_options_t {
     bool print_fast             : 1;
     bool fancy_sgb_border       : 1;
     bool show_grid              : 1;
+    bool save_confirm           : 1;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
@@ -152,5 +153,8 @@ inline void image_capture() {
 uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;
 
 #define COUNTER_INFINITE_VALUE 31
+
+#define DEFAULT_CONTRAST_VALUE 9
+#define DEFAULT_EXPOSURE_INDEX 28
 
 #endif

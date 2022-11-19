@@ -24,7 +24,7 @@ const frame_desc_t print_frames[] = {
         .tiles_bank = BANK(frame_photo),
         .image_y = 2,
         .image_x = 2,
-        .caption = "Photo! frame",
+        .caption = "Photo!",
         .desc = "\"Photo!\" frame",
     },{
         .height = frame_wild_HEIGHT / frame_wild_TILE_H,

@@ -40,7 +40,8 @@ typedef enum {
     idSettingsPrintFast,
     idSettingsAltBorder,
     idSettingsCGBPalette,
-    idSettingsShowGrid
+    idSettingsShowGrid,
+    idSettingsSaveConfirm
 } settings_menu_e;
 
 
@@ -104,8 +105,16 @@ const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits"
 
 const menu_item_t SettingsMenuItems[] = {
     {
-        .sub = &PrinterFramesMenu, .sub_params = NULL,
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
         .ofs_x = 1, .ofs_y = 1, .width = 13,
+        .id = idSettingsCGBPalette,
+        .caption = " Palette\t[%s]",
+        .helpcontext = " Select CGB palette",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_CGB_PALETTE
+    }, {
+        .sub = &PrinterFramesMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 13,
         .id = idSettingsPrintFrame,
         .caption = " Frame\t\t[%s]",
         .helpcontext = " Select frame for printing",
@@ -113,7 +122,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_NONE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 2, .width = 13,
+        .ofs_x = 1, .ofs_y = 3, .width = 13,
         .id = idSettingsPrintFast,
         .caption = " Fast printing\t\t\t%s",
         .helpcontext = " Enable CGB 32Kb/s printing",
@@ -121,20 +130,12 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_PRINT_FAST
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 3, .width = 13,
+        .ofs_x = 1, .ofs_y = 4, .width = 13,
         .id = idSettingsAltBorder,
         .caption = " Alt. SGB border\t\t%s",
         .helpcontext = " Switch different SGB borders",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_ALT_BORDER
-    }, {
-        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
-        .ofs_x = 1, .ofs_y = 4, .width = 13,
-        .id = idSettingsCGBPalette,
-        .caption = " Palette\t[%s]",
-        .helpcontext = " Select CGB palette",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_CGB_PALETTE
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 5, .width = 13,
@@ -143,10 +144,18 @@ const menu_item_t SettingsMenuItems[] = {
         .helpcontext = " Show grid on the live view",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_SHOW_GRID
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 6, .width = 13,
+        .id = idSettingsSaveConfirm,
+        .caption = " Save confirmation\t%s",
+        .helpcontext = " Confirm saving of picture",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_SAVE_CONF
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 7,
+    .x = 3, .y = 5, .width = 15, .height = 8,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -206,6 +215,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsShowGrid:
             sprintf(text_buffer, self->caption, checkbox[OPTION(show_grid)]);
             break;
+        case idSettingsSaveConfirm:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(save_confirm)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -241,6 +253,10 @@ void menu_settings_execute() BANKED {
             break;
         case ACTION_SETTINGS_SHOW_GRID:
             OPTION(show_grid) = !OPTION(show_grid);
+            save_camera_state();
+            break;
+        case ACTION_SETTINGS_SAVE_CONF:
+            OPTION(save_confirm) = !OPTION(save_confirm);
             save_camera_state();
             break;
         default:

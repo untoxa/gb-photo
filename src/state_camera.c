@@ -280,7 +280,7 @@ static void refresh_screen() {
 
 static uint8_t onPrinterProgress() BANKED {
     misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
     return 0;
 }
 
@@ -347,6 +347,30 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings);
+
+// --- Save confirmation namu ------------------------
+const menu_item_t SaveConfirmMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 0, .width = 6,
+        .caption = " Keep",
+        .onPaint = NULL,
+        .result = MENU_RESULT_YES
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 6, .ofs_y = 0, .width = 6,
+        .caption = " " ICON_B " Discard",
+        .onPaint = NULL,
+        .result = MENU_RESULT_NO
+    }
+};
+const menu_t SaveConfirmMenu = {
+    .x = 3, .y = 17, .width = 0, .height = 0,
+    .flags = MENU_INVERSE,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
+    .items = SaveConfirmMenuItems, .last_item = LAST_ITEM(SaveConfirmMenuItems),
+    .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
+};
 
 // --- Assisted menu ---------------------------------
 const menu_item_t CameraMenuItemsAssisted[] = {
@@ -526,6 +550,11 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
     return joypad_swap_dpad(value);
 }
+bool isSaveCancelled() {
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, 1, SOLID_BLACK);
+    uint8_t menu_result = menu_execute(&SaveConfirmMenu, NULL, NULL);
+    return (menu_result != MENU_RESULT_YES);
+}
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
 
@@ -542,20 +571,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process joypad buttons
     if (KEY_PRESSED(J_A)) {
         // A is a "shutter" button
-        switch (OPTION(trigger_mode)) {
-            case trigger_mode_interval:
-                COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
-            case trigger_mode_timer:
-                camera_charge_timer(OPTION(shutter_timer));
+        switch (OPTION(after_action)) {
+            case after_action_picnrec_video:
+            case after_action_transfer_video:
+                // toggle recording and start image capture
+                recording_video = !recording_video;
+                if (recording_video && !is_capturing()) image_capture();
+                refresh_usage_indicator();
                 break;
             default:
-                switch (OPTION(after_action)) {
-                    case after_action_picnrec_video:
-                    case after_action_transfer_video:
-                        // toggle recording and start image capture
-                        recording_video = !recording_video;
-                        if (recording_video && !is_capturing()) image_capture();
-                        refresh_usage_indicator();
+                switch (OPTION(trigger_mode)) {
+                    case trigger_mode_interval:
+                        COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
+                    case trigger_mode_timer:
+                        camera_charge_timer(OPTION(shutter_timer));
                         break;
                     default:
                         camera_do_shutter = TRUE;
@@ -575,8 +604,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         } else {
             if (OPTION(camera_mode) == camera_mode_auto) {
                 music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+                // reset both brightness and contrast to defaults, adjust the sliders
                 scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
+                scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_SETS);
                 save_camera_mode_settings(OPTION(camera_mode));
+                // change of contrast means reloading of the dithering pattern
+                SWITCH_RAM(CAMERA_BANK_REGISTERS);
+                RENDER_CAM_REG_DITHERPATTERN();
             }
         }
     } else if (KEY_PRESSED(J_SELECT)) {
@@ -792,6 +826,19 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         display_last_seen(FALSE);
         if (capture_triggered) {
             capture_triggered = false;
+            // check save confirmation
+            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_interval)) {
+                if ((OPTION(after_action) == after_action_save) ||
+                    (OPTION(after_action) == after_action_print) ||
+                    (OPTION(after_action) == after_action_printsave) ||
+                    (OPTION(after_action) == after_action_transfer) ||
+                    (OPTION(after_action) == after_action_transfersave) ||
+                    (OPTION(after_action) == after_action_picnrec)) {
+                        if (isSaveCancelled()) return ACTION_NONE;
+                        onHelpCameraMenu(menu, selection);
+                }
+            }
+            // perform after action(s)
             switch (OPTION(after_action)) {
                 case after_action_save:
                     camera_image_save();
@@ -807,6 +854,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     refresh_usage_indicator();
                 case after_action_transfer:
                     return ACTION_CAMERA_TRANSFER;
+                default:
+                    break;
             }
         }
         if ((image_live_preview) || (recording_video)) image_capture();
@@ -896,7 +945,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
     return 0;
 }
 
