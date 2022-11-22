@@ -43,7 +43,6 @@ typedef enum {
     idSettingsCGBPalette,
     idSettingsShowGrid,
     idSettingsSaveConfirm,
-    idSettingsIRRemoteShutter,
 } settings_menu_e;
 
 
@@ -154,18 +153,10 @@ const menu_item_t SettingsMenuItems[] = {
         .helpcontext = " Confirm saving of picture",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_SAVE_CONF
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 7, .width = 13,
-        .id = idSettingsIRRemoteShutter,
-        .caption = " IR remote\t\t\t\t%s",
-        .helpcontext = " CGB IR sensor as shutter",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_IR_REMOTE
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 9,
+    .x = 3, .y = 5, .width = 15, .height = 8,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -228,9 +219,6 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsSaveConfirm:
             sprintf(text_buffer, self->caption, checkbox[OPTION(save_confirm)]);
             break;
-        case idSettingsIRRemoteShutter:
-            sprintf(text_buffer, self->caption, checkbox[OPTION(ir_remote_shutter)]);
-            break;
         default:
             *text_buffer = 0;
             break;
@@ -271,18 +259,6 @@ void menu_settings_execute() BANKED {
         case ACTION_SETTINGS_SAVE_CONF:
             OPTION(save_confirm) = !OPTION(save_confirm);
             save_camera_state();
-            break;
-        case ACTION_SETTINGS_IR_REMOTE:
-            OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
-            save_camera_state();
-            // Apply change immediately in camera state, otherwise will be set entering camera state
-            if (_is_COLOR && CURRENT_PROGRAM_STATE == state_camera) {
-                if (OPTION(ir_remote_shutter)) {
-                    ir_sense_start();
-                } else {
-                    ir_sense_stop();
-                }
-            }
             break;
         default:
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);

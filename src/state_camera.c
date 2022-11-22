@@ -332,7 +332,7 @@ uint8_t ENTER_state_camera() BANKED {
     // set printer progress handler
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
     // On CGB, start sensing IR
-    if (OPTION(ir_remote_shutter)) {
+    if (OPTION(trigger_mode) == trigger_mode_ir) {
         ir_sense_start();
     }
     // reset capture timers and counters
@@ -570,15 +570,14 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     static change_direction_e change_direction;
     static bool capture_triggered = false;       // state of static variable persists between calls
-    static bool remote_shutter_triggered;
 
     // If enabled, sense remote shutters. IR sensing takes time but only if initially high
-    remote_shutter_triggered = remote_shutter_triggered || OPTION(ir_remote_shutter) && ir_sense_pattern();
+    bool ir_triggered = OPTION(trigger_mode) == trigger_mode_ir && ir_sense_pattern();
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
-    if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
+    if (KEY_PRESSED(J_A) || ir_triggered) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -834,12 +833,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
         display_last_seen(FALSE);
         if (capture_triggered) {
-            // Check save confirmation. Don't confirm save if triggered by remote
-            bool display_confirm_save = OPTION(save_confirm)
-                && (OPTION(trigger_mode) != trigger_mode_interval)
-                && !remote_shutter_triggered;
             capture_triggered = false;
-            remote_shutter_triggered = false;
+            // Check save confirmation, but only in certain trigger modes
+            bool display_confirm_save = OPTION(save_confirm)
+                && OPTION(trigger_mode) != trigger_mode_interval
+                && OPTION(trigger_mode) != trigger_mode_ir;
             if (display_confirm_save) {
                 if ((OPTION(after_action) == after_action_save) ||
                     (OPTION(after_action) == after_action_print) ||
@@ -1034,9 +1032,16 @@ uint8_t UPDATE_state_camera() BANKED {
                 }
                 case ACTION_TRIGGER_ABUTTON:
                 case ACTION_TRIGGER_TIMER:
-                case ACTION_TRIGGER_INTERVAL: {
-                    static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval};
-                    OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
+                case ACTION_TRIGGER_INTERVAL:
+                case ACTION_TRIGGER_IR: {
+                    static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval, trigger_mode_ir };
+                    trigger_mode_e selected = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
+                    if (selected == trigger_mode_ir && !_is_COLOR) {
+                        selected = trigger_mode_abutton;
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                    }
+                    selected == trigger_mode_ir ? ir_sense_start() : ir_sense_stop();
+                    OPTION(trigger_mode) = selected;
                     break;
                 }
                 case ACTION_ACTION_SAVE:

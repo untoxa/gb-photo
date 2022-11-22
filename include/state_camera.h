@@ -25,6 +25,7 @@ typedef enum {
     trigger_mode_abutton,
     trigger_mode_timer,
     trigger_mode_interval,
+    trigger_mode_ir,
     N_TRIGGER_MODES
 } trigger_mode_e;
 
@@ -45,13 +46,6 @@ typedef enum {
     shutter_sound_1,
     N_SHUTTER_SOUNDS
 } shutter_sound_e;
-
-typedef enum {
-    shutter_reason_gamepad,
-    shutter_reason_remote_pad,
-    shutter_reason_ir,
-    N_SHUTTER_REASONS
-} shutter_reason_e;
 
 typedef enum {
     idNone = 0,
