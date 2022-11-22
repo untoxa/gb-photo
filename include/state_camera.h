@@ -47,6 +47,13 @@ typedef enum {
 } shutter_sound_e;
 
 typedef enum {
+    shutter_reason_gamepad,
+    shutter_reason_remote_pad,
+    shutter_reason_ir,
+    N_SHUTTER_REASONS
+} shutter_reason_e;
+
+typedef enum {
     idNone = 0,
     idExposure,
     idGain,
@@ -84,6 +91,7 @@ typedef struct camera_state_options_t {
     bool fancy_sgb_border       : 1;
     bool show_grid              : 1;
     bool save_confirm           : 1;
+    bool ir_remote_shutter      : 1;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;

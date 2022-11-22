@@ -331,14 +331,16 @@ uint8_t ENTER_state_camera() BANKED {
     refresh_screen();
     // set printer progress handler
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
+    // On CGB, start sensing IR
+    if (OPTION(ir_remote_shutter)) {
+        ir_sense_start();
+    }
     // reset capture timers and counters
     COUNTER_RESET(camera_shutter_timer);
     COUNTER_RESET(camera_repeat_counter);
     // load some initial settings
     RENDER_CAM_REGISTERS();
     SHADOW.CAM_REG_CAPTURE = 0;
-    // On CGB, start sensing IR
-    ir_sense_start();
     // fade in
     fade_in_modal();
     return 0;
@@ -568,11 +570,15 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     static change_direction_e change_direction;
     static bool capture_triggered = false;       // state of static variable persists between calls
+    static bool remote_shutter_triggered;
+
+    // If enabled, sense remote shutters. IR sensing takes time but only if initially high
+    remote_shutter_triggered = remote_shutter_triggered || OPTION(ir_remote_shutter) && ir_sense_pattern();
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
-    if (KEY_PRESSED(J_A) || ir_sense_pattern()) {
+    if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -828,9 +834,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
         display_last_seen(FALSE);
         if (capture_triggered) {
+            // Check save confirmation. Don't confirm save if triggered by remote
+            bool display_confirm_save = OPTION(save_confirm)
+                && (OPTION(trigger_mode) != trigger_mode_interval)
+                && !remote_shutter_triggered;
             capture_triggered = false;
-            // check save confirmation
-            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_interval)) {
+            remote_shutter_triggered = false;
+            if (display_confirm_save) {
                 if ((OPTION(after_action) == after_action_save) ||
                     (OPTION(after_action) == after_action_print) ||
                     (OPTION(after_action) == after_action_printsave) ||
@@ -1072,7 +1082,7 @@ uint8_t LEAVE_state_camera() BANKED {
     fade_out_modal();
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
-    scrollbar_destroy_all();
     ir_sense_stop();
+    scrollbar_destroy_all();
     return 0;
 }

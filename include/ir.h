@@ -2,10 +2,21 @@
 #define __IR_H_INCLUDE__
 
 // Turn on IR sensing only on CGB
-void ir_sense_start();
+inline void ir_sense_start() {
+    if (_cpu == CGB_TYPE) {
+        // Turn off IR emit & turn on IR read
+        RP_REG = RPF_ENREAD;
+    }
+}
+
 
 // Turn off IR sensing only on CGB
-void ir_sense_stop();
+inline void ir_sense_stop() {
+    if (_cpu == CGB_TYPE) {
+        // Turn off IR emit & read
+        RP_REG = 0;
+    }
+}
 
 // If IR is detected, sense for a short period and return true 
 // if a pattern of flashes follows
