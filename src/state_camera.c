@@ -25,6 +25,7 @@
 #include "histogram.h"
 #include "math.h"
 #include "scrollbar.h"
+#include "ir.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -336,6 +337,8 @@ uint8_t ENTER_state_camera() BANKED {
     // load some initial settings
     RENDER_CAM_REGISTERS();
     SHADOW.CAM_REG_CAPTURE = 0;
+    // On CGB, start sensing IR
+    ir_sense_start();
     // fade in
     fade_in_modal();
     return 0;
@@ -569,7 +572,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
-    if (KEY_PRESSED(J_A)) {
+    if (KEY_PRESSED(J_A) || ir_sense_pattern()) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -1070,5 +1073,6 @@ uint8_t LEAVE_state_camera() BANKED {
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
     scrollbar_destroy_all();
+    ir_sense_stop();
     return 0;
 }
