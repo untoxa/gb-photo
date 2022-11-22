@@ -15,7 +15,6 @@
 #include "fade_manager.h"
 #include "joy.h"
 #include "systemhelpers.h"
-#include "ir.h"
 
 #include "state_camera.h"
 
@@ -42,7 +41,7 @@ typedef enum {
     idSettingsAltBorder,
     idSettingsCGBPalette,
     idSettingsShowGrid,
-    idSettingsSaveConfirm,
+    idSettingsSaveConfirm
 } settings_menu_e;
 
 

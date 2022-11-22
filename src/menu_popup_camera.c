@@ -103,7 +103,7 @@ const spinedit_params_t CounterSpinEditParams = {
     .value = &spinedit_counter_value,
     .names = &CounterSpinEditInfinite
 };
-menu_item_t TriggerSubMenuItems[] = {
+const menu_item_t TriggerSubMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 1, .width = 8,
