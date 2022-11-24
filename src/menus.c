@@ -56,7 +56,6 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     if (menu->onShow) menu->onShow(menu, param);
 
     // draw menu items
-
     for (const menu_item_t * current_item = menu->items; current_item <= menu->last_item; current_item++) {
         if (current_item == selection) {
             menu_move_selection(menu, NULL, current_item);

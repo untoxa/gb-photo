@@ -25,7 +25,6 @@ typedef enum {
     trigger_mode_abutton,
     trigger_mode_timer,
     trigger_mode_interval,
-    trigger_mode_ir,
     N_TRIGGER_MODES
 } trigger_mode_e;
 
@@ -85,6 +84,7 @@ typedef struct camera_state_options_t {
     bool fancy_sgb_border       : 1;
     bool show_grid              : 1;
     bool save_confirm           : 1;
+    bool ir_remote_shutter      : 1;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;

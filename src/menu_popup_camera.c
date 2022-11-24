@@ -127,17 +127,10 @@ const menu_item_t TriggerSubMenuItems[] = {
         .helpcontext = " Make series of pictures",
         .onPaint = NULL,
         .result = ACTION_TRIGGER_INTERVAL
-    },  {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 8,
-        .caption = " IR remote",
-        .helpcontext = " CGB IR sensor as remote",
-        .onPaint = NULL,
-        .result = ACTION_TRIGGER_IR
     }
 };
 const menu_t TriggerSubMenu = {
-    .x = 5, .y = 5, .width = 10, .height = 6,
+    .x = 5, .y = 5, .width = 10, .height = 5,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = TriggerSubMenuItems, .last_item = LAST_ITEM(TriggerSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -291,8 +284,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
         [trigger_mode_abutton]          = "[" ICON_A " button]",
         [trigger_mode_timer]            = "[Timer]",
-        [trigger_mode_interval]         = "[Repeat]",
-        [trigger_mode_ir]               = "[IR remote]"
+        [trigger_mode_interval]         = "[Repeat]"
     };
     static const uint8_t * const after_actions[N_AFTER_ACTIONS] = {
         [after_action_save]             = "[Save]",
