@@ -6,7 +6,6 @@
 #include "remote_down.h"
 
 inline uint8_t send_data(uint8_t b) {
-    uint16_t guard = 0;
     SB_REG = b;
     SC_REG = 0x81;
     while (SC_REG & 0x80);
