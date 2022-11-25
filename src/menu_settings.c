@@ -229,7 +229,8 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             sprintf(text_buffer, self->caption, checkbox[OPTION(save_confirm)]);
             break;
         case idSettingsIRRemoteShutter:
-            sprintf(text_buffer, self->caption, checkbox[OPTION(ir_remote_shutter)]);
+            // Indicate IR is not available when not GBC
+            sprintf(text_buffer, self->caption, (_is_COLOR) ? checkbox[OPTION(ir_remote_shutter)] : "-");
             break;
         default:
             *text_buffer = 0;
@@ -273,17 +274,20 @@ void menu_settings_execute() BANKED {
             save_camera_state();
             break;
         case ACTION_SETTINGS_IR_REMOTE:
-            OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
-            save_camera_state();
-            // Apply change immediately in camera state, otherwise will be set entering camera state
-            if (_is_COLOR && CURRENT_PROGRAM_STATE == state_camera) {
-                if (OPTION(ir_remote_shutter)) {
-                    ir_sense_start();
-                } else {
-                    ir_sense_stop();
+            // Fall through to play error sound if not GBC
+            if (_is_COLOR) {
+                OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
+                save_camera_state();
+                // Apply change immediately in camera state, otherwise will be set entering camera state
+                if (CURRENT_PROGRAM_STATE == state_camera) {
+                    if (OPTION(ir_remote_shutter)) {
+                        ir_sense_start();
+                    } else {
+                        ir_sense_stop();
+                    }
                 }
+                break;
             }
-            break;
         default:
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             break;
