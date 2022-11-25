@@ -5,7 +5,7 @@
 #include "remote.h"
 #include "remote_down.h"
 
-uint8_t send_data(uint8_t b) {
+inline uint8_t send_data(uint8_t b) {
     uint16_t guard = 0;
     SB_REG = b;
     SC_REG = 0x81;
