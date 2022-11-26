@@ -1,6 +1,5 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
-#include <time.h>
 
 #include "remote.h"
 #include "remote_down.h"
@@ -22,12 +21,14 @@ uint8_t send_joypad(uint8_t j, uint8_t id) {
     return send_data((j) | ((PARITY(j)) ? (uint8_t) 0x90 : (uint8_t) 0x80) | id);
 }
 
-uint8_t send_ir_shutter() {
-    clock_t end_t = clock() + CLOCKS_PER_SEC / 4;
-    do {
-        RP_REG = ~RP_REG & 0x1;
-        delay(10);
-    } while (clock() < end_t);
+#define MS_PULSE_LENGTH 10
+#define MS_PACKET_LENGTH 250
+
+uint8_t send_ir_shutter() CRITICAL {
+    for (uint8_t i = 0; i != MS_PACKET_LENGTH / MS_PULSE_LENGTH; i++) {
+        RP_REG ^= 0x1;
+        delay(MS_PULSE_LENGTH);
+    }
     RP_REG = 0;
     return TRUE;
 }
@@ -61,12 +62,6 @@ void update_joy(uint8_t joy, const submap_t * coords) {
     }
 }
 
-void update_connected(uint8_t connected) {
-    set_bkg_submap(DEVICE_SCREEN_X_OFFSET + 2, DEVICE_SCREEN_Y_OFFSET + 4, 3, 2,
-                   connected ? remote_down_map : remote_map,
-                   (remote_WIDTH / remote_TILE_W));
-}
-
 void main(void) {
     static uint8_t has_ir = FALSE;
 
@@ -81,17 +76,16 @@ void main(void) {
     SHOW_BKG;
     DISPLAY_ON;
 
+    // delay a bit for aesthetics
     for (uint8_t i = 30; i != 0; i--) wait_vbl_done();
+
     // refresh link state
-    static uint8_t connected = 0;
-    connected = send_data(0);
-    update_connected(connected);
+    static uint8_t connected, old_connected;
+    connected = send_data(0), old_connected = ~connected;
 
     static uint8_t joy = 0, old_joy;
-    static uint8_t old_connected;
     while (TRUE) {
         old_joy = joy, joy = joypad();
-        old_connected = connected;
 
         if ((old_joy ^ joy) & 0x0f) {
             update_joy(joy & 0x0f, pad);
@@ -105,8 +99,11 @@ void main(void) {
                 send_ir_shutter();
             }
         }
-        if (old_connected ^ connected) {
-            update_connected(connected);
+        if (old_connected != connected) {
+            set_bkg_submap(DEVICE_SCREEN_X_OFFSET + 2, DEVICE_SCREEN_Y_OFFSET + 4, 3, 2,
+                        connected ? remote_down_map : remote_map,
+                        (remote_WIDTH / remote_TILE_W));
+            old_connected = connected;
         }
         wait_vbl_done();
     }
