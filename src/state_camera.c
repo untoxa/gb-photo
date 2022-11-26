@@ -25,6 +25,7 @@
 #include "histogram.h"
 #include "math.h"
 #include "scrollbar.h"
+#include "ir.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -330,6 +331,10 @@ uint8_t ENTER_state_camera() BANKED {
     refresh_screen();
     // set printer progress handler
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
+    // On CGB, start sensing IR
+    if (OPTION(ir_remote_shutter)) {
+        ir_sense_start();
+    }
     // reset capture timers and counters
     COUNTER_RESET(camera_shutter_timer);
     COUNTER_RESET(camera_repeat_counter);
@@ -566,10 +571,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     static change_direction_e change_direction;
     static bool capture_triggered = false;       // state of static variable persists between calls
 
+    // If enabled, sense remote shutters. IR sensing takes time but only if initially high
+    bool remote_shutter_triggered = OPTION(ir_remote_shutter) && !capture_triggered && ir_sense_pattern();
+
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
-    if (KEY_PRESSED(J_A)) {
+    if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -1069,6 +1077,7 @@ uint8_t LEAVE_state_camera() BANKED {
     fade_out_modal();
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
+    ir_sense_stop();
     scrollbar_destroy_all();
     return 0;
 }
