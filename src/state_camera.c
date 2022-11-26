@@ -332,9 +332,7 @@ uint8_t ENTER_state_camera() BANKED {
     // set printer progress handler
     gbprinter_set_handler(onPrinterProgress, BANK(state_camera));
     // On CGB, start sensing IR
-    if (OPTION(ir_remote_shutter)) {
-        ir_sense_start();
-    }
+    if ((_is_COLOR) && (OPTION(ir_remote_shutter))) ir_sense_start();
     // reset capture timers and counters
     COUNTER_RESET(camera_shutter_timer);
     COUNTER_RESET(camera_repeat_counter);
@@ -572,7 +570,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     static bool capture_triggered = false;       // state of static variable persists between calls
 
     // If enabled, sense remote shutters. IR sensing takes time but only if initially high
-    bool remote_shutter_triggered = OPTION(ir_remote_shutter) && !capture_triggered && ir_sense_pattern();
+    static bool remote_shutter_triggered;
+    remote_shutter_triggered = ((_is_COLOR) && OPTION(ir_remote_shutter) && !capture_triggered && ir_sense_pattern());
 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
@@ -1077,7 +1076,7 @@ uint8_t LEAVE_state_camera() BANKED {
     fade_out_modal();
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);
-    ir_sense_stop();
+    if (_is_COLOR) ir_sense_stop();
     scrollbar_destroy_all();
     return 0;
 }

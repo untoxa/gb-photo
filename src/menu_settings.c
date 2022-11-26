@@ -229,8 +229,7 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             sprintf(text_buffer, self->caption, checkbox[OPTION(save_confirm)]);
             break;
         case idSettingsIRRemoteShutter:
-            // Indicate IR is not available when not GBC
-            sprintf(text_buffer, self->caption, (_is_COLOR) ? checkbox[OPTION(ir_remote_shutter)] : "-");
+            sprintf(text_buffer, self->caption, checkbox[OPTION(ir_remote_shutter)]);
             break;
         default:
             *text_buffer = 0;
@@ -274,10 +273,9 @@ void menu_settings_execute() BANKED {
             save_camera_state();
             break;
         case ACTION_SETTINGS_IR_REMOTE:
-            // Fall through to play error sound if not GBC
+            OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
+            save_camera_state();
             if (_is_COLOR) {
-                OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
-                save_camera_state();
                 // Apply change immediately in camera state, otherwise will be set entering camera state
                 if (CURRENT_PROGRAM_STATE == state_camera) {
                     if (OPTION(ir_remote_shutter)) {
