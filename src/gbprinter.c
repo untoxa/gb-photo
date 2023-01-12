@@ -106,7 +106,7 @@ uint8_t printer_wait(uint16_t timeout, uint8_t mask, uint8_t value) {
         }
         if (timeout-- == 0) return PRN_STATUS_MASK_ERRORS;
         if (error & PRN_STATUS_MASK_ERRORS) break;
-        wait_vbl_done();
+        vsync();
     }
     return error;
 }

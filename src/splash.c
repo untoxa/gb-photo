@@ -146,8 +146,8 @@ void logo_fade(const mask_t * mask) BANKED {
         counters[i] = i + (WIDTH(GBDK2020) + 1);
     
     while (counters[LENGTH(counters) - 1]) {
-        wait_vbl_done();
-        wait_vbl_done();
+        vsync();
+        vsync();
         for (j = 0; j != WIDTH(GBDK2020); j++) {
             if (counters[j]) {
                 if (--counters[j] < 8) {

@@ -62,7 +62,7 @@ void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
     vmemset(_VRAM8800, 0, 16);
     fill_bkg_rect(0, 0, 20, 18, 0x80);
 
-    wait_vbl_done();
+    vsync();
     LCDC_REG = tmp_lcdc;
 
     SGB_TRANSFER((SGB_MASK_EN << 3) | 1, SGB_SCR_UNFREEZE);

@@ -318,7 +318,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing() && !recording_video) wait_vbl_done();
+    if (!is_capturing() && !recording_video) vsync();
     return 0;
 }
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {

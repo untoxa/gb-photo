@@ -143,7 +143,7 @@ void tumbnail_refresh(uint8_t index) {
 }
 
 uint8_t tumbnails_diaplay(uint8_t start) {
-    wait_vbl_done();
+    vsync();
     screen_clear_rect(THUMBNAIL_DISPLAY_X, THUMBNAIL_DISPLAY_Y, THUMBNAIL_DISPLAY_WIDTH, THUMBNAIL_DISPLAY_HEIGHT, WHITE_ON_BLACK);
     for (uint8_t i = start, j = 0; (i < VECTOR_LEN(used_slots)) && (j != MAX_PREVIEW_THUMBNAILS); i++, j++) {
         uint8_t slot = VECTOR_GET(used_slots, i);
