@@ -1,6 +1,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "systemhelpers.h"
 #include "bankdata.h"
 

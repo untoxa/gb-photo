@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "compat.h"
 #include "sgb_border.h"
 
 #define SGB_CHR_BLOCK0 0

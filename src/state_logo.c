@@ -2,6 +2,7 @@
 
 #include <gbdk/platform.h>
 
+#include "compat.h"
 #include "musicmanager.h"
 #include "joy.h"
 #include "screen.h"

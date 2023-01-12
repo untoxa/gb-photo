@@ -3,6 +3,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "systemdetect.h"
 #include "fade_manager.h"
 #include "palette.h"

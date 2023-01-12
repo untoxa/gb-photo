@@ -3,6 +3,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "systemdetect.h"
 
 BANKREF(module_detect_system)

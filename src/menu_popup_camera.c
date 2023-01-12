@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "compat.h"
 #include "globals.h"
 #include "screen.h"
 

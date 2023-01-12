@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "compat.h"
 #include "systemhelpers.h"
 #include "musicmanager.h"
 #include "joy.h"

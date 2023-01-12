@@ -3,8 +3,8 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "systemdetect.h"
-
 #include "splash.h"
 
 #include "GBDK2020.h"   // logos must be compiled into the same bank

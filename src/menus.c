@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "compat.h"
 #include "joy.h"
 #include "vwf.h"
 #include "screen.h"

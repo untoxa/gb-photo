@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "compat.h"
 #include "gbprinter.h"
 #include "gbcamera.h"
 #include "bankdata.h"

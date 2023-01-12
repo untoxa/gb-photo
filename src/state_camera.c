@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat.h"
 #include "gbcamera.h"
 #include "musicmanager.h"
 #include "systemdetect.h"
