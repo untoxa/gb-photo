@@ -55,6 +55,7 @@ extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rend
 _MODULE(module_detect_system)\
 _MODULE(module_load_save)\
 _MODULE(module_sgb_assets)\
+_MODULE(module_splash)\
 _MODULE(module_display_off)\
 _MODULE(module_joy)\
 _MODULE(module_palette)\
