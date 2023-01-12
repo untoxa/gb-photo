@@ -1,1 +1,1 @@
--noflip -keep_palette_order
+-b 255 -noflip -keep_palette_order

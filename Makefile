@@ -92,17 +92,19 @@ DEPS = $(DEPENDANT:%.o=%.d)
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/sounds/%.vgm $$(wildcard $(RESDIR)/audio/$(PLAT)/sounds/%.vgm.meta)
-	python utils/vgm2data.py -5 -w -3 -d 4 -b 255 `cat <$<.meta 2>/dev/null` -o $@ $<
+	python utils/vgm2data.py -5 -w -3 -d 4 `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/sounds/%.sav $$(wildcard $(RESDIR)/audio/$(PLAT)/sounds/%.sav.meta)
-	python utils/fxhammer2data.py -d 4 -c -b 255 `cat <$<.meta 2>/dev/null` -o $@ $<
+	python utils/fxhammer2data.py -d 4 -c `cat <$<.meta 2>/dev/null` -o $@ $<
 
-$(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/music/%.uge
-	utils/uge2source $< -b 255 $(basename $(notdir $<)) $@
+.SECONDEXPANSION:
+$(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/music/%.uge $$(wildcard $(RESDIR)/audio/$(PLAT)/music/%.uge.meta)
+	utils/uge2source $< `cat <$<.meta 2>/dev/null` $(basename $(notdir $<)) $@
 
-$(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/waveforms/%.wav
-	python utils/wav2data.py -b 255 -o $@ $<
+.SECONDEXPANSION:
+$(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/waveforms/%.wav $$(wildcard $(RESDIR)/audio/$(PLAT)/waveforms/%.wav.meta)
+	python utils/wav2data.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 $(OBJDIR)/%.o:	$(RESDIR)/audio/$(PLAT)/%.c
 	$(LCC) $(CFLAGS) -c -o $@ $<
@@ -110,15 +112,15 @@ $(OBJDIR)/%.o:	$(RESDIR)/audio/$(PLAT)/%.c
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/fonts/%.png $$(wildcard $(RESDIR)/gfx/$(PLAT)/fonts/%.png.meta)
-	python utils/png2font.py -b 255 `cat <$<.meta 2>/dev/null` -o $@ $<
+	python utils/png2font.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/sprites/%.png $$(wildcard $(RESDIR)/gfx/$(PLAT)/sprites/%.png.meta)
-	$(PNG2ASSET) $< -c $@ `cat <$<.meta 2>/dev/null` -spr8x16 -b 255
+	$(PNG2ASSET) $< -c $@ `cat <$<.meta 2>/dev/null` -spr8x16
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/backgrounds/%.png $$(wildcard $(RESDIR)/gfx/$(PLAT)/backgrounds/%.png.meta)
-	$(PNG2ASSET) $< -c $@ -map `cat <$<.meta 2>/dev/null` -b 255
+	$(PNG2ASSET) $< -c $@ -map `cat <$<.meta 2>/dev/null`
 
 #always rebuild
 .PHONY: $(ALWAYS) remote
