@@ -45,7 +45,7 @@ void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8
 
 static void refresh_screen() {
     wait_vbl_done();
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     screen_load_picture(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, logo_WIDTH / logo_TILE_W, logo_HEIGHT / logo_TILE_H, logo_map, logo_tiles, BANK(logo));
     screen_text_render(0, 16, "\x03\xff (c) 2022 Toxa");
     screen_text_render(0, 17, version_string);

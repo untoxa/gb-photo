@@ -1,13 +1,29 @@
 #ifndef __MISC_ASSETS_H_INCLUDE__
 #define __MISC_ASSETS_H_INCLUDE__
 
-#define SOLID_WHITE         0xfeu
-#define SOLID_BLACK         0xffu
+#include <gbdk/platform.h>
 
-#define CORNER_UL           0xfau
-#define CORNER_UR           0xfbu
-#define CORNER_DR           0xfdu
-#define CORNER_DL           0xfcu
+#define BLACK_ON_WHITE      ((DMG_BLACK << 2) | DMG_WHITE)
+#define WHITE_ON_BLACK      ((DMG_WHITE << 2) | DMG_BLACK)
+
+#define DK_GR_ON_WHITE      ((DMG_DARK_GRAY << 2) | DMG_WHITE)
+#define WHITE_ON_DK_GR      ((DMG_WHITE << 2) | DMG_DARK_GRAY)
+
+#define LT_GR_ON_BLACK      ((DMG_LITE_GRAY << 2) | DMG_BLACK)
+#define BLACK_ON_LT_GR      ((DMG_BLACK << 2) | DMG_LITE_GRAY)
+
+#define BG_COLOR(c)         (c & 0b00000011)
+#define FG_COLOR(c)         ((c >> 2) & 0b00000011)
+
+#define SLD_WHITE           0xfcu
+#define SLD_LITE_GRAY       0xfdu
+#define SLD_DARK_GRAY       0xfeu
+#define SLD_BLACK           0xffu
+
+#define CORNER_UL           0xf8u
+#define CORNER_UR           0xf9u
+#define CORNER_DL           0xfau
+#define CORNER_DR           0xfbu
 
 #define ICON_BRIGHTNESS     "\x05"
 

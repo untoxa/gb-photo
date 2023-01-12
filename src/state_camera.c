@@ -269,11 +269,11 @@ static void refresh_usage_indicator() {
             sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
             break;
     }
-    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
 static void refresh_screen() {
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, SOLID_BLACK);
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     display_last_seen(TRUE);
     refresh_usage_indicator();
     scrollbar_repaint_all();
@@ -281,7 +281,7 @@ static void refresh_screen() {
 
 static uint8_t onPrinterProgress() BANKED {
     misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
-    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
     return 0;
 }
 
@@ -554,7 +554,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
     return joypad_swap_dpad(value);
 }
 bool isSaveCancelled() {
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, 1, SOLID_BLACK);
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, 1, WHITE_ON_BLACK);
     uint8_t menu_result = menu_execute(&SaveConfirmMenu, NULL, NULL);
     return (menu_result != MENU_RESULT_YES);
 }
@@ -603,9 +603,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter)) {
             // cancel timers
             COUNTER_RESET(camera_shutter_timer);
-            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
+            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
             COUNTER_RESET(camera_repeat_counter);
-            screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
+            screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
             camera_do_shutter = FALSE;
             capture_triggered = false;
         } else {
@@ -734,11 +734,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer), MUSIC_SFX_PRIORITY_MINIMAL);
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, SOLID_BLACK, " " ICON_CLOCK);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, SOLID_BLACK, text_buffer);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
         } else {
-            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
+            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
             if (COUNTER(camera_repeat_counter)) {
                 if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
                 if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) COUNTER_SET(camera_repeat_counter, COUNTER_INFINITE_VALUE);
@@ -749,14 +749,14 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (camera_repeat_counter) {
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, SOLID_BLACK, " " ICON_MULTIPLE);
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
             if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, " Inf");
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, " Inf");
             } else {
                 sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, SOLID_BLACK, text_buffer);
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
             }
-        } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
+        } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
     }
 
     // make the picture if not in progress yet
@@ -806,9 +806,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     #if (DEBUG_AUTOEXP==1)
             sprintf(text_buffer, "%d", (uint16_t)error);
-            menu_text_out(15, 0, 5, SOLID_BLACK, text_buffer);
+            menu_text_out(15, 0, 5, WHITE_ON_BLACK, text_buffer);
             sprintf(text_buffer, "%X", (uint32_t)new_exposure);
-            menu_text_out(15, 1, 5, SOLID_BLACK, text_buffer);
+            menu_text_out(15, 1, 5, WHITE_ON_BLACK, text_buffer);
     #endif
         }
 #endif
@@ -952,7 +952,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, selection->helpcontext);
     return 0;
 }
 
@@ -992,9 +992,9 @@ uint8_t UPDATE_state_camera() BANKED {
                 if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
                     // cancel button pressed while printing
                     COUNTER_RESET(camera_shutter_timer);
-                    screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, SOLID_BLACK);
+                    screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
                     COUNTER_RESET(camera_repeat_counter);
-                    screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, SOLID_BLACK);
+                    screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
                     camera_do_shutter = FALSE;
                 };
             } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);

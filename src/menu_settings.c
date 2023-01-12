@@ -191,10 +191,10 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
         case idPrintFrame2:
             banked_strcpy(text_buffer_extra, print_frames[(selection->id - idPrintFrame0)].desc, BANK(print_frames));
             sprintf(text_buffer, selection->helpcontext, text_buffer_extra);
-            menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, text_buffer);
+            menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
             break;
         default:
-            menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+            menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, selection->helpcontext);
             break;
     }
     return 0;

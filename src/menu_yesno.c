@@ -35,7 +35,7 @@ const menu_t YesNoMenu = {
 };
 
 uint8_t onShowYesNo(const menu_t * self, uint8_t * param) {
-    menu_text_out(self->x + 1, self->y + 1, 0, SOLID_WHITE, param);
+    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, param);
     return 0;
 }
 

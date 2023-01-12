@@ -57,7 +57,7 @@ uint8_t * onSpineditMenuItemPaint(const struct menu_t * menu, const struct menu_
 
 uint8_t onShowSpinEdit(const menu_t * self, uint8_t * param) {
     spinedit_current_params = (spinedit_params_t *)param;
-    menu_text_out(self->x + 1, self->y + 1, 0, SOLID_WHITE, spinedit_current_params->caption);
+    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, spinedit_current_params->caption);
     return 0;
 }
 uint8_t onTranslateKeySpinEdit(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
@@ -68,7 +68,7 @@ uint8_t onTranslateKeySpinEdit(const struct menu_t * menu, const struct menu_ite
 uint8_t onHelpSpinEdit(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, selection->helpcontext);
     return 0;
 }
 

@@ -226,7 +226,7 @@ uint8_t INIT_module_screen() BANKED {
         fill_bkg_rect(0, 0, 20, 18, 0);
         VBK_REG = 0;
     }
-    screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
+    screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
     return 0;
 }
 

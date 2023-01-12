@@ -47,19 +47,19 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
     screen_restore_rect(self->x + + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
-    menu_text_out(self->x + 1, self->y +  2, 0, SOLID_WHITE, "Original idea:");
-    menu_text_out(self->x + 2, self->y +  3, 0, SOLID_WHITE, "Andreas Hahn");
-    menu_text_out(self->x + 1, self->y +  4, 0, SOLID_WHITE, "Development:");
-    menu_text_out(self->x + 2, self->y +  5, 0, SOLID_WHITE, "Toxa, Andreas Hahn");
-    menu_text_out(self->x + 2, self->y +  6, 0, SOLID_WHITE, "Raphael Boichot, Hatch");
-    menu_text_out(self->x + 1, self->y +  7, 0, SOLID_WHITE, "Sound:");
-    menu_text_out(self->x + 2, self->y +  8, 0, SOLID_WHITE, "Tronimal");
-    menu_text_out(self->x + 1, self->y +  9, 0, SOLID_WHITE, "Art:");
-    menu_text_out(self->x + 2, self->y + 10, 0, SOLID_WHITE, "rembrandx, 2BitPit");
-    menu_text_out(self->x + 2, self->y + 11, 0, SOLID_WHITE, "NeoRame");
-    menu_text_out(self->x + 1, self->y + 12, 0, SOLID_WHITE, "Special thanks:");
-    menu_text_out(self->x + 2, self->y + 13, 0, SOLID_WHITE, "bbbbbr, AlexiG, HDR,");
-    menu_text_out(self->x + 2, self->y + 14, 0, SOLID_WHITE, "crizzlycruz, christianr");
+    menu_text_out(self->x + 1, self->y +  2, 0, BLACK_ON_WHITE, "Original idea:");
+    menu_text_out(self->x + 2, self->y +  3, 0, DK_GR_ON_WHITE, "Andreas Hahn");
+    menu_text_out(self->x + 1, self->y +  4, 0, BLACK_ON_WHITE, "Development:");
+    menu_text_out(self->x + 2, self->y +  5, 0, DK_GR_ON_WHITE, "Toxa, Andreas Hahn");
+    menu_text_out(self->x + 2, self->y +  6, 0, DK_GR_ON_WHITE, "Raphael Boichot, Hatch");
+    menu_text_out(self->x + 1, self->y +  7, 0, BLACK_ON_WHITE, "Sound:");
+    menu_text_out(self->x + 2, self->y +  8, 0, DK_GR_ON_WHITE, "Tronimal");
+    menu_text_out(self->x + 1, self->y +  9, 0, BLACK_ON_WHITE, "Art:");
+    menu_text_out(self->x + 2, self->y + 10, 0, DK_GR_ON_WHITE, "rembrandx, 2BitPit");
+    menu_text_out(self->x + 2, self->y + 11, 0, DK_GR_ON_WHITE, "NeoRame");
+    menu_text_out(self->x + 1, self->y + 12, 0, BLACK_ON_WHITE, "Special thanks:");
+    menu_text_out(self->x + 2, self->y + 13, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
+    menu_text_out(self->x + 2, self->y + 14, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
     vwf_activate_font(0);
     return 0;
 }
@@ -114,7 +114,7 @@ uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct me
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, selection->helpcontext);
     return 0;
 }
 

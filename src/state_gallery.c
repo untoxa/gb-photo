@@ -80,7 +80,7 @@ void gallery_toss_images() {
 
 uint8_t gallery_show_picture(uint8_t image_no) {
     wait_vbl_done();
-    screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, SOLID_BLACK);
+    screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, WHITE_ON_BLACK);
 
     if (!images_taken()) return CAMERA_IMAGE_DELETED;
 
@@ -98,7 +98,7 @@ uint8_t gallery_show_picture(uint8_t image_no) {
 
 uint8_t gallery_show_position(uint8_t image_no) {
     sprintf(text_buffer, "%hd/%hd", (uint8_t)((image_no < images_taken()) ? (image_no + 1) : 0), (uint8_t)images_taken());
-    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, SOLID_BLACK, text_buffer);
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
     return image_no;
 }
 
@@ -161,25 +161,25 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
         protected_metadata_read(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         if (image_metadata.crc == protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED)) {
             vwf_set_tab_size(1);
-            menu_text_out(self->x + 4, self->y + 1,  0, SOLID_WHITE, "Image data:");
-            menu_text_out(self->x + 1, self->y + 2,  0, SOLID_WHITE, camera_format_item_text(idExposure,      strcpy(text_buffer_extra_ex, "Exposure\t%sms"),   &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 3,  0, SOLID_WHITE, camera_format_item_text(idGain,          strcpy(text_buffer_extra_ex, "Gain\t\t\t\t%s"),   &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 4,  0, SOLID_WHITE, camera_format_item_text(idContrast,      strcpy(text_buffer_extra_ex, "Contrast\t\t%d"),   &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 5,  0, SOLID_WHITE, camera_format_item_text(idDither,        strcpy(text_buffer_extra_ex, "Dithering\t\t%s"),  &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 6,  0, SOLID_WHITE, camera_format_item_text(idDitherLight,   strcpy(text_buffer_extra_ex, "Dith. light\t%s"),  &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 7,  0, SOLID_WHITE, camera_format_item_text(idInvOutput,     strcpy(text_buffer_extra_ex, "Inverse\t\t\t%s"),  &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 8,  0, SOLID_WHITE, camera_format_item_text(idZeroPoint,     strcpy(text_buffer_extra_ex, "Zero point\t%s"),   &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 9,  0, SOLID_WHITE, camera_format_item_text(idVOut,          strcpy(text_buffer_extra_ex, "Volt. out.\t%dmv"), &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 10, 0, SOLID_WHITE, camera_format_item_text(idVoltageRef,    strcpy(text_buffer_extra_ex, "Volt. ref.\t%sv"),  &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 11, 0, SOLID_WHITE, camera_format_item_text(idEdgeOperation, strcpy(text_buffer_extra_ex, "Edge op.\t\t%s"),   &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 12, 0, SOLID_WHITE, camera_format_item_text(idEdgeRatio,     strcpy(text_buffer_extra_ex, "Edge ratio\t%s"),   &image_metadata.settings));
-            menu_text_out(self->x + 1, self->y + 13, 0, SOLID_WHITE, camera_format_item_text(idEdgeExclusive, strcpy(text_buffer_extra_ex, "Edge excl.\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 4, self->y + 1,  0, BLACK_ON_WHITE, "Image data:");
+            menu_text_out(self->x + 1, self->y + 2,  0, BLACK_ON_WHITE, camera_format_item_text(idExposure,      strcpy(text_buffer_extra_ex, "Exposure\t%sms"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 3,  0, BLACK_ON_WHITE, camera_format_item_text(idGain,          strcpy(text_buffer_extra_ex, "Gain\t\t\t\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 4,  0, BLACK_ON_WHITE, camera_format_item_text(idContrast,      strcpy(text_buffer_extra_ex, "Contrast\t\t%d"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 5,  0, BLACK_ON_WHITE, camera_format_item_text(idDither,        strcpy(text_buffer_extra_ex, "Dithering\t\t%s"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 6,  0, BLACK_ON_WHITE, camera_format_item_text(idDitherLight,   strcpy(text_buffer_extra_ex, "Dith. light\t%s"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 7,  0, BLACK_ON_WHITE, camera_format_item_text(idInvOutput,     strcpy(text_buffer_extra_ex, "Inverse\t\t\t%s"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 8,  0, BLACK_ON_WHITE, camera_format_item_text(idZeroPoint,     strcpy(text_buffer_extra_ex, "Zero point\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 9,  0, BLACK_ON_WHITE, camera_format_item_text(idVOut,          strcpy(text_buffer_extra_ex, "Volt. out.\t%dmv"), &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 10, 0, BLACK_ON_WHITE, camera_format_item_text(idVoltageRef,    strcpy(text_buffer_extra_ex, "Volt. ref.\t%sv"),  &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 11, 0, BLACK_ON_WHITE, camera_format_item_text(idEdgeOperation, strcpy(text_buffer_extra_ex, "Edge op.\t\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 12, 0, BLACK_ON_WHITE, camera_format_item_text(idEdgeRatio,     strcpy(text_buffer_extra_ex, "Edge ratio\t%s"),   &image_metadata.settings));
+            menu_text_out(self->x + 1, self->y + 13, 0, BLACK_ON_WHITE, camera_format_item_text(idEdgeExclusive, strcpy(text_buffer_extra_ex, "Edge excl.\t%s"),   &image_metadata.settings));
             vwf_set_tab_size(2);
-        } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No data...");
+        } else menu_text_out(self->x + 4, self->y + 1, 0, BLACK_ON_WHITE, "No data...");
         SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(self->x + 12, self->y + 2, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0x00);
         screen_restore_rect(self->x + 12, self->y + 2, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
-    } else menu_text_out(self->x + 4, self->y + 1, 0, SOLID_WHITE, "No image...");
+    } else menu_text_out(self->x + 4, self->y + 1, 0, BLACK_ON_WHITE, "No image...");
     return 0;
 }
 uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
@@ -277,7 +277,7 @@ uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, selection->helpcontext);
     return 0;
 }
 
@@ -290,9 +290,9 @@ uint8_t gallery_print_info() {
 }
 
 static uint8_t refresh_screen() {
-    screen_clear_rect(0, 0, 20, 18, SOLID_BLACK);
-    menu_text_out(0, 0, 20, SOLID_BLACK, " Gallery view");
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, SOLID_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
+    screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
+    menu_text_out(0, 0, 20, WHITE_ON_BLACK, " Gallery view");
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
     return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }
 
