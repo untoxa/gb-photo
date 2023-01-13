@@ -91,13 +91,10 @@ lbl:
 }
 
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
-    uint8_t **addr, *data;
-
-    data = picture;
-    addr = (uint8_t **)(screen_tile_addresses + y);
-
-    for (uint8_t i = 0; i != h; i++)
-        data = set_data_ex(*addr++ + (x << 4), data, w);
+    uint8_t **addr = (uint8_t **)(screen_tile_addresses + y);
+    do {
+        picture = set_data_ex(*addr++ + (x << 4), picture, w);
+    } while (--h);
 }
 
 void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank) {
