@@ -12,6 +12,9 @@
 #define LT_GR_ON_BLACK      ((DMG_LITE_GRAY << 2) | DMG_BLACK)
 #define BLACK_ON_LT_GR      ((DMG_BLACK << 2) | DMG_LITE_GRAY)
 
+#define DK_GR_ON_BLACK      ((DMG_DARK_GRAY << 2) | DMG_BLACK)
+#define LT_GR_ON_WHITE      ((DMG_LITE_GRAY << 2) | DMG_WHITE)
+
 #define HELP_CONTEXT_COLOR  LT_GR_ON_BLACK
 
 #define BG_COLOR(c)         (c & 0b00000011)

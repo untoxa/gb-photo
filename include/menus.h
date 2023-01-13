@@ -8,10 +8,14 @@ typedef struct menu_item_t;
 
 #define MENU_INVERSE  1
 
+#define ITEM_DEFAULT  0
+#define ITEM_DISABLED 1
+
 typedef uint8_t menu_handler_t (const struct menu_t * self, uint8_t * param);
 typedef uint8_t idle_handler_t (const struct menu_t * menu, const struct menu_item_t * selection);
 typedef uint8_t menu_translate_t (const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 typedef uint8_t * item_handler_t (const struct menu_t * menu, const struct menu_item_t * self);
+typedef uint8_t query_handler_t (const struct menu_t * menu, const struct menu_item_t * self);
 
 typedef struct menu_item_t {
     struct menu_t * sub;
@@ -23,6 +27,7 @@ typedef struct menu_item_t {
     const uint8_t * caption;
     const uint8_t * helpcontext;
     item_handler_t * onPaint;
+    query_handler_t * onGetProps;
     uint8_t result;
 } menu_item_t;
 
@@ -57,9 +62,9 @@ inline uint8_t inc_dec_int8(int8_t * value, int8_t delta, int8_t min, int8_t max
     int8_t v = *value;
     switch (dir) {
         case changeDecrease:
-            return (v != (*value = ((*value - delta) < min) ? min : (*value - delta)));
+            return (v != (*value = ((*value - delta) < min) ? max : (*value - delta)));
         case changeIncrease:
-            return (v != (*value = ((*value + delta) > max) ? max : (*value + delta)));
+            return (v != (*value = ((*value + delta) > max) ? min : (*value + delta)));
         default:
             return FALSE;
     }
@@ -68,10 +73,10 @@ inline uint8_t inc_dec_int16(int16_t * value, int16_t delta, int16_t min, int16_
     int16_t v = *value;
     switch (dir) {
         case changeDecrease:
-            *value = ((*value - delta) < min) ? min : (*value - delta);
+            *value = ((*value - delta) < min) ? max : (*value - delta);
             break;
         case changeIncrease:
-            *value = ((*value + delta) > max) ? max : (*value + delta);
+            *value = ((*value + delta) > max) ? min : (*value + delta);
             break;
     }
     return (v != *value);

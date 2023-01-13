@@ -1,6 +1,7 @@
 #include <gbdk/platform.h>
 #include <gbdk/metasprites.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "compat.h"
@@ -24,16 +25,39 @@ void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * t
     if (len < w) screen_clear_rect(x + len, y, w - len, 1, c);
 }
 
+inline uint8_t menu_item_get_props(const menu_t * menu, const menu_item_t * item) {
+    return (item->onGetProps) ? item->onGetProps(menu, item) : ITEM_DEFAULT;
+}
+
 const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t * selection, const menu_item_t * new_selection) {
-    if (selection)
+    static const uint8_t items_colors[2][2] = {{BLACK_ON_WHITE, WHITE_ON_BLACK}, {LT_GR_ON_WHITE, DK_GR_ON_BLACK}};
+    if (selection) {
+        uint8_t item_props = menu_item_get_props(menu, selection);
         menu_text_out(menu->x + selection->ofs_x, menu->y + selection->ofs_y, selection->width,
-                      ((menu->flags & MENU_INVERSE) ? WHITE_ON_BLACK : BLACK_ON_WHITE),
+                      items_colors[(bool)(item_props & ITEM_DISABLED)][(bool)(menu->flags & MENU_INVERSE)],
                       (selection->onPaint) ? selection->onPaint(menu, selection) : (uint8_t *)selection->caption);
+    }
     if (new_selection)
         menu_text_out(menu->x + new_selection->ofs_x, menu->y + new_selection->ofs_y, new_selection->width,
                       ((menu->flags & MENU_INVERSE) ? BLACK_ON_WHITE : WHITE_ON_BLACK),
                       (new_selection->onPaint) ? new_selection->onPaint(menu, new_selection) : (uint8_t *)new_selection->caption);
     return (new_selection) ? new_selection : selection;
+}
+
+const menu_item_t * menu_previous(const menu_t * menu, const menu_item_t * item) {
+    const menu_item_t * itm = item;
+    do {
+        itm = ((itm - 1) < menu->items) ? (const menu_item_t *)(menu->last_item) : (itm - 1);
+    } while (menu_item_get_props(menu, itm) & ITEM_DISABLED);
+    return itm;
+}
+
+const menu_item_t * menu_next(const menu_t * menu, const menu_item_t * item) {
+    const menu_item_t * itm = item;
+    do {
+        itm = ((itm + 1) > menu->last_item) ? (const menu_item_t *)(menu->items) : (itm + 1);
+    } while (menu_item_get_props(menu, itm) & ITEM_DISABLED);
+    return itm;
 }
 
 uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
@@ -56,6 +80,9 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     // call onShow handler if present
     if (menu->onShow) menu->onShow(menu, param);
 
+    // move selection if disabled
+    if (menu_item_get_props(menu, selection) & ITEM_DISABLED) selection = menu_next(menu, selection);
+
     // draw menu items
 
     for (const menu_item_t * current_item = menu->items; current_item <= menu->last_item; current_item++) {
@@ -76,13 +103,13 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         if (KEY_PRESSED(J_UP)) {
             if (menu->items != menu->last_item) {
                 music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move), MUSIC_SFX_PRIORITY_MINIMAL);
-                selection = menu_move_selection(menu, selection, ((selection - 1) < menu->items) ? (const menu_item_t *)(menu->last_item) : (selection - 1));
+                selection = menu_move_selection(menu, selection, menu_previous(menu, selection));
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_DOWN)) {
             if (menu->items != menu->last_item) {
                 music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move), MUSIC_SFX_PRIORITY_MINIMAL);
-                selection = menu_move_selection(menu, selection, ((selection + 1) > menu->last_item) ? (const menu_item_t *)(menu->items) : (selection + 1));
+                selection = menu_move_selection(menu, selection, menu_next(menu, selection));
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_A)) {

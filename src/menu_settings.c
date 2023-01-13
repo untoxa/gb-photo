@@ -50,6 +50,7 @@ typedef enum {
 uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 
 const menu_item_t FrameMenuItems[] = {
     {
@@ -107,21 +108,22 @@ const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits"
 
 const menu_item_t SettingsMenuItems[] = {
     {
-        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
-        .ofs_x = 1, .ofs_y = 1, .width = 13,
-        .id = idSettingsCGBPalette,
-        .caption = " Palette\t[%s]",
-        .helpcontext = " Select CGB palette",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_CGB_PALETTE
-    }, {
         .sub = &PrinterFramesMenu, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 2, .width = 13,
+        .ofs_x = 1, .ofs_y = 1, .width = 13,
         .id = idSettingsPrintFrame,
         .caption = " Frame\t\t[%s]",
         .helpcontext = " Select frame for printing",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_NONE
+    }, {
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+        .ofs_x = 1, .ofs_y = 2, .width = 13,
+        .id = idSettingsCGBPalette,
+        .caption = " Palette\t[%s]",
+        .helpcontext = " Select CGB palette",
+        .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
+        .result = ACTION_SETTINGS_CGB_PALETTE
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 3, .width = 13,
@@ -129,6 +131,7 @@ const menu_item_t SettingsMenuItems[] = {
         .caption = " Fast printing\t\t\t%s",
         .helpcontext = " Enable CGB 32Kb/s printing",
         .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_PRINT_FAST
     }, {
         .sub = NULL, .sub_params = NULL,
@@ -137,6 +140,7 @@ const menu_item_t SettingsMenuItems[] = {
         .caption = " Alt. SGB border\t\t%s",
         .helpcontext = " Switch different SGB borders",
         .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_ALT_BORDER
     }, {
         .sub = NULL, .sub_params = NULL,
@@ -161,6 +165,7 @@ const menu_item_t SettingsMenuItems[] = {
         .caption = " IR remote\t\t\t\t%s",
         .helpcontext = " CGB IR sensor as shutter",
         .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_IR_REMOTE
     }
 };
@@ -236,6 +241,19 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             break;
     }
     return text_buffer;
+}
+uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
+    switch ((settings_menu_e)self->id) {
+        case idSettingsPrintFast:
+        case idSettingsCGBPalette:
+        case idSettingsIRRemoteShutter:
+            return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
+        case idSettingsAltBorder:
+            return (_is_SUPER) ? ITEM_DEFAULT : ITEM_DISABLED;
+        default:
+            return ITEM_DEFAULT;
+    }
 }
 
 void menu_settings_execute() BANKED {
