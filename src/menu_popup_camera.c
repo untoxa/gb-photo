@@ -325,7 +325,7 @@ uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t *
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
     return 0;
 }
 
