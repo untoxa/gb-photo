@@ -5,6 +5,7 @@
 
 #include "compat.h"
 #include "systemdetect.h"
+#include "joy.h"
 #include "splash.h"
 
 #include "GBDK2020.h"   // logos must be compiled into the same bank
@@ -71,7 +72,7 @@ lbl:
         pop de
         jp (hl)
 
-#elif defined(SEGA) 
+#elif defined(SEGA)
 
 .macro SWITCH_VBLANK_COPY DIS
         ld a, DIS
@@ -142,9 +143,9 @@ void logo_fade(const mask_t * mask) BANKED {
     static uint16_t offset;
     static uint8_t counters[WIDTH(GBDK2020)];
 
-    for (i = 0; i != LENGTH(counters); i++) 
+    for (i = 0; i != LENGTH(counters); i++)
         counters[i] = i + (WIDTH(GBDK2020) + 1);
-    
+
     while (counters[LENGTH(counters) - 1]) {
         vsync();
         vsync();
@@ -152,11 +153,11 @@ void logo_fade(const mask_t * mask) BANKED {
             if (counters[j]) {
                 if (--counters[j] < 8) {
                     offset = (j * TILE_SIZE(GBDK2020));
-                    for (i = HEIGHT(GBDK2020); i != 0; i--, offset += (WIDTH(GBDK2020) * TILE_SIZE(GBDK2020))) 
+                    for (i = HEIGHT(GBDK2020); i != 0; i--, offset += (WIDTH(GBDK2020) * TILE_SIZE(GBDK2020)))
                         apply_mask(GBDK2020_tiles + offset, (*mask)[counters[j]], (TILE_VRAM + (TILE_ORIGIN(GBDK2020) * TILE_SIZE(GBDK2020))) + offset);
                 }
             }
-        }        
+        }
     }
 }
 
@@ -185,10 +186,12 @@ void logo_init() {
 
 uint8_t INIT_module_splash() BANKED {
     logo_init();
-
+    JOYPAD_RESET();
     logo_fade(&mask_in);
-    for (uint8_t i = 0; i != 2 * 60; i++) vsync();
+    for (uint8_t i = 0; i != 2 * 60; i++) {
+        PROCESS_INPUT();
+        if (KEY_PRESSED(J_ANY)) return 0; else vsync();
+    }
     logo_fade(&mask_out);
-
     return 0;
 }

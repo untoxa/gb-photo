@@ -10,6 +10,7 @@
 
 BANKREF_EXTERN(module_joy)
 
+#define J_ANY 0xff
 #define AUTOREPEAT_RATE 15
 
 #if (INT_DRIVEN_JOYPAD==1)
