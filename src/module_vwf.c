@@ -17,8 +17,6 @@ uint8_t INIT_module_vwf() BANKED {
     vwf_load_font(0, font_proportional, BANK(font_proportional));
     vwf_load_font(1, font_fancy, BANK(font_fancy));
     vwf_activate_font(0);
-#if !defined(NINTENDO)
-    vwf_set_colors(2, 1);
-#endif
+    vwf_set_colors(DMG_BLACK, DMG_WHITE);
     return 0;
 }

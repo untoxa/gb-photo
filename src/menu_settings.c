@@ -44,6 +44,7 @@ typedef enum {
     idSettingsShowGrid,
     idSettingsSaveConfirm,
     idSettingsIRRemoteShutter,
+    idSettingsBootToCamera
 } settings_menu_e;
 
 
@@ -167,10 +168,18 @@ const menu_item_t SettingsMenuItems[] = {
         .onPaint = onSettingsMenuItemPaint,
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_IR_REMOTE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 8, .width = 13,
+        .id = idSettingsBootToCamera,
+        .caption = " Quick boot\t\t\t%s",
+        .helpcontext = " Boot directly to the camera mode",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_BOOT_TO_CAM
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 9,
+    .x = 3, .y = 5, .width = 15, .height = 10,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -235,6 +244,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             break;
         case idSettingsIRRemoteShutter:
             sprintf(text_buffer, self->caption, checkbox[OPTION(ir_remote_shutter)]);
+            break;
+        case idSettingsBootToCamera:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(boot_to_camera_mode)]);
             break;
         default:
             *text_buffer = 0;
@@ -304,6 +316,10 @@ void menu_settings_execute() BANKED {
                 }
                 break;
             }
+        case ACTION_SETTINGS_BOOT_TO_CAM:
+            OPTION(boot_to_camera_mode) = !OPTION(boot_to_camera_mode);
+            save_camera_state();
+            break;
         default:
             music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
             break;

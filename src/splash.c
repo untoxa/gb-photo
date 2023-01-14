@@ -6,6 +6,8 @@
 #include "compat.h"
 #include "systemdetect.h"
 #include "joy.h"
+#include "gbcamera.h"
+#include "state_camera.h"
 #include "splash.h"
 
 #include "GBDK2020.h"   // logos must be compiled into the same bank
@@ -185,12 +187,16 @@ void logo_init() {
 }
 
 uint8_t INIT_module_splash() BANKED {
+    // skip logo if fast boot
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    if (OPTION(boot_to_camera_mode)) return 0;
+    // show logo
     logo_init();
     JOYPAD_RESET();
     logo_fade(&mask_in);
     for (uint8_t i = 0; i != 2 * 60; i++) {
         PROCESS_INPUT();
-        if (KEY_PRESSED(J_ANY)) return 0; else vsync();
+        if (KEY_PRESSED(J_ANY)) break; else vsync();
     }
     logo_fade(&mask_out);
     return 0;

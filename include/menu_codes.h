@@ -25,6 +25,7 @@
 #define ACTION_SETTINGS_SHOW_GRID   23
 #define ACTION_SETTINGS_SAVE_CONF   24
 #define ACTION_SETTINGS_IR_REMOTE   25
+#define ACTION_SETTINGS_BOOT_TO_CAM 26
 
 // state switching actions
 #define ACTION_GALLERY              30

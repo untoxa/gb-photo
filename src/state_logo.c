@@ -9,6 +9,8 @@
 #include "states.h"
 #include "bankdata.h"
 #include "fade_manager.h"
+#include "gbcamera.h"
+#include "state_camera.h"
 
 #include "misc_assets.h"
 
@@ -29,7 +31,7 @@ BANKREF(state_logo)
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
-static const uint8_t version_string[] = "\x03\xff Version " QUOTE(VERSION) " (" QUOTE(BRANCH) ")";
+static const uint8_t version_string[] = " Version " QUOTE(VERSION) " (" QUOTE(BRANCH) ")";
 
 void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
     static uint8_t **addr, i, j;
@@ -46,16 +48,20 @@ void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8
 
 static void refresh_screen() {
     vsync();
+    vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     screen_load_picture(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, logo_WIDTH / logo_TILE_W, logo_HEIGHT / logo_TILE_H, logo_map, logo_tiles, BANK(logo));
-    vwf_set_colors(DMG_BLACK, DMG_WHITE);
-    screen_text_render(0, 16, "\x03\xff (c) 2022 Toxa");
+    screen_text_render(0, 16, " (c) 2022 Toxa");
     screen_text_render(0, 17, version_string);
     vsync();
     screen_restore_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT);
 }
 
 uint8_t INIT_state_logo() BANKED {
+    // skip logo if fast boot
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    if (OPTION(boot_to_camera_mode)) CHANGE_STATE(MAIN_STATE);
+
     return 0;
 }
 

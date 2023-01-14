@@ -18,7 +18,7 @@
 void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text) {
     uint8_t len;
     if (text) {
-        vwf_set_colors(BG_COLOR(c), FG_COLOR(c));
+        vwf_set_colors(FG_COLOR(c), BG_COLOR(c));
         len = vwf_draw_text(screen_tile_addresses[y] + (x << 4), text);
         screen_restore_rect(x, y, len, 1);
     } else len = 0;

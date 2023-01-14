@@ -36,6 +36,7 @@ const camera_state_options_t default_camera_state_options = {
     .fancy_sgb_border = false,
     .show_grid = false,
     .save_confirm = true,
+    .boot_to_camera_mode = false,
     .shutter_sound = shutter_sound_0,
     .shutter_timer = 10,
     .shutter_counter = 5,
