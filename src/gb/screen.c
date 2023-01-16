@@ -91,9 +91,9 @@ lbl:
 }
 
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
-    uint8_t **addr = (uint8_t **)(screen_tile_addresses + y);
+    const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
     do {
-        picture = set_data_ex(*addr++ + (x << 4), picture, w);
+        picture = set_data_ex((uint8_t *)(*addr++ + (x << 4)), picture, w);
     } while (--h);
 }
 
@@ -107,11 +107,11 @@ void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_
 void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank) {
     uint8_t save = _current_bank;
     SWITCH_ROM(bank);
-    set_data_ex((uint8_t *)*(uint8_t **)(screen_tile_addresses + y) + (x << 4), tile, 1);
+    set_data_ex((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 4)), tile, 1);
     SWITCH_ROM(save);
 }
 
-void screen_copy_thumbnail_row(uint8_t * dest, uint8_t * sour) NAKED {
+void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
     dest; sour;
     __asm
 .macro .WAIT_STAT_01 ?lbl
