@@ -212,18 +212,22 @@ void LCD_ISR() NONBANKED {
 }
 
 uint8_t INIT_module_screen() BANKED {
+    // (re)install interrupt handlers
     CRITICAL {
         LYC_REG = 95, STAT_REG |= STATF_LYC;
+        remove_LCD(LCD_ISR);
         add_LCD(LCD_ISR);
+        remove_VBL(VBL_ISR);
         add_VBL(VBL_ISR);
     }
     set_interrupts(IE_REG | LCD_IFLAG);
+    // prepare the screen map
     if (_is_COLOR) {
         VBK_REG = 1;
-        fill_bkg_rect(0, 0, 20, 18, 0);
+        fill_bkg_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0);
         VBK_REG = 0;
     }
-    screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     return 0;
 }
 

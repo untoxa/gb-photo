@@ -173,7 +173,7 @@ const menu_item_t SettingsMenuItems[] = {
         .ofs_x = 1, .ofs_y = 8, .width = 13,
         .id = idSettingsBootToCamera,
         .caption = " Quick boot\t\t\t%s",
-        .helpcontext = " Boot directly to the camera mode",
+        .helpcontext = " Boot into the camera mode",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_BOOT_TO_CAM
     }

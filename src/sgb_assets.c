@@ -7,6 +7,7 @@
 #include "sgb_border.h"
 #include "sgb_assets.h"
 
+#include "gbcamera.h"
 #include "state_camera.h"
 
 #include "camera_sgb_border.h"
@@ -65,6 +66,7 @@ void sgb_assets_set_border(uint8_t border_index) {
 // load the SGB borders and palettes if SGB detected
 uint8_t INIT_module_sgb_assets() BANKED {
     if (_is_SUPER) {
+        SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (OPTION(fancy_sgb_border)) {
             sgb_assets_set_border(SGB_BORDER_FANCY);
             sgb_assets_set_palette(SGB_PALETTE_RED);

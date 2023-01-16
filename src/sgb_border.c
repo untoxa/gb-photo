@@ -36,7 +36,7 @@ void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
 
     // prepare tilemap for SGB_BORDER_CHR_TRN (should display all 256 tiles)
 
-    uint8_t i = 0, j = 0, *dest = 0x9800;
+    uint8_t i = 0, j = 0, *dest = (uint8_t *)0x9800;
     do {
         while (STAT_REG & STATF_BUSY);      // wait for accessible VRAM
         *dest++ = i++;                      // write one byte
