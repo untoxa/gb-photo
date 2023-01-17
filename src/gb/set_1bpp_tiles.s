@@ -5,7 +5,6 @@
         .area   _HOME
 
 .macro .BIT_TO_COLOR reg, bg_reg, fg_reg, ?lbl1
-        srl reg
         ld a, fg_reg
         jr c, lbl1
         ld a, bg_reg
@@ -37,7 +36,6 @@ _set_1bpp_data::
         ld b, #8
 3$:
         push bc
-        push de
         push hl
 
         ld hl, #__current_1bpp_colors
@@ -46,10 +44,12 @@ _set_1bpp_data::
         ld l, a         ; L ==.fg_colour, H == .bg_colour
 
         ld a, (de)
-        ld e, a
+        ld b, a
+        inc de
 
+        rr b
         .rept 8
-            .BIT_TO_COLOR e, h, l
+            .BIT_TO_COLOR b, h, l
 
             rrca
             rr c
@@ -64,9 +64,6 @@ _set_1bpp_data::
         inc l
         ld (hl), b
         inc hl
-
-        pop de
-        inc de
 
         pop bc
 
