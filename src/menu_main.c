@@ -92,7 +92,7 @@ const menu_item_t MainMenuItems[] = {
         .sub = &AboutMenu, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 4, .width = 10,
         .caption = " About",
-        .helpcontext = " About Photo! " QUOTE(VERSION),
+        .helpcontext = " About \"Photo!\" v." QUOTE(VERSION),
         .onPaint = NULL,
         .result = MENU_RESULT_OK
     }
