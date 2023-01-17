@@ -9,8 +9,8 @@ static uint8_t _save;
 
 uint8_t call_far(const far_ptr_t *ptr) NONBANKED NAKED {
     ptr;
-#if defined(NINTENDO)
 __asm
+#if defined(NINTENDO)
         ld h, d
         ld l, e
         ld a, (hl+)
@@ -19,10 +19,21 @@ __asm
         ld h, (hl)
         ld l, a         ; hl = ptr->SEG
         or h
-        ret z           ; return if zero pointer
-        jp ___sdcc_bcall_ehl
-__endasm;
+        jp nz, ___sdcc_bcall_ehl
+        ret
+#elif defined(SEGA)
+        push hl
+        ld e, (hl)
+        inc hl
+        ld a, (hl)
+        inc hl
+        ld h, (hl)
+        ld l, a
+        or h
+        jp nz, ___sdcc_bcall_ehl
+        ret
 #endif
+__endasm;
 }
 
 uint8_t * banked_strcpy(uint8_t *dest, const uint8_t *src, uint8_t bank) NONBANKED {
@@ -39,6 +50,13 @@ void * banked_memcpy(void *dest, const void *src, size_t len, uint8_t bank) NONB
     void * res = memcpy(dest, src, len);
     SWITCH_ROM(_save);
     return res;
+}
+
+void banked_vmemcpy(void *dest, const void *src, size_t len, uint8_t bank) NONBANKED {
+    _save = _current_bank;
+    SWITCH_ROM(bank);
+    vmemcpy(dest, src, len);
+    SWITCH_ROM(_save);
 }
 
 void set_banked_sprite_data(uint8_t first_tile, uint8_t nb_tiles, const uint8_t *data, uint8_t bank) NONBANKED {

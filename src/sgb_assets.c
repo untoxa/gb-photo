@@ -28,20 +28,6 @@ static const uint8_t sgb_palette_red[] = {
 
 static const uint8_t * const sgb_palettes[] = { sgb_palette_gray, sgb_palette_red };
 
-void sgb_assets_set_palette(uint8_t palette_index) {
-    sgb_transfer((uint8_t *)sgb_palettes[palette_index]);
-}
-
-typedef struct border_descriptor_t {
-    const uint8_t * tiles;
-    size_t tiles_size;
-    const uint8_t * map;
-    size_t map_size;
-    const uint8_t * palettes;
-    size_t palettes_size;
-    uint8_t bank;
-} border_descriptor_t;
-
 static const border_descriptor_t sgb_borders[] = {
     {
         .tiles = camera_sgb_border_default_tiles,       .tiles_size = sizeof(camera_sgb_border_default_tiles),
@@ -56,11 +42,8 @@ static const border_descriptor_t sgb_borders[] = {
     }
 };
 
-void sgb_assets_set_border(uint8_t border_index) {
-    set_sgb_border(sgb_borders[border_index].tiles,     sgb_borders[border_index].tiles_size,
-                   sgb_borders[border_index].map,       sgb_borders[border_index].map_size,
-                   sgb_borders[border_index].palettes,  sgb_borders[border_index].palettes_size,
-                   sgb_borders[border_index].bank);
+inline void sgb_assets_set_palette(uint8_t palette_index) {
+    sgb_transfer((uint8_t *)sgb_palettes[palette_index]);
 }
 
 // load the SGB borders and palettes if SGB detected
@@ -68,10 +51,10 @@ uint8_t INIT_module_sgb_assets() BANKED {
     if (_is_SUPER) {
         SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (OPTION(fancy_sgb_border)) {
-            sgb_assets_set_border(SGB_BORDER_FANCY);
+            set_sgb_border(&sgb_borders[SGB_BORDER_FANCY], BANK(module_sgb_assets));
             sgb_assets_set_palette(SGB_PALETTE_RED);
         } else {
-            sgb_assets_set_border(SGB_BORDER_DEFAULT);
+            set_sgb_border(&sgb_borders[SGB_BORDER_DEFAULT], BANK(module_sgb_assets));
             sgb_assets_set_palette(SGB_PALETTE_GRAY);
         }
     }

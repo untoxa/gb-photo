@@ -68,6 +68,7 @@ uint8_t INIT_state_logo() BANKED {
 uint8_t ENTER_state_logo() BANKED {
     refresh_screen();
     fade_in_modal();
+    JOYPAD_RESET();
     return 0;
 }
 

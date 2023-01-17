@@ -1,8 +1,12 @@
+#pragma bank 255
+
 #include <gbdk/platform.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "compat.h"
+#include "bankdata.h"
+
 #include "sgb_border.h"
 
 #define SGB_CHR_BLOCK0 0
@@ -15,19 +19,18 @@
 
 #define MIN(A,B) ((A)<(B)?(A):(B))
 
-void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
-                    const uint8_t * tilemap,  size_t tilemap_size,
-                    const uint8_t * palette,  size_t palette_size,
-                    uint8_t bank) NONBANKED {
 
-    uint8_t save = _current_bank;
-    SWITCH_ROM(bank);
+static unsigned char map_buf[2];
+static border_descriptor_t border_desc;
 
-    unsigned char map_buf[2];
+void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED{
+    banked_memcpy(&border_desc, desc, sizeof(border_desc), bank);
 
     SGB_TRANSFER(map_buf, (SGB_MASK_EN << 3) | 1, SGB_SCR_FREEZE);
 
-    BGP_REG = OBP0_REG = OBP1_REG = 0xE4U;
+    uint8_t BGP_save = BGP_REG;
+
+    BGP_REG = DMG_PALETTE(DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY, DMG_BLACK);
     SCX_REG = SCY_REG = 0U;
 
     uint8_t tmp_lcdc = LCDC_REG;
@@ -45,16 +48,16 @@ void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
 
 
     // transfer tile data
-    vmemcpy(_VRAM8000, (uint8_t *)tiledata, MIN(tiledata_size, 0x1000));
+    banked_vmemcpy(_VRAM8000, (uint8_t *)border_desc.tiles, MIN(border_desc.tiles_size, 0x1000), border_desc.bank);
     SGB_TRANSFER(map_buf, (SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK0);
-    if (tiledata_size > 0x1000) {
-        vmemcpy(_VRAM8000, (uint8_t *)(tiledata + 0x1000), tiledata_size - 0x1000);
+    if (border_desc.tiles_size > 0x1000) {
+        banked_vmemcpy(_VRAM8000, (uint8_t *)(border_desc.tiles + 0x1000), border_desc.tiles_size - 0x1000, border_desc.bank);
         SGB_TRANSFER(map_buf, (SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK1);
     }
 
     // transfer map and palettes
-    vmemcpy(_VRAM8000, (uint8_t *)tilemap, tilemap_size);
-    vmemcpy(_VRAM8800, (uint8_t *)palette, palette_size);
+    banked_vmemcpy(_VRAM8000, (uint8_t *)border_desc.map, border_desc.map_size, border_desc.bank);
+    banked_vmemcpy(_VRAM8800, (uint8_t *)border_desc.palettes, border_desc.palettes_size, border_desc.bank);
     SGB_TRANSFER(map_buf, (SGB_PCT_TRN << 3) | 1, 0);
 
     // clear SCREEN
@@ -62,10 +65,10 @@ void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
 
     fill_bkg_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0x80);
 
+    BGP_REG = BGP_save;
+
     vsync();
     LCDC_REG = tmp_lcdc;
 
     SGB_TRANSFER(map_buf, (SGB_MASK_EN << 3) | 1, SGB_SCR_UNFREEZE);
-
-    SWITCH_ROM(save);
 }

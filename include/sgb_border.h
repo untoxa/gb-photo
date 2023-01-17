@@ -32,6 +32,16 @@
 #define SGB_PKT(P) (((P) << 3) | 1)
 #define SNES_LE(C) (uint8_t)(C),(uint8_t)((C) >> 8)
 
+typedef struct border_descriptor_t {
+    const uint8_t * tiles;
+    size_t tiles_size;
+    const uint8_t * map;
+    size_t map_size;
+    const uint8_t * palettes;
+    size_t palettes_size;
+    uint8_t bank;
+} border_descriptor_t;
+
 /** sets SGB border
 
     When using the SGB with a PAL SNES, a delay should be added
@@ -43,9 +53,6 @@
     for (uint8_t i = 4; i != 0; i--) vsync();
     \endcode
 */
-void set_sgb_border(const uint8_t * tiledata, size_t tiledata_size,
-                    const uint8_t * tilemap,  size_t tilemap_size,
-                    const uint8_t * palette,  size_t palette_size,
-                    uint8_t bank) NONBANKED;
+void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED;
 
 #endif
