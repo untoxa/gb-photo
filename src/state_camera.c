@@ -560,8 +560,6 @@ bool isSaveCancelled() {
     return (menu_result != MENU_RESULT_YES);
 }
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
-    menu; selection;
-
     static const shutter_sound_t shutter_sounds[N_SHUTTER_SOUNDS] = {
         [shutter_sound_0] = {BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01)},
         [shutter_sound_1] = {BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02)}

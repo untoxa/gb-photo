@@ -50,6 +50,8 @@ typedef enum {
 
 uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * selection);
+uint8_t onShowSettings(const menu_t * self, uint8_t * param);
+uint8_t onIdleSettings(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 
@@ -182,9 +184,11 @@ const menu_t GlobalSettingsMenu = {
     .x = 3, .y = 5, .width = 15, .height = 10,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
-    .onShow = NULL, .onHelpContext = onHelpSettings,
+    .onShow = onShowSettings, .onIdle = onIdleSettings, .onHelpContext = onHelpSettings,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultSettings
 };
+static const menu_item_t * settings_menu_last_selection;
+static bool settings_menu_repaint;
 
 uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
@@ -211,6 +215,15 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
             menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
             break;
     }
+    return 0;
+}
+uint8_t onShowSettings(const menu_t * self, uint8_t * param) {
+    self; param;
+    return (settings_menu_repaint) ? MENU_FLAGS_DEFAULT : MENU_DRAW_SELECTION;
+}
+uint8_t onIdleSettings(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    settings_menu_last_selection = selection;
     return 0;
 }
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
@@ -270,58 +283,65 @@ uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_it
 
 void menu_settings_execute() BANKED {
     uint8_t menu_result;
+    settings_menu_repaint = true;
+    settings_menu_last_selection = NULL;
     spinedit_palette_value = OPTION(cgb_palette_idx);
-    switch (menu_result = menu_execute(&GlobalSettingsMenu, NULL, NULL)) {
-        case ACTION_PRINT_FRAME0:
-        case ACTION_PRINT_FRAME1:
-        case ACTION_PRINT_FRAME2:
-            OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
-            save_camera_state();
-            break;
-        case ACTION_SETTINGS_PRINT_FAST:
-            OPTION(print_fast) = !OPTION(print_fast);
-            save_camera_state();
-            break;
-        case ACTION_SETTINGS_ALT_BORDER:
-            OPTION(fancy_sgb_border) = !OPTION(fancy_sgb_border);
-            save_camera_state();
-            break;
-        case ACTION_SETTINGS_CGB_PALETTE:
-            OPTION(cgb_palette_idx) = spinedit_palette_value;
-            save_camera_state();
-            if (_is_COLOR) {
-                palette_reload();
-                fade_apply_palette_change_color(FADED_IN_FRAME);
-            }
-            break;
-        case ACTION_SETTINGS_SHOW_GRID:
-            OPTION(show_grid) = !OPTION(show_grid);
-            save_camera_state();
-            break;
-        case ACTION_SETTINGS_SAVE_CONF:
-            OPTION(save_confirm) = !OPTION(save_confirm);
-            save_camera_state();
-            break;
-        case ACTION_SETTINGS_IR_REMOTE:
-            OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
-            save_camera_state();
-            if (_is_COLOR) {
-                // Apply change immediately in camera state, otherwise will be set entering camera state
-                if (CURRENT_PROGRAM_STATE == state_camera) {
-                    if (OPTION(ir_remote_shutter)) {
-                        ir_sense_start();
-                    } else {
-                        ir_sense_stop();
+    while(TRUE) {
+        menu_result = menu_execute(&GlobalSettingsMenu, NULL, settings_menu_last_selection), settings_menu_repaint = false;
+        switch (menu_result) {
+            case ACTION_PRINT_FRAME0:
+            case ACTION_PRINT_FRAME1:
+            case ACTION_PRINT_FRAME2:
+                OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
+                save_camera_state();
+                settings_menu_repaint = true;
+                break;
+            case ACTION_SETTINGS_PRINT_FAST:
+                OPTION(print_fast) = !OPTION(print_fast);
+                save_camera_state();
+                break;
+            case ACTION_SETTINGS_ALT_BORDER:
+                OPTION(fancy_sgb_border) = !OPTION(fancy_sgb_border);
+                save_camera_state();
+                break;
+            case ACTION_SETTINGS_CGB_PALETTE:
+                OPTION(cgb_palette_idx) = spinedit_palette_value;
+                save_camera_state();
+                if (_is_COLOR) {
+                    palette_reload();
+                    fade_apply_palette_change_color(FADED_IN_FRAME);
+                }
+                settings_menu_repaint = true;
+                break;
+            case ACTION_SETTINGS_SHOW_GRID:
+                OPTION(show_grid) = !OPTION(show_grid);
+                save_camera_state();
+                break;
+            case ACTION_SETTINGS_SAVE_CONF:
+                OPTION(save_confirm) = !OPTION(save_confirm);
+                save_camera_state();
+                break;
+            case ACTION_SETTINGS_IR_REMOTE:
+                OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
+                save_camera_state();
+                if (_is_COLOR) {
+                    // Apply change immediately in camera state, otherwise will be set entering camera state
+                    if (CURRENT_PROGRAM_STATE == state_camera) {
+                        if (OPTION(ir_remote_shutter)) {
+                            ir_sense_start();
+                        } else {
+                            ir_sense_stop();
+                        }
                     }
                 }
                 break;
-            }
-        case ACTION_SETTINGS_BOOT_TO_CAM:
-            OPTION(boot_to_camera_mode) = !OPTION(boot_to_camera_mode);
-            save_camera_state();
-            break;
-        default:
-            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
-            break;
+            case ACTION_SETTINGS_BOOT_TO_CAM:
+                OPTION(boot_to_camera_mode) = !OPTION(boot_to_camera_mode);
+                save_camera_state();
+                break;
+            default:
+                music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                return;
+        }
     }
 }

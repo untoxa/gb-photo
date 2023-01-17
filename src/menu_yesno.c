@@ -35,8 +35,9 @@ const menu_t YesNoMenu = {
 };
 
 uint8_t onShowYesNo(const menu_t * self, uint8_t * param) {
+    menu_draw_frame(self);
     menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, param);
-    return 0;
+    return MENU_FLAGS_NOFRAME;
 }
 
 uint8_t onTranslateKeyYesNo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {

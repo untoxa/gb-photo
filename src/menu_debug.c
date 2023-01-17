@@ -66,9 +66,10 @@ static void render_cam_game_data(uint8_t * data_ptr, uint8_t x, uint8_t y) {
 uint8_t onShowDebug(const menu_t * self, uint8_t * param) {
     param;
     vwf_set_tab_size(2);
+    menu_draw_frame(self);
     menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, head_string);
     menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, "Image index:");
     render_cam_game_data((uint8_t *)&cam_game_data, self->x + 1, self->y + 3);
     render_cam_game_data((uint8_t *)&cam_game_data_echo, self->x + 1, self->y + 8);
-    return 0;
+    return MENU_FLAGS_NOFRAME;
 }

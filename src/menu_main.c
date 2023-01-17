@@ -44,6 +44,7 @@ const menu_t AboutMenu = {
 };
 uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     param;
+    menu_draw_frame(self);
     screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
     screen_restore_rect(self->x + + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
@@ -61,7 +62,7 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 2, self->y + 13, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
     menu_text_out(self->x + 2, self->y + 14, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
     vwf_activate_font(0);
-    return 0;
+    return MENU_FLAGS_NOFRAME;
 }
 
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);

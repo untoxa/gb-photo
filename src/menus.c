@@ -60,40 +60,44 @@ const menu_item_t * menu_next(const menu_t * menu, const menu_item_t * item) {
     return itm;
 }
 
+void menu_draw_frame(const menu_t * menu) {
+    // zero menu frame width == not draw menu frame
+    screen_clear_rect(menu->x, menu->y, menu->width, menu->height, BLACK_ON_WHITE);
+    set_bkg_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
+    set_bkg_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
+    set_bkg_tile_xy(menu->x,                   menu->y + menu->height - 1, CORNER_DL);
+    set_bkg_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
+}
+
 uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
     const menu_item_t * selection;
-    uint8_t result = 0;
+    uint8_t result;
 
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
 
+    // initialize selection
     selection = (select) ? select : (menu->items);
-
-    if (menu->width) {
-        // zero menu frame width == not draw menu frame
-        screen_clear_rect(menu->x, menu->y, menu->width, menu->height, BLACK_ON_WHITE);
-        set_bkg_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
-        set_bkg_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
-        set_bkg_tile_xy(menu->x,                   menu->y + menu->height - 1, CORNER_DL);
-        set_bkg_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
-    }
-
-    // call onShow handler if present
-    if (menu->onShow) menu->onShow(menu, param);
-
-    // move selection if disabled
+    // move selection if the current item is disabled
     if (menu_item_get_props(menu, selection) & ITEM_DISABLED) selection = menu_next(menu, selection);
 
+    // call onShow handler if present
+    if (menu->onShow) result = menu->onShow(menu, param); else result = (menu->width) ? MENU_FLAGS_DEFAULT : MENU_FLAGS_NOFRAME;
+    // draw menu frame
+    if (result & MENU_DRAW_FRAME) menu_draw_frame(menu);
     // draw menu items
-
     for (const menu_item_t * current_item = menu->items; current_item <= menu->last_item; current_item++) {
         if (current_item == selection) {
-            menu_move_selection(menu, NULL, current_item);
-            if (menu->onHelpContext) menu->onHelpContext(menu, selection);
+            if (result & MENU_DRAW_SELECTION) {
+                menu_move_selection(menu, NULL, current_item);
+                if (menu->onHelpContext) menu->onHelpContext(menu, selection);
+            }
         } else {
-            menu_move_selection(menu, current_item, NULL);
+            if (result & MENU_DRAW_ITEMS) menu_move_selection(menu, current_item, NULL);
         }
     }
 
+    // process menu
+    result = 0;
     do {
         // process input
         JOYPAD_INPUT();
