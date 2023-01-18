@@ -37,6 +37,7 @@ const camera_state_options_t default_camera_state_options = {
     .show_grid = false,
     .save_confirm = true,
     .boot_to_camera_mode = false,
+    .flip_live_view = false,
     .shutter_sound = shutter_sound_0,
     .shutter_timer = 10,
     .shutter_counter = 5,

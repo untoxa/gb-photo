@@ -51,7 +51,7 @@ const uint8_t screen_tile_map[360] = {
     0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77
 };
 
-uint8_t * set_data_ex(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+uint8_t * set_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
     dest; sour; count;
     __asm
 .macro .WAIT_STAT_00 ?lbl
@@ -90,24 +90,74 @@ lbl:
     __endasm;
 }
 
-void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
+static uint8_t hflip_loop;
+uint8_t * set_data_row_flipped(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+    dest; sour; count;
+    __asm
+.macro .WAIT_STAT_03 ?lbl
+lbl:
+        ldh a, (_STAT_REG)
+        and #STATF_BUSY
+        jr nz, lbl
+.endm
+        ldhl sp, #2
+        ld a, (hl)
+
+        ld hl, #(0x10 - 2)
+        add hl, de
+
+1$:
+        ld (#_hflip_loop), a
+
+        .rept 8
+            ld d, #>_flip_recode_table
+            .rept 2
+                ld a, (bc)
+                inc bc
+                ld e, a
+                .WAIT_STAT_03
+                ld a, (de)
+                ld (hl+), a
+            .endm
+            ld de, #-4
+            add hl, de
+        .endm
+
+        ld a, (#_hflip_loop)
+        dec a
+        jp nz, 1$
+
+        pop hl
+        inc sp
+        jp (hl)
+    __endasm;
+}
+
+void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, bool flip) {
     const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
+    if (!flip) {
+        do {
+            picture = set_data_row((uint8_t *)(*addr++ + (x << 4)), picture, w);
+        } while (--h);
+        return;
+    }
+    addr += (h - 1);
     do {
-        picture = set_data_ex((uint8_t *)(*addr++ + (x << 4)), picture, w);
+        picture = set_data_row_flipped((uint8_t *)(*addr-- + ((x + w - 1) << 4)), picture, w);
     } while (--h);
 }
 
-void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank) {
+void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank, bool flip) {
     uint8_t save = _current_bank;
     SWITCH_ROM(bank);
-    screen_load_image(x, y, w, h, picture);
+    screen_load_image(x, y, w, h, picture, flip);
     SWITCH_ROM(save);
 }
 
 void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank) {
     uint8_t save = _current_bank;
     SWITCH_ROM(bank);
-    set_data_ex((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 4)), tile, 1);
+    set_data_row((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 4)), tile, 1);
     SWITCH_ROM(save);
 }
 

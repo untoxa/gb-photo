@@ -3,6 +3,7 @@
 
 #include <gbdk/platform.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "vwf.h"
 #include "misc_assets.h"
@@ -24,8 +25,11 @@ inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
     return (w) ? set_bkg_submap(x, y, w, h, screen_tile_map, 20), w : w;
 }
 
-void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture);
-void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank);
+#define IMAGE_NORMAL  false
+#define IMAGE_FLIPPED true
+
+void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, bool flip);
+void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank, bool flip);
 void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank);
 
 void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill);

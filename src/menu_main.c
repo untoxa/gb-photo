@@ -45,7 +45,7 @@ const menu_t AboutMenu = {
 uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     param;
     menu_draw_frame(self);
-    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
+    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about), IMAGE_NORMAL);
     screen_restore_rect(self->x + + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
     menu_text_out(self->x + 1, self->y +  2, 0, BLACK_ON_WHITE, "Original idea:");
@@ -133,12 +133,9 @@ uint8_t menu_main_execute() BANKED {
         case ACTION_SETTINGS:
             menu_settings_execute();
             break;
-        case MENU_RESULT_OK:
-            // do nothing, no error sound
-            break;
         default:
-            // default action
-            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+            // unknown command or cancel
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
             break;
     }
     return FALSE;

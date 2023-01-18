@@ -86,6 +86,7 @@ typedef struct camera_state_options_t {
     bool save_confirm           : 1;
     bool ir_remote_shutter      : 1;
     bool boot_to_camera_mode    : 1;
+    bool flip_live_view         : 1;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;

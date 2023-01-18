@@ -3,6 +3,7 @@
 
 #include <gbdk/platform.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "gbcamera.h"
 
@@ -24,7 +25,7 @@ inline uint16_t protected_calculate_crc(uint8_t * data, uint8_t size, uint16_t s
 
 void protected_pack(uint8_t * v) BANKED;
 void protected_generate_thumbnail(uint8_t slot) BANKED;
-void protected_lastseen_to_slot(uint8_t slot) BANKED;
+void protected_lastseen_to_slot(uint8_t slot, bool flipped) BANKED;
 uint8_t protected_metadata_read(uint8_t slot, uint8_t * dest, uint8_t size) BANKED;
 uint8_t protected_metadata_write(uint8_t slot, uint8_t * dest, uint8_t size) BANKED;
 

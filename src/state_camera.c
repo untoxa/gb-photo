@@ -223,7 +223,7 @@ void RENDER_EDGE_FROM_EXPOSURE() {
 void display_last_seen(uint8_t restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
-    screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen);
+    screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen, OPTION(flip_live_view));
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
@@ -247,7 +247,7 @@ void camera_image_save() {
         uint8_t slot = VECTOR_POP(free_slots);
         protected_modify_slot(slot, n_images);
         // copy image data
-        protected_lastseen_to_slot(slot);
+        protected_lastseen_to_slot(slot, OPTION(flip_live_view));
         // generate thumbnail
         protected_generate_thumbnail(slot);
         // save metadata
@@ -1053,8 +1053,8 @@ uint8_t UPDATE_state_camera() BANKED {
                     RENDER_CAM_REGISTERS();
                     break;
                 default:
-                    // error, must not get here
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                    // unknown command or cancel
+                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
                     break;
             }
             save_camera_state();
@@ -1065,7 +1065,8 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
         }
         default:
-            music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+            // unknown command or cancel
+            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
             break;
     }
     return FALSE;

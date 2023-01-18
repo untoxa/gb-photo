@@ -2,6 +2,7 @@
 
 #include <gbdk/platform.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "systemhelpers.h"
 #include "gbcamera.h"
@@ -77,7 +78,75 @@ void protected_generate_thumbnail(uint8_t slot) BANKED {
     }
 }
 
-void protected_lastseen_to_slot(uint8_t slot) BANKED {
+uint8_t * copy_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+    dest; sour; count;
+    __asm
+        ldhl sp, #2
+        ld a, (hl)
+
+        ld h, d
+        ld l, e
+
+        ld d, a     ; d == count
+
+1$:
+        .rept 16
+            ld a, (bc)
+            inc bc
+            ld (hl+), a
+        .endm
+
+        dec d
+        jr nz, 1$
+
+        pop hl
+        inc sp
+        jp (hl)
+    __endasm;
+}
+
+static uint8_t hflip_loop;
+uint8_t * copy_data_row_flipped(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+    dest; sour; count;
+    __asm
+        ldhl sp, #2
+        ld a, (hl)
+        ld l, a
+        ld h, #0
+        .rept 4
+            add hl, hl
+        .endm
+        dec hl
+        dec hl
+        add hl, de
+
+1$:
+        ld (#_hflip_loop), a
+
+        .rept 8
+            ld d, #>_flip_recode_table
+            .rept 2
+                ld a, (bc)
+                inc bc
+                ld e, a
+                ld a, (de)
+                ld (hl+), a
+            .endm
+            ld de, #-4
+            add hl, de
+        .endm
+
+        ld a, (#_hflip_loop)
+        dec a
+        jp nz, 1$
+
+        pop hl
+        inc sp
+        jp (hl)
+    __endasm;
+}
+
+void protected_lastseen_to_slot(uint8_t slot, bool flipped) BANKED {
     static uint8_t slot_bank, * dest, * sour;
     uint8_t buffer[CAMERA_IMAGE_TILE_WIDTH * 16];
 
@@ -85,11 +154,21 @@ void protected_lastseen_to_slot(uint8_t slot) BANKED {
     dest = (slot & 1) ? image_second : image_first;
     sour = last_seen;
 
+    if (!flipped) {
+        for (uint8_t i = CAMERA_IMAGE_TILE_HEIGHT; i != 0; i--) {
+            SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+            copy_data_row(buffer, sour, CAMERA_IMAGE_TILE_WIDTH), sour += sizeof(buffer);
+            SWITCH_RAM(slot_bank);
+            copy_data_row(dest, buffer, CAMERA_IMAGE_TILE_WIDTH), dest += sizeof(buffer);
+        }
+        return;
+    }
+    sour += (CAMERA_IMAGE_TILE_HEIGHT - 1) * (CAMERA_IMAGE_TILE_WIDTH * 16);
     for (uint8_t i = CAMERA_IMAGE_TILE_HEIGHT; i != 0; i--) {
         SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
-        memcpy(buffer, sour, sizeof(buffer)), sour += sizeof(buffer);
+        copy_data_row_flipped(buffer, sour, CAMERA_IMAGE_TILE_WIDTH), sour -= sizeof(buffer);
         SWITCH_RAM(slot_bank);
-        memcpy(dest, buffer, sizeof(buffer)), dest += sizeof(buffer);
+        copy_data_row(dest, buffer, CAMERA_IMAGE_TILE_WIDTH), dest += sizeof(buffer);
     }
 }
 

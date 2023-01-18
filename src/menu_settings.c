@@ -44,7 +44,8 @@ typedef enum {
     idSettingsShowGrid,
     idSettingsSaveConfirm,
     idSettingsIRRemoteShutter,
-    idSettingsBootToCamera
+    idSettingsBootToCamera,
+    idSettingsFlipImage
 } settings_menu_e;
 
 
@@ -178,10 +179,18 @@ const menu_item_t SettingsMenuItems[] = {
         .helpcontext = " Boot into the camera mode",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_BOOT_TO_CAM
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 9, .width = 13,
+        .id = idSettingsFlipImage,
+        .caption = " Flip live image\t\t\t%s",
+        .helpcontext = " Flip the live view image",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_FLIP_IMAGE
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 10,
+    .x = 3, .y = 5, .width = 15, .height = 11,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = onShowSettings, .onIdle = onIdleSettings, .onHelpContext = onHelpSettings,
@@ -261,6 +270,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsBootToCamera:
             sprintf(text_buffer, self->caption, checkbox[OPTION(boot_to_camera_mode)]);
             break;
+        case idSettingsFlipImage:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(flip_live_view)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -339,8 +351,13 @@ void menu_settings_execute() BANKED {
                 OPTION(boot_to_camera_mode) = !OPTION(boot_to_camera_mode);
                 save_camera_state();
                 break;
+            case ACTION_SETTINGS_FLIP_IMAGE:
+                OPTION(flip_live_view) = !OPTION(flip_live_view);
+                save_camera_state();
+                break;
             default:
-                music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                // unknown command or cancel
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
                 return;
         }
     }

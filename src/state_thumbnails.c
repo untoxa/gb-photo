@@ -283,8 +283,8 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 break;
             }
             default:
-                // error, must not get here
-                music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                // unknown command or cancel
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
                 break;
         }
         // clear selection

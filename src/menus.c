@@ -61,7 +61,6 @@ const menu_item_t * menu_next(const menu_t * menu, const menu_item_t * item) {
 }
 
 void menu_draw_frame(const menu_t * menu) {
-    // zero menu frame width == not draw menu frame
     screen_clear_rect(menu->x, menu->y, menu->width, menu->height, BLACK_ON_WHITE);
     set_bkg_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
     set_bkg_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
@@ -81,9 +80,9 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     if (menu_item_get_props(menu, selection) & ITEM_DISABLED) selection = menu_next(menu, selection);
 
     // call onShow handler if present
-    if (menu->onShow) result = menu->onShow(menu, param); else result = (menu->width) ? MENU_FLAGS_DEFAULT : MENU_FLAGS_NOFRAME;
+    result = (menu->onShow) ? menu->onShow(menu, param) : MENU_FLAGS_DEFAULT;
     // draw menu frame
-    if (result & MENU_DRAW_FRAME) menu_draw_frame(menu);
+    if ((result & MENU_DRAW_FRAME) && (menu->width)) menu_draw_frame(menu);
     // draw menu items
     for (const menu_item_t * current_item = menu->items; current_item <= menu->last_item; current_item++) {
         if (current_item == selection) {
