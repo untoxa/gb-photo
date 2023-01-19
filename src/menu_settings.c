@@ -85,7 +85,7 @@ const menu_item_t FrameMenuItems[] = {
 };
 const menu_t PrinterFramesMenu = {
     .x = 7, .y = 4, .width = 10, .height = 5,
-    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = FrameMenuItems, .last_item = LAST_ITEM(FrameMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
@@ -118,7 +118,7 @@ const menu_item_t SettingsMenuItems[] = {
         .caption = " Frame\t\t[%s]",
         .helpcontext = " Select frame for printing",
         .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_NONE
+        .result = MENU_RESULT_OK
     }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
         .ofs_x = 1, .ofs_y = 2, .width = 13,
@@ -203,7 +203,7 @@ uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct me
     menu;
     switch (self->id) {
         case idSettingsCGBPalette:
-            return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
         default:
             break;
     }
@@ -298,7 +298,7 @@ void menu_settings_execute() BANKED {
     settings_menu_repaint = true;
     settings_menu_last_selection = NULL;
     spinedit_palette_value = OPTION(cgb_palette_idx);
-    while(TRUE) {
+    do {
         menu_result = menu_execute(&GlobalSettingsMenu, NULL, settings_menu_last_selection), settings_menu_repaint = false;
         switch (menu_result) {
             case ACTION_PRINT_FRAME0:
@@ -355,10 +355,12 @@ void menu_settings_execute() BANKED {
                 OPTION(flip_live_view) = !OPTION(flip_live_view);
                 save_camera_state();
                 break;
+            case MENU_RESULT_OK:
+                settings_menu_repaint = true;
             default:
                 // unknown command or cancel
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
-                return;
+                break;
         }
-    }
+    } while (menu_result != ACTION_NONE);
 }

@@ -1015,49 +1015,51 @@ uint8_t UPDATE_state_camera() BANKED {
             break;
         case ACTION_CAMERA_SUBMENU: {
             recording_video = FALSE;
-            switch (menu_result = menu_popup_camera_execute()) {
-                case ACTION_MODE_MANUAL:
-                case ACTION_MODE_ASSISTED:
-                case ACTION_MODE_AUTO:
-                case ACTION_MODE_BRACKETING: {
-                    static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_bracketing};
-                    OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
-                    RENDER_CAM_REGISTERS();
-                    break;
+            do {
+                switch (menu_result = menu_popup_camera_execute()) {
+                    case ACTION_MODE_MANUAL:
+                    case ACTION_MODE_ASSISTED:
+                    case ACTION_MODE_AUTO:
+                    case ACTION_MODE_BRACKETING: {
+                        static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_bracketing};
+                        OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
+                        RENDER_CAM_REGISTERS();
+                        break;
+                    }
+                    case ACTION_TRIGGER_ABUTTON:
+                    case ACTION_TRIGGER_TIMER:
+                    case ACTION_TRIGGER_INTERVAL: {
+                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval};
+                        OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
+                        break;
+                    }
+                    case ACTION_ACTION_SAVE:
+                    case ACTION_ACTION_PRINT:
+                    case ACTION_ACTION_SAVEPRINT:
+                    case ACTION_ACTION_TRANSFER:
+                    case ACTION_ACTION_SAVETRANSFER:
+                    case ACTION_ACTION_PICNREC:
+                    case ACTION_ACTION_PICNREC_VIDEO:
+                    case ACTION_ACTION_TRANSF_VIDEO: {
+                        static const after_action_e aactions[] = {
+                            after_action_save, after_action_print, after_action_printsave,
+                            after_action_transfer, after_action_transfersave, after_action_picnrec,
+                            after_action_picnrec_video, after_action_transfer_video
+                        };
+                        OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
+                        break;
+                    }
+                    case ACTION_RESTORE_DEFAULTS:
+                        restore_default_mode_settings(OPTION(camera_mode));
+                        RENDER_CAM_REGISTERS();
+                        break;
+                    default:
+                        // unknown command or cancel
+                        music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                        break;
                 }
-                case ACTION_TRIGGER_ABUTTON:
-                case ACTION_TRIGGER_TIMER:
-                case ACTION_TRIGGER_INTERVAL: {
-                    static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval};
-                    OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
-                    break;
-                }
-                case ACTION_ACTION_SAVE:
-                case ACTION_ACTION_PRINT:
-                case ACTION_ACTION_SAVEPRINT:
-                case ACTION_ACTION_TRANSFER:
-                case ACTION_ACTION_SAVETRANSFER:
-                case ACTION_ACTION_PICNREC:
-                case ACTION_ACTION_PICNREC_VIDEO:
-                case ACTION_ACTION_TRANSF_VIDEO: {
-                    static const after_action_e aactions[] = {
-                        after_action_save, after_action_print, after_action_printsave,
-                        after_action_transfer, after_action_transfersave, after_action_picnrec,
-                        after_action_picnrec_video, after_action_transfer_video
-                    };
-                    OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
-                    break;
-                }
-                case ACTION_RESTORE_DEFAULTS:
-                    restore_default_mode_settings(OPTION(camera_mode));
-                    RENDER_CAM_REGISTERS();
-                    break;
-                default:
-                    // unknown command or cancel
-                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
-                    break;
-            }
-            save_camera_state();
+                save_camera_state();
+            } while (menu_result != ACTION_NONE);
             COUNTER_RESET(camera_shutter_timer);
             COUNTER_RESET(camera_repeat_counter);
             camera_scrollbars_reinit();

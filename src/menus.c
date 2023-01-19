@@ -96,7 +96,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     }
 
     // process menu
-    result = 0;
+    result = MENU_RESULT_NONE;
     do {
         // process input
         JOYPAD_INPUT();
@@ -125,9 +125,9 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         }
         if (menu->onIdle) {
             uint8_t res;
-            if (res = menu->onIdle(menu, selection)) return res;
+            if ((res = menu->onIdle(menu, selection)) != MENU_RESULT_NONE) return res;
         } else vsync();
-    } while (result == 0);
+    } while (result == MENU_RESULT_NONE);
 
     return result;
 }

@@ -95,7 +95,7 @@ const menu_item_t MainMenuItems[] = {
         .caption = " About",
         .helpcontext = " About \"Photo!\" v." QUOTE(VERSION),
         .onPaint = NULL,
-        .result = MENU_RESULT_OK
+        .result = ACTION_ABOUT
     }
 };
 const menu_t MainMenu = {
@@ -107,8 +107,9 @@ const menu_t MainMenu = {
 };
 
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
-    if (menu == &YesNoMenu) {
-        return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+    menu;
+    if (self->sub == &AboutMenu) {
+        return (value == MENU_RESULT_OK) ? self->result : ACTION_NONE;
     }
     return value;
 }
@@ -121,22 +122,28 @@ uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 
 // Main Menu execute
 uint8_t menu_main_execute() BANKED {
-    switch (menu_execute(&MainMenu, NULL, NULL)) {
-        case ACTION_CAMERA:
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
-            CHANGE_STATE(state_camera);
-            return STATE_CHANGED();
-        case ACTION_GALLERY:
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
-            CHANGE_STATE(state_gallery);
-            return STATE_CHANGED();         // don't refresh screen if state changed
-        case ACTION_SETTINGS:
-            menu_settings_execute();
-            break;
-        default:
-            // unknown command or cancel
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
-            break;
-    }
+    uint8_t menu_result;
+    do {
+        switch (menu_result = menu_execute(&MainMenu, NULL, NULL)) {
+            case ACTION_CAMERA:
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                CHANGE_STATE(state_camera);
+                return STATE_CHANGED();
+            case ACTION_GALLERY:
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                CHANGE_STATE(state_gallery);
+                return STATE_CHANGED();         // don't refresh screen if state changed
+            case ACTION_SETTINGS:
+                menu_settings_execute();
+                break;
+            case ACTION_ABOUT:
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                return FALSE;
+            default:
+                // unknown command or cancel
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                break;
+        }
+    } while (menu_result != ACTION_NONE);
     return FALSE;
 }

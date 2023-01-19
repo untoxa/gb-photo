@@ -6,14 +6,15 @@
 typedef struct menu_t;
 typedef struct menu_item_t;
 
+#define MENU_RESULT_NONE        0
 #define MENU_INVERSE            1
 
-#define MENU_FLAGS_DEFAULT   (MENU_DRAW_FRAME | MENU_DRAW_ITEMS | MENU_DRAW_SELECTION)
-#define MENU_FLAGS_NOFRAME   (MENU_DRAW_ITEMS | MENU_DRAW_SELECTION)
-#define MENU_FLAGS_NONE      0
-#define MENU_DRAW_FRAME      1
-#define MENU_DRAW_ITEMS      2
-#define MENU_DRAW_SELECTION  4
+#define MENU_FLAGS_DEFAULT      (MENU_DRAW_FRAME | MENU_DRAW_ITEMS | MENU_DRAW_SELECTION)
+#define MENU_FLAGS_NOFRAME      (MENU_DRAW_ITEMS | MENU_DRAW_SELECTION)
+#define MENU_FLAGS_NONE         0
+#define MENU_DRAW_FRAME         1
+#define MENU_DRAW_ITEMS         2
+#define MENU_DRAW_SELECTION     4
 
 #define ITEM_DEFAULT            0
 #define ITEM_DISABLED           1

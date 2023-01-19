@@ -1,8 +1,7 @@
 #ifndef __MENU_CODES_H_INCLUDE__
 #define __MENU_CODES_H_INCLUDE__
 
-
-#define MENU_RESULT_NONE            0
+// #define MENU_RESULT_NONE            0    // defined in menus.h
 #define MENU_RESULT_CLOSE           1
 
 // default actions
@@ -69,6 +68,7 @@
 
 // global actions
 #define ACTION_MAIN_MENU            100
+#define ACTION_ABOUT                101
 
 // system menu results
 #define MENU_RESULT_YES             254

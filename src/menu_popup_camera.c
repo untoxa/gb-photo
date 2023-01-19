@@ -77,7 +77,7 @@ const menu_item_t ModeSubMenuItems[] = {
 };
 const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = MODES_SUBMENU_HEIGHT,
-    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = ModeSubMenuItems, .last_item = LAST_ITEM(ModeSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
@@ -132,7 +132,7 @@ const menu_item_t TriggerSubMenuItems[] = {
 };
 const menu_t TriggerSubMenu = {
     .x = 5, .y = 5, .width = 10, .height = 5,
-    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = TriggerSubMenuItems, .last_item = LAST_ITEM(TriggerSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultTriggerSubMenu
@@ -142,7 +142,7 @@ uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const str
     switch (self->id) {
         case idPopupTimerValue:
         case idPopupTimerCounter:
-            return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
         default:
             break;
     }
@@ -213,7 +213,7 @@ const menu_item_t ActionSubMenuItems[] = {
 };
 const menu_t ActionSubMenu = {
     .x = 5, .y = 4, .width = 12, .height = ACTION_SUBMENU_HEIGHT,
-    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = ActionSubMenuItems, .last_item = LAST_ITEM(ActionSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
@@ -268,7 +268,7 @@ uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct
     menu;
     switch (self->id) {
         case idPopupCameraRestore:
-            return (value == MENU_RESULT_YES) ? self->result : ACTION_NONE;
+            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
         default:
             break;
     }
