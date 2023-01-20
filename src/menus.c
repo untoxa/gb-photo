@@ -34,12 +34,12 @@ const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t *
     if (selection) {
         uint8_t item_props = menu_item_get_props(menu, selection);
         menu_text_out(menu->x + selection->ofs_x, menu->y + selection->ofs_y, selection->width,
-                      items_colors[(bool)(item_props & ITEM_DISABLED)][(bool)(menu->flags & MENU_INVERSE)],
+                      items_colors[(bool)(item_props & ITEM_DISABLED)][(bool)(menu->flags & MENU_FLAGS_INVERSE)],
                       (selection->onPaint) ? selection->onPaint(menu, selection) : (uint8_t *)selection->caption);
     }
     if (new_selection)
         menu_text_out(menu->x + new_selection->ofs_x, menu->y + new_selection->ofs_y, new_selection->width,
-                      ((menu->flags & MENU_INVERSE) ? BLACK_ON_WHITE : WHITE_ON_BLACK),
+                      ((menu->flags & MENU_FLAGS_INVERSE) ? BLACK_ON_WHITE : WHITE_ON_BLACK),
                       (new_selection->onPaint) ? new_selection->onPaint(menu, new_selection) : (uint8_t *)new_selection->caption);
     return (new_selection) ? new_selection : selection;
 }
@@ -61,11 +61,18 @@ const menu_item_t * menu_next(const menu_t * menu, const menu_item_t * item) {
 }
 
 void menu_draw_frame(const menu_t * menu) {
+    // field
     screen_clear_rect(menu->x, menu->y, menu->width, menu->height, BLACK_ON_WHITE);
+    // corners
     set_bkg_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
     set_bkg_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
     set_bkg_tile_xy(menu->x,                   menu->y + menu->height - 1, CORNER_DL);
     set_bkg_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
+}
+void menu_draw_shadow(const menu_t * menu) {
+    // shadow
+    fill_bkg_rect(menu->x + 1,           menu->y + menu->height, menu->width,  1,                SLD_DARK_GRAY);
+    fill_bkg_rect(menu->x + menu->width, menu->y + 1,            1,            menu->height - 1, SLD_DARK_GRAY);
 }
 
 uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
@@ -80,18 +87,21 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
     if (menu_item_get_props(menu, selection) & ITEM_DISABLED) selection = menu_next(menu, selection);
 
     // call onShow handler if present
-    result = (menu->onShow) ? menu->onShow(menu, param) : MENU_FLAGS_DEFAULT;
-    // draw menu frame
-    if ((result & MENU_DRAW_FRAME) && (menu->width)) menu_draw_frame(menu);
+    result = (menu->onShow) ? menu->onShow(menu, param) : MENU_PROP_DEFAULT;
+    // draw menu window
+    if (menu->width) {
+        if (result & MENU_PROP_FRAME) menu_draw_frame(menu);
+        if (result & MENU_PROP_SHADOW) menu_draw_shadow(menu);
+    }
     // draw menu items
     for (const menu_item_t * current_item = menu->items; current_item <= menu->last_item; current_item++) {
         if (current_item == selection) {
-            if (result & MENU_DRAW_SELECTION) {
+            if (result & MENU_PROP_SELECTION) {
                 menu_move_selection(menu, NULL, current_item);
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else {
-            if (result & MENU_DRAW_ITEMS) menu_move_selection(menu, current_item, NULL);
+            if (result & MENU_PROP_ITEMS) menu_move_selection(menu, current_item, NULL);
         }
     }
 
@@ -121,12 +131,10 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
                 if (menu->onTranslateSubResult) result = menu->onTranslateSubResult(menu, selection, result);
             } else result = selection->result;
         } else if (KEY_PRESSED(menu->cancel_mask)) {
-            return menu->cancel_result;
+            result = menu->cancel_result;
         }
-        if (menu->onIdle) {
-            uint8_t res;
-            if ((res = menu->onIdle(menu, selection)) != MENU_RESULT_NONE) return res;
-        } else vsync();
+        if (result != MENU_RESULT_NONE) break;
+        if (menu->onIdle) result = menu->onIdle(menu, selection); else vsync();
     } while (result == MENU_RESULT_NONE);
 
     return result;

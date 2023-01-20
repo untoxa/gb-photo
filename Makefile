@@ -43,7 +43,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # Optimization
-#CFLAGS      += -Wf'--max-allocs-per-node 50000'
+CFLAGS      += -Wf'--max-allocs-per-node 50000'
 
 # You can set the name of the ROM file here
 PROJECTNAME = photo

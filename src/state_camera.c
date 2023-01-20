@@ -370,7 +370,7 @@ const menu_item_t SaveConfirmMenuItems[] = {
 };
 const menu_t SaveConfirmMenu = {
     .x = 3, .y = 17, .width = 0, .height = 0,
-    .flags = MENU_INVERSE,
+    .flags = MENU_FLAGS_INVERSE,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = SaveConfirmMenuItems, .last_item = LAST_ITEM(SaveConfirmMenuItems),
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
@@ -415,7 +415,7 @@ const menu_item_t CameraMenuItemsAssisted[] = {
 };
 const menu_t CameraMenuAssisted = {
     .x = 0, .y = 0, .width = 0, .height = 0,
-    .flags = MENU_INVERSE,
+    .flags = MENU_FLAGS_INVERSE,
     .items = CameraMenuItemsAssisted, .last_item = LAST_ITEM(CameraMenuItemsAssisted),
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
@@ -543,7 +543,7 @@ const menu_item_t CameraMenuItemsManual[] = {
 };
 const menu_t CameraMenuManual = {
     .x = 0, .y = 0, .width = 0, .height = 0,
-    .flags = MENU_INVERSE,
+    .flags = MENU_FLAGS_INVERSE,
     .items = CameraMenuItemsManual, .last_item = LAST_ITEM(CameraMenuItemsManual),
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL

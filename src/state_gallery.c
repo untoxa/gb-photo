@@ -182,7 +182,7 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
         screen_load_thumbnail(self->x + 12, self->y + 2, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0x00);
         screen_restore_rect(self->x + 12, self->y + 2, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     } else menu_text_out(self->x + 4, self->y + 1, 0, BLACK_ON_WHITE, "No image...");
-    return MENU_FLAGS_NOFRAME;
+    return MENU_PROP_NO_FRAME;
 }
 uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;

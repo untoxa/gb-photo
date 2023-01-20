@@ -58,8 +58,9 @@ uint8_t * onSpineditMenuItemPaint(const struct menu_t * menu, const struct menu_
 uint8_t onShowSpinEdit(const menu_t * self, uint8_t * param) {
     spinedit_current_params = (spinedit_params_t *)param;
     menu_draw_frame(self);
+    menu_draw_shadow(self);
     menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, spinedit_current_params->caption);
-    return MENU_FLAGS_NOFRAME;
+    return MENU_PROP_NO_FRAME;
 }
 uint8_t onTranslateKeySpinEdit(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;

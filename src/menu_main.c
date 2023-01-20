@@ -62,7 +62,7 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 2, self->y + 13, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
     menu_text_out(self->x + 2, self->y + 14, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
     vwf_activate_font(0);
-    return MENU_FLAGS_NOFRAME;
+    return MENU_PROP_NO_FRAME;
 }
 
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);

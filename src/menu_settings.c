@@ -228,7 +228,7 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
 }
 uint8_t onShowSettings(const menu_t * self, uint8_t * param) {
     self; param;
-    return (settings_menu_repaint) ? MENU_FLAGS_DEFAULT : MENU_DRAW_SELECTION;
+    return (settings_menu_repaint) ? MENU_PROP_DEFAULT : MENU_PROP_SELECTION;
 }
 uint8_t onIdleSettings(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;

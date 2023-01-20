@@ -133,18 +133,22 @@ lbl:
     __endasm;
 }
 
-void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, bool flip) {
+inline void load_image_normal(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
     const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
-    if (!flip) {
-        do {
-            picture = set_data_row((uint8_t *)(*addr++ + (x << 4)), picture, w);
-        } while (--h);
-        return;
-    }
-    addr += (h - 1);
+    uint16_t ofs = x << 4;
     do {
-        picture = set_data_row_flipped((uint8_t *)(*addr-- + ((x + w - 1) << 4)), picture, w);
+        picture = set_data_row((uint8_t *)(*addr++ + ofs), picture, w);
     } while (--h);
+}
+inline void load_image_flipped(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
+    const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y + h - 1);
+    uint16_t ofs = (x + w - 1) << 4;
+    do {
+        picture = set_data_row_flipped((uint8_t *)(*addr-- + ofs), picture, w);
+    } while (--h);
+}
+void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, bool flip) {
+    if (flip) load_image_flipped(x, y, w, h, picture); else load_image_normal(x, y, w, h, picture);
 }
 
 void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank, bool flip) {

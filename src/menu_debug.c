@@ -71,5 +71,5 @@ uint8_t onShowDebug(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, "Image index:");
     render_cam_game_data((uint8_t *)&cam_game_data, self->x + 1, self->y + 3);
     render_cam_game_data((uint8_t *)&cam_game_data_echo, self->x + 1, self->y + 8);
-    return MENU_FLAGS_NOFRAME;
+    return MENU_PROP_NO_FRAME;
 }

@@ -7,17 +7,20 @@ typedef struct menu_t;
 typedef struct menu_item_t;
 
 #define MENU_RESULT_NONE        0
-#define MENU_INVERSE            1
 
-#define MENU_FLAGS_DEFAULT      (MENU_DRAW_FRAME | MENU_DRAW_ITEMS | MENU_DRAW_SELECTION)
-#define MENU_FLAGS_NOFRAME      (MENU_DRAW_ITEMS | MENU_DRAW_SELECTION)
-#define MENU_FLAGS_NONE         0
-#define MENU_DRAW_FRAME         1
-#define MENU_DRAW_ITEMS         2
-#define MENU_DRAW_SELECTION     4
+#define MENU_FLAGS_NONE         0x00
+#define MENU_FLAGS_INVERSE      0x01
 
-#define ITEM_DEFAULT            0
-#define ITEM_DISABLED           1
+#define MENU_PROP_NONE          0x00
+#define MENU_PROP_FRAME         0x01
+#define MENU_PROP_SHADOW        0x02
+#define MENU_PROP_ITEMS         0x04
+#define MENU_PROP_SELECTION     0x08
+#define MENU_PROP_DEFAULT       (MENU_PROP_FRAME | MENU_PROP_SHADOW | MENU_PROP_ITEMS | MENU_PROP_SELECTION)
+#define MENU_PROP_NO_FRAME      (MENU_PROP_ITEMS | MENU_PROP_SELECTION)
+
+#define ITEM_DEFAULT            0x00
+#define ITEM_DISABLED           0x01
 
 typedef uint8_t menu_handler_t (const struct menu_t * self, uint8_t * param);
 typedef uint8_t idle_handler_t (const struct menu_t * menu, const struct menu_item_t * selection);
@@ -59,6 +62,7 @@ typedef struct menu_t {
 void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text);
 const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t * selection, const menu_item_t * new_selection);
 void menu_draw_frame(const menu_t * menu);
+void menu_draw_shadow(const menu_t * menu);
 
 
 typedef enum {
