@@ -36,8 +36,10 @@ const camera_state_options_t default_camera_state_options = {
     .fancy_sgb_border = false,
     .show_grid = false,
     .save_confirm = true,
+    .ir_remote_shutter = false,
     .boot_to_camera_mode = false,
     .flip_live_view = false,
+    .double_speed = false,
     .shutter_sound = shutter_sound_0,
     .shutter_timer = 10,
     .shutter_counter = 5,
@@ -99,12 +101,18 @@ void save_camera_state() BANKED {
 uint8_t INIT_module_load_save() BANKED {
     ENABLE_RAM;
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
+    // check for the valid save blob and initialize with defaults if fail
     if (save_structure.MAGIC != MAGIC_VALUE) {
         save_structure.MAGIC = MAGIC_VALUE;
         save_structure.state_options = default_camera_state_options;
         memcpy(save_structure.mode_settings, default_camera_mode_settings, sizeof(save_structure.mode_settings));
     }
+    // load camera state
     camera_state = save_structure.state_options;
     memcpy(current_settings, save_structure.mode_settings, sizeof(current_settings));
+    // apply hardware settings
+    if (_is_COLOR) {
+        if (OPTION(double_speed)) CPU_FAST(); else CPU_SLOW();
+    }
     return 0;
 }

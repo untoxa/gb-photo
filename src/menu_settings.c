@@ -45,7 +45,8 @@ typedef enum {
     idSettingsSaveConfirm,
     idSettingsIRRemoteShutter,
     idSettingsBootToCamera,
-    idSettingsFlipImage
+    idSettingsFlipImage,
+    idSettingsDoubleSpeed
 } settings_menu_e;
 
 
@@ -133,7 +134,7 @@ const menu_item_t SettingsMenuItems[] = {
         .ofs_x = 1, .ofs_y = 3, .width = 13,
         .id = idSettingsPrintFast,
         .caption = " Fast printing\t\t\t%s",
-        .helpcontext = " Enable CGB 32Kb/s printing",
+        .helpcontext = " Enable CGB fast printing",
         .onPaint = onSettingsMenuItemPaint,
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_PRINT_FAST
@@ -187,10 +188,19 @@ const menu_item_t SettingsMenuItems[] = {
         .helpcontext = " Flip the live view image",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_FLIP_IMAGE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 10, .width = 13,
+        .id = idSettingsDoubleSpeed,
+        .caption = " Double speed\t\t\t%s",
+        .helpcontext = " CGB double speed mode",
+        .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
+        .result = ACTION_SETTINGS_DOUBLESPEED
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 5, .width = 15, .height = 11,
+    .x = 3, .y = 2, .width = 15, .height = 12,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = onShowSettings, .onIdle = onIdleSettings, .onHelpContext = onHelpSettings,
@@ -233,6 +243,9 @@ uint8_t onShowSettings(const menu_t * self, uint8_t * param) {
 uint8_t onIdleSettings(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     settings_menu_last_selection = selection;
+
+    vsync();
+
     return 0;
 }
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
@@ -273,6 +286,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsFlipImage:
             sprintf(text_buffer, self->caption, checkbox[OPTION(flip_live_view)]);
             break;
+        case idSettingsDoubleSpeed:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(double_speed)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -285,6 +301,7 @@ uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_it
         case idSettingsPrintFast:
         case idSettingsCGBPalette:
         case idSettingsIRRemoteShutter:
+        case idSettingsDoubleSpeed:
             return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idSettingsAltBorder:
             return (_is_SUPER) ? ITEM_DEFAULT : ITEM_DISABLED;
@@ -354,6 +371,16 @@ void menu_settings_execute() BANKED {
             case ACTION_SETTINGS_FLIP_IMAGE:
                 OPTION(flip_live_view) = !OPTION(flip_live_view);
                 save_camera_state();
+                break;
+            case ACTION_SETTINGS_DOUBLESPEED:
+                OPTION(double_speed) = !OPTION(double_speed);
+                save_camera_state();
+                if (_is_COLOR) {
+                    fade_out_modal();
+                    if (OPTION(double_speed)) CPU_FAST(); else CPU_SLOW();
+                    music_setup_timer_ex(_is_CPU_FAST);
+                    fade_in_modal();
+                }
                 break;
             case MENU_RESULT_OK:
                 settings_menu_repaint = true;

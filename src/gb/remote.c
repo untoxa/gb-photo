@@ -93,8 +93,17 @@ uint8_t remote_activate(uint8_t value) BANKED {
     return value;
 }
 
+static void * get_default_SIO_handler() NAKED {
+__asm
+        ld bc, #.serial_IO
+        ret
+__endasm;
+}
+
 uint8_t INIT_module_remote() BANKED {
     CRITICAL {
+        remove_SIO(get_default_SIO_handler());
+        // remove the default SIO handler
         // reinstall SIO handler (receive data)
         remove_SIO(isr_remote_SIO);
         add_SIO(isr_remote_SIO);

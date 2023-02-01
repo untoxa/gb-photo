@@ -3,13 +3,14 @@
 
 #include <gbdk/platform.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "globals.h"
 
 BANKREF_EXTERN(module_detect_system)
 
-extern uint8_t _is_SUPER, _is_COLOR, _is_ADVANCE;
-extern uint8_t _is_CPU_FAST;
+extern bool _is_SUPER, _is_COLOR, _is_ADVANCE;
+extern bool _is_CPU_FAST;
 
 uint8_t CPU_FAST() BANKED;
 void CPU_SLOW() BANKED;

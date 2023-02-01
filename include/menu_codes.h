@@ -26,6 +26,7 @@
 #define ACTION_SETTINGS_IR_REMOTE   25
 #define ACTION_SETTINGS_BOOT_TO_CAM 26
 #define ACTION_SETTINGS_FLIP_IMAGE  27
+#define ACTION_SETTINGS_DOUBLESPEED 28
 
 // state switching actions
 #define ACTION_GALLERY              30

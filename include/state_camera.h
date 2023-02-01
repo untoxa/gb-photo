@@ -87,6 +87,7 @@ typedef struct camera_state_options_t {
     bool ir_remote_shutter      : 1;
     bool boot_to_camera_mode    : 1;
     bool flip_live_view         : 1;
+    bool double_speed           : 1;
     shutter_sound_e shutter_sound;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
@@ -119,6 +120,7 @@ typedef struct camera_mode_settings_t {
     bool ditheringHighLight     : 1;
     bool invertOutput           : 1;
     bool edge_exclusive         : 1;
+    bool cpu_fast               : 1;
 } camera_mode_settings_t;
 
 typedef struct image_metadata_t {

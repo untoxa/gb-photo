@@ -253,6 +253,7 @@ void camera_image_save() {
         // save metadata
         image_metadata.raw_regs = SHADOW;
         image_metadata.settings = current_settings[OPTION(camera_mode)];
+        image_metadata.settings.cpu_fast = _is_CPU_FAST;
         image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         // add slot to used list
@@ -350,7 +351,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
 uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection);
-uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings);
+uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings, bool divide_exposure);
 
 // --- Save confirmation namu ------------------------
 const menu_item_t SaveConfirmMenuItems[] = {
@@ -874,13 +875,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (!is_capturing() && !recording_video) vsync();
     return 0;
 }
-uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) {
+uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings, bool divide_exposure) {
     static const uint8_t * const on_off[]   = {"Off",    "On"} ;
     static const uint8_t * const low_high[] = {"Low",    "High"};
     static const uint8_t * const norm_inv[] = {"Normal", "Inverted"};
     switch (id) {
         case idExposure: {
-            uint32_t value = FROM_EXPOSURE_VALUE(settings->current_exposure) / 10;
+            uint32_t value = FROM_EXPOSURE_VALUE((divide_exposure) ? settings->current_exposure >> 1 : settings->current_exposure) / 10;
             uint8_t * buf = text_buffer_extra;
             uint8_t len = strlen(ultoa(value, buf, 10));
             // if too short value, add leading zeroes
@@ -946,7 +947,7 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
 }
 uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    return formatItemText(self->id, self->caption, &CURRENT_SETTINGS);
+    return formatItemText(self->id, self->caption, &CURRENT_SETTINGS, _is_CPU_FAST);
 }
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
@@ -956,7 +957,7 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 }
 
 uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED {
-    return formatItemText(id, format, settings);
+    return formatItemText(id, format, settings, settings->cpu_fast);
 }
 
 uint8_t UPDATE_state_camera() BANKED {
