@@ -1,5 +1,6 @@
 #pragma bank 255
 
+#include <gb/isr.h>
 #include "remote.h"
 
 #define WATCHDOG_DELAY 2
@@ -18,6 +19,10 @@ inline void SIO_cancel_transfer() {
 
 void isr_remote_SIO() NONBANKED NAKED {
 __asm
+        push af
+        push hl
+        push de
+
         ld hl, #_remote_keys
         ldh a, (_SB_REG)    ; 0bS0IPXXXX S-stop, I-identifier, P-parity, XXXX - 4 button bits
         ld e, a
@@ -60,16 +65,26 @@ __asm
         or e
         ld (hl), a
 
-        ret
+        jr 4$
 1$:
         xor a
         ldh (_SC_REG), a    ; reset transfer
         ld (hl), a
         ld (_remote_watchdog), a
 
-        ret
+4$:
+        pop de
+        pop hl
+5$:
+        ldh a, (_STAT_REG)
+        and #STATF_BUSY
+        jr nz, 5$
+
+        pop af
+        reti
 __endasm;
 }
+ISR_VECTOR(VECTOR_SERIAL, isr_remote_SIO)
 
 void isr_remote_VBL() NONBANKED {
     if (remote_watchdog < WATCHDOG_DELAY) {
@@ -93,21 +108,8 @@ uint8_t remote_activate(uint8_t value) BANKED {
     return value;
 }
 
-static void * get_default_SIO_handler() NAKED {
-__asm
-        ld bc, #.serial_IO
-        ret
-__endasm;
-}
-
 uint8_t INIT_module_remote() BANKED {
     CRITICAL {
-        remove_SIO(get_default_SIO_handler());
-        // remove the default SIO handler
-        // reinstall SIO handler (receive data)
-        remove_SIO(isr_remote_SIO);
-        add_SIO(isr_remote_SIO);
-
         // reinstall VBL handler (watchdog)
         remove_VBL(isr_remote_VBL);
         add_VBL(isr_remote_VBL);
