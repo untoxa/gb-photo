@@ -45,7 +45,7 @@ STATE OLD_PROGRAM_STATE = N_STATES, CURRENT_PROGRAM_STATE = DEFAULT_STATE;
 
 void main() {
     // call init for the each module and then for the each state
-    for (uint8_t i = 0; i != LENGTH(PROGRAM_MODULES); i++) call_far(&PROGRAM_MODULES[i]);
+    for (far_ptr_t * init = PROGRAM_MODULES; init < (PROGRAM_MODULES + LENGTH(PROGRAM_MODULES)); call_far(init++));
 
     // the main program loop
     while (TRUE) {
