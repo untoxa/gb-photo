@@ -22,7 +22,6 @@ __asm
         jp nz, ___sdcc_bcall_ehl
         ret
 #elif defined(SEGA)
-        push hl
         ld e, (hl)
         inc hl
         ld a, (hl)
