@@ -3,13 +3,13 @@
 
 #include "sfxplayer.h"
 
-uint8_t sfx_play_bank = SFX_STOP_BANK;
-const uint8_t * sfx_play_sample = 0;
+volatile uint8_t sfx_play_bank = SFX_STOP_BANK;
+const uint8_t * sfx_play_sample = NULL;
 uint8_t sfx_frame_skip;
 
-uint8_t sfx_play_isr() NONBANKED NAKED OLDCALL {
-#if defined(__SDCC) 
-#if defined(NINTENDO) 
+uint8_t sfx_play_isr(void) NONBANKED NAKED OLDCALL {
+#if defined(__SDCC)
+#if defined(NINTENDO)
 __asm
 .macro copy_reg ?lbl
         sla b
@@ -82,7 +82,7 @@ lbl:
         cp #6
         jr nz, 4$                   ; just load waveform, not play
 
-        ld a, #0x80             
+        ld a, #0x80
         ldh (_NR30_REG),a
         ld a, #0xFE                 ; length of wave
         ldh (_NR31_REG),a
@@ -91,7 +91,7 @@ lbl:
         xor a                       ; low freq bits are zero
         ldh (_NR33_REG),a
         ld a, #0xC7                 ; start; no loop; high freq bits are 111
-        ldh (_NR34_REG),a       
+        ldh (_NR34_REG),a
 
         jr 4$
 5$:                                 ; terminator
@@ -105,7 +105,7 @@ lbl:
         add c
         add #_NR10_REG
         ld c, a                     ; c = NR10_REG + (a & 7) * 5
-        
+
         .rept 5
             copy_reg
         .endm
