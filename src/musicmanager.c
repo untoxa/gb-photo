@@ -9,26 +9,22 @@
 #endif
 
 volatile uint8_t music_current_track_bank = MUSIC_STOP_BANK;
-uint8_t music_mute_flag = FALSE, music_mute_mask = MUTE_MASK_NONE;
+volatile uint8_t music_mute_mask = MUTE_MASK_NONE;
 const MUSIC_MODULE * music_next_track;
 uint8_t music_play_isr_counter = 0;
 uint8_t music_play_isr_pause = FALSE;
-uint8_t music_sfx_priority = MUSIC_SFX_PRIORITY_MINIMAL;
+volatile uint8_t music_sfx_priority = MUSIC_SFX_PRIORITY_MINIMAL;
 uint8_t music_tick_mask = MUSIC_TICK_MASK_256HZ;
 
 void music_play_isr(void) NONBANKED {
     if (sfx_play_bank != SFX_STOP_BANK) {
-        if (!music_mute_flag) {
 #if defined(NINTENDO)
-            hUGE_mute_mask = music_mute_mask;
+        hUGE_mute_mask = music_mute_mask;
 #endif
-            music_mute_flag = TRUE;
-        }
         if (!sfx_play_isr()) {
 #if defined(NINTENDO)
             hUGE_mute_mask = MUTE_MASK_NONE, hUGE_reset_wave();
 #endif
-            music_mute_flag = FALSE;
 #ifdef FORCE_CUT_SFX
             music_sound_cut_mask(music_mute_mask);
 #endif

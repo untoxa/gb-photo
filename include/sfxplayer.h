@@ -65,6 +65,6 @@ inline void sfx_set_sample(uint8_t bank, const uint8_t * sample) {
 }
 
 // SFX driver interrupt routine
-uint8_t sfx_play_isr(void) OLDCALL;
+uint8_t sfx_play_isr(void);
 
 #endif

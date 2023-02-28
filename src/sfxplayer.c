@@ -7,7 +7,7 @@ volatile uint8_t sfx_play_bank = SFX_STOP_BANK;
 const uint8_t * sfx_play_sample = NULL;
 uint8_t sfx_frame_skip;
 
-uint8_t sfx_play_isr(void) NONBANKED NAKED OLDCALL {
+uint8_t sfx_play_isr(void) NONBANKED NAKED {
 #if defined(__SDCC)
 #if defined(NINTENDO)
 __asm
@@ -24,7 +24,7 @@ lbl:
         ld a, (hl+)
         ld e, a
         or (hl)
-        ret z
+        ret z                       ; return FALSE
         ld d, (hl)
 
         ld hl, #_sfx_frame_skip
@@ -32,9 +32,7 @@ lbl:
         or (hl)
         jr z, 7$
         dec (hl)
-8$:
-        ld e, a
-        ret
+        ret                         ; A != 0 that returns TRUE
 7$:
         ld h, d
         ld l, e                     ; HL = current position inside the sample
@@ -43,7 +41,7 @@ lbl:
         ld e, a
         ld a, (_sfx_play_bank)
         inc a                       ; SFX_STOP_BANK ?
-        jr z, 8$
+        ret z                       ; return FALSE
         dec a
         ldh (__current_bank), a
         ld (_rROMB0), a
@@ -121,7 +119,7 @@ lbl:
         dec d
         jp nz, 2$
 6$:
-        inc d                       ; return 1 if still playing
+        inc d                       ; return TRUE if still playing
 0$:
         ld a, l                     ; save current position
         ld (_sfx_play_sample), a
@@ -132,7 +130,7 @@ lbl:
         ldh (__current_bank), a
         ld (_rROMB0), a
 
-        ld e, d                     ; result in e
+        ld a, d                     ; result in a
 
         ret
 __endasm;

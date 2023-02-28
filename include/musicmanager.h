@@ -28,9 +28,9 @@
 #define MUSIC_TICK_MASK_256HZ 0x03u
 
 extern volatile uint8_t music_current_track_bank;
-extern uint8_t music_mute_mask;
+extern volatile uint8_t music_mute_mask;
 extern const MUSIC_MODULE * music_next_track;
-extern uint8_t music_sfx_priority;
+extern volatile uint8_t music_sfx_priority;
 extern uint8_t music_tick_mask;
 
 // set up timer interrupt to 256Hz and set up driver for 256Hz
@@ -102,7 +102,7 @@ inline void music_stop() {
 
 // play SFX with the desired priority, muting the music on the selected channels
 inline void music_play_sfx(uint8_t bank, const uint8_t * sample, uint8_t mute_mask, uint8_t priority) {
-    if (priority < music_sfx_priority) return;
+    if (music_sfx_priority > priority) return;
     sfx_play_bank = SFX_STOP_BANK;
     music_sfx_priority = priority;
     music_sound_cut_mask(music_mute_mask);
