@@ -28,12 +28,15 @@ void linkcable_send_block(const uint8_t * image) NAKED {
     image;
 #ifdef NINTENDO
     __asm
-.macro .SEND_A ?lbl
-        ldh (c), a
-        ld (hl), #START_TRANSFER_FAST
+.macro .SIO_WAIT ?lbl
 lbl:
         bit #7, (hl)
         jr nz, lbl
+.endm
+.macro .SIO_SEND_A
+        .SIO_WAIT
+        ldh (c), a
+        ld (hl), #START_TRANSFER_FAST
 .endm
         ld b, #224      ; image of 224 tiles
         ld c, #_SB_REG
@@ -42,14 +45,17 @@ lbl:
         .rept 15
             ld a, (de)
             inc e
-            .SEND_A
+            .SIO_SEND_A
         .endm
         ld a, (de)
         inc de
-        .SEND_A
+        .SIO_SEND_A
 
         dec b
         jp nz, 1$
+
+        .SIO_WAIT
+
         ret
     __endasm;
 #else
