@@ -32,6 +32,7 @@
 #define ACTION_GALLERY              30
 #define ACTION_CAMERA               31
 #define ACTION_SETTINGS             32
+#define ACTION_FLASHER              33
 
 // camera popup menu actions
 #define ACTION_MODE_MANUAL          40
@@ -66,6 +67,13 @@
 #define ACTION_PRINT_FRAME1         81
 #define ACTION_PRINT_FRAME2         82
 #define ACTION_PRINT_FRAME3         83
+
+// flasher
+#define ACTION_FLASH_SAVE           90
+#define ACTION_FLASH_LOAD           91
+#define ACTION_FLASH_ERASE          92
+#define ACTION_PRINT_SLOT           93
+#define ACTION_TRANSFER_SLOT        94
 
 // global actions
 #define ACTION_MAIN_MENU            100

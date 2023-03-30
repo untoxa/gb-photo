@@ -85,13 +85,20 @@ const menu_item_t MainMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 3, .width = 10,
+        .caption = " Flash storage",
+        .helpcontext = " Save/Restore galleries",
+        .onPaint = NULL,
+        .result = ACTION_FLASHER
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 10,
         .caption = " Settings",
         .helpcontext = " Edit program settings",
         .onPaint = NULL,
         .result = ACTION_SETTINGS
     }, {
         .sub = &AboutMenu, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 10,
+        .ofs_x = 1, .ofs_y = 5, .width = 10,
         .caption = " About",
         .helpcontext = " About \"Photo!\" v." QUOTE(VERSION),
         .onPaint = NULL,
@@ -99,7 +106,7 @@ const menu_item_t MainMenuItems[] = {
     }
 };
 const menu_t MainMenu = {
-    .x = 1, .y = 3, .width = 12, .height = 6,
+    .x = 1, .y = 3, .width = 12, .height = 7,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
     .onShow = NULL, .onHelpContext = onHelpMainMenu,
@@ -132,6 +139,10 @@ uint8_t menu_main_execute() BANKED {
             case ACTION_GALLERY:
                 music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
                 CHANGE_STATE(state_gallery);
+                return STATE_CHANGED();         // don't refresh screen if state changed
+            case ACTION_FLASHER:
+                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                CHANGE_STATE(state_flasher);
                 return STATE_CHANGED();         // don't refresh screen if state changed
             case ACTION_SETTINGS:
                 menu_settings_execute();

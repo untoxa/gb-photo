@@ -255,6 +255,12 @@ void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill
     }
 }
 
+void screen_load_thumbnail_banked(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill, uint8_t bank) {
+    uint8_t save = _current_bank;
+    SWITCH_ROM(bank);
+    screen_load_thumbnail(x, y, picture, fill);
+    SWITCH_ROM(save);
+}
 
 void VBL_ISR() NONBANKED {
     LCDC_REG &= ~LCDCF_BG8000;

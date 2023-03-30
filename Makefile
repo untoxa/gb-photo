@@ -18,7 +18,8 @@ START_SAVE = 12
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket sms gg
 #TARGETS = gb gbc pocket sms gg
-TARGETS = gb gbc
+#TARGETS = gb gbc
+TARGETS = gbc
 
 LIBRARIES = -Wl-llib/$(PORT)/hUGEDriver.lib
 
@@ -35,7 +36,7 @@ LCCFLAGS += -Wl-j -Wm-yoA -Wm-ya16 -autobank -Wb-ext=.rel
 # LCCFLAGS += -debug # Uncomment to enable debug output
 # LCCFLAGS += -v     # Uncomment for lcc verbose output
 
-CFLAGS = -Iinclude -Iinclude/$(PORT) -Iinclude/$(PLAT) -I$(RESDIR) -Iobj/$(PLAT) -Wf'--disable-warning 110'
+CFLAGS = -Iinclude -Iinclude/$(PORT) -Iinclude/$(PLAT) -I$(RESDIR) -Iobj/$(EXT) -Wf'--disable-warning 110'
 
 BRANCH      = $(shell git rev-parse --abbrev-ref HEAD)
 VERSION     = $(shell cat version)
@@ -43,7 +44,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # Optimization
-CFLAGS      += -Wf'--max-allocs-per-node 50000'
+# CFLAGS      += -Wf'--max-allocs-per-node 50000'
 
 # You can set the name of the ROM file here
 PROJECTNAME = photo
@@ -73,12 +74,14 @@ FONT_RES    = $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/gfx/$(PLAT)/fon
 SPR_RES     = $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/gfx/$(PLAT)/sprites/*.png)))
 BKG_RES     = $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/gfx/$(PLAT)/backgrounds/*.png)))
 
+DATA_RES    = $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/data/*.bin)))
+
 # C and ASM sources
 CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(SRCPLAT),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(SRCPORT),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/audio/$(PLAT)/*.c))) $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/menus/*.c))) $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/overlays/*.c)))
 ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s))) $(foreach dir,$(SRCPLAT),$(notdir $(wildcard $(dir)/*.s))) $(foreach dir,$(SRCPORT),$(notdir $(wildcard $(dir)/*.s)))
 
 OBJS        = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
-RESOBJ      = $(VGM_RES:%.vgm=$(OBJDIR)/%.o) $(WAV_RES:%.wav=$(OBJDIR)/%.o) $(FX_RES:%.sav=$(OBJDIR)/%.o) $(UGE_RES:%.uge=$(OBJDIR)/%.o) $(FONT_RES:%.png=$(OBJDIR)/%.o) $(SPR_RES:%.png=$(OBJDIR)/%.o) $(BKG_RES:%.png=$(OBJDIR)/%.o)
+RESOBJ      = $(VGM_RES:%.vgm=$(OBJDIR)/%.o) $(WAV_RES:%.wav=$(OBJDIR)/%.o) $(FX_RES:%.sav=$(OBJDIR)/%.o) $(UGE_RES:%.uge=$(OBJDIR)/%.o) $(FONT_RES:%.png=$(OBJDIR)/%.o) $(SPR_RES:%.png=$(OBJDIR)/%.o) $(BKG_RES:%.png=$(OBJDIR)/%.o) $(DATA_RES:%.bin=$(OBJDIR)/%.o)
 
 DEPENDANT   = $(CSOURCES:%.c=$(OBJDIR)/%.o)
 
@@ -105,6 +108,10 @@ $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/music/%.uge $$(wildcard $(RESDIR)/audio/$
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/waveforms/%.wav $$(wildcard $(RESDIR)/audio/$(PLAT)/waveforms/%.wav.meta)
 	python utils/wav2data.py `cat <$<.meta 2>/dev/null` -o $@ $<
+
+.SECONDEXPANSION:
+$(OBJDIR)/%.o:	$(RESDIR)/data/%.bin $$(wildcard $(RESDIR)/data/%.bin.meta)
+	python utils/bin2obj.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 $(OBJDIR)/%.o:	$(RESDIR)/audio/$(PLAT)/%.c
 	$(LCC) $(CFLAGS) -c -o $@ $<

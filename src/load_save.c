@@ -13,18 +13,9 @@
 
 BANKREF(module_load_save)
 
-#define MAGIC_VALUE 0x45564153
+#define LOAD_SAVE_OFFSET (0xC000 - sizeof(save_structure_t))
 
-#define FREE_SAVE_SPACE 72
-
-typedef struct save_structure_t {
-    uint32_t MAGIC;
-    camera_state_options_t state_options;
-    camera_mode_settings_t mode_settings[N_CAMERA_MODES];
-} save_structure_t;
-CHECK_SIZE_NOT_LARGER(save_structure_t, FREE_SAVE_SPACE);   // compiling breaks here if sizeof(save_structure_t) becomes larger than the available amount of bytes
-
-static save_structure_t AT(0xC000 - sizeof(save_structure_t)) save_structure;  // bind the structure to the top of SRAM bank
+static save_structure_t AT(LOAD_SAVE_OFFSET) save_structure;  // bind the structure to the top of SRAM bank
 
 const camera_state_options_t default_camera_state_options = {
     .camera_mode = camera_mode_auto,

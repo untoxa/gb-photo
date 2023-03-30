@@ -63,7 +63,7 @@ const metasprite_t gallery_cursor2[] = {
 };
 const metasprite_t * const gallery_cursor[] = {gallery_cursor0, gallery_cursor1, gallery_cursor2, gallery_cursor1};
 
-const thumb_coord_t thumbnail_coords[MAX_PREVIEW_THUMBNAILS] = {
+static const thumb_coord_t thumbnail_coords[MAX_PREVIEW_THUMBNAILS] = {
     {2,  1}, {6,  1}, {10,  1}, {14,  1},
     {2,  5}, {6,  5}, {10,  5}, {14,  5},
     {2,  9}, {6,  9}, {10,  9}, {14,  9},
@@ -143,7 +143,7 @@ void tumbnail_refresh(uint8_t index) {
     }
 }
 
-uint8_t tumbnails_diaplay(uint8_t start) {
+void thumbnails_diaplay(uint8_t start) {
     vsync();
     screen_clear_rect(THUMBNAIL_DISPLAY_X, THUMBNAIL_DISPLAY_Y, THUMBNAIL_DISPLAY_WIDTH, THUMBNAIL_DISPLAY_HEIGHT, WHITE_ON_BLACK);
     for (uint8_t i = start, j = 0; (i < VECTOR_LEN(used_slots)) && (j != MAX_PREVIEW_THUMBNAILS); i++, j++) {
@@ -153,14 +153,13 @@ uint8_t tumbnails_diaplay(uint8_t start) {
         if (selected_images[i]) menu_text_out(thumbnail_coords[j].x + 3, thumbnail_coords[j].y + 3, 0, WHITE_ON_BLACK, ICON_CBX_CHECKED);
         screen_restore_rect(thumbnail_coords[j].x, thumbnail_coords[j].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     }
-    return TRUE;
 }
 
 static void refresh_screen() {
     screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
     menu_text_out(0, 0, 20, WHITE_ON_BLACK, " Thumbnail view");
 
-    tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+    thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
 
     sprintf(text_buffer, "%hd/%hd", (uint8_t)((OPTION(gallery_picture_idx) < images_taken()) ? (OPTION(gallery_picture_idx) + 1) : 0), (uint8_t)images_taken());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
@@ -202,7 +201,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
             cx = THUMBS_COUNT_X - 1;
             if (old_page != thumbnails_page_no) {
                 hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-                tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+                thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
             }
         } else --cx;
         music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
@@ -213,7 +212,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
             cx = 0;
             if (old_page != thumbnails_page_no) {
                 hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-                tumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
+                thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
             }
         };
         music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);

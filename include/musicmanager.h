@@ -110,4 +110,6 @@ inline void music_play_sfx(uint8_t bank, const uint8_t * sample, uint8_t mute_ma
     sfx_set_sample(bank, sample);
 }
 
+#define PLAY_SFX(A) music_play_sfx(BANK(A), A, SFX_MUTE_MASK(A), MUSIC_SFX_PRIORITY_MINIMAL)
+
 #endif

@@ -33,7 +33,7 @@
 
 ___HandleCrash::
         push    hl
-        ld      hl, #.MBC_ROM_PAGE
+        ld      hl, #rROMB0
         ld      (hl), #b___HandleCrash_banked
         pop     hl
         jp      ___HandleCrash_banked 

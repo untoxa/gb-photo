@@ -52,8 +52,6 @@
 
 BANKREF(state_gallery)
 
-#define VECTOR_SET_DIRECT(VECTOR, POS, ELEM) ((VECTOR[(POS) + 1]) = (ELEM))
-
 VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 

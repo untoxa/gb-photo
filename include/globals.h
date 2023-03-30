@@ -54,6 +54,7 @@ extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rend
 #define MODULES \
 _MODULE(module_detect_system)\
 _MODULE(module_load_save)\
+_MODULE(module_protected)\
 _MODULE(module_sgb_assets)\
 _MODULE(module_joy)\
 _MODULE(module_splash)\
@@ -73,6 +74,7 @@ _STATE(state_logo)\
 _STATE(state_gallery)\
 _STATE(state_thumbnails)\
 _STATE(state_camera)\
+_STATE(state_flasher)\
 STATE_DEF_END
 
 #define DEFAULT_STATE state_logo

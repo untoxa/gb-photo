@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -9,6 +10,8 @@
 #include "vector.h"
 
 #include "protected.h"
+
+BANKREF(module_protected)
 
 void protected_pack(uint8_t * v) BANKED {
     uint8_t i, elem;
@@ -204,4 +207,12 @@ uint8_t protected_metadata_write(uint8_t slot, uint8_t * sour, uint8_t size) BAN
         if (!(--sz)) return TRUE;
     }
     return FALSE;
+}
+
+uint8_t INIT_module_protected() BANKED {
+    static const uint8_t magic_string[] = {'M', 'a', 'g', 'i', 'c'};
+    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    memcpy(cam_game_data.magic, magic_string, sizeof(cam_game_data.magic));
+    memcpy(cam_game_data_echo.magic, magic_string, sizeof(cam_game_data.magic));
+    return 0;
 }

@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <stdint.h>
 
 #include "compat.h"
 #include "musicmanager.h"
@@ -33,7 +34,7 @@ BANKREF(state_logo)
 
 static const uint8_t version_string[] = " Version " QUOTE(VERSION) " (" QUOTE(BRANCH) ")";
 
-void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
+static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
     static uint8_t **addr, i, j;
     static const uint8_t *data;
     data = map;

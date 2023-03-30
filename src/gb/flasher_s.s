@@ -1,10 +1,10 @@
         .include "global.s"
-                
+
         .globl  .start_save
         .globl __current_bank
 
         .area _INITIALIZED
-_save_rom_bank:: 
+_save_rom_bank::
         .ds 1
 _save_sram_bank_offset::
         .ds 1
@@ -40,8 +40,8 @@ _flash_data_routine:
 
         ld      h, #0x40                        ; two SRAM banks are saved into one ROM bank.
         bit     0, c
-        jr      z,0$
-        set     5, h 
+        jr      z, 0$
+        set     5, h
 0$:
         xor     a
         ld      l, a                            ; destination HL == 0x4000 or HL == 0x6000
@@ -49,12 +49,13 @@ _flash_data_routine:
         ld      d, #0xA0                        ; source DE == 0xA000
         ld      e, a
 
+        ld      a, (_save_sram_bank_offset)
+        add     c
+        ld      c, a
 1$:
         .wb     #rRAMG, #0x0A                   ; enable SRAM
 
-        ld      a, (_save_sram_bank_offset)
-        add     c
-        ldh     (#rRAMB), a                     ; switch SRAM
+        .wb     #rRAMB, c                       ; switch SRAM
 
         ld      a, (de)                         ; read byte
         ld      b, a
@@ -81,7 +82,7 @@ _flash_data_routine:
         dec     b
         jr      nz, 2$
 
-        ld      e, #0                           ; fail                  
+        ld      e, #0                           ; fail
         jr      5$
 3$:
         inc     de                              ; next source
@@ -100,7 +101,7 @@ _flash_data_routine:
         pop     af
         ld      (#rROMB0), a                    ; restore bank
 
-        ei 
+        ei
 
         pop     bc
         ret
@@ -144,13 +145,13 @@ _save_sram_banks::
 
         ld      a, e
         or      a
-        jr      z, 2$   
+        jr      z, 2$
 
         pop     af
         sub     #1
         jr      nc, 1$
 
-        push    af      
+        push    af
 2$:
         pop     af
 3$:
@@ -167,7 +168,7 @@ _erase_flash_sector_routine:
         push    af                              ; save current bank
 
         .wb     #rRAMG, #0x00                   ; disable SRAM
-        
+
         .wb     #rROMB0, (#_save_rom_bank)
 
         .wb     #0x4000, #0xF0                  ; reset
