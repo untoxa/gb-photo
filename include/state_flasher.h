@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#include "menus.h"
+
+#include "misc_assets.h"
+
 #define MAX_FLASHER_THUMBNAILS 10
 #define MAX_FLASHER_THUMBS_PAGES 3
 #define FLASHER_THUMBS_COUNT_X 5
@@ -27,6 +31,8 @@
 #define SECOND_HALF_OFS 8
 #define SECOND_HALF_LEN 8
 
+BANKREF_EXTERN(state_flasher)
+
 typedef enum {
     browse_mode_folders,
     browse_mode_thumbnails,
@@ -42,6 +48,11 @@ extern uint8_t save_sram_bank_offset;
 
 inline uint8_t slot_to_sector(uint8_t slot, uint8_t ofs) {
     return ((((slot) + 1) << 3) + (ofs << 2));
+}
+
+inline void flasher_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
+    misc_render_progressbar(value, size, text_buffer);
+    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
 #endif

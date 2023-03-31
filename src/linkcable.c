@@ -6,6 +6,8 @@
 #include "gbcamera.h"
 #include "gbprinter.h"
 
+#include "linkcable.h"
+
 // 0b10000011 - start, CGB double speed, internal clock
 #define START_TRANSFER_FAST 0x83
 
@@ -24,8 +26,8 @@ void linkcable_send_string(const uint8_t * data, uint8_t len) {
 }
 #define LINK_SEND_COMMAND(CMD) linkcable_send_string((const uint8_t *)&(CMD), sizeof(CMD))
 
-void linkcable_send_block(const uint8_t * image) NAKED {
-    image;
+void linkcable_send_block(const uint8_t * image, uint8_t bank) NONBANKED NAKED {
+    image; bank;
 #ifdef NINTENDO
     __asm
 .macro .SIO_WAIT ?lbl
@@ -35,26 +37,37 @@ lbl:
 .endm
 .macro .SIO_SEND_A
         .SIO_WAIT
-        ldh (c), a
+        ldh (_SB_REG), a
         ld (hl), #START_TRANSFER_FAST
 .endm
-        ld b, #224      ; image of 224 tiles
-        ld c, #_SB_REG
+        ld c, a
+        ldh a, (__current_bank)
+        push af
+        ld a, c
+        ldh (__current_bank), a
+        ld (_rROMB0), a
+
         ld hl, #_SC_REG
+        ld bc, #(224 << 4)  ; image of 224 tiles
+        inc b
+        inc c
+        jr  2$
 1$:
-        .rept 15
-            ld a, (de)
-            inc e
-            .SIO_SEND_A
-        .endm
         ld a, (de)
         inc de
         .SIO_SEND_A
 
+2$:
+        dec c
+        jr nz, 1$
         dec b
-        jp nz, 1$
+        jr nz, 1$
 
         .SIO_WAIT
+
+        pop af
+        ldh (__current_bank), a
+        ld (_rROMB0), a
 
         ret
     __endasm;
@@ -69,9 +82,9 @@ uint8_t linkcable_transfer_reset() BANKED {
 }
 
 uint8_t linkcable_transfer_image(const uint8_t * image, uint8_t image_bank) BANKED {
-    SWITCH_RAM(image_bank);
+    SWITCH_RAM(image_bank & 0x0f);
     LINK_SEND_COMMAND(LNK_DATA_HDR);
-    linkcable_send_block(image);
+    linkcable_send_block(image, image_bank);
     LINK_SEND_COMMAND(LNK_DATA_FTR);
     return PRN_STATUS_OK;
 }

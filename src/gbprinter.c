@@ -131,7 +131,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
 
     if ((rows >> 1) == 0) return PRN_STATUS_OK;
 
-    SWITCH_RAM(image_bank);
+    SWITCH_RAM(image_bank & 0x0f);
     img = image;
 
     const uint8_t * map = current_frame.map;
@@ -147,7 +147,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
             // overlay the picture tile if in range
             if ((y >= current_frame.image_y) && (y < (current_frame.image_y + CAMERA_IMAGE_TILE_HEIGHT)) &&
                 (x >= current_frame.image_x) && (x < (current_frame.image_x + CAMERA_IMAGE_TILE_WIDTH))) {
-                memcpy(tile_data, img + ((((y - current_frame.image_y) << 4) + (x - current_frame.image_x)) << 4), sizeof(tile_data));
+                banked_memcpy(tile_data, img + ((((y - current_frame.image_y) << 4) + (x - current_frame.image_x)) << 4), sizeof(tile_data), image_bank);
             }
             // print the resulting tile
             if (printer_print_tile(tile_data)) {

@@ -9,6 +9,8 @@
 
 #include "globals.h"
 
+#include "misc_assets.h"
+
 BANKREF_EXTERN(state_gallery)
 
 VECTOR_DECLARE_EXTERN(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);

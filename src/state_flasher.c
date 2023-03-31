@@ -13,10 +13,14 @@
 #include "bankdata.h"
 #include "fade_manager.h"
 #include "gbcamera.h"
+#include "gbprinter.h"
+#include "linkcable.h"
+#include "remote.h"
 #include "load_save.h"
 #include "vector.h"
 
 #include "state_flasher.h"
+#include "state_camera.h"
 
 #include "misc_assets.h"
 
@@ -25,6 +29,9 @@
 #include "menu_codes.h"
 #include "menu_main.h"
 #include "menu_yesno.h"
+
+// frames
+#include "print_frames.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -77,10 +84,15 @@ static const item_coord_t thumbnail_coords[MAX_FLASHER_THUMBNAILS] = {
     {0,  13}, {4,  13}, {8,  13}, {12,  13}, {16, 13}
 };
 
+static const uint8_t * const picture_addr[] = {0x6000, 0x7000, 0x4000, 0x5000};
 static const uint8_t * const thumbnail_addr[] = {0x6E00, 0x7E00, 0x4E00, 0x5E00};
 
 bool flash_slots[MAX_FLASH_SLOTS];
 VECTOR_DECLARE(flash_image_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
+
+inline uint8_t slot_images_taken() {
+    return VECTOR_LEN(flash_image_slots);
+}
 
 static const uint8_t MAGIC_SAVE_VALUE[] = {'M', 'a', 'g', 'i', 'c'};
 
@@ -97,7 +109,7 @@ static uint8_t flash_save_gallery_to_slot(uint8_t slot) {
     save_sram_bank_offset = SECOND_HALF_OFS;
     save_rom_bank = slot_to_sector(slot, 1);
     if (!erase_flash()) return FALSE;
-    return save_sram_banks(SECOND_HALF_LEN);            // update offset
+    return save_sram_banks(SECOND_HALF_LEN);
 }
 
 static uint8_t flash_erase_slot(uint8_t slot) {
@@ -118,6 +130,36 @@ static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, cons
             set_banked_data(*addr + ((x + j) << 4), tiles + (tile << 4), 16, bank);
         }
     }
+}
+
+uint8_t flasher_print_picture(uint8_t image_no, uint8_t frame_no) BANKED {
+    if (image_no < slot_images_taken()) {
+        uint8_t image_index = VECTOR_GET(flash_image_slots, image_no);
+        uint8_t slot_bank = slot_to_sector(current_slot, 0);
+        if (gbprinter_detect(10) == PRN_STATUS_OK) {
+            return (gbprinter_print_image((uint8_t *)picture_addr[image_index & 0x03],
+                                          slot_bank + (((image_index >> 1) + 1) >> 1),
+                                          print_frames + frame_no,
+                                          BANK(print_frames)) == PRN_STATUS_CANCELLED) ? FALSE : TRUE;
+        }
+    }
+    return FALSE;
+}
+
+uint8_t flasher_transfer_picture(uint8_t image_no) BANKED {
+    if (image_no < slot_images_taken()) {
+        uint8_t image_index = VECTOR_GET(flash_image_slots, image_no);
+        uint8_t slot_bank = slot_to_sector(current_slot, 0);
+        linkcable_transfer_image((uint8_t *)picture_addr[image_index & 0x03], slot_bank + (((image_index >> 1) + 1) >> 1));
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static uint8_t onPrinterProgress() BANKED {
+    // printer progress callback handler
+    flasher_show_progressbar(0, printer_completion, PRN_MAX_PROGRESS);
+    return 0;
 }
 
 typedef enum {
@@ -204,12 +246,12 @@ uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_ite
     switch ((settings_menu_e)self->id) {
         case idFlasherSave:
             return (!flash_slots[current_slot]) ? ITEM_DEFAULT : ITEM_DISABLED;
-        case idFlasherErase:
-            return (flash_slots[current_slot]) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idFlasherLoad:
+            return ITEM_DISABLED;
+        case idFlasherErase:
         case idFlasherPrintSlot:
         case idFlasherTransferSlot:
-            return ITEM_DISABLED;
+            return (flash_slots[current_slot]) ? ITEM_DEFAULT : ITEM_DISABLED;
         default:
             return ITEM_DEFAULT;
     }
@@ -289,7 +331,7 @@ static void refresh_screen(void) {
     vsync();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    menu_text_out(0,  0, 20, WHITE_ON_BLACK, " Flash directory");
+    menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Flash directory");
 
     // folders
     flasher_refresh_folders();
@@ -322,6 +364,7 @@ uint8_t ENTER_state_flasher(void) BANKED {
     browse_mode = browse_mode_folders;
     flasher_read_slots();
     refresh_screen();
+    gbprinter_set_handler(onPrinterProgress, BANK(state_flasher));
     fade_in_modal();
     JOYPAD_RESET();
     return 0;
@@ -430,7 +473,28 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                     break;
                 case ACTION_PRINT_SLOT:
                 case ACTION_TRANSFER_SLOT: {
-                    // print or transfer selected images
+                    gbprinter_set_handler(NULL, 0);
+                    remote_activate(REMOTE_DISABLED);
+                    if (menu_result == ACTION_TRANSFER_SLOT) {
+                        linkcable_transfer_reset();
+                        PLAY_SFX(sound_transmit);
+                    }
+                    uint8_t transfer_completion = 0, image_count = slot_images_taken();
+                    flasher_show_progressbar(0, 0, PRN_MAX_PROGRESS);
+                    for (uint8_t i = 0; i != image_count; i++) {
+                        if (!((menu_result == ACTION_TRANSFER_SLOT) ? flasher_transfer_picture(i) : flasher_print_picture(i, OPTION(print_frame_idx)))) {
+                            PLAY_SFX(sound_error);
+                            break;
+                        }
+                        uint8_t current_progress = (((uint16_t)(i + 1) * PRN_MAX_PROGRESS) / image_count);
+                        if (transfer_completion != current_progress) {
+                            transfer_completion = current_progress;
+                            flasher_show_progressbar(0, current_progress, PRN_MAX_PROGRESS);
+                        }
+                    }
+                    remote_activate(REMOTE_ENABLED);
+                    gbprinter_set_handler(onPrinterProgress, BANK(state_flasher));
+                    JOYPAD_RESET();
                     refresh_screen();
                     break;
                 }
@@ -453,6 +517,7 @@ uint8_t UPDATE_state_flasher(void) BANKED {
 
 uint8_t LEAVE_state_flasher(void) BANKED {
     fade_out_modal();
+    gbprinter_set_handler(NULL, 0);
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
     return 0;
 }

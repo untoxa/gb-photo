@@ -290,8 +290,8 @@ uint8_t gallery_print_info() {
 }
 
 static uint8_t refresh_screen() {
-    screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
-    menu_text_out(0, 0, 20, WHITE_ON_BLACK, " Gallery view");
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+    menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Gallery view");
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
     return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }
@@ -392,7 +392,7 @@ uint8_t UPDATE_state_gallery() BANKED {
                 }
                 uint8_t transfer_completion = 0, image_count = images_taken();
                 gallery_show_progressbar(0, 0, PRN_MAX_PROGRESS);
-                for (uint8_t i = 0; i != images_taken(); i++) {
+                for (uint8_t i = 0; i != image_count; i++) {
                     if (!((menu_result == ACTION_TRANSFER_GALLERY) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
                         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
                         break;

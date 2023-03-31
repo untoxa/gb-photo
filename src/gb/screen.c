@@ -262,13 +262,15 @@ void screen_load_thumbnail_banked(uint8_t x, uint8_t y, uint8_t * picture, uint8
     SWITCH_ROM(save);
 }
 
-void VBL_ISR() NONBANKED {
-    LCDC_REG &= ~LCDCF_BG8000;
-}
-
 void LCD_ISR() NONBANKED {
     while (STAT_REG & STATF_BUSY);
-    LCDC_REG |= LCDCF_BG8000;
+    if (LYC_REG == 95) {
+        LCDC_REG |= LCDCF_BG8000;
+        LYC_REG = 143;
+    } else {
+        LCDC_REG &= ~LCDCF_BG8000;
+        LYC_REG = 95;
+    }
 }
 
 uint8_t INIT_module_screen() BANKED {
@@ -277,8 +279,6 @@ uint8_t INIT_module_screen() BANKED {
         LYC_REG = 95, STAT_REG |= STATF_LYC;
         remove_LCD(LCD_ISR);
         add_LCD(LCD_ISR);
-        remove_VBL(VBL_ISR);
-        add_VBL(VBL_ISR);
     }
     set_interrupts(IE_REG | LCD_IFLAG);
     // prepare the screen map
