@@ -1,7 +1,8 @@
         .include "global.s"
 
-        .globl  .start_save
         .globl __current_bank
+
+.START_SAVE = 8
 
         .area _INITIALIZED
 _save_rom_bank::
@@ -10,10 +11,10 @@ _save_sram_bank_offset::
         .ds 1
 
         .area _INITIALIZER
-        .db .start_save
+        .db .START_SAVE
         .db 0
 
-        .area   _CODE
+        .area   _CODE_255
 
 .macro .wb addr, val
         ld a, val
@@ -108,8 +109,11 @@ _flash_data_routine:
 
 _end_flash_data_routine:
 
+b_save_sram_banks = 255
+.globl b_save_sram_banks
+
 _save_sram_banks::
-        lda     hl, 2(sp)
+        lda     hl, 6(sp)
         ld      b, (hl)
 
         lda     hl, 0(sp)
@@ -210,6 +214,9 @@ _erase_flash_sector_routine:
 
         ret
 _end_erase_flash_sector_routine:
+
+b_erase_flash = 255
+.globl b_erase_flash
 
 _erase_flash::
         lda     hl, 0(sp)
