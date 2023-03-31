@@ -18,9 +18,11 @@
 #include "remote.h"
 #include "load_save.h"
 #include "vector.h"
+#include "protected.h"
 
 #include "state_flasher.h"
 #include "state_camera.h"
+#include "state_gallery.h"
 
 #include "misc_assets.h"
 
@@ -75,7 +77,7 @@ const metasprite_t flasher[] = {
 };
 
 
-static cam_game_data_t AT(0x4000 + (0xB1B2 - 0xA000)) game_data;
+static cam_game_data_t AT(0x4000 + (0xB1B2 - 0xA000)) slot_game_data;
 
 static const item_coord_t folder_coords[] = {{2, 1}, {6, 1}, {10, 1}, {14, 1}, {4, 5}, {8, 5}, {12, 5}};
 
@@ -96,10 +98,20 @@ inline uint8_t slot_images_taken() {
 
 static const uint8_t MAGIC_SAVE_VALUE[] = {'M', 'a', 'g', 'i', 'c'};
 
-extern uint8_t erase_flash() OLDCALL;                   // erases FLASH sector: 64K or 4 banks
-extern uint8_t save_sram_banks(uint8_t count) OLDCALL;  // copies up to count SRAM banks to FLASH
+static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
+    static uint8_t **addr, i, j;
+    static const uint8_t *data;
+    data = map;
+    addr = (uint8_t **)(screen_tile_addresses + y);
+    for (i = 0; i != h; i++, addr++) {
+        for (j = 0; j != w; j++, data++) {
+            uint8_t tile = read_banked_ubyte(data, bank);
+            set_banked_data(*addr + ((x + j) << 4), tiles + (tile << 4), 16, bank);
+        }
+    }
+}
 
-static uint8_t flash_save_gallery_to_slot(uint8_t slot) {
+uint8_t flash_save_gallery_to_slot(uint8_t slot) {
     // erase the sector and save first 8 SRAM banks
     save_sram_bank_offset = FIRST_HALF_OFS;
     save_rom_bank = slot_to_sector(slot, 0);
@@ -112,24 +124,30 @@ static uint8_t flash_save_gallery_to_slot(uint8_t slot) {
     return save_sram_banks(SECOND_HALF_LEN);
 }
 
-static uint8_t flash_erase_slot(uint8_t slot) {
+uint8_t flash_erase_slot(uint8_t slot) {
     save_rom_bank = slot_to_sector(slot, 0);
     if (!erase_flash()) return FALSE;
     save_rom_bank = slot_to_sector(slot, 1);
     return erase_flash();
 }
 
-static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
-    static uint8_t **addr, i, j;
-    static const uint8_t *data;
-    data = map;
-    addr = (uint8_t **)(screen_tile_addresses + y);
-    for (i = 0; i != h; i++, addr++) {
-        for (j = 0; j != w; j++, data++) {
-            uint8_t tile = read_banked_ubyte(data, bank);
-            set_banked_data(*addr + ((x + j) << 4), tiles + (tile << 4), 16, bank);
-        }
+void flasher_load_gallery_from_slot(uint8_t slot) {
+    uint8_t slot_bank = slot_to_sector(slot, 0);
+    for (uint8_t image_index = 0; image_index != CAMERA_MAX_IMAGE_SLOTS; image_index++) {
+        SWITCH_RAM((image_index >> 1) + 1);
+        banked_memcpy(((image_index & 1) ? image_second : image_first),
+                      (uint8_t *)picture_addr[image_index & 0x03],
+                      CAMERA_IMAGE_SIZE,
+                      slot_bank + (((image_index >> 1) + 1) >> 1));
+        banked_memcpy(((image_index & 1) ? image_second_thumbnail : image_first_thumbnail),
+                      (uint8_t *)thumbnail_addr[image_index & 0x03],
+                      CAMERA_THUMB_SIZE,
+                      slot_bank + (((image_index >> 1) + 1) >> 1));
     }
+    banked_memcpy(text_buffer, slot_game_data.imageslots, CAMERA_MAX_IMAGE_SLOTS, slot_bank);
+    for (uint8_t i = 0; i != CAMERA_MAX_IMAGE_SLOTS; i++)
+        protected_modify_slot(i, text_buffer[i]);
+    gallery_toss_images();
 }
 
 uint8_t flasher_print_picture(uint8_t image_no, uint8_t frame_no) BANKED {
@@ -247,7 +265,6 @@ uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_ite
         case idFlasherSave:
             return (!flash_slots[current_slot]) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idFlasherLoad:
-            return ITEM_DISABLED;
         case idFlasherErase:
         case idFlasherPrintSlot:
         case idFlasherTransferSlot:
@@ -260,8 +277,8 @@ uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_ite
 
 void flasher_read_slots(void) {
     for (uint8_t i = 0; i != MAX_FLASH_SLOTS; i++) {
-        banked_memcpy(text_buffer, game_data.magic, sizeof(game_data.magic), slot_to_sector(i, 0));
-        flash_slots[i] = (memcmp(text_buffer, MAGIC_SAVE_VALUE, sizeof(game_data.magic)) == 0);
+        banked_memcpy(text_buffer, slot_game_data.magic, sizeof(slot_game_data.magic), slot_to_sector(i, 0));
+        flash_slots[i] = (memcmp(text_buffer, MAGIC_SAVE_VALUE, sizeof(slot_game_data.magic)) == 0);
     }
 }
 
@@ -280,7 +297,7 @@ void flasher_refresh_folders(void) {
 }
 
 void flasher_toss_images() {
-    banked_memcpy(text_buffer, game_data.imageslots, CAMERA_MAX_IMAGE_SLOTS, slot_to_sector(current_slot, 0));
+    banked_memcpy(text_buffer, slot_game_data.imageslots, CAMERA_MAX_IMAGE_SLOTS, slot_to_sector(current_slot, 0));
     memset(flash_image_slots, CAMERA_IMAGE_DELETED, sizeof(flash_image_slots));
     uint8_t elem;
     for (uint8_t i = 0; i != CAMERA_MAX_IMAGE_SLOTS; i++) {
@@ -459,7 +476,8 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                     JOYPAD_RESET();
                     break;
                 case ACTION_FLASH_LOAD:
-                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                    flasher_load_gallery_from_slot(current_slot);
+                    PLAY_SFX(sound_ok);
                     refresh_screen();
                     break;
                 case ACTION_FLASH_ERASE:
@@ -500,7 +518,7 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                 }
                 default:
                     // unknown command or cancel
-                    music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                    PLAY_SFX(sound_ok);
                     refresh_screen();
                     break;
             }

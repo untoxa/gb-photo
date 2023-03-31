@@ -36,5 +36,6 @@ inline void gallery_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) BANKED;
 uint8_t gallery_transfer_picture(uint8_t image_no) BANKED;
 
+void gallery_toss_images(void) BANKED;
 
 #endif

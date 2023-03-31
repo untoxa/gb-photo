@@ -55,4 +55,7 @@ inline void flasher_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
     menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
+extern uint8_t erase_flash() OLDCALL BANKED;                   // erases FLASH sector: 64K or 4 banks
+extern uint8_t save_sram_banks(uint8_t count) OLDCALL BANKED;  // copies up to count SRAM banks to FLASH
+
 #endif
