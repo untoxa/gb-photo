@@ -162,7 +162,8 @@ void flasher_load_gallery_from_slot(uint8_t slot) {
 
 uint8_t flasher_restore_image(uint8_t image_no) {
     uint8_t n_images = images_taken();
-    if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
+    if ((n_images < CAMERA_MAX_IMAGE_SLOTS) && (image_no < slot_images_taken())) {
+        uint8_t image_index = VECTOR_GET(flash_image_slots, image_no);
         uint8_t slot_bank = slot_to_sector(current_slot, 0);
         // modify index
         uint8_t image_slot = VECTOR_POP(free_slots);
@@ -170,13 +171,13 @@ uint8_t flasher_restore_image(uint8_t image_no) {
         // copy image data
         SWITCH_RAM((image_slot >> 1) + 1);
         banked_memcpy(((image_slot & 1) ? image_second : image_first),
-                      (uint8_t *)picture_addr[image_no & 0x03],
+                      (uint8_t *)picture_addr[image_index & 0x03],
                       CAMERA_IMAGE_SIZE,
-                      slot_bank + (((image_no >> 1) + 1) >> 1));
+                      slot_bank + (((image_index >> 1) + 1) >> 1));
         banked_memcpy(((image_slot & 1) ? image_second_thumbnail : image_first_thumbnail),
-                      (uint8_t *)thumbnail_addr[image_no & 0x03],
+                      (uint8_t *)thumbnail_addr[image_index & 0x03],
                       CAMERA_THUMB_SIZE,
-                      slot_bank + (((image_no >> 1) + 1) >> 1));
+                      slot_bank + (((image_index >> 1) + 1) >> 1));
         // add slot to used list
         VECTOR_ADD(used_slots, image_slot);
         return TRUE;
@@ -361,21 +362,23 @@ uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_ite
 }
 uint8_t onShowFlashGalleryMenu(const menu_t * self, uint8_t * param) {
     param;
+    uint8_t image_index = VECTOR_GET(flash_image_slots, current_slot_image);
     uint8_t slot_bank = slot_to_sector(current_slot, 0);
     menu_draw_frame(self);
     screen_load_thumbnail_banked(self->x + 11, self->y + 1,
-                                    (uint8_t *)thumbnail_addr[current_slot_image & 0x03],
+                                    (uint8_t *)thumbnail_addr[image_index & 0x03],
                                     0x00,
-                                    slot_bank + (((current_slot_image >> 1) + 1) >> 1));
+                                    slot_bank + (((image_index >> 1) + 1) >> 1));
     screen_restore_rect(self->x + 11, self->y + 1, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     return MENU_PROP_NO_FRAME;
 }
 uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param) {
     param;
+    uint8_t image_index = VECTOR_GET(flash_image_slots, current_slot_image);
     uint8_t slot_bank = slot_to_sector(current_slot, 0);
     screen_load_image_banked(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
-                             (uint8_t *)picture_addr[current_slot_image & 0x03],
-                             slot_bank + (((current_slot_image >> 1) + 1) >> 1),
+                             (uint8_t *)picture_addr[image_index & 0x03],
+                             slot_bank + (((image_index >> 1) + 1) >> 1),
                              false);
     screen_restore_rect(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
     return MENU_PROP_NO_FRAME;
