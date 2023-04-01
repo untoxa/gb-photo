@@ -16,8 +16,8 @@ PNG2ASSET = $(GBDK_HOME)bin/png2asset
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket sms gg
 #TARGETS = gb gbc pocket sms gg
-#TARGETS = gb gbc
-TARGETS = gbc
+TARGETS = gb gbc
+#TARGETS = gbc
 
 LIBRARIES = -Wl-llib/$(PORT)/hUGEDriver.lib
 
