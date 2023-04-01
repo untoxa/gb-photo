@@ -77,7 +77,7 @@ uint8_t UPDATE_state_logo() BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(~J_START)) {
         // any key but start enters the default state
-        music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+        PLAY_SFX(sound_ok);
         CHANGE_STATE(MAIN_STATE);
         return 0;
     } else if (KEY_PRESSED(J_START)) {

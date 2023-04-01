@@ -387,7 +387,7 @@ void menu_settings_execute() BANKED {
                 settings_menu_repaint = true;
             default:
                 // unknown command or cancel
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 break;
         }
     } while (menu_result != ACTION_NONE);

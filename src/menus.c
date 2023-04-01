@@ -115,13 +115,13 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         // process menu keys
         if (KEY_PRESSED(J_UP)) {
             if (menu->items != menu->last_item) {
-                music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_menu_move);
                 selection = menu_move_selection(menu, selection, menu_previous(menu, selection));
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_DOWN)) {
             if (menu->items != menu->last_item) {
-                music_play_sfx(BANK(sound_menu_move), sound_menu_move, SFX_MUTE_MASK(sound_menu_move), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_menu_move);
                 selection = menu_move_selection(menu, selection, menu_next(menu, selection));
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }

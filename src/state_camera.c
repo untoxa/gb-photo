@@ -258,7 +258,7 @@ void camera_image_save() {
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         // add slot to used list
         VECTOR_ADD(used_slots, slot);
-    } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
+    } else PLAY_SFX(sound_error);
 }
 
 static void refresh_usage_indicator() {
@@ -610,7 +610,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             capture_triggered = false;
         } else {
             if (OPTION(camera_mode) == camera_mode_auto) {
-                music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_menu_alter);
                 // reset both brightness and contrast to defaults, adjust the sliders
                 scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
                 scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_SETS);
@@ -724,7 +724,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
         // redraw selection if requested
         if (settings_changed) {
-            music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+            PLAY_SFX(sound_menu_alter);
             save_camera_mode_settings(OPTION(camera_mode));
             if (redraw_selection) menu_move_selection(menu, NULL, selection);
         }
@@ -733,7 +733,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the timer
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
-            music_play_sfx(BANK(sound_timer), sound_timer, SFX_MUTE_MASK(sound_timer), MUSIC_SFX_PRIORITY_MINIMAL);
+            PLAY_SFX(sound_timer);
             menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
             menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
@@ -997,7 +997,7 @@ uint8_t UPDATE_state_camera() BANKED {
                     screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
                     camera_do_shutter = FALSE;
                 };
-            } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+            } else PLAY_SFX(sound_error);
             remote_activate(REMOTE_ENABLED);
             break;
         case ACTION_CAMERA_TRANSFER:
@@ -1056,7 +1056,7 @@ uint8_t UPDATE_state_camera() BANKED {
                         break;
                     default:
                         // unknown command or cancel
-                        music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                        PLAY_SFX(sound_ok);
                         break;
                 }
                 save_camera_state();
@@ -1069,7 +1069,7 @@ uint8_t UPDATE_state_camera() BANKED {
         }
         default:
             // unknown command or cancel
-            music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+            PLAY_SFX(sound_ok);
             break;
     }
     return FALSE;

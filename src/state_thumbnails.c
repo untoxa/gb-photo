@@ -191,9 +191,9 @@ uint8_t UPDATE_state_thumbnails() BANKED {
     static uint8_t menu_result;
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP)) {
-        if (cy) --cy, music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+        if (cy) --cy, PLAY_SFX(sound_menu_alter);
     } else if (KEY_PRESSED(J_DOWN)) {
-        if (cy < (THUMBS_COUNT_Y - 1)) ++cy, music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+        if (cy < (THUMBS_COUNT_Y - 1)) ++cy, PLAY_SFX(sound_menu_alter);
     } else if (KEY_PRESSED(J_LEFT)) {
         if (!cx) {
             uint8_t old_page = thumbnails_page_no;
@@ -204,7 +204,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
             }
         } else --cx;
-        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+        PLAY_SFX(sound_menu_alter);
     } else if (KEY_PRESSED(J_RIGHT)) {
         if (++cx == THUMBS_COUNT_X) {
             uint8_t old_page = thumbnails_page_no;
@@ -215,11 +215,11 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
             }
         };
-        music_play_sfx(BANK(sound_menu_alter), sound_menu_alter, SFX_MUTE_MASK(sound_menu_alter), MUSIC_SFX_PRIORITY_MINIMAL);
+        PLAY_SFX(sound_menu_alter);
     } else if (KEY_PRESSED(J_A)) {
         OPTION(gallery_picture_idx) = coords_to_picture_no(cx, cy);
         save_camera_state();
-        music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+        PLAY_SFX(sound_ok);
         CHANGE_STATE(state_gallery);
         return 0;
     } else if (KEY_PRESSED(J_B)) {
@@ -227,7 +227,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
         if (idx < VECTOR_LEN(used_slots)) {
             selected_images[idx] = !selected_images[idx];
             tumbnail_refresh(idx);
-        } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+        } else PLAY_SFX(sound_error);
     } else if (KEY_PRESSED(J_SELECT)) {
         switch (menu_result = menu_execute(&ThumbnailMenu, NULL, NULL)) {
             case ACTION_DELETE_SELECTED:
@@ -247,7 +247,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 // update page no
                 thumbnails_page_no = (coords_to_picture_no(cx, cy) >> 4);
 
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 break;
             case ACTION_PRINT_SELECTED:
             case ACTION_TRANSFER_SELECTED: {
@@ -255,20 +255,20 @@ uint8_t UPDATE_state_thumbnails() BANKED {
                 // count selected images
                 for (uint8_t i = 0; i != images_taken(); i++) image_count += (selected_images[i]);
                 if (image_count == 0) {
-                    music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                    PLAY_SFX(sound_error);
                     break;
                 }
                 // print or transfer selected images
                 remote_activate(REMOTE_DISABLED);
                 if (menu_result == ACTION_TRANSFER_SELECTED) {
                     linkcable_transfer_reset();
-                    music_play_sfx(BANK(sound_transmit), sound_transmit, SFX_MUTE_MASK(sound_transmit), MUSIC_SFX_PRIORITY_MINIMAL);
+                    PLAY_SFX(sound_transmit);
                 }
                 gallery_show_progressbar(0, 0, PRN_MAX_PROGRESS);
                 for (uint8_t i = 0, j = 0; i != images_taken(); i++) {
                     if (!(selected_images[i])) continue;
                     if (!((menu_result == ACTION_TRANSFER_SELECTED) ? gallery_transfer_picture(i) : gallery_print_picture(i, OPTION(print_frame_idx)))) {
-                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_MINIMAL);
+                        PLAY_SFX(sound_error);
                         break;
                     }
                     uint8_t current_progress = (((uint16_t)++j * PRN_MAX_PROGRESS) / image_count);
@@ -283,7 +283,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
             }
             default:
                 // unknown command or cancel
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 break;
         }
         // clear selection

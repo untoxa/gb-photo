@@ -133,26 +133,26 @@ uint8_t menu_main_execute() BANKED {
     do {
         switch (menu_result = menu_execute(&MainMenu, NULL, NULL)) {
             case ACTION_CAMERA:
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 CHANGE_STATE(state_camera);
                 return STATE_CHANGED();
             case ACTION_GALLERY:
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 CHANGE_STATE(state_gallery);
                 return STATE_CHANGED();         // don't refresh screen if state changed
             case ACTION_FLASHER:
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 CHANGE_STATE(state_flasher);
                 return STATE_CHANGED();         // don't refresh screen if state changed
             case ACTION_SETTINGS:
                 menu_settings_execute();
                 break;
             case ACTION_ABOUT:
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 return FALSE;
             default:
                 // unknown command or cancel
-                music_play_sfx(BANK(sound_ok), sound_ok, SFX_MUTE_MASK(sound_ok), MUSIC_SFX_PRIORITY_MINIMAL);
+                PLAY_SFX(sound_ok);
                 break;
         }
     } while (menu_result != ACTION_NONE);
