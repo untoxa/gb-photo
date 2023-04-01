@@ -226,6 +226,7 @@ uint8_t onHelpFlasherMenu(const struct menu_t * menu, const struct menu_item_t *
 uint8_t onTranslateSubResultFlasherMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onShowFlashGalleryMenu(const menu_t * self, uint8_t * param);
+uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param);
 const menu_item_t FlasherMenuItems[] = {
     {
         .sub = &YesNoMenu, .sub_params = "Save camera roll?",
@@ -314,6 +315,24 @@ const menu_t FlashGalleryMenu = {
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultFlasherMenu
 };
 
+const menu_item_t ImagePreviewItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 0, .ofs_y = 0, .width = 0,
+        .caption = "",
+        .helpcontext = " Press " ICON_A " or " ICON_B " to continue",
+        .onPaint = NULL,
+        .result = ACTION_NONE
+    }
+};
+const menu_t ImagePreviewMenu = {
+    .x = 2, .y = 2, .width = 16, .height = 14,
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .items = ImagePreviewItems, .last_item = LAST_ITEM(ImagePreviewItems),
+    .onShow = onShowImagePreviewMenu, .onHelpContext = onHelpFlasherMenu,
+    .onTranslateKey = NULL, .onTranslateSubResult = NULL
+};
+
 uint8_t onTranslateSubResultFlasherMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     if (self->sub == &YesNoMenu) {
@@ -346,9 +365,19 @@ uint8_t onShowFlashGalleryMenu(const menu_t * self, uint8_t * param) {
     menu_draw_frame(self);
     screen_load_thumbnail_banked(self->x + 11, self->y + 1,
                                     (uint8_t *)thumbnail_addr[current_slot_image & 0x03],
-                                    0xFF,
+                                    0x00,
                                     slot_bank + (((current_slot_image >> 1) + 1) >> 1));
     screen_restore_rect(self->x + 11, self->y + 1, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
+    return MENU_PROP_NO_FRAME;
+}
+uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param) {
+    param;
+    uint8_t slot_bank = slot_to_sector(current_slot, 0);
+    screen_load_image_banked(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
+                             (uint8_t *)picture_addr[current_slot_image & 0x03],
+                             slot_bank + (((current_slot_image >> 1) + 1) >> 1),
+                             false);
+    screen_restore_rect(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
     return MENU_PROP_NO_FRAME;
 }
 
@@ -533,7 +562,12 @@ void update_mode_thumbnails(void) {
         };
         PLAY_SFX(sound_menu_alter);
     } else if (KEY_PRESSED(J_A)) {
-        PLAY_SFX(sound_error);
+        if ((current_slot_image = coords_to_picture_no(cx, cy)) < slot_images_taken()) {
+            screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+            menu_execute(&ImagePreviewMenu, NULL, NULL);
+            PLAY_SFX(sound_ok);
+            refresh_screen();
+        } else PLAY_SFX(sound_error);
     } else if (KEY_PRESSED(J_B)) {
         browse_mode = browse_mode_folders;
         PLAY_SFX(sound_menu_alter);
