@@ -74,6 +74,7 @@
 #define ACTION_FLASH_ERASE          92
 #define ACTION_PRINT_SLOT           93
 #define ACTION_TRANSFER_SLOT        94
+#define ACTION_RESTORE_IMAGE        95
 
 // global actions
 #define ACTION_MAIN_MENU            100

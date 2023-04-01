@@ -49,7 +49,7 @@
 BANKREF(state_flasher)
 
 static enum brows_mode_e browse_mode = browse_mode_folders;
-static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, current_slot = 0, cursor_anim = 0, cx = 0, cy = 0;
+static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, current_slot = 0, cursor_anim = 0, cx = 0, cy = 0, current_slot_image;
 
 const metasprite_t flasher_cursor0[] = {
     METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0),
@@ -94,6 +94,16 @@ VECTOR_DECLARE(flash_image_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
 inline uint8_t slot_images_taken() {
     return VECTOR_LEN(flash_image_slots);
+}
+inline uint8_t coords_to_index(uint8_t x, uint8_t y) {
+    return (thumbnails_page_no * 10) + (y * 5) + x;
+}
+inline uint8_t coords_to_picture_no(uint8_t x, uint8_t y) {
+    uint8_t image_count = VECTOR_LEN(flash_image_slots);
+    if (image_count) {
+        uint8_t no = coords_to_index(x, y);
+        return (no < image_count) ? no : image_count;
+    } else return image_count;
 }
 
 static const uint8_t MAGIC_SAVE_VALUE[] = {'M', 'a', 'g', 'i', 'c'};
@@ -148,6 +158,30 @@ void flasher_load_gallery_from_slot(uint8_t slot) {
     for (uint8_t i = 0; i != CAMERA_MAX_IMAGE_SLOTS; i++)
         protected_modify_slot(i, text_buffer[i]);
     gallery_toss_images();
+}
+
+uint8_t flasher_restore_image(uint8_t image_no) {
+    uint8_t n_images = images_taken();
+    if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
+        uint8_t slot_bank = slot_to_sector(current_slot, 0);
+        // modify index
+        uint8_t image_slot = VECTOR_POP(free_slots);
+        protected_modify_slot(image_slot, n_images);
+        // copy image data
+        SWITCH_RAM((image_slot >> 1) + 1);
+        banked_memcpy(((image_slot & 1) ? image_second : image_first),
+                      (uint8_t *)picture_addr[image_no & 0x03],
+                      CAMERA_IMAGE_SIZE,
+                      slot_bank + (((image_no >> 1) + 1) >> 1));
+        banked_memcpy(((image_slot & 1) ? image_second_thumbnail : image_first_thumbnail),
+                      (uint8_t *)thumbnail_addr[image_no & 0x03],
+                      CAMERA_THUMB_SIZE,
+                      slot_bank + (((image_no >> 1) + 1) >> 1));
+        // add slot to used list
+        VECTOR_ADD(used_slots, image_slot);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 uint8_t flasher_print_picture(uint8_t image_no, uint8_t frame_no) BANKED {
@@ -243,6 +277,38 @@ const menu_t FlasherMenu = {
     .x = 1, .y = 4, .width = 12, .height = 7,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = FlasherMenuItems, .last_item = LAST_ITEM(FlasherMenuItems),
+    .onShow = NULL, .onHelpContext = onHelpFlasherMenu,
+    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultFlasherMenu
+};
+
+const menu_item_t FlashGalleryMenuItems[] = {
+    {
+        .sub = &YesNoMenu, .sub_params = "Restore image?",
+        .ofs_x = 1, .ofs_y = 1, .width = 9,
+        .caption = " Restore image",
+        .helpcontext = " Restore image to camera roll",
+        .onPaint = NULL,
+        .result = ACTION_RESTORE_IMAGE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 9,
+        .caption = " Print image",
+        .helpcontext = " Print image",
+        .onPaint = NULL,
+        .result = ACTION_PRINT_IMAGE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 9,
+        .caption = " Transfer image",
+        .helpcontext = " Transfer image",
+        .onPaint = NULL,
+        .result = ACTION_TRANSFER_IMAGE
+    }
+};
+const menu_t FlashGalleryMenu = {
+    .x = 1, .y = 5, .width = 11, .height = 5,
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .items = FlashGalleryMenuItems, .last_item = LAST_ITEM(FlashGalleryMenuItems),
     .onShow = NULL, .onHelpContext = onHelpFlasherMenu,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultFlasherMenu
 };
@@ -522,6 +588,35 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                     refresh_screen();
                     break;
             }
+        } else {
+            if ((current_slot_image = coords_to_picture_no(cx, cy)) < slot_images_taken()) {
+                switch (menu_result = menu_execute(&FlashGalleryMenu, NULL, NULL)) {
+                    case ACTION_RESTORE_IMAGE:
+                        if (flasher_restore_image(current_slot_image)) PLAY_SFX(sound_ok); else PLAY_SFX(sound_error);
+                        break;
+                    case ACTION_PRINT_IMAGE: {
+                        remote_activate(REMOTE_DISABLED);
+                        if (!flasher_print_picture(current_slot_image, OPTION(print_frame_idx))) PLAY_SFX(sound_error);
+                        remote_activate(REMOTE_ENABLED);
+                        JOYPAD_RESET();
+                        break;
+                    }
+                    case ACTION_TRANSFER_IMAGE: {
+                        PLAY_SFX(sound_transmit);
+                        remote_activate(REMOTE_DISABLED);
+                        linkcable_transfer_reset();
+                        if (!flasher_transfer_picture(current_slot_image)) PLAY_SFX(sound_error);
+                        remote_activate(REMOTE_ENABLED);
+                        JOYPAD_RESET();
+                        break;
+                    }
+                    default:
+                        // unknown command or cancel
+                        PLAY_SFX(sound_ok);
+                        break;
+                }
+                refresh_screen();
+            } else PLAY_SFX(sound_error);
         }
     } else if (KEY_PRESSED(J_START)) {
         // run Main Menu
