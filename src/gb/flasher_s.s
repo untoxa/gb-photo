@@ -102,6 +102,8 @@ _flash_data_routine:
         pop     af
         ld      (#rROMB0), a                    ; restore bank
 
+        xor     a
+        ldh     (rIF), a
         ei
 
         pop     bc
@@ -210,6 +212,8 @@ _erase_flash_sector_routine:
         pop     af
         ld      (#rROMB0), a                    ; restore bank
 
+        xor     a
+        ldh     (rIF), a
         ei
 
         ret
