@@ -258,7 +258,7 @@ void camera_image_save() {
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
         // add slot to used list
         VECTOR_ADD(used_slots, slot);
-    } else PLAY_SFX(sound_error);
+    } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH); // high priority, override shutter sound!
 }
 
 static void refresh_usage_indicator() {
