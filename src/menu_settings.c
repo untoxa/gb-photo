@@ -35,9 +35,7 @@
 
 typedef enum {
     idSettingsNone = 0,
-    idPrintFrame0,
-    idPrintFrame1,
-    idPrintFrame2,
+    idPrintFrame,
     idSettingsPrintFrame,
     idSettingsPrintFast,
     idSettingsAltBorder,
@@ -62,7 +60,7 @@ const menu_item_t FrameMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 1, .width = 8,
-        .id = idPrintFrame0,
+        .id = idPrintFrame,
         .caption = " %s",
         .helpcontext = " %s",
         .onPaint = onSettingsMenuItemPaint,
@@ -70,7 +68,7 @@ const menu_item_t FrameMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 2, .width = 8,
-        .id = idPrintFrame1,
+        .id = idPrintFrame,
         .caption = " %s",
         .helpcontext = " %s",
         .onPaint = onSettingsMenuItemPaint,
@@ -78,15 +76,71 @@ const menu_item_t FrameMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 3, .width = 8,
-        .id = idPrintFrame2,
+        .id = idPrintFrame,
         .caption = " %s",
         .helpcontext = " %s",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_PRINT_FRAME2
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME3
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 5, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME4
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 6, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME5
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 7, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME6
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 8, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME7
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 9, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME8
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 10, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME9
     }
 };
 const menu_t PrinterFramesMenu = {
-    .x = 7, .y = 4, .width = 10, .height = 5,
+    .x = 3, .y = 2, .width = 15, .height = 12,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = FrameMenuItems, .last_item = LAST_ITEM(FrameMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -223,18 +277,14 @@ uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct me
 uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    switch ((settings_menu_e)selection->id) {
-        case idPrintFrame0:
-        case idPrintFrame1:
-        case idPrintFrame2:
-            banked_strcpy(text_buffer_extra, print_frames[(selection->id - idPrintFrame0)].desc, BANK(print_frames));
-            sprintf(text_buffer, selection->helpcontext, text_buffer_extra);
-            menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, text_buffer);
-            break;
-        default:
-            menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
-            break;
-    }
+    settings_menu_e menuid = (settings_menu_e)selection->id;
+    if ((settings_menu_e)selection->id == idPrintFrame) {
+        uint8_t frame_no = selection->result - ACTION_PRINT_FRAME0;
+        frame_get_desc(text_buffer_extra, frame_no);
+        sprintf(text_buffer, selection->helpcontext, text_buffer_extra);
+        menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, text_buffer);
+        frame_display_thumbnail(menu->x + 10, menu->y + 4, frame_no, BLACK_ON_WHITE);
+    } else menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
     return 0;
 }
 uint8_t onShowSettings(const menu_t * self, uint8_t * param) {
@@ -252,15 +302,14 @@ uint8_t onIdleSettings(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     static const uint8_t * checkbox[] = {ICON_CBX, ICON_CBX_CHECKED};
-    switch ((settings_menu_e)self->id) {
-        case idPrintFrame0:
-        case idPrintFrame1:
-        case idPrintFrame2:
-            banked_strcpy(text_buffer_extra, print_frames[(self->id - idPrintFrame0)].caption, BANK(print_frames));
+    settings_menu_e menuid = (settings_menu_e)self->id;
+    switch (menuid) {
+        case idPrintFrame:
+            frame_get_caption(text_buffer_extra, self->result - ACTION_PRINT_FRAME0);
             sprintf(text_buffer, self->caption, text_buffer_extra);
             break;
         case idSettingsPrintFrame:
-            banked_strcpy(text_buffer_extra, print_frames[OPTION(print_frame_idx)].caption, BANK(print_frames));
+            frame_get_caption(text_buffer_extra, OPTION(print_frame_idx));
             sprintf(text_buffer, self->caption, text_buffer_extra);
             break;
         case idSettingsPrintFast:
@@ -318,77 +367,76 @@ void menu_settings_execute() BANKED {
     spinedit_palette_value = OPTION(cgb_palette_idx);
     do {
         menu_result = menu_execute(&GlobalSettingsMenu, NULL, settings_menu_last_selection), settings_menu_repaint = false;
-        switch (menu_result) {
-            case ACTION_PRINT_FRAME0:
-            case ACTION_PRINT_FRAME1:
-            case ACTION_PRINT_FRAME2:
-                OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
-                save_camera_state();
-                settings_menu_repaint = true;
-                break;
-            case ACTION_SETTINGS_PRINT_FAST:
-                OPTION(print_fast) = !OPTION(print_fast);
-                save_camera_state();
-                break;
-            case ACTION_SETTINGS_ALT_BORDER:
-                OPTION(fancy_sgb_border) = !OPTION(fancy_sgb_border);
-                save_camera_state();
-                break;
-            case ACTION_SETTINGS_CGB_PALETTE:
-                OPTION(cgb_palette_idx) = spinedit_palette_value;
-                save_camera_state();
-                if (_is_COLOR) {
-                    palette_reload();
-                    fade_apply_palette_change_color(FADED_IN_FRAME);
-                }
-                settings_menu_repaint = true;
-                break;
-            case ACTION_SETTINGS_SHOW_GRID:
-                OPTION(show_grid) = !OPTION(show_grid);
-                save_camera_state();
-                break;
-            case ACTION_SETTINGS_SAVE_CONF:
-                OPTION(save_confirm) = !OPTION(save_confirm);
-                save_camera_state();
-                break;
-            case ACTION_SETTINGS_IR_REMOTE:
-                OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
-                save_camera_state();
-                if (_is_COLOR) {
-                    // Apply change immediately in camera state, otherwise will be set entering camera state
-                    if (CURRENT_PROGRAM_STATE == state_camera) {
-                        if (OPTION(ir_remote_shutter)) {
-                            ir_sense_start();
-                        } else {
-                            ir_sense_stop();
+        if ((menu_result >= ACTION_PRINT_FRAME0) && (menu_result <= ACTION_PRINT_FRAME9)) {
+            OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
+            save_camera_state();
+            settings_menu_repaint = true;
+        } else {
+            switch (menu_result) {
+                case ACTION_SETTINGS_PRINT_FAST:
+                    OPTION(print_fast) = !OPTION(print_fast);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_ALT_BORDER:
+                    OPTION(fancy_sgb_border) = !OPTION(fancy_sgb_border);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_CGB_PALETTE:
+                    OPTION(cgb_palette_idx) = spinedit_palette_value;
+                    save_camera_state();
+                    if (_is_COLOR) {
+                        palette_reload();
+                        fade_apply_palette_change_color(FADED_IN_FRAME);
+                    }
+                    settings_menu_repaint = true;
+                    break;
+                case ACTION_SETTINGS_SHOW_GRID:
+                    OPTION(show_grid) = !OPTION(show_grid);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_SAVE_CONF:
+                    OPTION(save_confirm) = !OPTION(save_confirm);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_IR_REMOTE:
+                    OPTION(ir_remote_shutter) = !OPTION(ir_remote_shutter);
+                    save_camera_state();
+                    if (_is_COLOR) {
+                        // Apply change immediately in camera state, otherwise will be set entering camera state
+                        if (CURRENT_PROGRAM_STATE == state_camera) {
+                            if (OPTION(ir_remote_shutter)) {
+                                ir_sense_start();
+                            } else {
+                                ir_sense_stop();
+                            }
                         }
                     }
-                }
-                break;
-            case ACTION_SETTINGS_BOOT_TO_CAM:
-                OPTION(boot_to_camera_mode) = !OPTION(boot_to_camera_mode);
-                save_camera_state();
-                break;
-            case ACTION_SETTINGS_FLIP_IMAGE:
-                OPTION(flip_live_view) = !OPTION(flip_live_view);
-                save_camera_state();
-                break;
-            case ACTION_SETTINGS_DOUBLESPEED:
-                OPTION(double_speed) = !OPTION(double_speed);
-                save_camera_state();
-                if (_is_COLOR) {
-                    fade_out_modal();
-                    if (OPTION(double_speed)) CPU_FAST(); else CPU_SLOW();
-                    music_setup_timer_ex(_is_CPU_FAST);
-                    fade_in_modal();
-                }
-                break;
-            case MENU_RESULT_OK:
-                settings_menu_repaint = true;
-            default:
-                // unknown command or cancel
-                PLAY_SFX(sound_ok);
-                break;
+                    break;
+                case ACTION_SETTINGS_BOOT_TO_CAM:
+                    OPTION(boot_to_camera_mode) = !OPTION(boot_to_camera_mode);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_FLIP_IMAGE:
+                    OPTION(flip_live_view) = !OPTION(flip_live_view);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_DOUBLESPEED:
+                    OPTION(double_speed) = !OPTION(double_speed);
+                    save_camera_state();
+                    if (_is_COLOR) {
+                        fade_out_modal();
+                        if (OPTION(double_speed)) CPU_FAST(); else CPU_SLOW();
+                        music_setup_timer_ex(_is_CPU_FAST);
+                        fade_in_modal();
+                    }
+                    break;
+                case MENU_RESULT_OK:
+                    settings_menu_repaint = true;
+                default:
+                    // unknown command or cancel
+                    PLAY_SFX(sound_ok);
+                    break;
+            }
         }
     } while (menu_result != ACTION_NONE);
 }

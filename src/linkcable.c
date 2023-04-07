@@ -48,7 +48,9 @@ lbl:
         ld (_rROMB0), a
 
         ld hl, #_SC_REG
-        ld bc, #(224 << 4)  ; image of 224 tiles
+        .SIO_WAIT
+
+        ld bc, #CAMERA_IMAGE_SIZE
         inc b
         inc c
         jr  2$

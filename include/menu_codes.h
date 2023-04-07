@@ -67,6 +67,12 @@
 #define ACTION_PRINT_FRAME1         81
 #define ACTION_PRINT_FRAME2         82
 #define ACTION_PRINT_FRAME3         83
+#define ACTION_PRINT_FRAME4         84
+#define ACTION_PRINT_FRAME5         85
+#define ACTION_PRINT_FRAME6         86
+#define ACTION_PRINT_FRAME7         87
+#define ACTION_PRINT_FRAME8         88
+#define ACTION_PRINT_FRAME9         89
 
 // flasher
 #define ACTION_FLASH_SAVE           90

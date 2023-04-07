@@ -75,20 +75,20 @@ typedef struct shutter_sound_t {
 } shutter_sound_t;
 
 typedef struct camera_state_options_t {
-    camera_mode_e camera_mode;
-    trigger_mode_e trigger_mode;
-    after_action_e after_action;
+    camera_mode_e camera_mode       : 4;
+    trigger_mode_e trigger_mode     : 4;
+    after_action_e after_action     : 4;
+    shutter_sound_e shutter_sound   : 4;
     uint8_t gallery_picture_idx;
     uint8_t print_frame_idx;
-    bool print_fast             : 1;
-    bool fancy_sgb_border       : 1;
-    bool show_grid              : 1;
-    bool save_confirm           : 1;
-    bool ir_remote_shutter      : 1;
-    bool boot_to_camera_mode    : 1;
-    bool flip_live_view         : 1;
-    bool double_speed           : 1;
-    shutter_sound_e shutter_sound;
+    bool print_fast                 : 1;
+    bool fancy_sgb_border           : 1;
+    bool show_grid                  : 1;
+    bool save_confirm               : 1;
+    bool ir_remote_shutter          : 1;
+    bool boot_to_camera_mode        : 1;
+    bool flip_live_view             : 1;
+    bool double_speed               : 1;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
     uint8_t cgb_palette_idx;
