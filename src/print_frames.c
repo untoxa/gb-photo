@@ -23,8 +23,8 @@
 #include "frame_pcb_thumb.h"
 #include "frame_zebra.h"
 #include "frame_zebra_thumb.h"
-
 #include "frame_wild.h"
+#include "frame_wild_thumb.h"
 
 BANKREF(print_frames)
 
@@ -145,8 +145,8 @@ const frame_desc_t print_frames[] = {
         .map_bank = BANK(frame_wild),
         .tiles = frame_wild_tiles,
         .tiles_bank = BANK(frame_wild),
-        .thumb = NULL,
-        .thumb_bank = 0,
+        .thumb = frame_wild_thumb_tiles,
+        .thumb_bank = BANK(frame_wild_thumb),
         .image_y = 14,
         .image_x = 2,
         .caption = "GB Camera",
