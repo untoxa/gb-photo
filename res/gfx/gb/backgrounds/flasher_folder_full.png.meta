@@ -1,1 +1,1 @@
--b 255 -noflip -keep-palette-order -keep_duplicate_tiles -bpp 2 -pack_mode gb
+-b 255 -keep_duplicate_tiles -keep_palette_order -noflip

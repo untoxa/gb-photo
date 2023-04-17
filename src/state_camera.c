@@ -288,8 +288,8 @@ static uint8_t onPrinterProgress() BANKED {
 }
 
 const metasprite_t grid_metasprite[] = {
-    METASPR_ITEM(-4, -4, 2, 0),       METASPR_ITEM(35, 43, 2, 0), METASPR_ITEM(0, 43, 2, 0),         METASPR_ITEM(-35, 43, 2, 0),
-    METASPR_ITEM(35 + 43, -43, 2, 0), METASPR_ITEM(35, 43, 2, 0), METASPR_ITEM(-35, -43 - 43, 2, 0), METASPR_ITEM(35, -43, 2, 0),
+    METASPR_ITEM(-4, -4, 0, 0),       METASPR_ITEM(35, 43, 0, 0), METASPR_ITEM(0, 43, 0, 0),         METASPR_ITEM(-35, 43, 0, 0),
+    METASPR_ITEM(35 + 43, -43, 0, 0), METASPR_ITEM(35, 43, 0, 0), METASPR_ITEM(-35, -43 - 43, 0, 0), METASPR_ITEM(35, -43, 0, 0),
     METASPR_TERM
 };
 uint8_t grid_render(uint8_t hw) {

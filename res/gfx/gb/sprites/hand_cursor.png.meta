@@ -1,0 +1,1 @@
+-b 255 -spr8x8 -sw 16 -sh 16 -px -8 -py -16 -keep_palette_order

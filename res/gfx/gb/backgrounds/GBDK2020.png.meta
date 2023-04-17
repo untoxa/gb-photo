@@ -1,1 +1,1 @@
--noflip -keep_duplicate_tiles -keep-palette-order -use_map_attributes -bpp 2 -max_palettes 8 -pack_mode gb -tile_origin 1 -b 1
+-noflip -keep_duplicate_tiles -use_map_attributes -bpp 2 -max_palettes 8 -pack_mode gb -tile_origin 1 -b 1

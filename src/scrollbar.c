@@ -16,7 +16,7 @@ uint8_t scrollbar_render_all(uint8_t hiwater) NONBANKED {
     SWITCH_ROM(BANK(cursors));
     scrollbar_t * current = scrollbars;
     while (current) {
-        hw += move_metasprite(cursors_metasprites[2], (0x80 - cursors_TILE_COUNT), hw,
+        hw += move_metasprite(cursors_metasprites[1], (0x80 - cursors_TILE_COUNT), hw,
                               ((current->vertical) ? (current->x << 3) : ((current->x << 3) + current->position + 8)),
                               ((current->vertical) ? ((current->y << 3) + current->position + 8) : (current->y << 3)));
         current = current->prev;

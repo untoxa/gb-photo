@@ -27,6 +27,8 @@
 #include "state_gallery.h"
 
 #include "misc_assets.h"
+#include "cursors.h"
+#include "hand_cursor.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -46,22 +48,24 @@ bool selected_images[CAMERA_MAX_IMAGE_SLOTS];
 
 static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, cx = 0, cy = 0, cursor_anim = 0;
 
-const metasprite_t gallery_cursor0[] = {
-    METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0),
-    METASPR_ITEM(24,  0, 3, 0), METASPR_ITEM(0, -24, 2, 0),
+#define HAND_CURSOR_BASE_TILE (0x80 - cursors_TILE_COUNT - hand_cursor_TILE_COUNT)
+static const metasprite_t hand_cursor0[] = {
+    METASPR_ITEM(32, 24, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
     METASPR_TERM
 };
-const metasprite_t gallery_cursor1[] = {
-    METASPR_ITEM(17,  9, 0, 0), METASPR_ITEM(0,  22, 1, 0),
-    METASPR_ITEM(22,  0, 3, 0), METASPR_ITEM(0, -22, 2, 0),
+static const metasprite_t hand_cursor1[] = {
+    METASPR_ITEM(33, 24, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
     METASPR_TERM
 };
-const metasprite_t gallery_cursor2[] = {
-    METASPR_ITEM(18, 10, 0, 0), METASPR_ITEM(0,  20, 1, 0),
-    METASPR_ITEM(20,  0, 3, 0), METASPR_ITEM(0, -20, 2, 0),
+static const metasprite_t hand_cursor2[] = {
+    METASPR_ITEM(33, 25, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
     METASPR_TERM
 };
-const metasprite_t * const gallery_cursor[] = {gallery_cursor0, gallery_cursor1, gallery_cursor2, gallery_cursor1};
+static const metasprite_t hand_cursor3[] = {
+    METASPR_ITEM(32, 25, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
+    METASPR_TERM
+};
+static const metasprite_t* const hand_cursor[] = {hand_cursor0, hand_cursor1, hand_cursor2, hand_cursor3};
 
 static const thumb_coord_t thumbnail_coords[MAX_PREVIEW_THUMBNAILS] = {
     {2,  1}, {6,  1}, {10,  1}, {14,  1},
@@ -295,7 +299,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         if (!menu_main_execute()) refresh_screen();
     }
-    hide_sprites_range(move_metasprite(gallery_cursor[cursor_anim], CORNER_UL, 0, ((cx << 2) + 2) << 3, ((cy << 2) + 1) << 3), MAX_HARDWARE_SPRITES);
+    hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, ((cx << 2) + 2) << 3, ((cy << 2) + 1) << 3), MAX_HARDWARE_SPRITES);
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
     return TRUE;
 }

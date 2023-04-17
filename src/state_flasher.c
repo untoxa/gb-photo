@@ -25,6 +25,8 @@
 #include "state_gallery.h"
 
 #include "misc_assets.h"
+#include "cursors.h"
+#include "hand_cursor.h"
 
 // menus
 #include "menus.h"
@@ -51,24 +53,7 @@ BANKREF(state_flasher)
 static enum brows_mode_e browse_mode = browse_mode_folders;
 static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, current_slot = 0, cursor_anim = 0, cx = 0, cy = 0, current_slot_image;
 
-const metasprite_t flasher_cursor0[] = {
-    METASPR_ITEM(16,  8, 0, 0), METASPR_ITEM(0,  24, 1, 0),
-    METASPR_ITEM(24,  0, 3, 0), METASPR_ITEM(0, -24, 2, 0),
-    METASPR_TERM
-};
-const metasprite_t flasher_cursor1[] = {
-    METASPR_ITEM(17,  9, 0, 0), METASPR_ITEM(0,  22, 1, 0),
-    METASPR_ITEM(22,  0, 3, 0), METASPR_ITEM(0, -22, 2, 0),
-    METASPR_TERM
-};
-const metasprite_t flasher_cursor2[] = {
-    METASPR_ITEM(18, 10, 0, 0), METASPR_ITEM(0,  20, 1, 0),
-    METASPR_ITEM(20,  0, 3, 0), METASPR_ITEM(0, -20, 2, 0),
-    METASPR_TERM
-};
-const metasprite_t * const flasher_cursor[] = {flasher_cursor0, flasher_cursor1, flasher_cursor2, flasher_cursor1};
-
-const metasprite_t flasher[] = {
+static const metasprite_t flasher[] = {
     METASPR_ITEM(16,  8,  0,  0), METASPR_ITEM(0,  8,  1,  0), METASPR_ITEM(0,  8,  2,  0), METASPR_ITEM(0,  8,  3,  0),
     METASPR_ITEM( 8,-24,  4,  0), METASPR_ITEM(0,  8,  5,  0), METASPR_ITEM(0,  8,  6,  0), METASPR_ITEM(0,  8,  7,  0),
     METASPR_ITEM( 8,-24,  8,  0), METASPR_ITEM(0,  8,  9,  0), METASPR_ITEM(0,  8, 10,  0), METASPR_ITEM(0,  8, 11,  0),
@@ -76,6 +61,24 @@ const metasprite_t flasher[] = {
     METASPR_TERM
 };
 
+#define HAND_CURSOR_BASE_TILE (0x80 - cursors_TILE_COUNT - hand_cursor_TILE_COUNT)
+static const metasprite_t hand_cursor0[] = {
+    METASPR_ITEM(32, 24, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
+    METASPR_TERM
+};
+static const metasprite_t hand_cursor1[] = {
+    METASPR_ITEM(33, 24, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
+    METASPR_TERM
+};
+static const metasprite_t hand_cursor2[] = {
+    METASPR_ITEM(33, 25, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
+    METASPR_TERM
+};
+static const metasprite_t hand_cursor3[] = {
+    METASPR_ITEM(32, 25, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(8, -8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
+    METASPR_TERM
+};
+static const metasprite_t* const hand_cursor[] = {hand_cursor0, hand_cursor1, hand_cursor2, hand_cursor3};
 
 static cam_game_data_t AT(0x4000 + (0xB1B2 - 0xA000)) slot_game_data;
 
@@ -504,7 +507,7 @@ uint8_t ENTER_state_flasher(void) BANKED {
 }
 
 inline void update_mode_folders_cursor(void) {
-    hide_sprites_range(move_metasprite(flasher_cursor[cursor_anim], CORNER_UL, 0, folder_coords[current_slot].x << 3, folder_coords[current_slot].y << 3), MAX_HARDWARE_SPRITES);
+    hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, folder_coords[current_slot].x << 3, folder_coords[current_slot].y << 3), MAX_HARDWARE_SPRITES);
 }
 
 void update_mode_folders(void) {
@@ -575,7 +578,7 @@ void update_mode_thumbnails(void) {
         browse_mode = browse_mode_folders;
         PLAY_SFX(sound_menu_alter);
     }
-    hide_sprites_range(move_metasprite(flasher_cursor[cursor_anim], CORNER_UL, 0, ((cx << 2) + FLASHER_THUMBS_DISPLAY_X) << 3, ((cy << 2) + FLASHER_THUMBS_DISPLAY_Y) << 3), MAX_HARDWARE_SPRITES);
+    hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, ((cx << 2) + FLASHER_THUMBS_DISPLAY_X) << 3, ((cy << 2) + FLASHER_THUMBS_DISPLAY_Y) << 3), MAX_HARDWARE_SPRITES);
 }
 
 uint8_t UPDATE_state_flasher(void) BANKED {
