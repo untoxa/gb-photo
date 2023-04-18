@@ -19,6 +19,7 @@
 
 // graphics assets
 #include "logo_about.h"
+#include "main_menu.h"
 
 // audio assets
 #include "sound_ok.h"
