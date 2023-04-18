@@ -7,4 +7,8 @@
 #define vsync wait_vbl_done
 #endif
 
+#ifndef S_PAL
+#define S_PAL(n) (n)
+#endif
+
 #endif
