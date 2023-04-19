@@ -115,14 +115,14 @@ const menu_item_t MainMenuItems[] = {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 2 + (28 * 2), .ofs_y = 8, .width = 0, //10,
         .caption = NULL, //" Flash storage",
-        .helpcontext = " Save/Restore rolls",
+        .helpcontext = " Save/Restore camera rolls",
         .onPaint = NULL,
         .result = ACTION_FLASHER
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 2 + (28 * 3), .ofs_y = 8, .width = 0, //10,
         .caption = NULL, //" Settings",
-        .helpcontext = " Edit program settings",
+        .helpcontext = " Camera system settings",
         .onPaint = NULL,
         .result = ACTION_SETTINGS
     }, {
