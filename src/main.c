@@ -43,7 +43,7 @@ const state_desc_t PROGRAM_STATES[] = {
 STATE OLD_PROGRAM_STATE = N_STATES, CURRENT_PROGRAM_STATE = DEFAULT_STATE;
 
 
-void main() {
+void main(void) {
     // call init for the each module and then for the each state
     for (const far_ptr_t * init = PROGRAM_MODULES; init < (PROGRAM_MODULES + LENGTH(PROGRAM_MODULES)); call_far(init++));
 

@@ -400,9 +400,9 @@ void flasher_refresh_folders(void) {
     screen_clear_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4 * 2, WHITE_ON_BLACK);
     for (uint8_t i = 0; i != MAX_FLASH_SLOTS; i++) {
         if (flash_slots[i]) {
-            screen_load_picture(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_full_map, flasher_folder_full_tiles, BANK(flasher_folder_full));
+            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_full_tiles, BANK(flasher_folder_full), false);
         } else {
-            screen_load_picture(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_empty_map, flasher_folder_empty_tiles, BANK(flasher_folder_empty));
+            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_empty_tiles, BANK(flasher_folder_empty), false);
         }
     }
     screen_restore_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4);
