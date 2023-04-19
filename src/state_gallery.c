@@ -210,7 +210,7 @@ const menu_item_t GalleryMenuItems[] = {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 3, .width = 8,
         .caption = " Print all",
-        .helpcontext = " Print the whole gallery",
+        .helpcontext = " Print the whole roll",
         .onPaint = NULL,
         .result = ACTION_PRINT_GALLERY
     }, {
@@ -224,7 +224,7 @@ const menu_item_t GalleryMenuItems[] = {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 5, .width = 8,
         .caption = " Transfer all",
-        .helpcontext = " Transfer the whole gallery",
+        .helpcontext = " Transfer the whole roll",
         .onPaint = NULL,
         .result = ACTION_TRANSFER_GALLERY
     }, {
@@ -238,14 +238,14 @@ const menu_item_t GalleryMenuItems[] = {
         .sub = &YesNoMenu, .sub_params = "Delete all images?",
         .ofs_x = 1, .ofs_y = 7, .width = 8,
         .caption = " Delete all",
-        .helpcontext = " Erase the whole gallery",
+        .helpcontext = " Erase the whole roll",
         .onPaint = NULL,
         .result = ACTION_ERASE_GALLERY
     }, {
         .sub = &YesNoMenu, .sub_params = "Undelete all images?",
         .ofs_x = 1, .ofs_y = 8, .width = 8,
         .caption = " Undelete all",
-        .helpcontext = " Unerase the whole gallery",
+        .helpcontext = " Unerase the whole roll",
         .onPaint = NULL,
         .result = ACTION_UNERASE_GALLERY
 #if (DEBUG_ENABLED==1)
@@ -291,7 +291,7 @@ uint8_t gallery_print_info() {
 
 static uint8_t refresh_screen() {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Gallery view");
+    menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Camera roll");
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
     return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }

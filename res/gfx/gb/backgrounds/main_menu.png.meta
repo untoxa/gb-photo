@@ -1,1 +1,1 @@
--b 255 -keep_duplicate_tiles -keep_palette_order -noflip
+-b 255 -tiles_only -keep_duplicate_tiles -keep_palette_order -noflip

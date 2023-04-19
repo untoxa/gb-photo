@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -9,6 +10,7 @@
 #include "states.h"
 #include "globals.h"
 #include "systemhelpers.h"
+#include "joy.h"
 
 #include "misc_assets.h"
 
@@ -20,6 +22,8 @@
 // graphics assets
 #include "logo_about.h"
 #include "main_menu.h"
+#include "cursors.h"
+#include "hand_cursor.h"
 
 // audio assets
 #include "sound_ok.h"
@@ -27,6 +31,27 @@
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
+
+static uint8_t cursor_anim = 0;
+
+#define HAND_CURSOR_BASE_TILE (0x80 - cursors_TILE_COUNT - hand_cursor_TILE_COUNT)
+static const metasprite_t hand_cursor0[] = {
+    METASPR_ITEM(32, 16, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_TERM
+};
+static const metasprite_t hand_cursor1[] = {
+    METASPR_ITEM(33, 16, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_TERM
+};
+static const metasprite_t hand_cursor2[] = {
+    METASPR_ITEM(33, 17, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_TERM
+};
+static const metasprite_t hand_cursor3[] = {
+    METASPR_ITEM(32, 17, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_TERM
+};
+static const metasprite_t* const hand_cursor[] = {hand_cursor0, hand_cursor1, hand_cursor2, hand_cursor3};
 
 uint8_t onShowAbout(const struct menu_t * self, uint8_t * param);
 const menu_item_t AboutMenuItems[] = {
@@ -47,7 +72,7 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     param;
     menu_draw_frame(self);
     screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about), IMAGE_NORMAL);
-    screen_restore_rect(self->x + + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
+    screen_restore_rect(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
     menu_text_out(self->x + 1, self->y +  2, 0, BLACK_ON_WHITE, "Original idea:");
     menu_text_out(self->x + 2, self->y +  3, 0, DK_GR_ON_WHITE, "Andreas Hahn");
@@ -66,54 +91,77 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     return MENU_PROP_NO_FRAME;
 }
 
+uint8_t onTranslateKeyMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
+uint8_t onShowMain(const menu_t * self, uint8_t * param);
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t MainMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 1, .width = 10,
-        .caption = " Camera",
+        .ofs_x = 2 + (28 * 0), .ofs_y = 8, .width = 0, //10,
+        .caption = NULL, //" Camera",
         .helpcontext = " Make your own pictures",
         .onPaint = NULL,
         .result = ACTION_CAMERA
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 2, .width = 10,
-        .caption = " Image gallery",
-        .helpcontext = " View your image gallery",
+        .ofs_x = 2 + (28 * 1), .ofs_y = 8, .width = 0, //10,
+        .caption = NULL, //" Camera roll",
+        .helpcontext = " View your camera roll",
         .onPaint = NULL,
         .result = ACTION_GALLERY
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 3, .width = 10,
-        .caption = " Flash storage",
-        .helpcontext = " Save/Restore galleries",
+        .ofs_x = 2 + (28 * 2), .ofs_y = 8, .width = 0, //10,
+        .caption = NULL, //" Flash storage",
+        .helpcontext = " Save/Restore rolls",
         .onPaint = NULL,
         .result = ACTION_FLASHER
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 10,
-        .caption = " Settings",
+        .ofs_x = 2 + (28 * 3), .ofs_y = 8, .width = 0, //10,
+        .caption = NULL, //" Settings",
         .helpcontext = " Edit program settings",
         .onPaint = NULL,
         .result = ACTION_SETTINGS
     }, {
         .sub = &AboutMenu, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 5, .width = 10,
-        .caption = " About",
+        .ofs_x = 2 + (28 * 4), .ofs_y = 8, .width = 0, //10,
+        .caption = NULL, //" About",
         .helpcontext = " About \"Photo!\" v." QUOTE(VERSION),
         .onPaint = NULL,
         .result = ACTION_ABOUT
     }
 };
 const menu_t MainMenu = {
-    .x = 1, .y = 3, .width = 12, .height = 7,
+//    .x = 1, .y = 3, .width = 12, .height = 7,
+    .x = 1, .y = 3, .width = 18, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
-    .onShow = NULL, .onHelpContext = onHelpMainMenu,
-    .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultMainMenu
+    .onShow = onShowMain, .onIdle = onIdleMainMenu, .onHelpContext = onHelpMainMenu,
+    .onTranslateKey = onTranslateKeyMainMenu, .onTranslateSubResult = onTranslateSubResultMainMenu
 };
 
+uint8_t onTranslateKeyMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu; self;
+    // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
+    return joypad_swap_dpad(value);
+}
+uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu; selection;
+    if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
+    hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, (menu->x << 3) + selection->ofs_x, (menu->y << 3) + selection->ofs_y), MAX_HARDWARE_SPRITES);
+    vsync();
+    return 0;
+}
+uint8_t onShowMain(const menu_t * self, uint8_t * param) {
+    param; self;
+    menu_draw_frame(self);
+    screen_load_image_banked(self->x, self->y + 1, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H, main_menu_tiles, BANK(main_menu), IMAGE_NORMAL);
+    screen_restore_rect(self->x, self->y + 1, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H);
+    return (MENU_PROP_SHADOW | MENU_PROP_SELECTION);
+}
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     if (self->sub == &AboutMenu) {
@@ -132,7 +180,9 @@ uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t menu_main_execute() BANKED {
     uint8_t menu_result;
     do {
-        switch (menu_result = menu_execute(&MainMenu, NULL, NULL)) {
+        menu_result = menu_execute(&MainMenu, NULL, NULL);
+        hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+        switch (menu_result) {
             case ACTION_CAMERA:
                 PLAY_SFX(sound_ok);
                 CHANGE_STATE(state_camera);
@@ -140,11 +190,11 @@ uint8_t menu_main_execute() BANKED {
             case ACTION_GALLERY:
                 PLAY_SFX(sound_ok);
                 CHANGE_STATE(state_gallery);
-                return STATE_CHANGED();         // don't refresh screen if state changed
+                return STATE_CHANGED();
             case ACTION_FLASHER:
                 PLAY_SFX(sound_ok);
                 CHANGE_STATE(state_flasher);
-                return STATE_CHANGED();         // don't refresh screen if state changed
+                return STATE_CHANGED();
             case ACTION_SETTINGS:
                 menu_settings_execute();
                 break;

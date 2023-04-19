@@ -111,19 +111,6 @@ inline uint8_t coords_to_picture_no(uint8_t x, uint8_t y) {
 
 static const uint8_t MAGIC_SAVE_VALUE[] = {'M', 'a', 'g', 'i', 'c'};
 
-static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * map, const uint8_t * tiles, uint8_t bank) {
-    static uint8_t **addr, i, j;
-    static const uint8_t *data;
-    data = map;
-    addr = (uint8_t **)(screen_tile_addresses + y);
-    for (i = 0; i != h; i++, addr++) {
-        for (j = 0; j != w; j++, data++) {
-            uint8_t tile = read_banked_ubyte(data, bank);
-            set_banked_data(*addr + ((x + j) << 4), tiles + (tile << 4), 16, bank);
-        }
-    }
-}
-
 uint8_t flash_save_gallery_to_slot(uint8_t slot) {
     // erase the sector and save first 8 SRAM banks
     save_sram_bank_offset = FIRST_HALF_OFS;
@@ -382,7 +369,7 @@ uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param) {
     screen_load_image_banked(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
                              (uint8_t *)picture_addr[image_index & 0x03],
                              slot_bank + (((image_index >> 1) + 1) >> 1),
-                             false);
+                             IMAGE_NORMAL);
     screen_restore_rect(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
     return MENU_PROP_NO_FRAME;
 }
@@ -400,9 +387,9 @@ void flasher_refresh_folders(void) {
     screen_clear_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4 * 2, WHITE_ON_BLACK);
     for (uint8_t i = 0; i != MAX_FLASH_SLOTS; i++) {
         if (flash_slots[i]) {
-            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_full_tiles, BANK(flasher_folder_full), false);
+            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_full_tiles, BANK(flasher_folder_full), IMAGE_NORMAL);
         } else {
-            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_empty_tiles, BANK(flasher_folder_empty), false);
+            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_empty_tiles, BANK(flasher_folder_empty), IMAGE_NORMAL);
         }
     }
     screen_restore_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4);

@@ -155,7 +155,7 @@ const menu_item_t ActionSubMenuItems[] = {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 1, .width = 10,
         .caption = " Save",
-        .helpcontext = " Save to Gallery",
+        .helpcontext = " Save to roll",
         .onPaint = NULL,
         .result = ACTION_ACTION_SAVE
     }, {
