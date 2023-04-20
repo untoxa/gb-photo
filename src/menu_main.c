@@ -84,7 +84,7 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x + 2, self->y +  8, 0, DK_GR_ON_WHITE, "Tronimal");
     menu_text_out(self->x + 1, self->y +  9, 0, BLACK_ON_WHITE, "Art:");
     menu_text_out(self->x + 2, self->y + 10, 0, DK_GR_ON_WHITE, "rembrandx, 2BitPit");
-    menu_text_out(self->x + 2, self->y + 11, 0, DK_GR_ON_WHITE, "NeoRame");
+    menu_text_out(self->x + 2, self->y + 11, 0, DK_GR_ON_WHITE, "NeoRame, bbbbbr");
     menu_text_out(self->x + 1, self->y + 12, 0, BLACK_ON_WHITE, "Special thanks:");
     menu_text_out(self->x + 2, self->y + 13, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
     menu_text_out(self->x + 2, self->y + 14, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
@@ -100,35 +100,35 @@ uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct me
 const menu_item_t MainMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 0), .ofs_y = 8, .width = 0, //10,
+        .ofs_x = 2 + (28 * 0), .ofs_y = 8, .width = 0,
         .caption = NULL, //" Camera",
         .helpcontext = " Make your own pictures",
         .onPaint = NULL,
         .result = ACTION_CAMERA
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 1), .ofs_y = 8, .width = 0, //10,
+        .ofs_x = 2 + (28 * 1), .ofs_y = 8, .width = 0,
         .caption = NULL, //" Camera roll",
         .helpcontext = " View your camera roll",
         .onPaint = NULL,
         .result = ACTION_GALLERY
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 2), .ofs_y = 8, .width = 0, //10,
+        .ofs_x = 2 + (28 * 2), .ofs_y = 8, .width = 0,
         .caption = NULL, //" Flash storage",
         .helpcontext = " Save/Restore camera rolls",
         .onPaint = NULL,
         .result = ACTION_FLASHER
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 3), .ofs_y = 8, .width = 0, //10,
+        .ofs_x = 2 + (28 * 3), .ofs_y = 8, .width = 0,
         .caption = NULL, //" Settings",
         .helpcontext = " Camera system settings",
         .onPaint = NULL,
         .result = ACTION_SETTINGS
     }, {
         .sub = &AboutMenu, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 4), .ofs_y = 8, .width = 0, //10,
+        .ofs_x = 2 + (28 * 4), .ofs_y = 8, .width = 0,
         .caption = NULL, //" About",
         .helpcontext = " About \"Photo!\" v." QUOTE(VERSION),
         .onPaint = NULL,
@@ -136,7 +136,6 @@ const menu_item_t MainMenuItems[] = {
     }
 };
 const menu_t MainMenu = {
-//    .x = 1, .y = 3, .width = 12, .height = 7,
     .x = 1, .y = 3, .width = 18, .height = 6,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
@@ -149,8 +148,10 @@ uint8_t onTranslateKeyMainMenu(const struct menu_t * menu, const struct menu_ite
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
     return joypad_swap_dpad(value);
 }
+static const menu_item_t * last_menu_item =  NULL;
 uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
-    menu; selection;
+    menu;
+    last_menu_item = selection;
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
     hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, (menu->x << 3) + selection->ofs_x, (menu->y << 3) + selection->ofs_y), MAX_HARDWARE_SPRITES);
     vsync();
@@ -181,7 +182,7 @@ uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t menu_main_execute() BANKED {
     uint8_t menu_result;
     do {
-        menu_result = menu_execute(&MainMenu, NULL, NULL);
+        menu_result = menu_execute(&MainMenu, NULL, last_menu_item);
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         switch (menu_result) {
             case ACTION_CAMERA:
