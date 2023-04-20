@@ -100,35 +100,35 @@ uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct me
 const menu_item_t MainMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 0), .ofs_y = 8, .width = 0,
+        .ofs_x = 2 + (28 * 0), .ofs_y = 16, .width = 0,
         .caption = NULL, //" Camera",
         .helpcontext = " Make your own pictures",
         .onPaint = NULL,
         .result = ACTION_CAMERA
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 1), .ofs_y = 8, .width = 0,
+        .ofs_x = 2 + (28 * 1), .ofs_y = 16, .width = 0,
         .caption = NULL, //" Camera roll",
         .helpcontext = " View your camera roll",
         .onPaint = NULL,
         .result = ACTION_GALLERY
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 2), .ofs_y = 8, .width = 0,
+        .ofs_x = 2 + (28 * 2), .ofs_y = 16, .width = 0,
         .caption = NULL, //" Flash storage",
         .helpcontext = " Save/Restore camera rolls",
         .onPaint = NULL,
         .result = ACTION_FLASHER
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 3), .ofs_y = 8, .width = 0,
+        .ofs_x = 2 + (28 * 3), .ofs_y = 16, .width = 0,
         .caption = NULL, //" Settings",
         .helpcontext = " Camera system settings",
         .onPaint = NULL,
         .result = ACTION_SETTINGS
     }, {
         .sub = &AboutMenu, .sub_params = NULL,
-        .ofs_x = 2 + (28 * 4), .ofs_y = 8, .width = 0,
+        .ofs_x = 2 + (28 * 4), .ofs_y = 16, .width = 0,
         .caption = NULL, //" About",
         .helpcontext = " About \"Photo!\" v." QUOTE(VERSION),
         .onPaint = NULL,
@@ -136,7 +136,7 @@ const menu_item_t MainMenuItems[] = {
     }
 };
 const menu_t MainMenu = {
-    .x = 1, .y = 3, .width = 18, .height = 6,
+    .x = 1, .y = 3, .width = 18, .height = 7,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
     .onShow = onShowMain, .onIdle = onIdleMainMenu, .onHelpContext = onHelpMainMenu,
@@ -160,8 +160,10 @@ uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t onShowMain(const menu_t * self, uint8_t * param) {
     param; self;
     menu_draw_frame(self);
-    screen_load_image_banked(self->x, self->y + 1, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H, main_menu_tiles, BANK(main_menu), IMAGE_NORMAL);
-    screen_restore_rect(self->x, self->y + 1, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H);
+    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about), IMAGE_NORMAL);
+    screen_restore_rect(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
+    screen_load_image_banked(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H, main_menu_tiles, BANK(main_menu), IMAGE_NORMAL);
+    screen_restore_rect(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H);
     return (MENU_PROP_SHADOW | MENU_PROP_SELECTION);
 }
 uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
