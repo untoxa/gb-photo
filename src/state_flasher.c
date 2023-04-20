@@ -439,7 +439,7 @@ void flasher_refresh_thumbnails(void) {
         screen_clear_rect(FLASHER_THUMBS_DISPLAY_X, FLASHER_THUMBS_DISPLAY_Y, FLASHER_THUMBS_DISPLAY_WIDTH, FLASHER_THUMBS_DISPLAY_HEIGHT, WHITE_ON_BLACK);
         VECTOR_CLEAR(flash_image_slots);
     }
-    sprintf(text_buffer, " Images: %hd", VECTOR_LEN(flash_image_slots));
+    sprintf(text_buffer, " Slot: %hd Images: %hd", (uint8_t)(current_slot + 1), VECTOR_LEN(flash_image_slots));
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
     return;
 }
