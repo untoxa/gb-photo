@@ -34,6 +34,7 @@
 #define QUOTE(x) Q(x)
 
 static uint8_t cursor_anim = 0;
+static const menu_item_t * last_menu_item =  NULL;
 
 #define HAND_CURSOR_BASE_TILE (0x80 - cursors_TILE_COUNT - hand_cursor_TILE_COUNT)
 static const metasprite_t hand_cursor0[] = {
@@ -148,7 +149,6 @@ uint8_t onTranslateKeyMainMenu(const struct menu_t * menu, const struct menu_ite
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
     return joypad_swap_dpad(value);
 }
-static const menu_item_t * last_menu_item =  NULL;
 uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     last_menu_item = selection;
