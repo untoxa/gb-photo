@@ -270,6 +270,7 @@ ___HandleCrash_banked::
         xor     a
         ldh     (.IF), a
         halt
+	nop
 
         jr      .loop
 
