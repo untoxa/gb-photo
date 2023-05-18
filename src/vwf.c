@@ -24,24 +24,18 @@ font_desc_t vwf_current_font_desc;
 uint8_t vwf_current_font_bank;
 
 #if defined(NINTENDO)
-void vwf_print_shift_char(void * dest, const void * src, uint8_t bank) OLDCALL;
+void vwf_print_shift_char(void * dest, const void * src, uint8_t bank);
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) OLDCALL;
-uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank) OLDCALL __preserves_regs(b, c) ;
-uint8_t * vwf_get_win_addr() OLDCALL __preserves_regs(b, c, h, l) ;
-uint8_t * vwf_get_bkg_addr() OLDCALL __preserves_regs(b, c, h, l) ;
-void vwf_set_banked_data(uint8_t i, uint8_t l, const unsigned char* ptr, uint8_t bank) OLDCALL;
+uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank);
 void vwf_swap_tiles() OLDCALL;
 #elif defined(SEGA)
 void vwf_print_shift_char(void * dest, const void * src, uint8_t bank) __z88dk_callee;
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) __z88dk_callee;
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank) __z88dk_callee;
-uint8_t * vwf_get_win_addr() OLDCALL;
-uint8_t * vwf_get_bkg_addr() OLDCALL;
-void vwf_set_banked_data(uint8_t i, uint8_t l, const unsigned char* ptr, uint8_t bank) __z88dk_callee;
 void vwf_swap_tiles() OLDCALL;
 #endif
 
-void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data) OLDCALL PRESERVES_REGS(b, c);
+void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data);
 
 void vwf_print_reset(const uint8_t * tile) {
     vwf_current_tile = (uint8_t *)tile;
@@ -77,7 +71,7 @@ uint8_t vwf_print_render(const unsigned char ch) {
         set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
         return FALSE;
     } else {
-//        vwf_set_banked_data(vwf_current_tile += VWF_TILE_SIZE, 1, bitmap, vwf_current_font_bank);
+        // not implemented
         vwf_current_offset = 0;
         return TRUE;
     }

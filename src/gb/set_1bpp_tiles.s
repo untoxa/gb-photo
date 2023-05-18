@@ -4,27 +4,28 @@
 
         .area   _HOME
 
-.macro .BIT_TO_COLOR reg, bg_reg, fg_reg, ?lbl1
+.macro .BIT_TO_COLOR bg_reg, fg_reg, ?lbl1
         ld a, fg_reg
         jr c, lbl1
         ld a, bg_reg
 lbl1:
 .endm
 
-; void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data) OLDCALL PRESERVES_REGS(b, c);
+; void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data);
 _set_1bpp_data::
-        push bc
-
-        lda hl, 8(sp)
-        ld a, (hl-) ; ID of 1st tile
-        ld d, a
-        ld a, (hl-) ; ID of 1st tile
-        ld e, a
-        ld a, (hl-) ; Nb of tiles
         ld c, a
-        ld a, (hl-) ; dest ptr
-        ld l, (hl)
+
+        lda hl, 2(sp)
+        ld a, (hl+)
+        ld h, (hl)
+        ld l, a
+
+        ld a, d
+        ld d, h
         ld h, a
+        ld a, e
+        ld e, l
+        ld l, a
 
 1$:
         ; Wrap from past $97FF to $8800 onwards
@@ -49,7 +50,7 @@ _set_1bpp_data::
 
         rr b
         .rept 8
-            .BIT_TO_COLOR b, h, l
+            .BIT_TO_COLOR h, l
 
             rrca
             rr c
@@ -73,5 +74,6 @@ _set_1bpp_data::
         dec c
         jp nz, 1$
 
-        pop bc
-        ret
+        pop hl
+        pop de
+        jp (hl)

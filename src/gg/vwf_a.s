@@ -1,14 +1,13 @@
         .include        "global.s"
 
         .globl _vwf_current_rotate, _vwf_current_mask, _vwf_inverse_map, _vwf_tile_data, _vwf_inverse_map
-        .globl _set_tile_1bpp_data, __current_1bpp_colors
 
         .ez80
 
         .area _DATA
-        
-__save: 
-        .ds 0x01 
+
+__save:
+        .ds 0x01
 
         .area _CODE
 
@@ -32,7 +31,7 @@ _vwf_memcpy::
         ld  (.MAP_FRAME1),a
         ret
 
-; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank) __z88dk_callee; 
+; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank) __z88dk_callee;
 _vwf_read_banked_ubyte::
         ld  a, (.MAP_FRAME1)
         ld  (#__save), a
@@ -47,35 +46,6 @@ _vwf_read_banked_ubyte::
 
         ex de, hl
         ld l, (hl)
-
-        ld  a, (#__save)
-        ld (.MAP_FRAME1), a
-        ret
-
-; void vwf_set_banked_bkg_data(UBYTE i, UBYTE l, const unsigned char* ptr, UBYTE bank)  __z88dk_callee;
-_vwf_set_banked_data::
-        ld  a, (.MAP_FRAME1)
-        ld  (#__save), a
-
-        pop hl
-        pop de
-        pop bc
-        dec sp
-        ex (sp), hl
-
-        ld a, h
-        ld (.MAP_FRAME1), a
-
-        ld hl, (__current_1bpp_colors)
-        push hl
-        push bc
-        ld h, #0
-        ld l, d
-        push hl
-        ld l, e
-        push hl
-
-        call  _set_tile_1bpp_data
 
         ld  a, (#__save)
         ld (.MAP_FRAME1), a
@@ -107,7 +77,7 @@ _vwf_print_shift_char::
         xor c
         ld c, a
         inc de
-                
+
         ld a, (_vwf_current_rotate)
         sla a
         jr z, 1$
@@ -150,11 +120,6 @@ _vwf_print_shift_char::
         ld  a, (#__save)
         ld (.MAP_FRAME1), a
 
-        ret
-
-_vwf_get_win_addr::
-_vwf_get_bkg_addr::
-        ld hl, #.VDP_TILEMAP
         ret
 
 _vwf_swap_tiles::

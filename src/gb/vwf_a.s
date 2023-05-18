@@ -1,12 +1,11 @@
         .include        "global.s"
 
         .globl _vwf_current_rotate, _vwf_current_mask, _vwf_inverse_map, _vwf_tile_data, _vwf_inverse_map
-        .globl _set_bkg_1bpp_data
 
         .area _DATA
-        
-__save: 
-        .ds 0x01 
+
+__save:
+        .ds 0x01
 
         .area _CODE
 
@@ -18,7 +17,7 @@ _vwf_memcpy::
         ldhl sp, #8
         ld  a, (hl-)
         ldh (__current_bank),a
-        ld  (#0x2000), a
+        ld  (rROMB0), a
 
         ld a, (hl-)
         ld b, a
@@ -47,66 +46,41 @@ _vwf_memcpy::
 
         ld  a, (#__save)
         ldh (__current_bank),a
-        ld  (#0x2000), a
+        ld  (rROMB0), a
         ret
 
-; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank) __preserves_regs(b, c); 
+; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank);
 _vwf_read_banked_ubyte::
-        ldh a, (__current_bank)
-        ld  (#__save),a
+        ld  hl, #__current_bank
+        ld  c, (hl)
 
-        ldhl  sp, #4
-        ld  a, (hl-)
-        ldh (__current_bank),a
-        ld  (#0x2000), a
+        ld  (hl), a
+        ld  (rROMB0), a
 
-        ld  a, (hl-)
-        ld  l, (hl)
-        ld  h, a
-        ld  e, (hl)
+        ld  a, (de)
+        ld  e, a
 
-        ld  a, (#__save)
-        ldh (__current_bank),a
-        ld  (#0x2000), a
+        ld  a, c
+        ld  (hl), a
+        ld  (rROMB0), a
+
+        ld a, e
         ret
-
-; void vwf_set_banked_bkg_data(UBYTE i, UBYTE l, const unsigned char* ptr, UBYTE bank);
-_vwf_set_banked_data::
-        ldh a, (__current_bank)
-        ld  (#__save),a
-
-        ldhl  sp, #6
-        ld  a, (hl)
-        ldh (__current_bank),a
-        ld  (#0x2000), a
-
-        pop bc
-        call  _set_bkg_1bpp_data
-
-        ld  a, (#__save)
-        ldh (__current_bank),a
-        ld  (#0x2000), a
-        ld  h, b
-        ld  l, c
-        jp  (hl)
 
 ; void vwf_print_shift_char(void * dest, const void * src, UBYTE bank);
 _vwf_print_shift_char::
-        ldhl sp, #6
-        
+        ldhl sp, #2
+
         ldh a, (__current_bank)
         push af
-        ld a, (hl-)
+        ld a, (hl)
         ldh (__current_bank), a
-        ld  (#0x2000), a
+        ld  (rROMB0), a
 
-        ld a, (hl-)
-        ld d, a
-        ld a, (hl-)
-        ld e, a 
-        ld a, (hl-)
-        ld l, (hl)
-        ld h, a 
+        ld h, d
+        ld l, e
+        ld d, b
+        ld e, c
 
         ld b, #8
 3$:
@@ -116,7 +90,7 @@ _vwf_print_shift_char::
         xor c
         ld c, a
         inc de
-                
+
         ld a, (_vwf_current_rotate)
         sla a
         jr z, 1$
@@ -157,28 +131,11 @@ _vwf_print_shift_char::
 
         pop af
         ldh (__current_bank),a
-        ld  (#0x2000), a
+        ld  (rROMB0), a
 
-        ret
-
-; UBYTE * vwf_get_win_addr() __preserves_regs(b, c, h, l);
-_vwf_get_win_addr::
-        ldh     a,(.LCDC)
-        bit     6,a
-        jr      Z,.is98
-        jr      .is9c
-
-; UBYTE * vwf_get_bkg_addr() __preserves_regs(b, c, h, l);
-_vwf_get_bkg_addr::
-        ldh     a,(.LCDC)
-        bit     3,a
-        jr      NZ,.is9c
-.is98:
-        ld      de,#0x9800      ; DE = origin
-        ret
-.is9c:
-        ld      de,#0x9C00      ; DE = origin
-        ret
+        pop hl
+        inc sp
+        jp (hl)
 
 _vwf_swap_tiles::
         ld      hl, #_vwf_tile_data
