@@ -137,13 +137,13 @@ static const table_value_t edge_operations[] = {
     { CAM01_EDGEOP_2D, "2D" }, { CAM01_EDGEOP_HORIZ, "Horiz" }, { CAM01_EDGEOP_VERT, "Vert" },{ CAM01_EDGEOP_NONE, "None" }
 };
 
-void RENDER_CAM_REG_EDEXOPGAIN()  { CAM_REG_EDEXOPGAIN  = SHADOW.CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
-void RENDER_CAM_REG_EXPTIME()     { CAM_REG_EXPTIME     = SHADOW.CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
-void RENDER_CAM_REG_EDRAINVVREF() { CAM_REG_EDRAINVVREF = SHADOW.CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_ratio)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
-void RENDER_CAM_REG_ZEROVOUT()    { CAM_REG_ZEROVOUT    = SHADOW.CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
-inline void RENDER_CAM_REG_DITHERPATTERN() { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
+void RENDER_CAM_REG_EDEXOPGAIN(void)  { CAM_REG_EDEXOPGAIN  = SHADOW.CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
+void RENDER_CAM_REG_EXPTIME(void)     { CAM_REG_EXPTIME     = SHADOW.CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
+void RENDER_CAM_REG_EDRAINVVREF(void) { CAM_REG_EDRAINVVREF = SHADOW.CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_ratio)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
+void RENDER_CAM_REG_ZEROVOUT(void)    { CAM_REG_ZEROVOUT    = SHADOW.CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
+inline void RENDER_CAM_REG_DITHERPATTERN(void) { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
-void RENDER_CAM_REGISTERS() {
+void RENDER_CAM_REGISTERS(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
     RENDER_CAM_REG_EXPTIME();
@@ -152,7 +152,7 @@ void RENDER_CAM_REGISTERS() {
     RENDER_CAM_REG_DITHERPATTERN();
 }
 
-void RENDER_REGS_FROM_EXPOSURE() {
+void RENDER_REGS_FROM_EXPOSURE(void) {
     // Gain 32.0 | vRef 0.480 | No edge Operation    | Exposure time range from 1048ms to 394ms
     // Gain 26.0 | vRef 0.416 | 2-D edge mode        | Exposure time range from  573ms to 164ms
     // Gain 20.0 | vRef 0.224 | 2-D edge mode        | Exposure time range from  282ms to  32ms
@@ -203,7 +203,7 @@ void RENDER_REGS_FROM_EXPOSURE() {
     if (apply_dither) RENDER_CAM_REG_DITHERPATTERN();
 }
 
-void RENDER_EDGE_FROM_EXPOSURE() {
+void RENDER_EDGE_FROM_EXPOSURE(void) {
     uint16_t exposure = SETTING(current_exposure);
     if (exposure < TO_EXPOSURE_VALUE(768)) {
         SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
@@ -227,7 +227,7 @@ void display_last_seen(uint8_t restore) {
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-inline void camera_scrollbars_reinit() {
+inline void camera_scrollbars_reinit(void) {
     scrollbar_destroy_all();
     if (OPTION(camera_mode) == camera_mode_auto) {
         // init and set brightness scrollbar
@@ -239,7 +239,7 @@ inline void camera_scrollbars_reinit() {
     }
 }
 
-void camera_image_save() {
+void camera_image_save(void) {
     static image_metadata_t image_metadata;
     uint8_t n_images = images_taken();
     if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
@@ -261,7 +261,7 @@ void camera_image_save() {
     } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH); // high priority, override shutter sound!
 }
 
-static void refresh_usage_indicator() {
+static void refresh_usage_indicator(void) {
     switch (OPTION(after_action)) {
         case after_action_picnrec_video:
         case after_action_transfer_video:
@@ -274,14 +274,14 @@ static void refresh_usage_indicator() {
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
-static void refresh_screen() {
+static void refresh_screen(void) {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     display_last_seen(TRUE);
     refresh_usage_indicator();
     scrollbar_repaint_all();
 }
 
-static uint8_t onPrinterProgress() BANKED {
+static uint8_t onPrinterProgress(void) BANKED {
     misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
     menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
     return 0;
@@ -309,7 +309,7 @@ inline void camera_charge_timer(uint8_t value) {
     vbl_frames_counter = 60;
 }
 
-void shutter_VBL_ISR() NONBANKED {
+void shutter_VBL_ISR(void) NONBANKED {
     if (!vbl_frames_counter--) {
         vbl_frames_counter = 60;
         if (COUNTER(camera_shutter_timer)) {
@@ -319,14 +319,14 @@ void shutter_VBL_ISR() NONBANKED {
 }
 
 
-uint8_t INIT_state_camera() BANKED {
+uint8_t INIT_state_camera(void) BANKED {
     CRITICAL {
         add_VBL(shutter_VBL_ISR);
     }
     return 0;
 }
 
-uint8_t ENTER_state_camera() BANKED {
+uint8_t ENTER_state_camera(void) BANKED {
     // scrollbars
     camera_scrollbars_reinit();
     // repaint screen
@@ -555,7 +555,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
     return joypad_swap_dpad(value);
 }
-bool isSaveCancelled() {
+bool isSaveCancelled(void) {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, 1, WHITE_ON_BLACK);
     uint8_t menu_result = menu_execute(&SaveConfirmMenu, NULL, NULL);
     return (menu_result != MENU_RESULT_YES);
@@ -960,7 +960,7 @@ uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, came
     return formatItemText(id, format, settings, settings->cpu_fast);
 }
 
-uint8_t UPDATE_state_camera() BANKED {
+uint8_t UPDATE_state_camera(void) BANKED {
     static uint8_t menu_result;
     JOYPAD_RESET();
     // start capturing of the image
@@ -1075,7 +1075,7 @@ uint8_t UPDATE_state_camera() BANKED {
     return FALSE;
 }
 
-uint8_t LEAVE_state_camera() BANKED {
+uint8_t LEAVE_state_camera(void) BANKED {
     fade_out_modal();
     recording_video = FALSE;
     gbprinter_set_handler(NULL, 0);

@@ -6,7 +6,7 @@
 #include "states.h"
 
 #define DECLARE_MODULE(MODULE_IDX) \
-    uint8_t INIT_##MODULE_IDX() BANKED; \
+    uint8_t INIT_##MODULE_IDX(void) BANKED; \
     BANKREF_EXTERN(MODULE_IDX)
 
 #define MODULE_DEF_END

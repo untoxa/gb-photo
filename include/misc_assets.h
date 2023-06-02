@@ -74,6 +74,6 @@ inline void misc_render_progressbar(uint8_t value, uint8_t size, uint8_t * buffe
     *ptr = 0;
 }
 
-uint8_t INIT_module_misc_assets() BANKED;
+uint8_t INIT_module_misc_assets(void) BANKED;
 
 #endif

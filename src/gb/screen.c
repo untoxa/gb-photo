@@ -262,7 +262,7 @@ void screen_load_thumbnail_banked(uint8_t x, uint8_t y, uint8_t * picture, uint8
     SWITCH_ROM(save);
 }
 
-void LCD_ISR() NONBANKED {
+void LCD_ISR(void) NONBANKED {
     while (STAT_REG & STATF_BUSY);
     if (LYC_REG == 95) {
         LCDC_REG |= LCDCF_BG8000;
@@ -273,7 +273,7 @@ void LCD_ISR() NONBANKED {
     }
 }
 
-uint8_t INIT_module_screen() BANKED {
+uint8_t INIT_module_screen(void) BANKED {
     // (re)install interrupt handlers
     CRITICAL {
         LYC_REG = 95, STAT_REG |= STATF_LYC;
@@ -292,13 +292,13 @@ uint8_t INIT_module_screen() BANKED {
 }
 
 // switch display off
-uint8_t INIT_module_display_off() BANKED {
+uint8_t INIT_module_display_off(void) BANKED {
     DISPLAY_OFF;
     return 0;
 }
 
 // set LCDC and switch on display
-uint8_t INIT_module_display_on() BANKED {
+uint8_t INIT_module_display_on(void) BANKED {
     LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8);
     return 0;
 }

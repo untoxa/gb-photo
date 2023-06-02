@@ -27,7 +27,7 @@ void hUGETrackerRoutine(unsigned char ch, unsigned char param, unsigned char tic
 #endif
 
 // initialize the music/SFX driver
-uint8_t INIT_module_music() BANKED {
+uint8_t INIT_module_music(void) BANKED {
     music_init();
     CRITICAL {
         music_setup_timer_ex(_is_CPU_FAST);

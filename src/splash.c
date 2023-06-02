@@ -163,7 +163,7 @@ void logo_fade(const mask_t * mask) BANKED {
     }
 }
 
-void logo_init() {
+void logo_init(void) {
     DISPLAY_OFF;
     // set palettes if system supports color
     if (_is_COLOR) {
@@ -186,7 +186,7 @@ void logo_init() {
     DISPLAY_ON;
 }
 
-uint8_t INIT_module_splash() BANKED {
+uint8_t INIT_module_splash(void) BANKED {
     // skip logo if fast boot
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (OPTION(boot_to_camera_mode)) return 0;

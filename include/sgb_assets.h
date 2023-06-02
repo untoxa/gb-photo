@@ -12,6 +12,6 @@
 
 BANKREF_EXTERN(module_sgb_assets)
 
-uint8_t INIT_module_sgb_assets() BANKED;
+uint8_t INIT_module_sgb_assets(void) BANKED;
 
 #endif

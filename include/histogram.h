@@ -13,6 +13,6 @@ extern void __histogram_target_value;
 extern void __histogram_max_value;
 extern void __histogram_points_count;
 
-int16_t calculate_histogram() BANKED;
+int16_t calculate_histogram(void) BANKED;
 
 #endif

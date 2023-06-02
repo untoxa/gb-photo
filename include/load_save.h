@@ -20,8 +20,8 @@ CHECK_SIZE_NOT_LARGER(save_structure_t, FREE_SAVE_SPACE);   // compiling breaks 
 
 void save_camera_mode_settings(camera_mode_e mode) BANKED;
 void restore_default_mode_settings(camera_mode_e mode) BANKED;
-void save_camera_state() BANKED;
+void save_camera_state(void) BANKED;
 
-uint8_t INIT_module_load_save() BANKED;
+uint8_t INIT_module_load_save(void) BANKED;
 
 #endif

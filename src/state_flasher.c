@@ -95,7 +95,7 @@ static const uint8_t * const thumbnail_addr[] = {0x6E00, 0x7E00, 0x4E00, 0x5E00}
 bool flash_slots[MAX_FLASH_SLOTS];
 VECTOR_DECLARE(flash_image_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
-inline uint8_t slot_images_taken() {
+inline uint8_t slot_images_taken(void) {
     return VECTOR_LEN(flash_image_slots);
 }
 inline uint8_t coords_to_index(uint8_t x, uint8_t y) {
@@ -199,7 +199,7 @@ uint8_t flasher_transfer_picture(uint8_t image_no) BANKED {
     return FALSE;
 }
 
-static uint8_t onPrinterProgress() BANKED {
+static uint8_t onPrinterProgress(void) BANKED {
     // printer progress callback handler
     flasher_show_progressbar(0, printer_completion, PRN_MAX_PROGRESS);
     return 0;
@@ -396,7 +396,7 @@ void flasher_refresh_folders(void) {
     screen_restore_rect(FLASHER_FOLDER_DISPLAY_X2, FLASHER_FOLDER_DISPLAY_Y2, FLASHER_FOLDER_DISPLAY_ROW2, 4);
 }
 
-void flasher_toss_images() {
+void flasher_toss_images(void) {
     banked_memcpy(text_buffer, slot_game_data.imageslots, CAMERA_MAX_IMAGE_SLOTS, slot_to_sector(current_slot, 0));
     memset(flash_image_slots, CAMERA_IMAGE_DELETED, sizeof(flash_image_slots));
     uint8_t elem;
@@ -444,7 +444,7 @@ void flasher_refresh_thumbnails(void) {
     return;
 }
 
-static void refresh_usage_indicator() {
+static void refresh_usage_indicator(void) {
     sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
 }

@@ -88,12 +88,12 @@ uint8_t printer_print_tile(const uint8_t *tiledata) {
     return FALSE;
 }
 
-inline void printer_init() {
+inline void printer_init(void) {
     printer_tile_num = 0;
     PRINTER_SEND_COMMAND(PRN_PKT_INIT);
 }
 
-inline bool printer_check_cancel() {
+inline bool printer_check_cancel(void) {
     PROCESS_INPUT();
     return (KEY_PRESSED(J_B));
 }

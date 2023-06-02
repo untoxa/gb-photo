@@ -13,7 +13,7 @@
 BANKREF(module_vwf)
 
 // initialize the VWF subsystem
-uint8_t INIT_module_vwf() BANKED {
+uint8_t INIT_module_vwf(void) BANKED {
     vwf_load_font(0, font_proportional, BANK(font_proportional));
     vwf_load_font(1, font_fancy, BANK(font_fancy));
     vwf_activate_font(0);

@@ -10,7 +10,7 @@
 #define IR_FLASHES_MIN 2
 
 
-uint8_t ir_sense_pattern() {
+uint8_t ir_sense_pattern(void) {
 #ifdef _CGB_H
     // If you sense IR, sample for a short period (1 is off)
     if ((RP_REG & RPF_DATAIN) == RPF_DATAIN) {

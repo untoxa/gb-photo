@@ -11,21 +11,21 @@ BANKREF_EXTERN(module_remote)
 
 extern volatile uint8_t remote_keys;
 
-inline uint8_t remote_joypad() {
+inline uint8_t remote_joypad(void) {
     return remote_keys;
 }
 
 #if defined(NINTENDO)
 
 uint8_t remote_activate(uint8_t value) BANKED;
-uint8_t INIT_module_remote() BANKED;
+uint8_t INIT_module_remote(void) BANKED;
 
 #else
 
 uint8_t remote_activate(uint8_t value) {
     return REMOTE_DISABLED;
 };
-uint8_t INIT_module_remote() BANKED;
+uint8_t INIT_module_remote(void) BANKED;
 
 #endif
 

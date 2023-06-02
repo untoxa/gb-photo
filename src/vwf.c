@@ -27,12 +27,12 @@ uint8_t vwf_current_font_bank;
 void vwf_print_shift_char(void * dest, const void * src, uint8_t bank);
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) OLDCALL;
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank);
-void vwf_swap_tiles() OLDCALL;
+void vwf_swap_tiles(void) OLDCALL;
 #elif defined(SEGA)
 void vwf_print_shift_char(void * dest, const void * src, uint8_t bank) __z88dk_callee;
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) __z88dk_callee;
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank) __z88dk_callee;
-void vwf_swap_tiles() OLDCALL;
+void vwf_swap_tiles(void) OLDCALL;
 #endif
 
 void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data);
@@ -123,6 +123,6 @@ void vwf_activate_font(uint8_t idx) {
     vwf_memcpy(&vwf_current_font_desc, vwf_fonts[idx].ptr, sizeof(font_desc_t), vwf_current_font_bank);
 }
 
-uint8_t * vwf_next_tile() {
+uint8_t * vwf_next_tile(void) {
     return (vwf_current_offset) ? vwf_current_tile + VWF_TILE_SIZE : vwf_current_tile;
 }

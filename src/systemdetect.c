@@ -12,7 +12,7 @@ BANKREF(module_detect_system)
 bool _is_SUPER, _is_COLOR, _is_ADVANCE;
 bool _is_CPU_FAST;
 
-uint8_t INIT_module_detect_system() BANKED {
+uint8_t INIT_module_detect_system(void) BANKED {
 #if defined(NINTENDO)
     // For the SGB + PAL SNES setup this delay is required on startup, otherwise borders don't show up
     for (uint8_t i = 0; i != 4; i++) vsync();
@@ -30,10 +30,10 @@ uint8_t INIT_module_detect_system() BANKED {
     return 0;
 }
 
-uint8_t CPU_FAST() BANKED {
+uint8_t CPU_FAST(void) BANKED {
     return (_is_CPU_FAST = (_is_COLOR) ? (cpu_fast(), true) : false);
 }
 
-void CPU_SLOW() BANKED {
+void CPU_SLOW(void) BANKED {
     if (_is_COLOR) _is_CPU_FAST = (cpu_slow(), false);
 }

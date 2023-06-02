@@ -99,7 +99,7 @@ lbl:
 #endif
 }
 
-int16_t calculate_histogram() BANKED {
+int16_t calculate_histogram(void) BANKED {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     *(uint32_t *)&(histogram + 2) = *(uint32_t *)&histogram = 0;
     for (uint8_t i = LENGTH(histogram_points), * const * ptr = histogram_points; i != 0; i--) calculate_tile(*ptr++);

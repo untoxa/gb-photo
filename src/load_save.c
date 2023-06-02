@@ -65,7 +65,7 @@ const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
     }
 };
 
-inline void save_wait_sram() {
+inline void save_wait_sram(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
 }
@@ -82,14 +82,14 @@ void restore_default_mode_settings(camera_mode_e mode) BANKED {
     current_settings[mode] = save_structure.mode_settings[mode] = default_camera_mode_settings[mode];
 }
 
-void save_camera_state() BANKED {
+void save_camera_state(void) BANKED {
     save_wait_sram();
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     save_structure.state_options = camera_state;
 }
 
 // enable battery backed-up SRAM and load/initialize program settings
-uint8_t INIT_module_load_save() BANKED {
+uint8_t INIT_module_load_save(void) BANKED {
     ENABLE_RAM;
     SWITCH_RAM(LOAD_SAVE_DATA_BANK);
     // check for the valid save blob and initialize with defaults if fail

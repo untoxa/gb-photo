@@ -12,7 +12,7 @@ uint16_t joy_ts = 0;
 
 #if (INT_DRIVEN_JOYPAD==1)
 volatile uint8_t joy_isr_value = 0;
-void joypad_ISR() NONBANKED {
+void joypad_ISR(void) NONBANKED {
     // OR keypad bits until read
     if ((sys_time - joy_ts) > COOLDOWN_RATE) {
         joy_isr_value |= (joypad() | remote_joypad());
@@ -20,7 +20,7 @@ void joypad_ISR() NONBANKED {
 }
 #endif
 
-uint8_t INIT_module_joy() BANKED {
+uint8_t INIT_module_joy(void) BANKED {
     JOYPAD_INIT;
     return 0;
 }

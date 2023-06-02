@@ -49,7 +49,7 @@ __asm
 __endasm;
 }
 
-void palette_reload() BANKED {
+void palette_reload(void) BANKED {
     if (_is_COLOR) {
         memset(BkgPalette, 0, sizeof(BkgPalette));
         memset(SprPalette, 0, sizeof(SprPalette));
@@ -65,7 +65,7 @@ void palette_reload() BANKED {
     }
 }
 
-uint8_t INIT_module_palette() BANKED {
+uint8_t INIT_module_palette(void) BANKED {
     palette_reload();
     fade_init();
     if (_is_COLOR) {

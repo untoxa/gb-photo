@@ -78,7 +78,7 @@ lbl:
 #endif
 }
 
-uint8_t linkcable_transfer_reset() BANKED {
+uint8_t linkcable_transfer_reset(void) BANKED {
     LINK_SEND_COMMAND(LNK_PKT_INIT);
     return PRN_STATUS_OK;
 }

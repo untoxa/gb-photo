@@ -20,12 +20,12 @@ inline scrollbar_t * scrollbar_add(scrollbar_t * ss, uint8_t x, uint8_t y, uint8
     return ss;
 }
 
-inline void scrollbar_destroy_all() {
+inline void scrollbar_destroy_all(void) {
     scrollbars = NULL;
 }
 
 uint8_t scrollbar_render_all(uint8_t hiwater);
-void scrollbar_repaint_all() BANKED;
+void scrollbar_repaint_all(void) BANKED;
 void scrollbar_set_position(scrollbar_t * ss, uint16_t value, uint16_t min, uint16_t max) BANKED;
 
 #endif

@@ -16,15 +16,15 @@ BANKREF_EXTERN(state_gallery)
 VECTOR_DECLARE_EXTERN(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE_EXTERN(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
-inline uint8_t images_taken() {
+inline uint8_t images_taken(void) {
     return VECTOR_LEN(used_slots);
 }
 
-inline uint8_t images_total() {
+inline uint8_t images_total(void) {
     return CAMERA_MAX_IMAGE_SLOTS;
 }
 
-inline uint8_t images_free() {
+inline uint8_t images_free(void) {
     return VECTOR_LEN(free_slots);
 }
 

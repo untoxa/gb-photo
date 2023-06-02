@@ -330,7 +330,7 @@ uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t *
 }
 
 
-uint8_t menu_popup_camera_execute() BANKED {
+uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_timer_value = OPTION(shutter_timer);
     spinedit_counter_value = OPTION(shutter_counter);
     uint8_t menu_result;

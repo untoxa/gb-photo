@@ -92,7 +92,7 @@ inline void music_load(uint8_t bank, const MUSIC_MODULE * data) {
 void music_pause(uint8_t pause);
 
 // stop music
-inline void music_stop() {
+inline void music_stop(void) {
     music_current_track_bank = MUSIC_STOP_BANK, music_sound_cut();
 }
 

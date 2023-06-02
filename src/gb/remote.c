@@ -10,14 +10,14 @@ BANKREF(module_remote)
 volatile uint8_t remote_keys;
 volatile uint8_t remote_watchdog;
 
-inline void SIO_request_transfer() {
+inline void SIO_request_transfer(void) {
     SC_REG = 0x80;      // start transfer with external clock
 }
-inline void SIO_cancel_transfer() {
+inline void SIO_cancel_transfer(void) {
     SC_REG = 0x00;      // reset transfer request
 }
 
-void isr_remote_SIO() NONBANKED NAKED {
+void isr_remote_SIO(void) NONBANKED NAKED {
 __asm
         push af
         push hl
@@ -86,7 +86,7 @@ __endasm;
 }
 ISR_VECTOR(VECTOR_SERIAL, isr_remote_SIO)
 
-void isr_remote_VBL() NONBANKED {
+void isr_remote_VBL(void) NONBANKED {
     if (remote_watchdog < WATCHDOG_DELAY) {
         if ((++remote_watchdog) == WATCHDOG_DELAY) {
             SIO_cancel_transfer();
@@ -108,7 +108,7 @@ uint8_t remote_activate(uint8_t value) BANKED {
     return value;
 }
 
-uint8_t INIT_module_remote() BANKED {
+uint8_t INIT_module_remote(void) BANKED {
     CRITICAL {
         // reinstall VBL handler (watchdog)
         remove_VBL(isr_remote_VBL);

@@ -159,7 +159,7 @@ void thumbnails_diaplay(uint8_t start) {
     }
 }
 
-static void refresh_screen() {
+static void refresh_screen(void) {
     screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
     menu_text_out(0, 0, 20, WHITE_ON_BLACK, " Thumbnail view");
 
@@ -169,11 +169,11 @@ static void refresh_screen() {
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
-uint8_t INIT_state_thumbnails() BANKED {
+uint8_t INIT_state_thumbnails(void) BANKED {
     return 0;
 }
 
-uint8_t ENTER_state_thumbnails() BANKED {
+uint8_t ENTER_state_thumbnails(void) BANKED {
     thumbnails_num_pages = VECTOR_LEN(used_slots) >> 4;
     if (VECTOR_LEN(used_slots) & 0x0f) thumbnails_num_pages++;
 
@@ -191,7 +191,7 @@ uint8_t ENTER_state_thumbnails() BANKED {
     return 0;
 }
 
-uint8_t UPDATE_state_thumbnails() BANKED {
+uint8_t UPDATE_state_thumbnails(void) BANKED {
     static uint8_t menu_result;
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP)) {
@@ -304,7 +304,7 @@ uint8_t UPDATE_state_thumbnails() BANKED {
     return TRUE;
 }
 
-uint8_t LEAVE_state_thumbnails() BANKED {
+uint8_t LEAVE_state_thumbnails(void) BANKED {
     fade_out_modal();
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
     return 0;

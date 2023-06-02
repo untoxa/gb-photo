@@ -5,6 +5,6 @@
 
 BANKREF_EXTERN(module_music)
 
-uint8_t INIT_module_music() BANKED;
+uint8_t INIT_module_music(void) BANKED;
 
 #endif

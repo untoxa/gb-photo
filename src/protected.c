@@ -209,7 +209,7 @@ uint8_t protected_metadata_write(uint8_t slot, uint8_t * sour, uint8_t size) BAN
     return FALSE;
 }
 
-uint8_t INIT_module_protected() BANKED {
+uint8_t INIT_module_protected(void) BANKED {
     static const uint8_t magic_string[] = {'M', 'a', 'g', 'i', 'c'};
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     memcpy(cam_game_data.magic, magic_string, sizeof(cam_game_data.magic));

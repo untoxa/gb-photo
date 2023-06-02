@@ -20,7 +20,7 @@ extern uint8_t fade_style;
 /**
  * Initialise fade variables
  */
-void fade_init() BANKED;
+void fade_init(void) BANKED;
 
 /**
  * Change current fade speed
@@ -32,12 +32,12 @@ void fade_setspeed(uint8_t speed) BANKED;
 /**
  * Fade in and wait until complete
  */
-void fade_in_modal() BANKED;
+void fade_in_modal(void) BANKED;
 
 /**
  * Fade out and wait until complete
  */
-void fade_out_modal() BANKED;
+void fade_out_modal(void) BANKED;
 
 /**
  * Applies palette change on CGB

@@ -360,7 +360,7 @@ uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_it
     }
 }
 
-void menu_settings_execute() BANKED {
+void menu_settings_execute(void) BANKED {
     uint8_t menu_result;
     settings_menu_repaint = true;
     settings_menu_last_selection = NULL;

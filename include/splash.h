@@ -8,6 +8,6 @@ BANKREF_EXTERN(module_splash)
 
 typedef uint8_t mask_t[8][8];
 
-uint8_t INIT_module_splash() BANKED;
+uint8_t INIT_module_splash(void) BANKED;
 
 #endif

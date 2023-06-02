@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-uint8_t menu_popup_camera_execute() BANKED;
+uint8_t menu_popup_camera_execute(void) BANKED;
 
 #endif

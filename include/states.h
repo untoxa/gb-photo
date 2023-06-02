@@ -5,10 +5,10 @@
 #include "globals.h"
 
 #define DECLARE_STATE(STATE_IDX) \
-    uint8_t INIT_##STATE_IDX() BANKED; \
-    uint8_t ENTER_##STATE_IDX() BANKED; \
-    uint8_t UPDATE_##STATE_IDX() BANKED; \
-    uint8_t LEAVE_##STATE_IDX() BANKED; \
+    uint8_t INIT_##STATE_IDX(void) BANKED; \
+    uint8_t ENTER_##STATE_IDX(void) BANKED; \
+    uint8_t UPDATE_##STATE_IDX(void) BANKED; \
+    uint8_t LEAVE_##STATE_IDX(void) BANKED; \
     BANKREF_EXTERN(STATE_IDX)
 
 #define STATE_DEF_END
@@ -38,7 +38,7 @@ inline void CHANGE_STATE(STATE new_state) {
     CURRENT_PROGRAM_STATE = new_state;
 }
 
-inline uint8_t STATE_CHANGED() {
+inline uint8_t STATE_CHANGED(void) {
     return (CURRENT_PROGRAM_STATE != OLD_PROGRAM_STATE);
 }
 

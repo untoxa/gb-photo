@@ -139,18 +139,18 @@ extern uint8_t recording_video;
 
 extern camera_shadow_regs_t SHADOW;
 
-inline uint8_t is_capturing() {
+inline uint8_t is_capturing(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     return (CAM_REG_CAPTURE & CAM00F_CAPTURING);
 }
-inline uint8_t image_captured() {
+inline uint8_t image_captured(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     uint8_t v = CAM_REG_CAPTURE;
     uint8_t r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
     SHADOW.CAM_REG_CAPTURE = v;
     return r;
 }
-inline void image_capture() {
+inline void image_capture(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
 }

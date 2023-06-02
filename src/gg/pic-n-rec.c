@@ -1,3 +1,3 @@
-void picnrec_trigger() {
+void picnrec_trigger(void) {
     // do nothing
 }

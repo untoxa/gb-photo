@@ -47,7 +47,7 @@ inline void sgb_assets_set_palette(uint8_t palette_index) {
 }
 
 // load the SGB borders and palettes if SGB detected
-uint8_t INIT_module_sgb_assets() BANKED {
+uint8_t INIT_module_sgb_assets(void) BANKED {
     if (_is_SUPER) {
         SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (OPTION(fancy_sgb_border)) {

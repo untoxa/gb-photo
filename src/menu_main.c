@@ -181,7 +181,7 @@ uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 }
 
 // Main Menu execute
-uint8_t menu_main_execute() BANKED {
+uint8_t menu_main_execute(void) BANKED {
     uint8_t menu_result;
     do {
         menu_result = menu_execute(&MainMenu, NULL, last_menu_item);

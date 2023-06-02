@@ -123,7 +123,7 @@ uint8_t gallery_transfer_picture(uint8_t image_no) BANKED {
     return FALSE;
 }
 
-static uint8_t onPrinterProgress() BANKED {
+static uint8_t onPrinterProgress(void) BANKED {
     // printer progress callback handler
     gallery_show_progressbar(0, printer_completion, PRN_MAX_PROGRESS);
     return 0;
@@ -282,26 +282,26 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
 }
 
 
-uint8_t gallery_print_info() {
+uint8_t gallery_print_info(void) {
     if (gbprinter_detect(10) == PRN_STATUS_OK) {
         return (gbprinter_print_screen_rect(ImageInfoMenu.x + 1, ImageInfoMenu.y + 1, ImageInfoMenu.width - 2, ImageInfoMenu.height - 3, TRUE) == PRN_STATUS_CANCELLED) ? FALSE : TRUE;
     }
     return FALSE;
 }
 
-static uint8_t refresh_screen() {
+static uint8_t refresh_screen(void) {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Camera roll");
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_START " or " ICON_SELECT "/" ICON_B " for Menus");
     return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }
 
-uint8_t INIT_state_gallery() BANKED {
+uint8_t INIT_state_gallery(void) BANKED {
     gallery_toss_images();
     return 0;
 }
 
-uint8_t ENTER_state_gallery() BANKED {
+uint8_t ENTER_state_gallery(void) BANKED {
     OPTION(gallery_picture_idx) = refresh_screen();
     gbprinter_set_handler(onPrinterProgress, BANK(state_gallery));
     fade_in_modal();
@@ -309,7 +309,7 @@ uint8_t ENTER_state_gallery() BANKED {
     return 0;
 }
 
-uint8_t UPDATE_state_gallery() BANKED {
+uint8_t UPDATE_state_gallery(void) BANKED {
     static uint8_t menu_result;
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP) || KEY_PRESSED(J_RIGHT)) {
@@ -422,7 +422,7 @@ uint8_t UPDATE_state_gallery() BANKED {
     return TRUE;
 }
 
-uint8_t LEAVE_state_gallery() BANKED {
+uint8_t LEAVE_state_gallery(void) BANKED {
     fade_out_modal();
     gbprinter_set_handler(NULL, 0);
     return 0;

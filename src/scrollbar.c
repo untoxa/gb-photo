@@ -44,7 +44,7 @@ void scrollbar_paint(scrollbar_t * ss) {
     }
 }
 
-void scrollbar_repaint_all() BANKED {
+void scrollbar_repaint_all(void) BANKED {
     scrollbar_t * current = scrollbars;
     while (current) {
         scrollbar_paint(current);

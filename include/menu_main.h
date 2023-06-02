@@ -3,6 +3,6 @@
 
 #include "menus.h"
 
-uint8_t menu_main_execute() BANKED;
+uint8_t menu_main_execute(void) BANKED;
 
 #endif

@@ -233,7 +233,7 @@ void fade_apply_palette_change_dmg(uint8_t index) BANKED {
     }
 }
 
-void fade_init() BANKED {
+void fade_init(void) BANKED {
     fade_frames_per_step = fade_speeds[2];
     fade_timer = FADED_OUT_FRAME;
     fade_running = FALSE;
@@ -244,7 +244,7 @@ void fade_init() BANKED {
     fade_apply_palette_change_dmg(FADED_OUT_FRAME);
 }
 
-static void fade_in() {
+static void fade_in(void) {
     if (fade_timer == FADED_IN_FRAME) {
         return;
     }
@@ -259,7 +259,7 @@ static void fade_in() {
     fade_apply_palette_change_dmg(FADED_OUT_FRAME);
 }
 
-static void fade_out() {
+static void fade_out(void) {
     if (fade_timer == FADED_OUT_FRAME) {
         return;
     }
@@ -274,7 +274,7 @@ static void fade_out() {
     fade_apply_palette_change_dmg(FADED_IN_FRAME);
 }
 
-static void fade_update() {
+static void fade_update(void) {
     if (fade_running) {
         if ((fade_frame++ & fade_frames_per_step) == 0) {
             if (fade_direction == FADE_IN) {
@@ -297,11 +297,11 @@ void fade_setspeed(uint8_t speed) BANKED {
     fade_frames_per_step = fade_speeds[speed];
 }
 
-inline uint8_t fade_isfading() {
+inline uint8_t fade_isfading(void) {
   return fade_running;
 }
 
-void fade_in_modal() BANKED {
+void fade_in_modal(void) BANKED {
     fade_in();
     while (fade_isfading()) {
         vsync();
@@ -309,7 +309,7 @@ void fade_in_modal() BANKED {
     }
 }
 
-void fade_out_modal() BANKED {
+void fade_out_modal(void) BANKED {
     fade_out();
     while (fade_isfading()) {
         vsync();

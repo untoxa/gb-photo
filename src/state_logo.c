@@ -47,7 +47,7 @@ static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, cons
     }
 }
 
-static void refresh_screen() {
+static void refresh_screen(void) {
     vsync();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
@@ -58,7 +58,7 @@ static void refresh_screen() {
     screen_restore_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT);
 }
 
-uint8_t INIT_state_logo() BANKED {
+uint8_t INIT_state_logo(void) BANKED {
     // skip logo if fast boot
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (OPTION(boot_to_camera_mode)) CHANGE_STATE(MAIN_STATE);
@@ -66,14 +66,14 @@ uint8_t INIT_state_logo() BANKED {
     return 0;
 }
 
-uint8_t ENTER_state_logo() BANKED {
+uint8_t ENTER_state_logo(void) BANKED {
     refresh_screen();
     fade_in_modal();
     JOYPAD_RESET();
     return 0;
 }
 
-uint8_t UPDATE_state_logo() BANKED {
+uint8_t UPDATE_state_logo(void) BANKED {
     PROCESS_INPUT();
     if (KEY_PRESSED(~J_START)) {
         // any key but start enters the default state
@@ -87,7 +87,7 @@ uint8_t UPDATE_state_logo() BANKED {
     return TRUE;
 }
 
-uint8_t LEAVE_state_logo() BANKED {
+uint8_t LEAVE_state_logo(void) BANKED {
     fade_out_modal();
     return 0;
 }

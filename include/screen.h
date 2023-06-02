@@ -43,8 +43,8 @@ inline uint8_t screen_text_out(uint8_t x, uint8_t y, const uint8_t * text) {
     return screen_restore_rect(x, y, vwf_draw_text(screen_tile_addresses[y] + (x << 4), text), 1);
 }
 
-uint8_t INIT_module_screen() BANKED;
-uint8_t INIT_module_display_off() BANKED;
-uint8_t INIT_module_display_on() BANKED;
+uint8_t INIT_module_screen(void) BANKED;
+uint8_t INIT_module_display_off(void) BANKED;
+uint8_t INIT_module_display_on(void) BANKED;
 
 #endif
