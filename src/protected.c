@@ -83,6 +83,7 @@ void protected_generate_thumbnail(uint8_t slot) BANKED {
 
 uint8_t * copy_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
     dest; sour; count;
+#ifdef NINTENDO
     __asm
         ldhl sp, #2
         ld a, (hl)
@@ -106,11 +107,20 @@ uint8_t * copy_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAK
         inc sp
         jp (hl)
     __endasm;
+#else
+    __asm
+        pop hl
+        inc sp
+        ex (sp), hl
+        ret
+    __endasm;
+#endif
 }
 
 static uint8_t hflip_loop;
 uint8_t * copy_data_row_flipped(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
     dest; sour; count;
+#ifdef NINTENDO
     __asm
         ldhl sp, #2
         ld a, (hl)
@@ -147,6 +157,14 @@ uint8_t * copy_data_row_flipped(uint8_t * dest, const uint8_t * sour, uint8_t co
         inc sp
         jp (hl)
     __endasm;
+#else
+    __asm
+        pop hl
+        inc sp
+        ex (sp), hl
+        ret
+    __endasm;
+#endif
 }
 
 void protected_lastseen_to_slot(uint8_t slot, bool flipped) BANKED {
@@ -209,10 +227,95 @@ uint8_t protected_metadata_write(uint8_t slot, uint8_t * sour, uint8_t size) BAN
     return FALSE;
 }
 
+#define CAMERA_SUM_SEED 0x2fu
+#define CAMERA_XOR_SEED 0x15u
+
+typedef struct magic_struct_t {
+    uint8_t magic[5];
+    uint16_t crc;
+} magic_struct_t;
+
+uint16_t protected_checksum(uint8_t * address, uint8_t length) {
+    uint8_t bsum = CAMERA_SUM_SEED, bxor = CAMERA_XOR_SEED;
+    for (uint8_t i = length; (i); i--) {
+        bsum += *address;
+        bxor ^= *address++;
+    }
+    return (uint16_t)(bxor << 8) | bsum;
+}
+
+#define PROTECTED_BLOCK_SIZE(LEN) ((LEN) + sizeof(magic_struct_t))
+
+#define ALBUM_ADDRESS 0xb000        // bank 0
+#define ALBUM_LENGTH 0xd2
+static void AT(ALBUM_ADDRESS) prot_album;
+static magic_struct_t AT(ALBUM_ADDRESS + ALBUM_LENGTH) prot_album_crc;
+static void AT(ALBUM_ADDRESS + PROTECTED_BLOCK_SIZE(ALBUM_LENGTH)) prot_album_echo;
+
+#define VECTOR_ADDRESS 0xb1b2       // bank 0
+#define VECTOR_LENGTH 0x1e
+static void AT(VECTOR_ADDRESS) prot_vector;
+static magic_struct_t AT(VECTOR_ADDRESS + VECTOR_LENGTH) prot_vector_crc;
+static void AT(VECTOR_ADDRESS + PROTECTED_BLOCK_SIZE(VECTOR_LENGTH)) prot_vector_echo;
+
+#define OWNER_ADDRESS 0xafb8        // bank 1
+#define OWNER_LENGTH 0x12
+static void AT(OWNER_ADDRESS) prot_owner;
+static magic_struct_t AT(OWNER_ADDRESS + OWNER_LENGTH) prot_owner_crc;
+static void AT(OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(OWNER_LENGTH)) prot_owner_echo;
+
+#define IMAGE0_OWNER_ADDRESS 0xaf00  // bank 1 and above
+#define IMAGE0_OWNER_LENGTH 0x55
+static void AT(IMAGE0_OWNER_ADDRESS) image0_owner;
+static magic_struct_t AT(IMAGE0_OWNER_ADDRESS + IMAGE0_OWNER_LENGTH) image0_owner_crc;
+static void AT(IMAGE0_OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(IMAGE0_OWNER_LENGTH)) image0_owner_echo;
+
+#define IMAGE1_OWNER_ADDRESS 0xbf00  // bank 1 and above
+#define IMAGE1_OWNER_LENGTH 0x55
+static void AT(IMAGE1_OWNER_ADDRESS) image1_owner;
+static magic_struct_t AT(IMAGE1_OWNER_ADDRESS + IMAGE1_OWNER_LENGTH) image1_owner_crc;
+static void AT(IMAGE1_OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(IMAGE1_OWNER_LENGTH)) image1_owner_echo;
+
 uint8_t INIT_module_protected(void) BANKED {
-    static const uint8_t magic_string[] = {'M', 'a', 'g', 'i', 'c'};
+    static const magic_struct_t magic = {
+        .magic = {'M', 'a', 'g', 'i', 'c'},
+        .crc = 0
+    };
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
-    memcpy(cam_game_data.magic, magic_string, sizeof(cam_game_data.magic));
-    memcpy(cam_game_data_echo.magic, magic_string, sizeof(cam_game_data.magic));
+    if (prot_album_crc.crc != protected_checksum(&prot_album, ALBUM_LENGTH)) {
+        memset(&prot_album, 0, ALBUM_LENGTH);
+        prot_album_crc = magic;
+        prot_album_crc.crc = protected_checksum(&prot_album, ALBUM_LENGTH);
+        memcpy(&prot_album_echo, &prot_album, PROTECTED_BLOCK_SIZE(ALBUM_LENGTH));
+    }
+    if (prot_vector_crc.crc != protected_checksum(&prot_vector, VECTOR_LENGTH)) {
+        for (uint8_t * ptr = &prot_vector, i = 0; (i != VECTOR_LENGTH); *ptr++ = i++);
+        prot_vector_crc = magic;
+        prot_vector_crc.crc = protected_checksum(&prot_vector, VECTOR_LENGTH);
+        memcpy(&prot_vector_echo, &prot_vector, PROTECTED_BLOCK_SIZE(VECTOR_LENGTH));
+    }
+    SWITCH_RAM(1);
+    if (prot_owner_crc.crc != protected_checksum(&prot_owner, OWNER_LENGTH)) {
+        memset(&prot_owner, 0, OWNER_LENGTH);
+        prot_owner_crc = magic;
+        prot_owner_crc.crc = protected_checksum(&prot_owner, OWNER_LENGTH);
+        memcpy(&prot_owner_echo, &prot_owner, PROTECTED_BLOCK_SIZE(OWNER_LENGTH));
+    }
+    for (uint8_t i = 1; i != 16; i++) {
+        SWITCH_RAM(i);
+        if (image0_owner_crc.crc != protected_checksum(&image0_owner, IMAGE0_OWNER_LENGTH)) {
+            memset(&image0_owner, 0, IMAGE0_OWNER_LENGTH);
+            image0_owner_crc = magic;
+            image0_owner_crc.crc = protected_checksum(&image0_owner, IMAGE0_OWNER_LENGTH);
+            memcpy(&image0_owner_echo, &image0_owner, PROTECTED_BLOCK_SIZE(IMAGE0_OWNER_LENGTH));
+        }
+        if (image1_owner_crc.crc != protected_checksum(&image1_owner, IMAGE1_OWNER_LENGTH)) {
+            memset(&image1_owner, 0, IMAGE1_OWNER_LENGTH);
+            image1_owner_crc = magic;
+            image1_owner_crc.crc = protected_checksum(&image1_owner, IMAGE1_OWNER_LENGTH);
+            memcpy(&image1_owner_echo, &image1_owner, PROTECTED_BLOCK_SIZE(IMAGE1_OWNER_LENGTH));
+        }
+    }
+    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     return 0;
 }
