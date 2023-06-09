@@ -5,13 +5,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "compat.h"
 #include "systemhelpers.h"
 #include "gbcamera.h"
 #include "vector.h"
+#include "joy.h"
+#include "screen.h"
+#include "menus.h"
+#include "fade_manager.h"
+
+#include "misc_assets.h"
 
 #include "protected.h"
 
 BANKREF(module_protected)
+BANKREF(module_sysmessages)
 
 void protected_pack(uint8_t * v) BANKED {
     uint8_t i, elem;
@@ -227,14 +235,6 @@ uint8_t protected_metadata_write(uint8_t slot, uint8_t * sour, uint8_t size) BAN
     return FALSE;
 }
 
-#define CAMERA_SUM_SEED 0x2fu
-#define CAMERA_XOR_SEED 0x15u
-
-typedef struct magic_struct_t {
-    uint8_t magic[5];
-    uint16_t crc;
-} magic_struct_t;
-
 uint16_t protected_checksum(uint8_t * address, uint8_t length) {
     uint8_t bsum = CAMERA_SUM_SEED, bxor = CAMERA_XOR_SEED;
     for (uint8_t i = length; (i); i--) {
@@ -244,40 +244,42 @@ uint16_t protected_checksum(uint8_t * address, uint8_t length) {
     return (uint16_t)(bxor << 8) | bsum;
 }
 
-#define PROTECTED_BLOCK_SIZE(LEN) ((LEN) + sizeof(magic_struct_t))
+#define PROTECTED_BLOCK_SIZE(LEN) ((LEN) + sizeof(cam_magic_struct_t))
 
 #define ALBUM_ADDRESS 0xb000        // bank 0
 #define ALBUM_LENGTH 0xd2
 static void AT(ALBUM_ADDRESS) prot_album;
-static magic_struct_t AT(ALBUM_ADDRESS + ALBUM_LENGTH) prot_album_crc;
+static cam_magic_struct_t AT(ALBUM_ADDRESS + ALBUM_LENGTH) prot_album_crc;
 static void AT(ALBUM_ADDRESS + PROTECTED_BLOCK_SIZE(ALBUM_LENGTH)) prot_album_echo;
 
 #define VECTOR_ADDRESS 0xb1b2       // bank 0
 #define VECTOR_LENGTH 0x1e
 static void AT(VECTOR_ADDRESS) prot_vector;
-static magic_struct_t AT(VECTOR_ADDRESS + VECTOR_LENGTH) prot_vector_crc;
+static cam_magic_struct_t AT(VECTOR_ADDRESS + VECTOR_LENGTH) prot_vector_crc;
 static void AT(VECTOR_ADDRESS + PROTECTED_BLOCK_SIZE(VECTOR_LENGTH)) prot_vector_echo;
 
 #define OWNER_ADDRESS 0xafb8        // bank 1
 #define OWNER_LENGTH 0x12
 static void AT(OWNER_ADDRESS) prot_owner;
-static magic_struct_t AT(OWNER_ADDRESS + OWNER_LENGTH) prot_owner_crc;
+static cam_magic_struct_t AT(OWNER_ADDRESS + OWNER_LENGTH) prot_owner_crc;
 static void AT(OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(OWNER_LENGTH)) prot_owner_echo;
 
 #define IMAGE0_OWNER_ADDRESS 0xaf00  // bank 1 and above
 #define IMAGE0_OWNER_LENGTH 0x55
 static void AT(IMAGE0_OWNER_ADDRESS) image0_owner;
-static magic_struct_t AT(IMAGE0_OWNER_ADDRESS + IMAGE0_OWNER_LENGTH) image0_owner_crc;
+static cam_magic_struct_t AT(IMAGE0_OWNER_ADDRESS + IMAGE0_OWNER_LENGTH) image0_owner_crc;
 static void AT(IMAGE0_OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(IMAGE0_OWNER_LENGTH)) image0_owner_echo;
 
 #define IMAGE1_OWNER_ADDRESS 0xbf00  // bank 1 and above
 #define IMAGE1_OWNER_LENGTH 0x55
 static void AT(IMAGE1_OWNER_ADDRESS) image1_owner;
-static magic_struct_t AT(IMAGE1_OWNER_ADDRESS + IMAGE1_OWNER_LENGTH) image1_owner_crc;
+static cam_magic_struct_t AT(IMAGE1_OWNER_ADDRESS + IMAGE1_OWNER_LENGTH) image1_owner_crc;
 static void AT(IMAGE1_OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(IMAGE1_OWNER_LENGTH)) image1_owner_echo;
 
+uint8_t protected_status = PROTECTED_CORRECT;
+
 uint8_t INIT_module_protected(void) BANKED {
-    static const magic_struct_t magic = {
+    static const cam_magic_struct_t magic = {
         .magic = {'M', 'a', 'g', 'i', 'c'},
         .crc = 0
     };
@@ -287,12 +289,14 @@ uint8_t INIT_module_protected(void) BANKED {
         prot_album_crc = magic;
         prot_album_crc.crc = protected_checksum(&prot_album, ALBUM_LENGTH);
         memcpy(&prot_album_echo, &prot_album, PROTECTED_BLOCK_SIZE(ALBUM_LENGTH));
+        protected_status |= PROTECTED_REPAIR_ALBUM;
     }
     if (prot_vector_crc.crc != protected_checksum(&prot_vector, VECTOR_LENGTH)) {
         for (uint8_t * ptr = &prot_vector, i = 0; (i != VECTOR_LENGTH); *ptr++ = i++);
         prot_vector_crc = magic;
         prot_vector_crc.crc = protected_checksum(&prot_vector, VECTOR_LENGTH);
         memcpy(&prot_vector_echo, &prot_vector, PROTECTED_BLOCK_SIZE(VECTOR_LENGTH));
+        protected_status |= PROTECTED_REPAIR_VECTOR;
     }
     SWITCH_RAM(1);
     if (prot_owner_crc.crc != protected_checksum(&prot_owner, OWNER_LENGTH)) {
@@ -300,6 +304,7 @@ uint8_t INIT_module_protected(void) BANKED {
         prot_owner_crc = magic;
         prot_owner_crc.crc = protected_checksum(&prot_owner, OWNER_LENGTH);
         memcpy(&prot_owner_echo, &prot_owner, PROTECTED_BLOCK_SIZE(OWNER_LENGTH));
+        protected_status |= PROTECTED_REPAIR_OWNER;
     }
     for (uint8_t i = 1; i != 16; i++) {
         SWITCH_RAM(i);
@@ -308,14 +313,52 @@ uint8_t INIT_module_protected(void) BANKED {
             image0_owner_crc = magic;
             image0_owner_crc.crc = protected_checksum(&image0_owner, IMAGE0_OWNER_LENGTH);
             memcpy(&image0_owner_echo, &image0_owner, PROTECTED_BLOCK_SIZE(IMAGE0_OWNER_LENGTH));
+            protected_status |= PROTECTED_REPAIR_META;
         }
         if (image1_owner_crc.crc != protected_checksum(&image1_owner, IMAGE1_OWNER_LENGTH)) {
             memset(&image1_owner, 0, IMAGE1_OWNER_LENGTH);
             image1_owner_crc = magic;
             image1_owner_crc.crc = protected_checksum(&image1_owner, IMAGE1_OWNER_LENGTH);
             memcpy(&image1_owner_echo, &image1_owner, PROTECTED_BLOCK_SIZE(IMAGE1_OWNER_LENGTH));
+            protected_status |= PROTECTED_REPAIR_META;
         }
     }
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    return 0;
+}
+
+const uint8_t * const repair_messages[] = {
+    "  Reset album data...\tOK!",
+    "  Undelete images...\tOK!",
+    "  Reset owner info...\tOK!",
+    "  Reset images meta...\tOK!"
+};
+
+uint8_t INIT_module_sysmessages(void) BANKED {
+    if (protected_status == PROTECTED_CORRECT) return 0;
+
+    vsync();
+    vwf_set_colors(DMG_WHITE, DMG_BLACK);
+    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+
+    menu_text_out(0, 0, 0, WHITE_ON_BLACK, "Save file errors were detected.");
+    menu_text_out(0, 2, 0, WHITE_ON_BLACK, "Fixing checksums to prevent wiping");
+    menu_text_out(0, 3, 0, WHITE_ON_BLACK, "data by the original camera ROM.");
+    uint8_t y = 5;
+    for (uint8_t i = protected_status, * const *ptr = repair_messages; (i); i >>= 1, ptr++) {
+        menu_text_out(0, y++, 0, WHITE_ON_BLACK, *ptr);
+    }
+    menu_text_out(0, ++y, 0, WHITE_ON_BLACK, "Press " ICON_START " to continue...");
+
+    fade_in_modal();
+
+    JOYPAD_RESET();
+    do {
+        PROCESS_INPUT();
+        vsync();
+    } while (!KEY_PRESSED(J_START));
+
+    fade_out_modal();
+
     return 0;
 }

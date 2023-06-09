@@ -20,6 +20,20 @@
 */
 #define CAMERA_MAGIC "Magic"
 
+#define CAMERA_SUM_SEED 0x2fu
+#define CAMERA_XOR_SEED 0x15u
+
+typedef struct cam_magic_struct_t {
+    uint8_t magic[5];
+    union {
+        uint16_t crc;
+        struct {
+            uint8_t crc_add;
+            uint8_t crc_xor;
+        };
+    };
+} cam_magic_struct_t;
+
 /** Images are stored in 30 sram slots and the state of each slot is stored in a vector state of 30 bytes, in the same order
     0xFF means that the slot is free or erased, any number between 0x00 and 0x1D indicates the # of image in the album corresponding to the # of the memory slot
     Deleting an image replace its value by 0xFF but does not erase the memory slot.
@@ -28,9 +42,7 @@
 
 typedef struct cam_game_data_t {
     uint8_t imageslots[CAMERA_MAX_IMAGE_SLOTS];
-    uint8_t magic[5];
-    uint8_t CRC_add;
-    uint8_t CRC_xor;
+    cam_magic_struct_t magic;
 } cam_game_data_t;
 
 /*

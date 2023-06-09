@@ -66,6 +66,7 @@ _MODULE(module_remote)\
 _MODULE(module_misc_assets)\
 _MODULE(module_vwf)\
 _MODULE(module_display_on)\
+_MODULE(module_sysmessages)\
 MODULE_DEF_END
 
 // define program states

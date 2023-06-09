@@ -7,14 +7,22 @@
 
 #include "gbcamera.h"
 
+#define PROTECTED_CORRECT       0
+#define PROTECTED_REPAIR_ALBUM  1
+#define PROTECTED_REPAIR_VECTOR 2
+#define PROTECTED_REPAIR_OWNER  4
+#define PROTECTED_REPAIR_META   8
+
+extern uint8_t protected_status;
+
 #define PROTECTED_SEED 0xAA55u
 
 inline void protected_modify_slot(uint8_t slot, uint8_t value) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t old = cam_game_data.imageslots[slot];
     cam_game_data_echo.imageslots[slot] = cam_game_data.imageslots[slot] = value;
-    cam_game_data_echo.CRC_add = cam_game_data.CRC_add += (value - old);
-    cam_game_data_echo.CRC_xor = cam_game_data.CRC_xor ^= (value ^ old);
+    cam_game_data_echo.magic.crc_add = cam_game_data.magic.crc_add += (value - old);
+    cam_game_data_echo.magic.crc_xor = cam_game_data.magic.crc_xor ^= (value ^ old);
 }
 
 inline uint16_t protected_calculate_crc(uint8_t * data, uint8_t size, uint16_t seed) {

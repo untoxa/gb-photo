@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "compat.h"
+#include "vwf.h"
 #include "musicmanager.h"
 #include "joy.h"
 #include "screen.h"

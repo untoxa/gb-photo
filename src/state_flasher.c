@@ -377,8 +377,8 @@ uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param) {
 
 void flasher_read_slots(void) {
     for (uint8_t i = 0; i != MAX_FLASH_SLOTS; i++) {
-        banked_memcpy(text_buffer, slot_game_data.magic, sizeof(slot_game_data.magic), slot_to_sector(i, 0));
-        flash_slots[i] = (memcmp(text_buffer, MAGIC_SAVE_VALUE, sizeof(slot_game_data.magic)) == 0);
+        banked_memcpy(text_buffer, slot_game_data.magic.magic, sizeof(slot_game_data.magic.magic), slot_to_sector(i, 0));
+        flash_slots[i] = (memcmp(text_buffer, MAGIC_SAVE_VALUE, sizeof(slot_game_data.magic.magic)) == 0);
     }
 }
 
