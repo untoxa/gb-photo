@@ -7,11 +7,12 @@
 
 #include "gbcamera.h"
 
-#define PROTECTED_CORRECT       0
-#define PROTECTED_REPAIR_ALBUM  1
-#define PROTECTED_REPAIR_VECTOR 2
-#define PROTECTED_REPAIR_OWNER  4
-#define PROTECTED_REPAIR_META   8
+#define PROTECTED_CORRECT       0x00
+#define PROTECTED_REPAIR_ALBUM  0x01
+#define PROTECTED_REPAIR_VECTOR 0x02
+#define PROTECTED_REPAIR_OWNER  0x04
+#define PROTECTED_REPAIR_META   0x08
+#define PROTECTED_REPAIR_CAL    0x10
 
 extern uint8_t protected_status;
 

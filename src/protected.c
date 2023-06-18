@@ -276,6 +276,12 @@ static void AT(IMAGE1_OWNER_ADDRESS) image1_owner;
 static cam_magic_struct_t AT(IMAGE1_OWNER_ADDRESS + IMAGE1_OWNER_LENGTH) image1_owner_crc;
 static void AT(IMAGE1_OWNER_ADDRESS + PROTECTED_BLOCK_SIZE(IMAGE1_OWNER_LENGTH)) image1_owner_echo;
 
+#define CALIBRATION_BANK 2
+static void AT(0xaff2) calibration;
+#define CALIBRATION_ECHO_BANK 8
+static void AT(0xbff2) calibration_echo;
+const uint8_t default_calibration[] = {125, 125, 124, 126, 124, 125, 124, 122, 123, 121, 118, 104, 194, 60};
+
 uint8_t protected_status = PROTECTED_CORRECT;
 
 uint8_t INIT_module_protected(void) BANKED {
@@ -323,6 +329,13 @@ uint8_t INIT_module_protected(void) BANKED {
             protected_status |= PROTECTED_REPAIR_META;
         }
     }
+    if (protected_status != PROTECTED_CORRECT) {
+        SWITCH_RAM(CALIBRATION_BANK);
+        memcpy(&calibration, default_calibration, sizeof(default_calibration));
+        SWITCH_RAM(CALIBRATION_ECHO_BANK);
+        memcpy(&calibration_echo, default_calibration, sizeof(default_calibration));
+        protected_status |= PROTECTED_REPAIR_CAL;
+    }
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     return 0;
 }
@@ -331,7 +344,8 @@ const uint8_t * const repair_messages[] = {
     "  Reset album data...\tOK!",
     "  Undelete images...\tOK!",
     "  Reset owner info...\tOK!",
-    "  Reset images meta...\tOK!"
+    "  Reset images meta...\tOK!",
+    "  Reset calibration...\tOK!"
 };
 
 uint8_t INIT_module_sysmessages(void) BANKED {
