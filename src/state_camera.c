@@ -160,41 +160,73 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
     // Gain 14.0 | vRef 0.160 | Horizontal edge mode | Exposure time range from  0.5ms to 0.3ms
     bool apply_dither;
     uint16_t exposure = SETTING(current_exposure);
-    if (exposure < TO_EXPOSURE_VALUE(768)) {
-        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-        SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-        SETTING(voltage_out)        = 160;
-        SETTING(current_gain)       = 0;        // CAM01_GAIN_140
-        if (apply_dither = (SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = false;// dither HIGH
-    } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
-        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-        SETTING(voltage_out)        = 192;
-        SETTING(current_gain)       = 0;        // CAM01_GAIN_140
-        if (apply_dither = (SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = false;// dither HIGH
-    } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
-        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-        SETTING(voltage_out)        = 224;
-        SETTING(current_gain)       = 4;        // CAM01_GAIN_200
-        if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = true; // dither LOW
-    } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
-        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-        SETTING(voltage_out)        = 416;
-        SETTING(current_gain)       = 8;        // CAM01_GAIN_260
-        if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = true; // dither LOW
+    if (_is_CPU_FAST) {
+        if (exposure < TO_EXPOSURE_VALUE((768 << 1))) {
+            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
+            SETTING(voltage_out)        = 160;
+            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
+            if (apply_dither = (SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = false;// dither HIGH
+        } else if (exposure < TO_EXPOSURE_VALUE((32000 << 1))) {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+            SETTING(voltage_out)        = 192;
+            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
+            if (apply_dither = (SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = false;// dither HIGH
+        } else if (exposure < TO_EXPOSURE_VALUE((282000 << 1))) {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+            SETTING(voltage_out)        = 224;
+            SETTING(current_gain)       = 4;        // CAM01_GAIN_200
+            if (apply_dither = (!SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = true; // dither LOW
+        } else {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+            SETTING(voltage_out)        = 416;
+            SETTING(current_gain)       = 8;        // CAM01_GAIN_260
+            if (apply_dither = (!SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = true; // dither LOW
+        }
     } else {
-        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-        SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
-        SETTING(voltage_out)        = 480;
-        SETTING(current_gain)       = 12;       // CAM01_GAIN_32
-        if (apply_dither = (!SETTING(ditheringHighLight)))
-            SETTING(ditheringHighLight) = true; // dither LOW
+        if (exposure < TO_EXPOSURE_VALUE(768)) {
+            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
+            SETTING(voltage_out)        = 160;
+            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
+            if (apply_dither = (SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = false;// dither HIGH
+        } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+            SETTING(voltage_out)        = 192;
+            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
+            if (apply_dither = (SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = false;// dither HIGH
+        } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+            SETTING(voltage_out)        = 224;
+            SETTING(current_gain)       = 4;        // CAM01_GAIN_200
+            if (apply_dither = (!SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = true; // dither LOW
+        } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+            SETTING(voltage_out)        = 416;
+            SETTING(current_gain)       = 8;        // CAM01_GAIN_260
+            if (apply_dither = (!SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = true; // dither LOW
+        } else {
+            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+            SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
+            SETTING(voltage_out)        = 480;
+            SETTING(current_gain)       = 12;       // CAM01_GAIN_32
+            if (apply_dither = (!SETTING(ditheringHighLight)))
+                SETTING(ditheringHighLight) = true; // dither LOW
+        }
     }
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
@@ -205,15 +237,25 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
 
 void RENDER_EDGE_FROM_EXPOSURE(void) {
     uint16_t exposure = SETTING(current_exposure);
-    if (exposure < TO_EXPOSURE_VALUE(768)) {
-        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-        SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-    } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
-        SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-        SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+    if (_is_CPU_FAST) {
+        if (exposure < TO_EXPOSURE_VALUE((768 << 1))) {
+            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
+        } else {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+        }
     } else {
-        SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-        SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
+        if (exposure < TO_EXPOSURE_VALUE(768)) {
+            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
+        } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
+            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
+            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
+        } else {
+            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
+            SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
+        }
     }
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
