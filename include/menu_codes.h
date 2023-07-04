@@ -62,29 +62,34 @@
 #define ACTION_PRINT_SELECTED       71
 #define ACTION_TRANSFER_SELECTED    72
 
-// printer frames
-#define ACTION_PRINT_FRAME0         80
-#define ACTION_PRINT_FRAME1         81
-#define ACTION_PRINT_FRAME2         82
-#define ACTION_PRINT_FRAME3         83
-#define ACTION_PRINT_FRAME4         84
-#define ACTION_PRINT_FRAME5         85
-#define ACTION_PRINT_FRAME6         86
-#define ACTION_PRINT_FRAME7         87
-#define ACTION_PRINT_FRAME8         88
-#define ACTION_PRINT_FRAME9         89
-
 // flasher
-#define ACTION_FLASH_SAVE           90
-#define ACTION_FLASH_LOAD           91
-#define ACTION_FLASH_ERASE          92
-#define ACTION_PRINT_SLOT           93
-#define ACTION_TRANSFER_SLOT        94
-#define ACTION_RESTORE_IMAGE        95
+#define ACTION_FLASH_SAVE           80
+#define ACTION_FLASH_LOAD           81
+#define ACTION_FLASH_ERASE          82
+#define ACTION_PRINT_SLOT           83
+#define ACTION_TRANSFER_SLOT        84
+#define ACTION_RESTORE_IMAGE        85
+
+// printer frames
+#define ACTION_PRINT_FRAME0         90
+#define ACTION_PRINT_FRAME1         91
+#define ACTION_PRINT_FRAME2         92
+#define ACTION_PRINT_FRAME3         93
+#define ACTION_PRINT_FRAME4         94
+#define ACTION_PRINT_FRAME5         95
+#define ACTION_PRINT_FRAME6         96
+#define ACTION_PRINT_FRAME7         97
+#define ACTION_PRINT_FRAME8         98
+#define ACTION_PRINT_FRAME9         99
+#define ACTION_PRINT_FRAME10        100
+#define ACTION_PRINT_FRAME11        101
+
+#define ACTION_PRINT_FRAME_FIRST    ACTION_PRINT_FRAME0
+#define ACTION_PRINT_FRAME_LAST     ACTION_PRINT_FRAME11
 
 // global actions
-#define ACTION_MAIN_MENU            100
-#define ACTION_ABOUT                101
+#define ACTION_MAIN_MENU            150
+#define ACTION_ABOUT                151
 
 // system menu results
 #define MENU_RESULT_YES             254

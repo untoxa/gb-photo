@@ -137,10 +137,26 @@ const menu_item_t FrameMenuItems[] = {
         .helpcontext = " %s",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_PRINT_FRAME9
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 11, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME10
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 12, .width = 8,
+        .id = idPrintFrame,
+        .caption = " %s",
+        .helpcontext = " %s",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_PRINT_FRAME11
     }
 };
 const menu_t PrinterFramesMenu = {
-    .x = 3, .y = 2, .width = 15, .height = 12,
+    .x = 3, .y = 1, .width = 15, .height = 14,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = FrameMenuItems, .last_item = LAST_ITEM(FrameMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -255,7 +271,7 @@ const menu_item_t SettingsMenuItems[] = {
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 3, .y = 2, .width = 15, .height = 12,
+    .x = 2, .y = 2, .width = 15, .height = 12,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = onShowSettings, .onIdle = onIdleSettings, .onHelpContext = onHelpSettings,
@@ -279,11 +295,11 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
     // we draw help context here
     settings_menu_e menuid = (settings_menu_e)selection->id;
     if ((settings_menu_e)selection->id == idPrintFrame) {
-        uint8_t frame_no = selection->result - ACTION_PRINT_FRAME0;
+        uint8_t frame_no = selection->result - ACTION_PRINT_FRAME_FIRST;
         frame_get_desc(text_buffer_extra, frame_no);
         sprintf(text_buffer, selection->helpcontext, text_buffer_extra);
         menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, text_buffer);
-        frame_display_thumbnail(menu->x + 10, menu->y + 4, frame_no, BLACK_ON_WHITE);
+        frame_display_thumbnail(menu->x + 10, menu->y + 5, frame_no, BLACK_ON_WHITE);
     } else menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
     return 0;
 }
@@ -305,7 +321,7 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
     settings_menu_e menuid = (settings_menu_e)self->id;
     switch (menuid) {
         case idPrintFrame:
-            frame_get_caption(text_buffer_extra, self->result - ACTION_PRINT_FRAME0);
+            frame_get_caption(text_buffer_extra, self->result - ACTION_PRINT_FRAME_FIRST);
             sprintf(text_buffer, self->caption, text_buffer_extra);
             break;
         case idSettingsPrintFrame:
@@ -367,8 +383,8 @@ void menu_settings_execute(void) BANKED {
     spinedit_palette_value = OPTION(cgb_palette_idx);
     do {
         menu_result = menu_execute(&GlobalSettingsMenu, NULL, settings_menu_last_selection), settings_menu_repaint = false;
-        if ((menu_result >= ACTION_PRINT_FRAME0) && (menu_result <= ACTION_PRINT_FRAME9)) {
-            OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME0);
+        if ((menu_result >= ACTION_PRINT_FRAME_FIRST) && (menu_result <= ACTION_PRINT_FRAME_LAST)) {
+            OPTION(print_frame_idx) = (menu_result - ACTION_PRINT_FRAME_FIRST);
             save_camera_state();
             settings_menu_repaint = true;
         } else {

@@ -25,6 +25,10 @@
 #include "frame_zebra_thumb.h"
 #include "frame_wild.h"
 #include "frame_wild_thumb.h"
+#include "frame_black.h"
+#include "frame_black_thumb.h"
+#include "frame_white.h"
+#include "frame_white_thumb.h"
 
 BANKREF(print_frames)
 
@@ -151,6 +155,30 @@ const frame_desc_t print_frames[] = {
         .image_x = 2,
         .caption = "GB Camera",
         .desc = "\"GB Camera\" frame"
+    }, {
+        .height = IMG_HEIGHT(frame_black),
+        .map = frame_black_map,
+        .map_bank = BANK(frame_black),
+        .tiles = frame_black_tiles,
+        .tiles_bank = BANK(frame_black),
+        .thumb = frame_black_thumb_tiles,
+        .thumb_bank = BANK(frame_black_thumb),
+        .image_y = 2,
+        .image_x = 2,
+        .caption = "Black",
+        .desc = "Full black frame"
+    }, {
+        .height = IMG_HEIGHT(frame_white),
+        .map = frame_white_map,
+        .map_bank = BANK(frame_white),
+        .tiles = frame_white_tiles,
+        .tiles_bank = BANK(frame_white),
+        .thumb = frame_white_thumb_tiles,
+        .thumb_bank = BANK(frame_white_thumb),
+        .image_y = 2,
+        .image_x = 2,
+        .caption = "While",
+        .desc = "Full while frame"
     }
 };
 
