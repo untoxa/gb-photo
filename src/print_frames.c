@@ -177,8 +177,8 @@ const frame_desc_t print_frames[] = {
         .thumb_bank = BANK(frame_white_thumb),
         .image_y = 2,
         .image_x = 2,
-        .caption = "While",
-        .desc = "Full while frame"
+        .caption = "White",
+        .desc = "Full white frame"
     }
 };
 
