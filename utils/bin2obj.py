@@ -47,7 +47,7 @@ def main(argv=None):
     if options.identifier == None:
         identifier = "_" + str(Path(infilename.name).with_suffix(''))
     else: 
-        identifier = options.identifier       
+        identifier = "_" + options.identifier       
 
     with open(str(infilename), mode="rb") as f:
         data = f.read()
@@ -58,7 +58,10 @@ def main(argv=None):
 
     ofile = open(str(outfilename), "wb")
     ofile.write(bytes(("XL3\n"
-                       "H {:X} areas {:X} global symbols\n").format(nbanks, 1), "ascii"))
+                       "H {:X} areas {:X} global symbols\n").format(nbanks, 3), "ascii"))
+
+    ofile.write(bytes(("S ___bank{:s} Def{:06X}\n").format(identifier, sbank), "ascii"))        
+    ofile.write(bytes(("S ___size{:s} Def{:06X}\n").format(identifier, tsize), "ascii"))        
 
     tmp = tsize
     for bank in range(sbank, sbank + nbanks):
