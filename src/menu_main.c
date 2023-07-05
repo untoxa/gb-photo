@@ -137,7 +137,7 @@ const menu_item_t MainMenuItems[] = {
     }
 };
 const menu_t MainMenu = {
-    .x = 1, .y = 3, .width = 18, .height = 7,
+    .x = 1, .y = 3, .width = 18, .height = 8,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
     .onShow = onShowMain, .onIdle = onIdleMainMenu, .onHelpContext = onHelpMainMenu,
