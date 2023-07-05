@@ -147,11 +147,11 @@ inline void load_image_flipped(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8
         picture = set_data_row_flipped((uint8_t *)(*addr-- + ofs), picture, w);
     } while (--h);
 }
-void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, bool flip) {
+void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, bool flip) {
     if (flip) load_image_flipped(x, y, w, h, picture); else load_image_normal(x, y, w, h, picture);
 }
 
-void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture, uint8_t bank, bool flip) {
+void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, uint8_t bank, bool flip) {
     uint8_t save = _current_bank;
     SWITCH_ROM(bank);
     screen_load_image(x, y, w, h, picture, flip);
