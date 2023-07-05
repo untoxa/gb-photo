@@ -11,5 +11,5 @@ BANKREF(sound_error)
 const uint8_t sound_error[] = { 0 };
 const void AT(0b00000010) __mute_mask_sound_error;
 
-BANKREF(music_ingame)
-const uint8_t music_ingame[] = { 0 }; 
+BANKREF(song)
+const uint8_t song[] = { 0 }; 

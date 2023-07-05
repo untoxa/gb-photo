@@ -40,6 +40,6 @@ uint8_t INIT_module_music(void) BANKED {
 #if defined(NINTENDO)
     set_interrupts(IE_REG | TIM_IFLAG);
 #endif
-    music_load(BANK(song1), &song1), music_pause(music_paused = TRUE);
+    music_load(BANK(song), &song), music_pause(music_paused = TRUE);
     return 0;
 }

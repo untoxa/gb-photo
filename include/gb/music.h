@@ -3,7 +3,7 @@
 
 #include "hUGEDriver.h"
 
-extern const hUGESong_t song1; 
-BANKREF_EXTERN(song1)
+extern const hUGESong_t song; 
+BANKREF_EXTERN(song)
 
 #endif
