@@ -15,20 +15,20 @@ uint8_t onTranslateKeyYesNo(const struct menu_t * menu, const struct menu_item_t
 const menu_item_t YesNoMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 2, .ofs_y = 3, .width = 0,
+        .ofs_x = 3, .ofs_y = 3, .width = 0,
         .caption = " " ICON_B " No ",
         .onPaint = NULL,
         .result = MENU_RESULT_NO
     },{
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 7, .ofs_y = 3, .width = 0,
+        .ofs_x = 8, .ofs_y = 3, .width = 0,
         .caption = " Yes",
         .onPaint = NULL,
         .result = MENU_RESULT_YES
     }
 };
 const menu_t YesNoMenu = {
-    .x = 4, .y = 8, .width = 12, .height = 5,
+    .x = 3, .y = 8, .width = 14, .height = 5,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = YesNoMenuItems, .last_item = LAST_ITEM(YesNoMenuItems),
     .onShow = onShowYesNo, .onTranslateKey = onTranslateKeyYesNo, .onTranslateSubResult = NULL
