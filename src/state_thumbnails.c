@@ -123,6 +123,12 @@ uint8_t onHelpThumbnailMenu(const struct menu_t * menu, const struct menu_item_t
 }
 
 
+inline uint8_t selected_count(void) {
+    uint8_t image_count = 0;
+    for (uint8_t i = 0; i != images_taken(); i++) image_count += (selected_images[i]) ? 1 : 0;
+    return image_count;
+}
+
 inline uint8_t coords_to_index(uint8_t x, uint8_t y) {
     return (thumbnails_page_no << 4) | (y << 2) | x;
 }
@@ -192,7 +198,7 @@ uint8_t ENTER_state_thumbnails(void) BANKED {
 }
 
 uint8_t UPDATE_state_thumbnails(void) BANKED {
-    static uint8_t menu_result;
+    static uint8_t menu_result, selected_image_count;
     PROCESS_INPUT();
     if (KEY_PRESSED(J_UP)) {
         if (cy) --cy, PLAY_SFX(sound_menu_alter);
@@ -232,7 +238,7 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
             selected_images[idx] = !selected_images[idx];
             tumbnail_refresh(idx);
         } else PLAY_SFX(sound_error);
-    } else if (KEY_PRESSED(J_SELECT)) {
+    } else if ((KEY_PRESSED(J_SELECT)) && (selected_image_count = selected_count())) {
         switch (menu_result = menu_execute(&ThumbnailMenu, NULL, NULL)) {
             case ACTION_DELETE_SELECTED:
                 for (int8_t i = CAMERA_MAX_IMAGE_SLOTS - 1; i >= 0; i--) {
@@ -255,13 +261,7 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
                 break;
             case ACTION_PRINT_SELECTED:
             case ACTION_TRANSFER_SELECTED: {
-                uint8_t transfer_completion = 0, image_count = 0;
-                // count selected images
-                for (uint8_t i = 0; i != images_taken(); i++) image_count += (selected_images[i]);
-                if (image_count == 0) {
-                    PLAY_SFX(sound_error);
-                    break;
-                }
+                uint8_t transfer_completion = 0;
                 // print or transfer selected images
                 remote_activate(REMOTE_DISABLED);
                 if (menu_result == ACTION_TRANSFER_SELECTED) {
@@ -275,7 +275,7 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
                         PLAY_SFX(sound_error);
                         break;
                     }
-                    uint8_t current_progress = (((uint16_t)++j * PRN_MAX_PROGRESS) / image_count);
+                    uint8_t current_progress = (((uint16_t)++j * PRN_MAX_PROGRESS) / selected_image_count);
                     if (transfer_completion != current_progress) {
                         transfer_completion = current_progress;
                         gallery_show_progressbar(0, current_progress, PRN_MAX_PROGRESS);

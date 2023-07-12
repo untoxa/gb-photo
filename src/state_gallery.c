@@ -189,64 +189,93 @@ uint8_t onTranslateKeyImageInfo(const struct menu_t * menu, const struct menu_it
     return value;
 }
 
+typedef enum {
+    idGalleryViewImageMeta = 0,
+    idGalleryPrint,
+    idGalleryPrintAll,
+    idGalleryTransfer,
+    idGalleryTransferAll,
+    idGalleryDelete,
+    idGalleryDeleteAll,
+    idGalleryUndeleteAll
+} gallery_menu_e;
+
 uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultGalleryMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+uint8_t onGalleryMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
+
 const menu_item_t GalleryMenuItems[] = {
     {
         .sub = &ImageInfoMenu, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 1, .width = 8,
+        .id =  idGalleryViewImageMeta,
         .caption = " Info",
         .helpcontext = " View image metadata",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = MENU_RESULT_CLOSE
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 2, .width = 8,
+        .id =  idGalleryPrint,
         .caption = " Print",
         .helpcontext = " Print current image",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_PRINT_IMAGE
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 3, .width = 8,
+        .id =  idGalleryPrintAll,
         .caption = " Print all",
         .helpcontext = " Print the whole roll",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_PRINT_GALLERY
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 4, .width = 8,
+        .id =  idGalleryTransfer,
         .caption = " Transfer",
         .helpcontext = " Transfer using link cable",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_TRANSFER_IMAGE
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 5, .width = 8,
+        .id =  idGalleryTransferAll,
         .caption = " Transfer all",
         .helpcontext = " Transfer the whole roll",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_TRANSFER_GALLERY
     }, {
         .sub = &YesNoMenu, .sub_params = "Are you sure?",
         .ofs_x = 1, .ofs_y = 6, .width = 8,
+        .id =  idGalleryDelete,
         .caption = " Delete",
         .helpcontext = " Delete current image",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_ERASE_IMAGE
     }, {
-        .sub = &YesNoMenu, .sub_params = "Delete all images?",
+        .sub = &YesNoMenu, .sub_params = "Delete camera roll?",
         .ofs_x = 1, .ofs_y = 7, .width = 8,
+        .id =  idGalleryDeleteAll,
         .caption = " Delete all",
-        .helpcontext = " Erase the whole roll",
+        .helpcontext = " Erase the camera roll",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_ERASE_GALLERY
     }, {
-        .sub = &YesNoMenu, .sub_params = "Undelete all images?",
+        .sub = &YesNoMenu, .sub_params = "Undelete camera roll?",
         .ofs_x = 1, .ofs_y = 8, .width = 8,
+        .id =  idGalleryUndeleteAll,
         .caption = " Undelete all",
-        .helpcontext = " Unerase the whole roll",
+        .helpcontext = " Unerase the camera roll",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_UNERASE_GALLERY
 #if (DEBUG_ENABLED==1)
     }, {
@@ -255,6 +284,7 @@ const menu_item_t GalleryMenuItems[] = {
         .caption = " Debug",
         .helpcontext = " Show debug info",
         .onPaint = NULL,
+        .onGetProps = onGalleryMenuItemProps,
         .result = MENU_RESULT_CLOSE
 #endif
     }
@@ -279,6 +309,23 @@ uint8_t onHelpGalleryMenu(const struct menu_t * menu, const struct menu_item_t *
     // we draw help context here
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
     return 0;
+}
+uint8_t onGalleryMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
+    switch ((gallery_menu_e)self->id) {
+        case idGalleryViewImageMeta:
+        case idGalleryPrint:
+        case idGalleryPrintAll:
+        case idGalleryTransfer:
+        case idGalleryTransferAll:
+        case idGalleryDelete:
+        case idGalleryDeleteAll:
+            return (images_taken()) ? ITEM_DEFAULT : ITEM_DISABLED;
+        case idGalleryUndeleteAll:
+            return (images_taken() < CAMERA_MAX_IMAGE_SLOTS) ? ITEM_DEFAULT : ITEM_DISABLED;
+        default:
+            return ITEM_DEFAULT;
+    }
 }
 
 
