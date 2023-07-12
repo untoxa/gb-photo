@@ -102,7 +102,7 @@ const menu_item_t ThumbnailMenuItems[] = {
     }
 };
 const menu_t ThumbnailMenu = {
-    .x = 1, .y = 4, .width = 13, .height = 5,
+    .x = 1, .y = 4, .width = 13, .height = LENGTH(ThumbnailMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = ThumbnailMenuItems, .last_item = LAST_ITEM(ThumbnailMenuItems),
     .onShow = NULL, .onHelpContext = onHelpThumbnailMenu,

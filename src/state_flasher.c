@@ -277,7 +277,7 @@ const menu_item_t FlasherMenuItems[] = {
     }
 };
 const menu_t FlasherMenu = {
-    .x = 1, .y = 4, .width = 13, .height = 8,
+    .x = 1, .y = 4, .width = 13, .height = LENGTH(FlasherMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = FlasherMenuItems, .last_item = LAST_ITEM(FlasherMenuItems),
     .onShow = NULL, .onHelpContext = onHelpFlasherMenu,
@@ -309,7 +309,7 @@ const menu_item_t FlashGalleryMenuItems[] = {
     }
 };
 const menu_t FlashGalleryMenu = {
-    .x = 1, .y = 5, .width = 16, .height = 6,
+    .x = 1, .y = 5, .width = 16, .height = MAX(LENGTH(FlashGalleryMenuItems) + 2, 6),
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = FlashGalleryMenuItems, .last_item = LAST_ITEM(FlashGalleryMenuItems),
     .onShow = onShowFlashGalleryMenu, .onHelpContext = onHelpFlasherMenu,

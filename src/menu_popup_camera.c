@@ -18,17 +18,6 @@
 #include "menu_yesno.h"
 #include "menu_spinedit.h"
 
-#if (PICNREC_ENABLED==1)
-    #define ACTION_SUBMENU_HEIGHT 10
-#else
-    #define ACTION_SUBMENU_HEIGHT 8
-#endif
-#if (BRACKETING_ENABLED==1)
-    #define MODES_SUBMENU_HEIGHT 6
-#else
-    #define MODES_SUBMENU_HEIGHT 5
-#endif
-
 typedef enum {
     idPopupNone = 0,
     idPopupCameraRestore,
@@ -76,7 +65,7 @@ const menu_item_t ModeSubMenuItems[] = {
     }
 };
 const menu_t CameraModeSubMenu = {
-    .x = 5, .y = 4, .width = 11, .height = MODES_SUBMENU_HEIGHT,
+    .x = 5, .y = 4, .width = 11, .height = LENGTH(ModeSubMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = ModeSubMenuItems, .last_item = LAST_ITEM(ModeSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -131,7 +120,7 @@ const menu_item_t TriggerSubMenuItems[] = {
     }
 };
 const menu_t TriggerSubMenu = {
-    .x = 5, .y = 5, .width = 10, .height = 5,
+    .x = 5, .y = 5, .width = 10, .height = LENGTH(TriggerSubMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = TriggerSubMenuItems, .last_item = LAST_ITEM(TriggerSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -212,7 +201,7 @@ const menu_item_t ActionSubMenuItems[] = {
     }
 };
 const menu_t ActionSubMenu = {
-    .x = 5, .y = 4, .width = 12, .height = ACTION_SUBMENU_HEIGHT,
+    .x = 5, .y = 4, .width = 12, .height = LENGTH(ActionSubMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = ActionSubMenuItems, .last_item = LAST_ITEM(ActionSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
@@ -258,7 +247,7 @@ const menu_item_t CameraMenuItems[] = {
     }
 };
 const menu_t CameraPopupMenu = {
-    .x = 1, .y = 3, .width = 15, .height = 6,
+    .x = 1, .y = 3, .width = 15, .height = LENGTH(CameraMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = CameraMenuItems, .last_item = LAST_ITEM(CameraMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,

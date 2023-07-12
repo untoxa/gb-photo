@@ -156,7 +156,7 @@ const menu_item_t FrameMenuItems[] = {
     }
 };
 const menu_t PrinterFramesMenu = {
-    .x = 3, .y = 1, .width = 15, .height = 14,
+    .x = 3, .y = 1, .width = 15, .height = LENGTH(FrameMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = FrameMenuItems, .last_item = LAST_ITEM(FrameMenuItems),
     .onShow = NULL, .onHelpContext = onHelpSettings,
@@ -271,7 +271,7 @@ const menu_item_t SettingsMenuItems[] = {
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 2, .y = 2, .width = 15, .height = 12,
+    .x = 2, .y = 2, .width = 15, .height = LENGTH(SettingsMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = onShowSettings, .onIdle = onIdleSettings, .onHelpContext = onHelpSettings,
