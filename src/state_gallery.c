@@ -43,13 +43,6 @@
 // frames
 #include "print_frames.h"
 
-#if (DEBUG_ENABLED==1)
-    #define GALLERYMENU_HEIGHT 11
-#else
-    #define GALLERYMENU_HEIGHT 10
-#endif
-
-
 BANKREF(state_gallery)
 
 VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
@@ -290,7 +283,7 @@ const menu_item_t GalleryMenuItems[] = {
     }
 };
 const menu_t GalleryMenu = {
-    .x = 1, .y = 3, .width = 10, .height = GALLERYMENU_HEIGHT,
+    .x = 1, .y = 3, .width = 10, .height = LENGTH(GalleryMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = GalleryMenuItems, .last_item = LAST_ITEM(GalleryMenuItems),
     .onShow = NULL, .onHelpContext = onHelpGalleryMenu,
