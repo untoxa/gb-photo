@@ -211,6 +211,7 @@ typedef enum {
     idFlasherErase,
     idFlasherPrintSlot,
     idFlasherTransferSlot,
+    idFlasherDeleteAll,
 } settings_menu_e;
 
 uint8_t onHelpFlasherMenu(const struct menu_t * menu, const struct menu_item_t * selection);
@@ -221,7 +222,7 @@ uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param);
 const menu_item_t FlasherMenuItems[] = {
     {
         .sub = &YesNoMenu, .sub_params = "Save camera roll?",
-        .ofs_x = 1, .ofs_y = 1, .width = 10,
+        .ofs_x = 1, .ofs_y = 1, .width = 11,
         .id = idFlasherSave,
         .caption = " Save camera roll",
         .helpcontext = " Save camera roll to slot",
@@ -229,8 +230,17 @@ const menu_item_t FlasherMenuItems[] = {
         .onGetProps = onFlasherMenuItemProps,
         .result = ACTION_FLASH_SAVE
     }, {
+        .sub = &YesNoMenu, .sub_params = "Delete camera roll?",
+        .ofs_x = 1, .ofs_y = 2, .width = 11,
+        .id = idFlasherDeleteAll,
+        .caption = " Delete camera roll",
+        .helpcontext = " Erase the camera roll",
+        .onPaint = NULL,
+        .onGetProps = onFlasherMenuItemProps,
+        .result = ACTION_ERASE_GALLERY
+    }, {
         .sub = &YesNoMenu, .sub_params = "Load camera roll?",
-        .ofs_x = 1, .ofs_y = 2, .width = 10,
+        .ofs_x = 1, .ofs_y = 3, .width = 11,
         .id = idFlasherLoad,
         .caption = " Load camera roll",
         .helpcontext = " Load images to camera roll",
@@ -239,7 +249,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_FLASH_LOAD
     }, {
         .sub = &YesNoMenu, .sub_params = "Erase slot?",
-        .ofs_x = 1, .ofs_y = 3, .width = 10,
+        .ofs_x = 1, .ofs_y = 4, .width = 11,
         .id = idFlasherErase,
         .caption = " Erase slot",
         .helpcontext = " Erase all images in slot",
@@ -248,7 +258,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_FLASH_ERASE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 10,
+        .ofs_x = 1, .ofs_y = 5, .width = 11,
         .id = idFlasherPrintSlot,
         .caption = " Print slot",
         .helpcontext = " Print all images from slot",
@@ -257,7 +267,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_PRINT_SLOT
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 5, .width = 10,
+        .ofs_x = 1, .ofs_y = 6, .width = 11,
         .id = idFlasherTransferSlot,
         .caption = " Transfer slot",
         .helpcontext = " Transfer all images from slot",
@@ -267,7 +277,7 @@ const menu_item_t FlasherMenuItems[] = {
     }
 };
 const menu_t FlasherMenu = {
-    .x = 1, .y = 4, .width = 12, .height = 7,
+    .x = 1, .y = 4, .width = 13, .height = 8,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = FlasherMenuItems, .last_item = LAST_ITEM(FlasherMenuItems),
     .onShow = NULL, .onHelpContext = onHelpFlasherMenu,
@@ -346,6 +356,8 @@ uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_ite
         case idFlasherPrintSlot:
         case idFlasherTransferSlot:
             return (flash_slots[current_slot]) ? ITEM_DEFAULT : ITEM_DISABLED;
+        case idFlasherDeleteAll:
+            return (images_taken()) ? ITEM_DEFAULT : ITEM_DISABLED;
         default:
             return ITEM_DEFAULT;
     }
@@ -356,9 +368,9 @@ uint8_t onShowFlashGalleryMenu(const menu_t * self, uint8_t * param) {
     uint8_t slot_bank = slot_to_sector(current_slot, 0);
     menu_draw_frame(self);
     screen_load_thumbnail_banked(self->x + 11, self->y + 1,
-                                    (uint8_t *)thumbnail_addr[image_index & 0x03],
-                                    0x00,
-                                    slot_bank + (((image_index >> 1) + 1) >> 1));
+                                 (uint8_t *)thumbnail_addr[image_index & 0x03],
+                                 0x00,
+                                 slot_bank + (((image_index >> 1) + 1) >> 1));
     screen_restore_rect(self->x + 11, self->y + 1, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     return MENU_PROP_NO_FRAME;
 }
@@ -577,6 +589,17 @@ uint8_t UPDATE_state_flasher(void) BANKED {
     if (KEY_PRESSED(J_SELECT)) {
         if (browse_mode == browse_mode_folders) {
             switch (menu_result = menu_execute(&FlasherMenu, NULL, NULL)) {
+                case ACTION_ERASE_GALLERY:
+                    if (images_taken() != 0) {
+                        VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
+                        for (uint8_t i = CAMERA_MAX_IMAGE_SLOTS; i != 0; i--) {
+                            protected_modify_slot(i - 1, CAMERA_IMAGE_DELETED);
+                            VECTOR_ADD(free_slots, i - 1);
+                        }
+                        PLAY_SFX(sound_ok);
+                    } else PLAY_SFX(sound_error);
+                    refresh_screen();
+                    break;
                 case ACTION_FLASH_SAVE:
                     flasher_show_icon();
                     if (flash_save_gallery_to_slot(current_slot)) {
