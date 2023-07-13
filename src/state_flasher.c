@@ -221,26 +221,17 @@ uint8_t onShowFlashGalleryMenu(const menu_t * self, uint8_t * param);
 uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param);
 const menu_item_t FlasherMenuItems[] = {
     {
-        .sub = &YesNoMenu, .sub_params = "Save camera roll?",
+        .sub = &YesNoMenu, .sub_params = "Save the camera roll?",
         .ofs_x = 1, .ofs_y = 1, .width = 11,
         .id = idFlasherSave,
         .caption = " Save camera roll",
-        .helpcontext = " Save camera roll to slot",
+        .helpcontext = " Save the camera roll to slot",
         .onPaint = NULL,
         .onGetProps = onFlasherMenuItemProps,
         .result = ACTION_FLASH_SAVE
     }, {
-        .sub = &YesNoMenu, .sub_params = "Delete camera roll?",
+        .sub = &YesNoMenu, .sub_params = "Load the camera roll?",
         .ofs_x = 1, .ofs_y = 2, .width = 11,
-        .id = idFlasherDeleteAll,
-        .caption = " Delete camera roll",
-        .helpcontext = " Erase the camera roll",
-        .onPaint = NULL,
-        .onGetProps = onFlasherMenuItemProps,
-        .result = ACTION_ERASE_GALLERY
-    }, {
-        .sub = &YesNoMenu, .sub_params = "Load camera roll?",
-        .ofs_x = 1, .ofs_y = 3, .width = 11,
         .id = idFlasherLoad,
         .caption = " Load camera roll",
         .helpcontext = " Load images to camera roll",
@@ -248,8 +239,8 @@ const menu_item_t FlasherMenuItems[] = {
         .onGetProps = onFlasherMenuItemProps,
         .result = ACTION_FLASH_LOAD
     }, {
-        .sub = &YesNoMenu, .sub_params = "Erase slot?",
-        .ofs_x = 1, .ofs_y = 4, .width = 11,
+        .sub = &YesNoMenu, .sub_params = "Erase the slot?",
+        .ofs_x = 1, .ofs_y = 3, .width = 11,
         .id = idFlasherErase,
         .caption = " Erase slot",
         .helpcontext = " Erase all images in slot",
@@ -258,7 +249,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_FLASH_ERASE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 5, .width = 11,
+        .ofs_x = 1, .ofs_y = 4, .width = 11,
         .id = idFlasherPrintSlot,
         .caption = " Print slot",
         .helpcontext = " Print all images from slot",
@@ -267,13 +258,22 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_PRINT_SLOT
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 6, .width = 11,
+        .ofs_x = 1, .ofs_y = 5, .width = 11,
         .id = idFlasherTransferSlot,
         .caption = " Transfer slot",
         .helpcontext = " Transfer all images from slot",
         .onPaint = NULL,
         .onGetProps = onFlasherMenuItemProps,
         .result = ACTION_TRANSFER_SLOT
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Clear the camera roll?",
+        .ofs_x = 1, .ofs_y = 6, .width = 11,
+        .id = idFlasherDeleteAll,
+        .caption = " Clear camera roll",
+        .helpcontext = " Clear the camera roll",
+        .onPaint = NULL,
+        .onGetProps = onFlasherMenuItemProps,
+        .result = ACTION_ERASE_GALLERY
     }
 };
 const menu_t FlasherMenu = {

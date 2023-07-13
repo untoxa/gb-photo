@@ -203,7 +203,7 @@ const menu_item_t GalleryMenuItems[] = {
         .ofs_x = 1, .ofs_y = 1, .width = 8,
         .id =  idGalleryViewImageMeta,
         .caption = " Info",
-        .helpcontext = " View image metadata",
+        .helpcontext = " View the image metadata",
         .onPaint = NULL,
         .onGetProps = onGalleryMenuItemProps,
         .result = MENU_RESULT_CLOSE
@@ -221,7 +221,7 @@ const menu_item_t GalleryMenuItems[] = {
         .ofs_x = 1, .ofs_y = 3, .width = 8,
         .id =  idGalleryPrintAll,
         .caption = " Print all",
-        .helpcontext = " Print the whole roll",
+        .helpcontext = " Print the camera roll",
         .onPaint = NULL,
         .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_PRINT_GALLERY
@@ -239,7 +239,7 @@ const menu_item_t GalleryMenuItems[] = {
         .ofs_x = 1, .ofs_y = 5, .width = 8,
         .id =  idGalleryTransferAll,
         .caption = " Transfer all",
-        .helpcontext = " Transfer the whole roll",
+        .helpcontext = " Transfer the camera roll",
         .onPaint = NULL,
         .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_TRANSFER_GALLERY
@@ -257,7 +257,7 @@ const menu_item_t GalleryMenuItems[] = {
         .ofs_x = 1, .ofs_y = 7, .width = 8,
         .id =  idGalleryDeleteAll,
         .caption = " Delete all",
-        .helpcontext = " Erase the camera roll",
+        .helpcontext = " Clear the camera roll",
         .onPaint = NULL,
         .onGetProps = onGalleryMenuItemProps,
         .result = ACTION_ERASE_GALLERY
