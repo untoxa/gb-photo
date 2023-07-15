@@ -64,11 +64,12 @@
 
 // flasher
 #define ACTION_FLASH_SAVE           80
-#define ACTION_FLASH_LOAD           81
-#define ACTION_FLASH_ERASE          82
-#define ACTION_PRINT_SLOT           83
-#define ACTION_TRANSFER_SLOT        84
-#define ACTION_RESTORE_IMAGE        85
+#define ACTION_FLASH_MOVE           81
+#define ACTION_FLASH_LOAD           82
+#define ACTION_FLASH_ERASE          83
+#define ACTION_PRINT_SLOT           84
+#define ACTION_TRANSFER_SLOT        85
+#define ACTION_RESTORE_IMAGE        86
 
 // printer frames
 #define ACTION_PRINT_FRAME0         90

@@ -207,6 +207,7 @@ static uint8_t onPrinterProgress(void) BANKED {
 
 typedef enum {
     idFlasherSave = 0,
+    idFlasherMove,
     idFlasherLoad,
     idFlasherErase,
     idFlasherPrintSlot,
@@ -224,23 +225,32 @@ const menu_item_t FlasherMenuItems[] = {
         .sub = &YesNoMenu, .sub_params = "Save the camera roll?",
         .ofs_x = 1, .ofs_y = 1, .width = 11,
         .id = idFlasherSave,
-        .caption = " Save camera roll",
+        .caption = " Save roll to slot",
         .helpcontext = " Save the camera roll to slot",
         .onPaint = NULL,
         .onGetProps = onFlasherMenuItemProps,
         .result = ACTION_FLASH_SAVE
     }, {
-        .sub = &YesNoMenu, .sub_params = "Load the camera roll?",
+        .sub = &YesNoMenu, .sub_params = "Move the camera roll?",
         .ofs_x = 1, .ofs_y = 2, .width = 11,
+        .id = idFlasherMove,
+        .caption = " Move roll to slot",
+        .helpcontext = " Save roll to slot and clear",
+        .onPaint = NULL,
+        .onGetProps = onFlasherMenuItemProps,
+        .result = ACTION_FLASH_MOVE
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Load the camera roll?",
+        .ofs_x = 1, .ofs_y = 3, .width = 11,
         .id = idFlasherLoad,
-        .caption = " Load camera roll",
+        .caption = " Load roll from slot",
         .helpcontext = " Load images to camera roll",
         .onPaint = NULL,
         .onGetProps = onFlasherMenuItemProps,
         .result = ACTION_FLASH_LOAD
     }, {
         .sub = &YesNoMenu, .sub_params = "Erase the slot?",
-        .ofs_x = 1, .ofs_y = 3, .width = 11,
+        .ofs_x = 1, .ofs_y = 4, .width = 11,
         .id = idFlasherErase,
         .caption = " Erase slot",
         .helpcontext = " Erase all images in slot",
@@ -249,7 +259,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_FLASH_ERASE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 11,
+        .ofs_x = 1, .ofs_y = 5, .width = 11,
         .id = idFlasherPrintSlot,
         .caption = " Print slot",
         .helpcontext = " Print all images from slot",
@@ -258,7 +268,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_PRINT_SLOT
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 5, .width = 11,
+        .ofs_x = 1, .ofs_y = 6, .width = 11,
         .id = idFlasherTransferSlot,
         .caption = " Transfer slot",
         .helpcontext = " Transfer all images from slot",
@@ -267,7 +277,7 @@ const menu_item_t FlasherMenuItems[] = {
         .result = ACTION_TRANSFER_SLOT
     }, {
         .sub = &YesNoMenu, .sub_params = "Clear the camera roll?",
-        .ofs_x = 1, .ofs_y = 6, .width = 11,
+        .ofs_x = 1, .ofs_y = 7, .width = 11,
         .id = idFlasherDeleteAll,
         .caption = " Clear camera roll",
         .helpcontext = " Clear the camera roll",
@@ -350,6 +360,7 @@ uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_ite
     menu;
     switch ((settings_menu_e)self->id) {
         case idFlasherSave:
+        case idFlasherMove:
             return (!flash_slots[current_slot]) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idFlasherLoad:
         case idFlasherErase:
@@ -580,6 +591,16 @@ void update_mode_thumbnails(void) {
     hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, ((cx << 2) + FLASHER_THUMBS_DISPLAY_X) << 3, ((cy << 2) + FLASHER_THUMBS_DISPLAY_Y) << 3), MAX_HARDWARE_SPRITES);
 }
 
+bool clear_camera_roll(void) {
+    if (images_taken() == 0) return false;
+    VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
+    for (uint8_t i = CAMERA_MAX_IMAGE_SLOTS; i != 0; i--) {
+        protected_modify_slot(i - 1, CAMERA_IMAGE_DELETED);
+        VECTOR_ADD(free_slots, i - 1);
+    }
+    return true;
+}
+
 uint8_t UPDATE_state_flasher(void) BANKED {
     static uint8_t menu_result;
     PROCESS_INPUT();
@@ -590,20 +611,15 @@ uint8_t UPDATE_state_flasher(void) BANKED {
         if (browse_mode == browse_mode_folders) {
             switch (menu_result = menu_execute(&FlasherMenu, NULL, NULL)) {
                 case ACTION_ERASE_GALLERY:
-                    if (images_taken() != 0) {
-                        VECTOR_CLEAR(used_slots), VECTOR_CLEAR(free_slots);
-                        for (uint8_t i = CAMERA_MAX_IMAGE_SLOTS; i != 0; i--) {
-                            protected_modify_slot(i - 1, CAMERA_IMAGE_DELETED);
-                            VECTOR_ADD(free_slots, i - 1);
-                        }
-                        PLAY_SFX(sound_ok);
-                    } else PLAY_SFX(sound_error);
+                    if (clear_camera_roll()) PLAY_SFX(sound_ok); else PLAY_SFX(sound_error);
                     refresh_screen();
                     break;
                 case ACTION_FLASH_SAVE:
+                case ACTION_FLASH_MOVE:
                     flasher_show_icon();
                     if (flash_save_gallery_to_slot(current_slot)) {
                         flasher_read_slots();
+                        if (menu_result == ACTION_FLASH_MOVE) clear_camera_roll();
                         PLAY_SFX(sound_ok);
                     } else PLAY_SFX(sound_error);
                     flasher_hide_icon();
