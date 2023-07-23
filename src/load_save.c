@@ -88,6 +88,8 @@ void save_camera_state(void) BANKED {
     save_structure.state_options = camera_state;
 }
 
+bool camera_settings_reset = false;
+
 // enable battery backed-up SRAM and load/initialize program settings
 uint8_t INIT_module_load_save(void) BANKED {
     ENABLE_RAM;
@@ -97,6 +99,7 @@ uint8_t INIT_module_load_save(void) BANKED {
         save_structure.MAGIC = MAGIC_VALUE;
         save_structure.state_options = default_camera_state_options;
         memcpy(save_structure.mode_settings, default_camera_mode_settings, sizeof(save_structure.mode_settings));
+        camera_settings_reset = true;
     }
     // load camera state
     camera_state = save_structure.state_options;
