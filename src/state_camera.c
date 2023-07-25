@@ -847,10 +847,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             RENDER_EDGE_FROM_EXPOSURE();
 
     #if (DEBUG_AUTOEXP==1)
+            menu_text_out(14, 0, 6, WHITE_ON_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
             sprintf(text_buffer, "%d", (uint16_t)error);
-            menu_text_out(15, 0, 5, WHITE_ON_BLACK, text_buffer);
-            sprintf(text_buffer, "%X", (uint32_t)new_exposure);
-            menu_text_out(15, 1, 5, WHITE_ON_BLACK, text_buffer);
+            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
     #endif
         }
 #endif
