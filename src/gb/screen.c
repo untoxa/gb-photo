@@ -133,14 +133,14 @@ lbl:
     __endasm;
 }
 
-inline void load_image_normal(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
+inline void load_image_normal(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
     const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
     uint16_t ofs = x << 4;
     do {
         picture = set_data_row((uint8_t *)(*addr++ + ofs), picture, w);
     } while (--h);
 }
-inline void load_image_flipped(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t * picture) {
+inline void load_image_flipped(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
     const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y + h - 1);
     uint16_t ofs = (x + w - 1) << 4;
     do {
