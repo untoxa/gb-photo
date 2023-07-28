@@ -45,7 +45,8 @@ typedef enum {
     idSettingsIRRemoteShutter,
     idSettingsBootToCamera,
     idSettingsFlipImage,
-    idSettingsDoubleSpeed
+    idSettingsDoubleSpeed,
+    idSettingsDisplayExposure
 } settings_menu_e;
 
 
@@ -268,6 +269,15 @@ const menu_item_t SettingsMenuItems[] = {
         .onPaint = onSettingsMenuItemPaint,
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_DOUBLESPEED
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 11, .width = 13,
+        .id = idSettingsDisplayExposure,
+        .caption = " Display exposure\t\t%s",
+        .helpcontext = " Exposure display in auto mode",
+        .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
+        .result = ACTION_SETTINGS_DISPLAY_EXP
     }
 };
 const menu_t GlobalSettingsMenu = {
@@ -354,6 +364,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             break;
         case idSettingsDoubleSpeed:
             sprintf(text_buffer, self->caption, checkbox[OPTION(double_speed)]);
+            break;
+        case idSettingsDisplayExposure:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(display_exposure)]);
             break;
         default:
             *text_buffer = 0;
@@ -445,6 +458,10 @@ void menu_settings_execute(void) BANKED {
                         music_setup_timer_ex(_is_CPU_FAST);
                         fade_in_modal();
                     }
+                    break;
+                case ACTION_SETTINGS_DISPLAY_EXP:
+                    OPTION(display_exposure) = !OPTION(display_exposure);
+                    save_camera_state();
                     break;
                 case MENU_RESULT_OK:
                     settings_menu_repaint = true;

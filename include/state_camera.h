@@ -91,7 +91,8 @@ typedef struct camera_state_options_t {
     bool double_speed               : 1;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
-    uint8_t cgb_palette_idx;
+    uint8_t cgb_palette_idx         : 4;
+    bool display_exposure           : 1;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT

@@ -843,11 +843,14 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 new_exposure = current_exposure + ((error_negative) ? -1 : 1);
             } else new_exposure = current_exposure;
 
-            SETTING(current_exposure) = CONSTRAINT(new_exposure, AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
-            RENDER_EDGE_FROM_EXPOSURE();
+            uint16_t result_exposure = CONSTRAINT(new_exposure, AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+            if (result_exposure != SETTING(current_exposure)) {
+                SETTING(current_exposure) = result_exposure;
+                RENDER_EDGE_FROM_EXPOSURE();
 
+                if (OPTION(display_exposure)) menu_text_out(14, 0, 6, WHITE_ON_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
+            }
     #if (DEBUG_AUTOEXP==1)
-            menu_text_out(14, 0, 6, WHITE_ON_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
             sprintf(text_buffer, "%d", (uint16_t)error);
             menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
     #endif

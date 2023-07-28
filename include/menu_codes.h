@@ -27,6 +27,7 @@
 #define ACTION_SETTINGS_BOOT_TO_CAM 26
 #define ACTION_SETTINGS_FLIP_IMAGE  27
 #define ACTION_SETTINGS_DOUBLESPEED 28
+#define ACTION_SETTINGS_DISPLAY_EXP 29
 
 // state switching actions
 #define ACTION_GALLERY              30
