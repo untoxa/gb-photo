@@ -68,7 +68,6 @@ uint8_t vwf_print_render(const unsigned char ch) {
             vwf_swap_tiles();
             return TRUE;
         };
-        set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
         return FALSE;
     } else {
         // not implemented
@@ -91,8 +90,8 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str) {
                 vwf_inverse_map = *++ui_text_ptr;
                 break;
             case '\t':
+                set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                 if (!vwf_current_offset) {
-                    set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                     vwf_current_tile += VWF_TILE_SIZE;
                     vwf_swap_tiles();
                 } else vwf_print_reset(vwf_next_tile());
@@ -108,6 +107,7 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str) {
         }
         ui_text_ptr++;
     }
+    if (vwf_current_offset) set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
 
     return  ((uint16_t)(vwf_current_tile - base_tile) >> VWF_TILE_SIZE_BITS) + ((vwf_current_offset) ? 1 : 0);
 }
