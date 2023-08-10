@@ -591,7 +591,7 @@ const menu_t CameraMenuManual = {
     .onShow = NULL, .onIdle = onIdleCameraMenu, .onHelpContext = onHelpCameraMenu,
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
-static const menu_item_t * last_menu_items[N_CAMERA_MODES] = { NULL, NULL, NULL, NULL };
+static const menu_item_t * last_menu_items[N_CAMERA_MODES] = { NULL, NULL, NULL };
 uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu; self;
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
@@ -878,7 +878,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (capture_triggered) {
             capture_triggered = false;
             // check save confirmation
-            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_interval)) {
+            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_interval) && (OPTION(trigger_mode) != trigger_mode_HDR)) {
                 if ((OPTION(after_action) == after_action_save) ||
                     (OPTION(after_action) == after_action_print) ||
                     (OPTION(after_action) == after_action_printsave) ||
@@ -1014,7 +1014,6 @@ uint8_t UPDATE_state_camera(void) BANKED {
         case camera_mode_manual:
             menu_result = menu_execute(&CameraMenuManual, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
-        case camera_mode_bracketing:
         case camera_mode_assisted:
             menu_result = menu_execute(&CameraMenuAssisted, NULL, last_menu_items[OPTION(camera_mode)]);
             break;
@@ -1064,17 +1063,17 @@ uint8_t UPDATE_state_camera(void) BANKED {
                 switch (menu_result = menu_popup_camera_execute()) {
                     case ACTION_MODE_MANUAL:
                     case ACTION_MODE_ASSISTED:
-                    case ACTION_MODE_AUTO:
-                    case ACTION_MODE_BRACKETING: {
-                        static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto, camera_mode_bracketing};
+                    case ACTION_MODE_AUTO: {
+                        static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto};
                         OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
                         RENDER_CAM_REGISTERS();
                         break;
                     }
                     case ACTION_TRIGGER_ABUTTON:
                     case ACTION_TRIGGER_TIMER:
-                    case ACTION_TRIGGER_INTERVAL: {
-                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval};
+                    case ACTION_TRIGGER_INTERVAL:
+                    case ACTION_TRIGGER_HDR: {
+                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval, trigger_mode_HDR};
                         OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                         break;
                     }

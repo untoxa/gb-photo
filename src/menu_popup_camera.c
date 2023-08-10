@@ -24,8 +24,10 @@ typedef enum {
     idPopupCameraMode,
     idPopupCameraTrigger,
     idPopupCameraAction,
-    idPopupTimerValue,
-    idPopupTimerCounter
+    idPopupTriggerAButton,
+    idPopupTriggerTimerValue,
+    idPopupTriggerTimerCounter,
+    idPopupTriggerHDR
 } camera_popup_menu_e;
 
 
@@ -53,15 +55,6 @@ const menu_item_t ModeSubMenuItems[] = {
         .helpcontext = " Expert mode",
         .onPaint = NULL,
         .result = ACTION_MODE_MANUAL
-#if (BRACKETING_ENABLED==1)
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 9,
-        .caption = " Bracketing",
-        .helpcontext = " Make series of images",
-        .onPaint = NULL,
-        .result = ACTION_MODE_BRACKETING
-#endif
     }
 };
 const menu_t CameraModeSubMenu = {
@@ -97,6 +90,7 @@ const menu_item_t TriggerSubMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 1, .width = 8,
+        .id = idPopupTriggerAButton,
         .caption = " " ICON_A " button",
         .helpcontext = " Trigger shutter with " ICON_A,
         .onPaint = NULL,
@@ -104,7 +98,7 @@ const menu_item_t TriggerSubMenuItems[] = {
     }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&TimerSpinEditParams,
         .ofs_x = 1, .ofs_y = 2, .width = 8,
-        .id = idPopupTimerValue,
+        .id = idPopupTriggerTimerValue,
         .caption = " Timer",
         .helpcontext = " Use shutter timer",
         .onPaint = NULL,
@@ -112,11 +106,21 @@ const menu_item_t TriggerSubMenuItems[] = {
     }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&CounterSpinEditParams,
         .ofs_x = 1, .ofs_y = 3, .width = 8,
-        .id = idPopupTimerCounter,
+        .id = idPopupTriggerTimerCounter,
         .caption = " Repeat",
         .helpcontext = " Make series of pictures",
         .onPaint = NULL,
         .result = ACTION_TRIGGER_INTERVAL
+#if (HDR_ENABLED==1)
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 8,
+        .id = idPopupTriggerHDR,
+        .caption = " " ICON_A " HDR",
+        .helpcontext = " Make series for HDR pictures",
+        .onPaint = NULL,
+        .result = ACTION_TRIGGER_HDR
+#endif
     }
 };
 const menu_t TriggerSubMenu = {
@@ -129,8 +133,8 @@ const menu_t TriggerSubMenu = {
 uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     switch (self->id) {
-        case idPopupTimerValue:
-        case idPopupTimerCounter:
+        case idPopupTriggerTimerValue:
+        case idPopupTriggerTimerCounter:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
         default:
             break;
@@ -269,12 +273,12 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [camera_mode_manual]            = "[Manual]",
         [camera_mode_assisted]          = "[Assisted]",
         [camera_mode_auto]              = "[Auto]",
-        [camera_mode_bracketing]        = "[Bracketing]"
     };
     static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
         [trigger_mode_abutton]          = "[" ICON_A " button]",
         [trigger_mode_timer]            = "[Timer]",
-        [trigger_mode_interval]         = "[Repeat]"
+        [trigger_mode_interval]         = "[Repeat]",
+        [trigger_mode_HDR]              = "[" ICON_A " HDR]"
     };
     static const uint8_t * const after_actions[N_AFTER_ACTIONS] = {
         [after_action_save]             = "[Save]",

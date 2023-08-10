@@ -17,7 +17,6 @@ typedef enum {
     camera_mode_manual,
     camera_mode_assisted,
     camera_mode_auto,
-    camera_mode_bracketing,
     N_CAMERA_MODES
 } camera_mode_e;
 
@@ -25,6 +24,7 @@ typedef enum {
     trigger_mode_abutton,
     trigger_mode_timer,
     trigger_mode_interval,
+    trigger_mode_HDR,
     N_TRIGGER_MODES
 } trigger_mode_e;
 

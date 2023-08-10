@@ -37,9 +37,9 @@
     #define AUTOEXP_LOW_LIMIT TO_EXPOSURE_VALUE(768)
     #define AUTOEXP_HIGH_LIMIT CAM02_MAX_VALUE
 #endif
-// bracketing mode
-#ifndef BRACKETING_ENABLED
-    #define BRACKETING_ENABLED 0
+// HDR mode
+#ifndef HDR_ENABLED
+    #define HDR_ENABLED 0
 #endif
 // use interrupts to update joypad state
 #ifndef INT_DRIVEN_JOYPAD
