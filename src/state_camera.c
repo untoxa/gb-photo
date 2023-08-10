@@ -630,7 +630,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
             default:
                 switch (OPTION(trigger_mode)) {
-                    case trigger_mode_interval:
+                    case trigger_mode_repeat:
                         COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
                     case trigger_mode_timer:
                         camera_charge_timer(OPTION(shutter_timer));
@@ -878,7 +878,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (capture_triggered) {
             capture_triggered = false;
             // check save confirmation
-            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_interval) && (OPTION(trigger_mode) != trigger_mode_HDR)) {
+            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_repeat) && (OPTION(trigger_mode) != trigger_mode_HDR)) {
                 if ((OPTION(after_action) == after_action_save) ||
                     (OPTION(after_action) == after_action_print) ||
                     (OPTION(after_action) == after_action_printsave) ||
@@ -1073,7 +1073,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                     case ACTION_TRIGGER_TIMER:
                     case ACTION_TRIGGER_INTERVAL:
                     case ACTION_TRIGGER_HDR: {
-                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_interval, trigger_mode_HDR};
+                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_repeat, trigger_mode_HDR};
                         OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                         break;
                     }

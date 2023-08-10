@@ -277,7 +277,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     static const uint8_t * const trigger_modes[N_TRIGGER_MODES] = {
         [trigger_mode_abutton]          = "[" ICON_A " button]",
         [trigger_mode_timer]            = "[Timer]",
-        [trigger_mode_interval]         = "[Repeat]",
+        [trigger_mode_repeat]           = "[Repeat]",
         [trigger_mode_HDR]              = "[" ICON_A " HDR]"
     };
     static const uint8_t * const after_actions[N_AFTER_ACTIONS] = {

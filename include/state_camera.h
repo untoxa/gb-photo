@@ -23,7 +23,7 @@ typedef enum {
 typedef enum {
     trigger_mode_abutton,
     trigger_mode_timer,
-    trigger_mode_interval,
+    trigger_mode_repeat,
     trigger_mode_HDR,
     N_TRIGGER_MODES
 } trigger_mode_e;
