@@ -69,6 +69,9 @@ uint8_t camera_do_shutter = FALSE;
 COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
+COUNTER_DECLARE(camera_HDR_counter, uint8_t, 0);
+uint16_t last_HDR_exposure;
+
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
@@ -360,6 +363,15 @@ void shutter_VBL_ISR(void) NONBANKED {
     }
 }
 
+void reset_HDR(void) {
+    if (COUNTER(camera_HDR_counter)) {
+        COUNTER_RESET(camera_HDR_counter);
+        SETTING(current_exposure) = last_HDR_exposure;
+        // if HDR capture process was cancelled, then restore exposure
+        SWITCH_RAM(CAMERA_BANK_REGISTERS);
+        RENDER_CAM_REG_EXPTIME();
+    }
+}
 
 uint8_t INIT_state_camera(void) BANKED {
     CRITICAL {
@@ -379,6 +391,7 @@ uint8_t ENTER_state_camera(void) BANKED {
     if ((_is_COLOR) && (OPTION(ir_remote_shutter))) ir_sense_start();
     // reset capture timers and counters
     COUNTER_RESET(camera_shutter_timer);
+    COUNTER_RESET(camera_HDR_counter);
     COUNTER_RESET(camera_repeat_counter);
     // load some initial settings
     RENDER_CAM_REGISTERS();
@@ -634,7 +647,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
                     case trigger_mode_timer:
                         camera_charge_timer(OPTION(shutter_timer));
+                        COUNTER_SET(camera_HDR_counter, 0);
                         break;
+                    case trigger_mode_HDR:
+                        if (COUNTER(camera_HDR_counter)) break;
+                        COUNTER_SET(camera_HDR_counter, 15);
+                        last_HDR_exposure = SETTING(current_exposure);
                     default:
                         camera_do_shutter = TRUE;
                         break;
@@ -642,8 +660,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     } else if (KEY_PRESSED(J_B)) {
-        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter)) {
-            // cancel timers
+        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_HDR_counter)) {
+            reset_HDR();
+            // cancel timers and counters
             COUNTER_RESET(camera_shutter_timer);
             screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
             COUNTER_RESET(camera_repeat_counter);
@@ -676,18 +695,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     selection_item_id = selection->id;
 
     // !!! d-pad keys are translated
-    if (OPTION(camera_mode) == camera_mode_auto) {
-        // in automatic mode menu items are "synthetic"
-        if (KEY_PRESSED(J_RIGHT))       change_direction = changeIncrease, selection_item_id = idBrightness;
-        else if (KEY_PRESSED(J_LEFT))   change_direction = changeDecrease, selection_item_id = idBrightness;
-        else if (KEY_PRESSED(J_DOWN))   change_direction = changeIncrease, selection_item_id = idContrast;
-        else if (KEY_PRESSED(J_UP))     change_direction = changeDecrease, selection_item_id = idContrast;
-        else change_direction = changeNone;
-    } else {
-        if (KEY_PRESSED(J_RIGHT))       change_direction = changeDecrease;
-        else if (KEY_PRESSED(J_LEFT))   change_direction = changeIncrease;
-        else change_direction = changeNone;
-    }
+    if (!COUNTER(camera_HDR_counter)) {
+        if (OPTION(camera_mode) == camera_mode_auto) {
+            // in automatic mode menu items are "synthetic"
+            if (KEY_PRESSED(J_RIGHT))       change_direction = changeIncrease, selection_item_id = idBrightness;
+            else if (KEY_PRESSED(J_LEFT))   change_direction = changeDecrease, selection_item_id = idBrightness;
+            else if (KEY_PRESSED(J_DOWN))   change_direction = changeIncrease, selection_item_id = idContrast;
+            else if (KEY_PRESSED(J_UP))     change_direction = changeDecrease, selection_item_id = idContrast;
+            else change_direction = changeNone;
+        } else {
+            if (KEY_PRESSED(J_RIGHT))       change_direction = changeDecrease;
+            else if (KEY_PRESSED(J_LEFT))   change_direction = changeIncrease;
+            else change_direction = changeNone;
+        }
+    } else change_direction = changeNone;                   // disable menu when capturing HDR
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
@@ -790,7 +811,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
-        if (camera_repeat_counter) {
+        if (COUNTER(camera_repeat_counter)) {
             menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
             if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, " Inf");
@@ -799,6 +820,22 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
             }
         } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+    }
+
+    // process HDR counter
+    if (COUNTER_CHANGED(camera_HDR_counter)) {
+        if (COUNTER(camera_HDR_counter)) {
+            COUNTER(camera_HDR_counter)--;
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
+            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_HDR_counter));
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
+            camera_do_shutter = TRUE;
+            // set new exposure here
+        } else {
+            screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+            SETTING(current_exposure) = last_HDR_exposure;
+            RENDER_CAM_REG_EXPTIME();
+        }
     }
 
     // make the picture if not in progress yet
@@ -814,9 +851,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
 #ifdef ENABLE_AUTOEXP
-        if (OPTION(camera_mode) == camera_mode_auto) {
+        if ((OPTION(camera_mode) == camera_mode_auto) && !(COUNTER(camera_HDR_counter))) {
             int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
-            SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after calculating
+            SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
             int32_t new_exposure, current_exposure = SETTING(current_exposure);
 
@@ -1034,6 +1071,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
             if (gbprinter_detect(10) == PRN_STATUS_OK) {
                 if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
                     // cancel button pressed while printing
+                    reset_HDR();
                     COUNTER_RESET(camera_shutter_timer);
                     screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
                     COUNTER_RESET(camera_repeat_counter);
@@ -1052,6 +1090,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
         case ACTION_MAIN_MENU:
             recording_video = FALSE;
             if (!menu_main_execute()) {
+                reset_HDR();
                 COUNTER_RESET(camera_shutter_timer);
                 COUNTER_RESET(camera_repeat_counter);
                 refresh_screen();
@@ -1104,6 +1143,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                 }
                 save_camera_state();
             } while (menu_result != ACTION_NONE);
+            reset_HDR();
             COUNTER_RESET(camera_shutter_timer);
             COUNTER_RESET(camera_repeat_counter);
             camera_scrollbars_reinit();
