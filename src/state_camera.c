@@ -823,19 +823,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     }
 
     // process HDR counter
-    if (COUNTER_CHANGED(camera_HDR_counter)) {
+    if ((!capture_triggered) && COUNTER_CHANGED(camera_HDR_counter)) {
         if (COUNTER(camera_HDR_counter)) {
             COUNTER(camera_HDR_counter)--;
             menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_HDR_counter));
             menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
             camera_do_shutter = TRUE;
-            // set new exposure here
+            // set new calculated exposure here instead of this:
+            SETTING(current_exposure) = last_HDR_exposure;
         } else {
             screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
             SETTING(current_exposure) = last_HDR_exposure;
-            RENDER_CAM_REG_EXPTIME();
         }
+        RENDER_CAM_REG_EXPTIME();
     }
 
     // make the picture if not in progress yet
