@@ -39,7 +39,7 @@
 #endif
 // HDR mode
 #ifndef HDR_ENABLED
-    #define HDR_ENABLED 0
+    #define HDR_ENABLED 1
 #endif
 // use interrupts to update joypad state
 #ifndef INT_DRIVEN_JOYPAD

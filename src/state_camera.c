@@ -69,8 +69,10 @@ uint8_t camera_do_shutter = FALSE;
 COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
+#define MAX_HDR_IMAGES 9
 COUNTER_DECLARE(camera_HDR_counter, uint8_t, 0);
 uint16_t last_HDR_exposure;
+int32_t HDR_exposure_list[MAX_HDR_IMAGES];
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
@@ -651,8 +653,18 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         break;
                     case trigger_mode_HDR:
                         if (COUNTER(camera_HDR_counter)) break;
-                        COUNTER_SET(camera_HDR_counter, 15);
+                        COUNTER_SET(camera_HDR_counter, MAX_HDR_IMAGES);
                         last_HDR_exposure = SETTING(current_exposure);
+                        HDR_exposure_list[4] = (int32_t)last_HDR_exposure;
+                        HDR_exposure_list[2] = (int32_t)last_HDR_exposure >> 1;
+                        HDR_exposure_list[0] = (int32_t)last_HDR_exposure >> 2;
+                        HDR_exposure_list[6] = (int32_t)last_HDR_exposure << 1;
+                        HDR_exposure_list[8] = (int32_t)last_HDR_exposure << 2;
+                        HDR_exposure_list[1] = HDR_exposure_list[0] + ((HDR_exposure_list[2] - HDR_exposure_list[0]) >> 1);
+                        HDR_exposure_list[3] = HDR_exposure_list[2] + ((HDR_exposure_list[4] - HDR_exposure_list[2]) >> 1);
+                        HDR_exposure_list[5] = HDR_exposure_list[4] + ((HDR_exposure_list[6] - HDR_exposure_list[4]) >> 1);
+                        HDR_exposure_list[7] = HDR_exposure_list[6] + ((HDR_exposure_list[8] - HDR_exposure_list[6]) >> 1);
+                        break;
                     default:
                         camera_do_shutter = TRUE;
                         break;
@@ -822,23 +834,6 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
     }
 
-    // process HDR counter
-    if ((!capture_triggered) && COUNTER_CHANGED(camera_HDR_counter)) {
-        if (COUNTER(camera_HDR_counter)) {
-            COUNTER(camera_HDR_counter)--;
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
-            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_HDR_counter));
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
-            camera_do_shutter = TRUE;
-            // set new calculated exposure here instead of this:
-            SETTING(current_exposure) = last_HDR_exposure;
-        } else {
-            screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
-            SETTING(current_exposure) = last_HDR_exposure;
-        }
-        RENDER_CAM_REG_EXPTIME();
-    }
-
     // make the picture if not in progress yet
     if (camera_do_shutter) {
         if (!capture_triggered) {
@@ -851,49 +846,6 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 
     // check image was captured, if yes, then restart capturing process
     if (image_captured()) {
-#ifdef ENABLE_AUTOEXP
-        if ((OPTION(camera_mode) == camera_mode_auto) && !(COUNTER(camera_HDR_counter))) {
-            int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
-            SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
-
-            int32_t new_exposure, current_exposure = SETTING(current_exposure);
-
-            bool error_negative = (error < 0) ? true : false;
-            uint16_t abs_error = abs(error);
-
-            // real camera uses a very similar autoexposure mechanism with steps of
-            // 1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
-            // 1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
-            // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
-            // algorithm here is globally faster and simplier than a real camera
-
-            if (abs_error > 95) {
-                // raw tuning +- 1EV
-                new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
-            } else if (abs_error > 20) {
-                // intermediate tuning +- 1/8 EV
-                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
-            } else if (abs_error > 10) {
-                // fine tuning +- 1/16 EV
-                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
-            } else if (abs_error > 5) {
-                // very fine tuning +- 1 in C register
-                new_exposure = current_exposure + ((error_negative) ? -1 : 1);
-            } else new_exposure = current_exposure;
-
-            uint16_t result_exposure = CONSTRAINT(new_exposure, AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
-            if (result_exposure != SETTING(current_exposure)) {
-                SETTING(current_exposure) = result_exposure;
-                RENDER_EDGE_FROM_EXPOSURE();
-
-                if (OPTION(display_exposure)) menu_text_out(14, 0, 6, WHITE_ON_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
-            }
-    #if (DEBUG_AUTOEXP==1)
-            sprintf(text_buffer, "%d", (uint16_t)error);
-            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
-    #endif
-        }
-#endif
         switch (OPTION(after_action)) {
             case after_action_picnrec:
                 if (capture_triggered) picnrec_trigger();
@@ -947,6 +899,67 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     break;
             }
         }
+
+        // process HDR counter
+        if (COUNTER_CHANGED(camera_HDR_counter)) {
+            if (COUNTER(camera_HDR_counter)) {
+                COUNTER(camera_HDR_counter)--;
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
+                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_HDR_counter));
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
+                camera_do_shutter = TRUE;
+                // set new calculated exposure here instead of this:
+                SETTING(current_exposure) = CONSTRAINT(HDR_exposure_list[COUNTER(camera_HDR_counter)], AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+            } else {
+                screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+                SETTING(current_exposure) = last_HDR_exposure;
+            }
+            SWITCH_RAM(CAMERA_BANK_REGISTERS);
+            RENDER_CAM_REG_EXPTIME();
+        }
+#ifdef ENABLE_AUTOEXP
+        else if (OPTION(camera_mode) == camera_mode_auto) {
+            int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
+            SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
+
+            int32_t new_exposure, current_exposure = SETTING(current_exposure);
+
+            bool error_negative = (error < 0) ? true : false;
+            uint16_t abs_error = abs(error);
+
+            // real camera uses a very similar autoexposure mechanism with steps of
+            // 1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
+            // 1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
+            // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
+            // algorithm here is globally faster and simplier than a real camera
+
+            if (abs_error > 95) {
+                // raw tuning +- 1EV
+                new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
+            } else if (abs_error > 20) {
+                // intermediate tuning +- 1/8 EV
+                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
+            } else if (abs_error > 10) {
+                // fine tuning +- 1/16 EV
+                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
+            } else if (abs_error > 5) {
+                // very fine tuning +- 1 in C register
+                new_exposure = current_exposure + ((error_negative) ? -1 : 1);
+            } else new_exposure = current_exposure;
+
+            uint16_t result_exposure = CONSTRAINT(new_exposure, AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+            if (result_exposure != SETTING(current_exposure)) {
+                SETTING(current_exposure) = result_exposure;
+                RENDER_EDGE_FROM_EXPOSURE();
+
+                if (OPTION(display_exposure)) menu_text_out(14, 0, 6, WHITE_ON_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
+            }
+    #if (DEBUG_AUTOEXP==1)
+            sprintf(text_buffer, "%d", (uint16_t)error);
+            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
+    #endif
+        }
+#endif
         if ((image_live_preview) || (recording_video)) image_capture();
     }
 
