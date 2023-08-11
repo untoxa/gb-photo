@@ -70,9 +70,10 @@ COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
 #define MAX_HDR_IMAGES 9
+#define MIDDLE_HDR_IMAGE (MAX_HDR_IMAGES >> 1)
 COUNTER_DECLARE(camera_HDR_counter, uint8_t, 0);
-uint16_t last_HDR_exposure;
-int32_t HDR_exposure_list[MAX_HDR_IMAGES];
+uint16_t HDR_exposure_list[MAX_HDR_IMAGES];
+#define last_HDR_exposure (HDR_exposure_list[MIDDLE_HDR_IMAGE])
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
@@ -654,28 +655,15 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     case trigger_mode_HDR:
                         if (COUNTER(camera_HDR_counter)) break;
                         COUNTER_SET(camera_HDR_counter, MAX_HDR_IMAGES);
-                        last_HDR_exposure = SETTING(current_exposure);
-                        
-                        uint8_t mid_point = MAX_HDR_IMAGES>>1;
-                        HDR_exposure_list[mid_point] = (int32_t)last_HDR_exposure;//exposure mid point
-
-                        //under-exposure in i steps
-                        for (int8_t i=mid_point-1;i>-1;i--){
-                            HDR_exposure_list[i] = HDR_exposure_list[i+1]-(HDR_exposure_list[i+1]>>3);
+                        // exposure mid point which is also the last_HDR_exposure
+                        HDR_exposure_list[MIDDLE_HDR_IMAGE] = SETTING(current_exposure);
+                        // under-exposure in i steps
+                        for (uint8_t i = MIDDLE_HDR_IMAGE; i != 0; i--) {
+                            HDR_exposure_list[i - 1] = CONSTRAINT((int32_t)HDR_exposure_list[i] - (HDR_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
                         }
-                        //over-exposure in i steps
-                        for (int8_t i=mid_point+1;i<MAX_HDR_IMAGES;i++){
-                            HDR_exposure_list[i] = HDR_exposure_list[i-1]+(HDR_exposure_list[i-1]>>3);
-                        }
-
-                        //register limits verification
-                        for (int8_t i=0;i<MAX_HDR_IMAGES+1;i++){
-                        if (HDR_exposure_list[i]<0x0010) {
-                            HDR_exposure_list[i]=0x0010;
-                        }
-                         if (HDR_exposure_list[i]>0xFFFF) {
-                            HDR_exposure_list[i]=0xFFFF;
-                        }
+                        // over-exposure in i steps
+                        for (uint8_t i = MIDDLE_HDR_IMAGE; i != MAX_HDR_IMAGES; i++) {
+                            HDR_exposure_list[i + 1] = CONSTRAINT((int32_t)HDR_exposure_list[i] + (HDR_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
                         }
                         break;
                     default:
@@ -922,7 +910,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
                 camera_do_shutter = TRUE;
                 // set new calculated exposure here instead of this:
-                SETTING(current_exposure) = CONSTRAINT(HDR_exposure_list[COUNTER(camera_HDR_counter)], AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                SETTING(current_exposure) = HDR_exposure_list[COUNTER(camera_HDR_counter)];
             } else {
                 screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
                 SETTING(current_exposure) = last_HDR_exposure;
