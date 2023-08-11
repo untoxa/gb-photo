@@ -655,15 +655,28 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         if (COUNTER(camera_HDR_counter)) break;
                         COUNTER_SET(camera_HDR_counter, MAX_HDR_IMAGES);
                         last_HDR_exposure = SETTING(current_exposure);
-                        HDR_exposure_list[4] = (int32_t)last_HDR_exposure;
-                        HDR_exposure_list[2] = (int32_t)last_HDR_exposure >> 1;
-                        HDR_exposure_list[0] = (int32_t)last_HDR_exposure >> 2;
-                        HDR_exposure_list[6] = (int32_t)last_HDR_exposure << 1;
-                        HDR_exposure_list[8] = (int32_t)last_HDR_exposure << 2;
-                        HDR_exposure_list[1] = HDR_exposure_list[0] + ((HDR_exposure_list[2] - HDR_exposure_list[0]) >> 1);
-                        HDR_exposure_list[3] = HDR_exposure_list[2] + ((HDR_exposure_list[4] - HDR_exposure_list[2]) >> 1);
-                        HDR_exposure_list[5] = HDR_exposure_list[4] + ((HDR_exposure_list[6] - HDR_exposure_list[4]) >> 1);
-                        HDR_exposure_list[7] = HDR_exposure_list[6] + ((HDR_exposure_list[8] - HDR_exposure_list[6]) >> 1);
+                        
+                        uint8_t mid_point = MAX_HDR_IMAGES>>1;
+                        HDR_exposure_list[mid_point] = (int32_t)last_HDR_exposure;//exposure mid point
+
+                        //under-exposure in i steps
+                        for (int8_t i=mid_point-1;i>-1;i--){
+                            HDR_exposure_list[i] = HDR_exposure_list[i+1]-(HDR_exposure_list[i+1]>>3);
+                        }
+                        //over-exposure in i steps
+                        for (int8_t i=mid_point+1;i<MAX_HDR_IMAGES;i++){
+                            HDR_exposure_list[i] = HDR_exposure_list[i-1]+(HDR_exposure_list[i-1]>>3);
+                        }
+
+                        //register limits verification
+                        for (int8_t i=0;i<MAX_HDR_IMAGES+1;i++){
+                        if (HDR_exposure_list[i]<0x0010) {
+                            HDR_exposure_list[i]=0x0010;
+                        }
+                         if (HDR_exposure_list[i]>0xFFFF) {
+                            HDR_exposure_list[i]=0xFFFF;
+                        }
+                        }
                         break;
                     default:
                         camera_do_shutter = TRUE;
