@@ -69,11 +69,11 @@ uint8_t camera_do_shutter = FALSE;
 COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
-#define MAX_HDR_IMAGES 9
-#define MIDDLE_HDR_IMAGE (MAX_HDR_IMAGES >> 1)
-COUNTER_DECLARE(camera_HDR_counter, uint8_t, 0);
-uint16_t HDR_exposure_list[MAX_HDR_IMAGES];
-#define last_HDR_exposure (HDR_exposure_list[MIDDLE_HDR_IMAGE])
+#define MAX_AEB_IMAGES 9
+#define MIDDLE_AEB_IMAGE (MAX_AEB_IMAGES >> 1)
+COUNTER_DECLARE(camera_AEB_counter, uint8_t, 0);
+uint16_t AEB_exposure_list[MAX_AEB_IMAGES];
+#define last_AEB_exposure (AEB_exposure_list[MIDDLE_AEB_IMAGE])
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
@@ -366,11 +366,11 @@ void shutter_VBL_ISR(void) NONBANKED {
     }
 }
 
-void reset_HDR(void) {
-    if (COUNTER(camera_HDR_counter)) {
-        COUNTER_RESET(camera_HDR_counter);
-        SETTING(current_exposure) = last_HDR_exposure;
-        // if HDR capture process was cancelled, then restore exposure
+void reset_AEB(void) {
+    if (COUNTER(camera_AEB_counter)) {
+        COUNTER_RESET(camera_AEB_counter);
+        SETTING(current_exposure) = last_AEB_exposure;
+        // if AEB capture process was cancelled, then restore exposure
         SWITCH_RAM(CAMERA_BANK_REGISTERS);
         RENDER_CAM_REG_EXPTIME();
     }
@@ -394,7 +394,7 @@ uint8_t ENTER_state_camera(void) BANKED {
     if ((_is_COLOR) && (OPTION(ir_remote_shutter))) ir_sense_start();
     // reset capture timers and counters
     COUNTER_RESET(camera_shutter_timer);
-    COUNTER_RESET(camera_HDR_counter);
+    COUNTER_RESET(camera_AEB_counter);
     COUNTER_RESET(camera_repeat_counter);
     // load some initial settings
     RENDER_CAM_REGISTERS();
@@ -650,20 +650,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
                     case trigger_mode_timer:
                         camera_charge_timer(OPTION(shutter_timer));
-                        COUNTER_SET(camera_HDR_counter, 0);
+                        COUNTER_SET(camera_AEB_counter, 0);
                         break;
-                    case trigger_mode_HDR:
-                        if (COUNTER(camera_HDR_counter)) break;
-                        COUNTER_SET(camera_HDR_counter, MAX_HDR_IMAGES);
-                        // exposure mid point which is also the last_HDR_exposure
-                        HDR_exposure_list[MIDDLE_HDR_IMAGE] = SETTING(current_exposure);
+                    case trigger_mode_AEB:
+                        if (COUNTER(camera_AEB_counter)) break;
+                        COUNTER_SET(camera_AEB_counter, MAX_AEB_IMAGES);
+                        // exposure mid point which is also the last_AEB_exposure
+                        AEB_exposure_list[MIDDLE_AEB_IMAGE] = SETTING(current_exposure);
                         // under-exposure in i steps
-                        for (uint8_t i = MIDDLE_HDR_IMAGE; i != 0; i--) {
-                            HDR_exposure_list[i - 1] = CONSTRAINT((int32_t)HDR_exposure_list[i] - (HDR_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                        for (uint8_t i = MIDDLE_AEB_IMAGE; i != 0; i--) {
+                            AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
                         }
                         // over-exposure in i steps
-                        for (uint8_t i = MIDDLE_HDR_IMAGE; i != (MAX_HDR_IMAGES - 1); i++) {
-                            HDR_exposure_list[i + 1] = CONSTRAINT((int32_t)HDR_exposure_list[i] + (HDR_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                        for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MAX_AEB_IMAGES - 1); i++) {
+                            AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
                         }
                         break;
                     default:
@@ -673,8 +673,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     } else if (KEY_PRESSED(J_B)) {
-        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_HDR_counter)) {
-            reset_HDR();
+        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_AEB_counter)) {
+            reset_AEB();
             // cancel timers and counters
             COUNTER_RESET(camera_shutter_timer);
             screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
@@ -708,7 +708,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     selection_item_id = selection->id;
 
     // !!! d-pad keys are translated
-    if (!COUNTER(camera_HDR_counter)) {
+    if (!COUNTER(camera_AEB_counter)) {
         if (OPTION(camera_mode) == camera_mode_auto) {
             // in automatic mode menu items are "synthetic"
             if (KEY_PRESSED(J_RIGHT))       change_direction = changeIncrease, selection_item_id = idBrightness;
@@ -721,7 +721,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             else if (KEY_PRESSED(J_LEFT))   change_direction = changeIncrease;
             else change_direction = changeNone;
         }
-    } else change_direction = changeNone;                   // disable menu when capturing HDR
+    } else change_direction = changeNone;                   // disable menu when capturing AEB
 
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
@@ -869,7 +869,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         if (capture_triggered) {
             capture_triggered = false;
             // check save confirmation
-            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_repeat) && (OPTION(trigger_mode) != trigger_mode_HDR)) {
+            if (OPTION(save_confirm) && (OPTION(trigger_mode) != trigger_mode_repeat) && (OPTION(trigger_mode) != trigger_mode_AEB)) {
                 if ((OPTION(after_action) == after_action_save) ||
                     (OPTION(after_action) == after_action_print) ||
                     (OPTION(after_action) == after_action_printsave) ||
@@ -901,18 +901,18 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             }
         }
 
-        // process HDR counter
-        if (COUNTER_CHANGED(camera_HDR_counter)) {
-            if (COUNTER(camera_HDR_counter)) {
+        // process AEB counter
+        if (COUNTER_CHANGED(camera_AEB_counter)) {
+            if (COUNTER(camera_AEB_counter)) {
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
-                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_HDR_counter));
+                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_AEB_counter));
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
                 camera_do_shutter = TRUE;
                 // set new calculated exposure here instead of this:
-                SETTING(current_exposure) = HDR_exposure_list[--COUNTER(camera_HDR_counter)];
+                SETTING(current_exposure) = AEB_exposure_list[--COUNTER(camera_AEB_counter)];
             } else {
                 screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
-                SETTING(current_exposure) = last_HDR_exposure;
+                SETTING(current_exposure) = last_AEB_exposure;
             }
             SWITCH_RAM(CAMERA_BANK_REGISTERS);
             RENDER_CAM_REG_EXPTIME();
@@ -1085,7 +1085,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
             if (gbprinter_detect(10) == PRN_STATUS_OK) {
                 if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
                     // cancel button pressed while printing
-                    reset_HDR();
+                    reset_AEB();
                     COUNTER_RESET(camera_shutter_timer);
                     screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
                     COUNTER_RESET(camera_repeat_counter);
@@ -1104,7 +1104,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
         case ACTION_MAIN_MENU:
             recording_video = FALSE;
             if (!menu_main_execute()) {
-                reset_HDR();
+                reset_AEB();
                 COUNTER_RESET(camera_shutter_timer);
                 COUNTER_RESET(camera_repeat_counter);
                 refresh_screen();
@@ -1125,8 +1125,8 @@ uint8_t UPDATE_state_camera(void) BANKED {
                     case ACTION_TRIGGER_ABUTTON:
                     case ACTION_TRIGGER_TIMER:
                     case ACTION_TRIGGER_INTERVAL:
-                    case ACTION_TRIGGER_HDR: {
-                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_repeat, trigger_mode_HDR};
+                    case ACTION_TRIGGER_AEB: {
+                        static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_repeat, trigger_mode_AEB};
                         OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                         break;
                     }
@@ -1157,7 +1157,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                 }
                 save_camera_state();
             } while (menu_result != ACTION_NONE);
-            reset_HDR();
+            reset_AEB();
             COUNTER_RESET(camera_shutter_timer);
             COUNTER_RESET(camera_repeat_counter);
             camera_scrollbars_reinit();

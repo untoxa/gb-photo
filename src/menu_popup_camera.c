@@ -27,7 +27,7 @@ typedef enum {
     idPopupTriggerAButton,
     idPopupTriggerTimerValue,
     idPopupTriggerTimerCounter,
-    idPopupTriggerHDR
+    idPopupTriggerAEB
 } camera_popup_menu_e;
 
 
@@ -111,15 +111,15 @@ const menu_item_t TriggerSubMenuItems[] = {
         .helpcontext = " Make series of pictures",
         .onPaint = NULL,
         .result = ACTION_TRIGGER_INTERVAL
-#if (HDR_ENABLED==1)
+#if (AEB_ENABLED==1)
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 4, .width = 8,
-        .id = idPopupTriggerHDR,
-        .caption = " " ICON_A " HDR",
-        .helpcontext = " Make series for HDR pictures",
+        .id = idPopupTriggerAEB,
+        .caption = " AEB mode",
+        .helpcontext = " Auto Exposure Bracketing",
         .onPaint = NULL,
-        .result = ACTION_TRIGGER_HDR
+        .result = ACTION_TRIGGER_AEB
 #endif
     }
 };
@@ -278,7 +278,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [trigger_mode_abutton]          = "[" ICON_A " button]",
         [trigger_mode_timer]            = "[Timer]",
         [trigger_mode_repeat]           = "[Repeat]",
-        [trigger_mode_HDR]              = "[" ICON_A " HDR]"
+        [trigger_mode_AEB]              = "[AEB mode]"
     };
     static const uint8_t * const after_actions[N_AFTER_ACTIONS] = {
         [after_action_save]             = "[Save]",

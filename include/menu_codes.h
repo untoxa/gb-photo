@@ -42,7 +42,7 @@
 #define ACTION_TRIGGER_ABUTTON      43
 #define ACTION_TRIGGER_TIMER        44
 #define ACTION_TRIGGER_INTERVAL     45
-#define ACTION_TRIGGER_HDR          46
+#define ACTION_TRIGGER_AEB          46
 #define ACTION_ACTION_SAVE          47
 #define ACTION_ACTION_PRINT         48
 #define ACTION_ACTION_SAVEPRINT     49
