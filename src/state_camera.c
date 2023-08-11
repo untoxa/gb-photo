@@ -69,8 +69,6 @@ uint8_t camera_do_shutter = FALSE;
 COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 
-#define MAX_AEB_IMAGES 9
-#define MIDDLE_AEB_IMAGE (MAX_AEB_IMAGES >> 1)
 COUNTER_DECLARE(camera_AEB_counter, uint8_t, 0);
 uint16_t AEB_exposure_list[MAX_AEB_IMAGES];
 #define last_AEB_exposure (AEB_exposure_list[MIDDLE_AEB_IMAGE])
@@ -652,20 +650,22 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         camera_charge_timer(OPTION(shutter_timer));
                         COUNTER_SET(camera_AEB_counter, 0);
                         break;
-                    case trigger_mode_AEB:
-                        if (COUNTER(camera_AEB_counter)) break;
-                        COUNTER_SET(camera_AEB_counter, MAX_AEB_IMAGES);
-                        // exposure mid point which is also the last_AEB_exposure
-                        AEB_exposure_list[MIDDLE_AEB_IMAGE] = SETTING(current_exposure);
-                        // under-exposure in i steps
-                        for (uint8_t i = MIDDLE_AEB_IMAGE; i != 0; i--) {
-                            AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                    case trigger_mode_AEB: {
+                            if (COUNTER(camera_AEB_counter)) break;
+                            uint8_t aeb_over_counter = MIN(OPTION(aeb_overexp_count), MAX_AEB_OVEREXPOSURE);
+                            COUNTER_SET(camera_AEB_counter, (aeb_over_counter << 1) + 1);
+                            // exposure mid point which is also the last_AEB_exposure
+                            AEB_exposure_list[MIDDLE_AEB_IMAGE] = SETTING(current_exposure);
+                            // under-exposure in i steps
+                            for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MIDDLE_AEB_IMAGE - aeb_over_counter); i--) {
+                                AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                            }
+                            // over-exposure in i steps
+                            for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MIDDLE_AEB_IMAGE + aeb_over_counter); i++) {
+                                AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                            }
+                            break;
                         }
-                        // over-exposure in i steps
-                        for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MAX_AEB_IMAGES - 1); i++) {
-                            AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
-                        }
-                        break;
                     default:
                         camera_do_shutter = TRUE;
                         break;
@@ -909,7 +909,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
                 camera_do_shutter = TRUE;
                 // set new calculated exposure here instead of this:
-                SETTING(current_exposure) = AEB_exposure_list[--COUNTER(camera_AEB_counter)];
+                SETTING(current_exposure) = AEB_exposure_list[--COUNTER(camera_AEB_counter) + (MIDDLE_AEB_IMAGE - MIN(OPTION(aeb_overexp_count), MAX_AEB_OVEREXPOSURE))];
             } else {
                 screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
                 SETTING(current_exposure) = last_AEB_exposure;

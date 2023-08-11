@@ -69,6 +69,7 @@ const menu_t CameraModeSubMenu = {
 uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 static uint8_t spinedit_timer_value;
 static uint8_t spinedit_counter_value;
+static uint8_t spinedit_aeb_overexp_count;
 const spinedit_params_t TimerSpinEditParams = {
     .caption = "Timer:",
     .min_value = 1,
@@ -85,6 +86,12 @@ const spinedit_params_t CounterSpinEditParams = {
     .max_value = 31,
     .value = &spinedit_counter_value,
     .names = &CounterSpinEditInfinite
+};
+const spinedit_params_t AEBOverexpSpinEditParams = {
+    .caption = "Range:",
+    .min_value = 2,
+    .max_value = MAX_AEB_OVEREXPOSURE,
+    .value = &spinedit_aeb_overexp_count
 };
 const menu_item_t TriggerSubMenuItems[] = {
     {
@@ -113,7 +120,7 @@ const menu_item_t TriggerSubMenuItems[] = {
         .result = ACTION_TRIGGER_INTERVAL
 #if (AEB_ENABLED==1)
     }, {
-        .sub = NULL, .sub_params = NULL,
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&AEBOverexpSpinEditParams,
         .ofs_x = 1, .ofs_y = 4, .width = 8,
         .id = idPopupTriggerAEB,
         .caption = " AEB mode",
@@ -135,6 +142,7 @@ uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const str
     switch (self->id) {
         case idPopupTriggerTimerValue:
         case idPopupTriggerTimerCounter:
+        case idPopupTriggerAEB:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
         default:
             break;
@@ -326,6 +334,7 @@ uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t *
 uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_timer_value = OPTION(shutter_timer);
     spinedit_counter_value = OPTION(shutter_counter);
+    spinedit_aeb_overexp_count = OPTION(aeb_overexp_count);
     uint8_t menu_result;
     switch (menu_result = menu_execute(&CameraPopupMenu, NULL, NULL)) {
         case ACTION_TRIGGER_TIMER:
@@ -333,6 +342,9 @@ uint8_t menu_popup_camera_execute(void) BANKED {
             break;
         case ACTION_TRIGGER_INTERVAL:
             OPTION(shutter_counter) = spinedit_counter_value;
+            break;
+        case ACTION_TRIGGER_AEB:
+            OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
             break;
         default:
             break;

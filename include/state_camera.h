@@ -93,6 +93,7 @@ typedef struct camera_state_options_t {
     uint8_t shutter_counter;
     uint8_t cgb_palette_idx         : 4;
     bool display_exposure           : 1;
+    uint8_t aeb_overexp_count;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT
@@ -162,5 +163,9 @@ uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, came
 
 #define DEFAULT_CONTRAST_VALUE 9
 #define DEFAULT_EXPOSURE_INDEX 28
+
+#define MAX_AEB_IMAGES 29
+#define MAX_AEB_OVEREXPOSURE (MAX_AEB_IMAGES >> 1)
+#define MIDDLE_AEB_IMAGE (MAX_AEB_IMAGES >> 1)
 
 #endif
