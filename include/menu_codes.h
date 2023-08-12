@@ -94,8 +94,8 @@
 #define ACTION_ABOUT                151
 
 // system menu results
-#define MENU_RESULT_YES             254
 #define MENU_RESULT_NO              253
+#define MENU_RESULT_YES             254
 #define MENU_RESULT_OK              255
 
 #endif

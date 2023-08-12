@@ -1157,7 +1157,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         break;
                 }
                 save_camera_state();
-            } while (menu_result != ACTION_NONE);
+            } while (menu_result == MENU_RESULT_NO);
             reset_AEB();
             COUNTER_RESET(camera_shutter_timer);
             COUNTER_RESET(camera_repeat_counter);

@@ -59,7 +59,7 @@ const menu_item_t ModeSubMenuItems[] = {
 };
 const menu_t CameraModeSubMenu = {
     .x = 5, .y = 4, .width = 11, .height = LENGTH(ModeSubMenuItems) + 2,
-    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = ModeSubMenuItems, .last_item = LAST_ITEM(ModeSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
@@ -132,7 +132,7 @@ const menu_item_t TriggerSubMenuItems[] = {
 };
 const menu_t TriggerSubMenu = {
     .x = 5, .y = 5, .width = 10, .height = LENGTH(TriggerSubMenuItems) + 2,
-    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = TriggerSubMenuItems, .last_item = LAST_ITEM(TriggerSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultTriggerSubMenu
@@ -143,7 +143,7 @@ uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const str
         case idPopupTriggerTimerValue:
         case idPopupTriggerTimerCounter:
         case idPopupTriggerAEB:
-            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
+            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
         default:
             break;
     }
@@ -214,7 +214,7 @@ const menu_item_t ActionSubMenuItems[] = {
 };
 const menu_t ActionSubMenu = {
     .x = 5, .y = 4, .width = 12, .height = LENGTH(ActionSubMenuItems) + 2,
-    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = ActionSubMenuItems, .last_item = LAST_ITEM(ActionSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
