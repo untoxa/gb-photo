@@ -6,7 +6,9 @@
 
 #include "compat.h"
 #include "globals.h"
+#include "musicmanager.h"
 #include "screen.h"
+#include "joy.h"
 
 #include "state_camera.h"
 
@@ -17,6 +19,8 @@
 #include "menu_codes.h"
 #include "menu_yesno.h"
 #include "menu_spinedit.h"
+
+#include "sound_menu_alter.h"
 
 typedef enum {
     idPopupNone = 0,
@@ -65,11 +69,106 @@ const menu_t CameraModeSubMenu = {
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
+uint8_t * onAEBMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t onShowAEBMenu(const menu_t * self, uint8_t * param);
+uint8_t onTranslateKeyAEBMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
+uint8_t onIdleAEBMenu(const struct menu_t * menu, const struct menu_item_t * selection);
+static uint8_t spinedit_aeb_overexp_count;
+static uint8_t spinedit_aeb_exp_step;
+const spinedit_params_t AEBOverexpSpinEditParams = {
+    .caption = "Steps:",
+    .min_value = 2,
+    .max_value = MAX_AEB_OVEREXPOSURE,
+    .value = &spinedit_aeb_overexp_count
+};
+const spinedit_value_names_t AEBStepNames[] = {
+    { .next = AEBStepNames + 1, .value = 0, .name = " " ICON_SPIN_UP " 2 EV\t" ICON_SPIN_DOWN },
+    { .next = NULL,             .value = 1, .name = " " ICON_SPIN_UP " 1 EV\t" ICON_SPIN_DOWN}
+};
+const spinedit_params_t AEBStepSpinEditParams = {
+    .caption = "Range:",
+    .min_value = 0,
+    .max_value = MAX_INDEX(AEBStepNames),
+    .value = &spinedit_aeb_exp_step,
+    .names = AEBStepNames
+};
+const menu_item_t AEBMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = (uint8_t *)&AEBOverexpSpinEditParams,
+        .ofs_x = 6, .ofs_y = 1, .width = 3,
+        .caption = " " ICON_SPIN_UP " %d\t\t" ICON_SPIN_DOWN,
+        .helpcontext = " D-Pad Edit, " ICON_A " Ok " ICON_B " Cancel",
+        .onPaint = onAEBMenuItemPaint,
+        .result = MENU_RESULT_YES
+    }, {
+        .sub = NULL, .sub_params = (uint8_t *)&AEBStepSpinEditParams,
+        .ofs_x = 6, .ofs_y = 2, .width = 3,
+        .caption = " " ICON_SPIN_UP " %d\t\t" ICON_SPIN_DOWN,
+        .helpcontext = " D-Pad Edit, " ICON_A " Ok " ICON_B " Cancel",
+        .onPaint = onAEBMenuItemPaint,
+        .result = MENU_RESULT_YES
+    }
+};
+const menu_t AEBMenu = {
+    .x = 4, .y = 8, .width = 14, .height = 4,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
+    .items = AEBMenuItems, .last_item = LAST_ITEM(AEBMenuItems),
+    .onShow = onShowAEBMenu, .onIdle = onIdleAEBMenu, .onHelpContext = onHelpCameraPopup,
+    .onTranslateKey = onTranslateKeyAEBMenu, .onTranslateSubResult = NULL
+};
+uint8_t * onAEBMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
+    if (self->sub_params) {
+        const spinedit_params_t * params = (const spinedit_params_t *)self->sub_params;
+        uint8_t value = *params->value;
+        const spinedit_value_names_t * current_name = params->names;
+        while (current_name) {
+            if (current_name->value == value) return strcpy(text_buffer, current_name->name);
+            current_name = current_name->next;
+        }
+        sprintf(text_buffer, self->caption, value);
+        return text_buffer;
+    }
+    return 0;
+}
+uint8_t onShowAEBMenu(const menu_t * self, uint8_t * param) {
+    param;
+    menu_draw_frame(self);
+    menu_draw_shadow(self);
+    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, AEBOverexpSpinEditParams.caption);
+    menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, AEBStepSpinEditParams.caption);
+    return MENU_PROP_NO_FRAME;
+}
+uint8_t onTranslateKeyAEBMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu; self;
+    // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
+    return joypad_swap_dpad(value);
+}
+uint8_t onIdleAEBMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu; selection;
+    static change_direction_e change_direction;
+
+    // !!! d-pad keys are translated
+    if (KEY_PRESSED(J_RIGHT)) change_direction = changeDecrease;
+    else if (KEY_PRESSED(J_LEFT)) change_direction = changeIncrease;
+    else change_direction = changeNone;
+
+    if ((change_direction != changeNone) && (selection->sub_params)) {
+        spinedit_params_t * params = (spinedit_params_t *)selection->sub_params;
+        if (inc_dec_int8(params->value, 1, params->min_value, params->max_value, change_direction)) {
+            PLAY_SFX(sound_menu_alter);
+            menu_move_selection(menu, NULL, selection);
+            if (params->onChange) params->onChange(menu, selection, params);
+        }
+    }
+
+    vsync();
+    return 0;
+}
 
 uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 static uint8_t spinedit_timer_value;
 static uint8_t spinedit_counter_value;
-static uint8_t spinedit_aeb_overexp_count;
 const spinedit_params_t TimerSpinEditParams = {
     .caption = "Timer:",
     .min_value = 1,
@@ -86,12 +185,6 @@ const spinedit_params_t CounterSpinEditParams = {
     .max_value = 31,
     .value = &spinedit_counter_value,
     .names = &CounterSpinEditInfinite
-};
-const spinedit_params_t AEBOverexpSpinEditParams = {
-    .caption = "Range:",
-    .min_value = 2,
-    .max_value = MAX_AEB_OVEREXPOSURE,
-    .value = &spinedit_aeb_overexp_count
 };
 const menu_item_t TriggerSubMenuItems[] = {
     {
@@ -120,7 +213,7 @@ const menu_item_t TriggerSubMenuItems[] = {
         .result = ACTION_TRIGGER_INTERVAL
 #if (AEB_ENABLED==1)
     }, {
-        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&AEBOverexpSpinEditParams,
+        .sub = &AEBMenu, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 4, .width = 8,
         .id = idPopupTriggerAEB,
         .caption = " AEB mode",
@@ -335,6 +428,7 @@ uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_timer_value = OPTION(shutter_timer);
     spinedit_counter_value = OPTION(shutter_counter);
     spinedit_aeb_overexp_count = OPTION(aeb_overexp_count);
+    spinedit_aeb_exp_step = OPTION(aeb_overexp_step);
     uint8_t menu_result;
     switch (menu_result = menu_execute(&CameraPopupMenu, NULL, NULL)) {
         case ACTION_TRIGGER_TIMER:
@@ -345,6 +439,7 @@ uint8_t menu_popup_camera_execute(void) BANKED {
             break;
         case ACTION_TRIGGER_AEB:
             OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
+            OPTION(aeb_overexp_step) = spinedit_aeb_exp_step;
             break;
         default:
             break;
