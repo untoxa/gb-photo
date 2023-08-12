@@ -119,6 +119,8 @@
 
 #define PRN_STATUS_CANCELLED    PRN_STATUS_ER2
 
+#define PRINTER_DETECT_TIMEOUT  10
+
 typedef struct start_print_pkt_t {
     uint16_t magic;
     uint16_t command;

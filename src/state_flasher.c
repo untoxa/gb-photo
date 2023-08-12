@@ -179,7 +179,7 @@ uint8_t flasher_print_picture(uint8_t image_no, uint8_t frame_no) BANKED {
     if (image_no < slot_images_taken()) {
         uint8_t image_index = VECTOR_GET(flash_image_slots, image_no);
         uint8_t slot_bank = slot_to_sector(current_slot, 0);
-        if (gbprinter_detect(10) == PRN_STATUS_OK) {
+        if (gbprinter_detect(PRINTER_DETECT_TIMEOUT) == PRN_STATUS_OK) {
             return (gbprinter_print_image((uint8_t *)picture_addr[image_index & 0x03],
                                           slot_bank + (((image_index >> 1) + 1) >> 1),
                                           print_frames + frame_no,

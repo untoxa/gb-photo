@@ -97,7 +97,7 @@ uint8_t gallery_show_position(uint8_t image_no) {
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) BANKED {
     if (image_no < images_taken()) {
         uint8_t image_index = VECTOR_GET(used_slots, image_no);
-        if (gbprinter_detect(10) == PRN_STATUS_OK) {
+        if (gbprinter_detect(PRINTER_DETECT_TIMEOUT) == PRN_STATUS_OK) {
             return (gbprinter_print_image(((image_index & 1) ? image_second : image_first),
                                           (image_index >> 1) + 1,
                                           print_frames + frame_no,
@@ -323,7 +323,7 @@ uint8_t onGalleryMenuItemProps(const struct menu_t * menu, const struct menu_ite
 
 
 uint8_t gallery_print_info(void) {
-    if (gbprinter_detect(10) == PRN_STATUS_OK) {
+    if (gbprinter_detect(PRINTER_DETECT_TIMEOUT) == PRN_STATUS_OK) {
         return (gbprinter_print_screen_rect(ImageInfoMenu.x + 1, ImageInfoMenu.y + 1, ImageInfoMenu.width - 2, ImageInfoMenu.height - 3, TRUE) == PRN_STATUS_CANCELLED) ? FALSE : TRUE;
     }
     return FALSE;

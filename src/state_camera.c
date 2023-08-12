@@ -1083,7 +1083,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
     switch (menu_result) {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
-            if (gbprinter_detect(10) == PRN_STATUS_OK) {
+            if (gbprinter_detect(PRINTER_DETECT_TIMEOUT) == PRN_STATUS_OK) {
                 if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
                     // cancel button pressed while printing
                     reset_AEB();
