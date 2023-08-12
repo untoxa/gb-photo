@@ -653,16 +653,17 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     case trigger_mode_AEB: {
                             if (COUNTER(camera_AEB_counter)) break;
                             uint8_t aeb_over_counter = MIN(OPTION(aeb_overexp_count), MAX_AEB_OVEREXPOSURE);
+                            uint8_t aeb_shift = (aeb_over_counter > 7) ? 4 : 3;
                             COUNTER_SET(camera_AEB_counter, (aeb_over_counter << 1) + 1);
                             // exposure mid point which is also the last_AEB_exposure
                             AEB_exposure_list[MIDDLE_AEB_IMAGE] = SETTING(current_exposure);
                             // under-exposure in i steps
                             for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MIDDLE_AEB_IMAGE - aeb_over_counter); i--) {
-                                AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                                AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> aeb_shift), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
                             }
                             // over-exposure in i steps
                             for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MIDDLE_AEB_IMAGE + aeb_over_counter); i++) {
-                                AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> 3), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                                AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> aeb_shift), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
                             }
                             break;
                         }
