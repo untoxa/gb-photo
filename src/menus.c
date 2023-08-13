@@ -134,7 +134,7 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
             result = menu->cancel_result;
         }
         if (result != MENU_RESULT_NONE) break;
-        if (menu->onIdle) result = menu->onIdle(menu, selection); else vsync();
+        if (menu->onIdle) result = menu->onIdle(menu, selection); else sync_vblank();
     } while (result == MENU_RESULT_NONE);
 
     return result;

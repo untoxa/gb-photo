@@ -71,7 +71,7 @@ void gallery_toss_images(void) BANKED {
 }
 
 uint8_t gallery_show_picture(uint8_t image_no) {
-    vsync();
+    sync_vblank();
     screen_clear_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, WHITE_ON_BLACK);
 
     if (!images_taken()) return CAMERA_IMAGE_DELETED;
@@ -82,7 +82,7 @@ uint8_t gallery_show_picture(uint8_t image_no) {
     SWITCH_RAM((image_index >> 1) + 1);
     screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((image_index & 1) ? image_second : image_first), IMAGE_NORMAL);
 
-    vsync();
+    sync_vblank();
     screen_restore_rect(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 
     return displayed_index;

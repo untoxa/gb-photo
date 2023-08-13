@@ -352,7 +352,7 @@ const uint8_t * const repair_messages[] = {
 uint8_t INIT_module_sysmessages(void) BANKED {
     if ((!camera_settings_reset) && (protected_status == PROTECTED_CORRECT)) return 0;
 
-    vsync();
+    sync_vblank();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
 
@@ -381,7 +381,7 @@ uint8_t INIT_module_sysmessages(void) BANKED {
     JOYPAD_RESET();
     do {
         PROCESS_INPUT();
-        vsync();
+        sync_vblank();
     } while (!KEY_PRESSED(J_START));
 
     fade_out_modal();

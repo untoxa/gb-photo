@@ -321,7 +321,7 @@ uint8_t onIdleSettings(const struct menu_t * menu, const struct menu_item_t * se
     menu;
     settings_menu_last_selection = selection;
 
-    vsync();
+    sync_vblank();
 
     return 0;
 }

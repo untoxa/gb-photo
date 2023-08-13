@@ -968,7 +968,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     hide_sprites_range(scrollbar_render_all(grid_render(0)), MAX_HARDWARE_SPRITES);
 
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing() && !recording_video) vsync();
+    if (!is_capturing() && !recording_video) sync_vblank();
     return 0;
 }
 uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings, bool divide_exposure) {

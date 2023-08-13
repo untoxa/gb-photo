@@ -67,7 +67,7 @@ void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED{
 
     BGP_REG = BGP_save;
 
-    vsync();
+    sync_vblank();
     LCDC_REG = tmp_lcdc;
 
     SGB_TRANSFER(map_buf, (SGB_MASK_EN << 3) | 1, SGB_SCR_UNFREEZE);

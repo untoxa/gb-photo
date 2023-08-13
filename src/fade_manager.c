@@ -304,7 +304,7 @@ inline uint8_t fade_isfading(void) {
 void fade_in_modal(void) BANKED {
     fade_in();
     while (fade_isfading()) {
-        vsync();
+        sync_vblank();
         fade_update();
     }
 }
@@ -312,7 +312,7 @@ void fade_in_modal(void) BANKED {
 void fade_out_modal(void) BANKED {
     fade_out();
     while (fade_isfading()) {
-        vsync();
+        sync_vblank();
         fade_update();
     }
 }

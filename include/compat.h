@@ -3,8 +3,11 @@
 
 #include <gbdk/platform.h>
 
-#ifndef vsync
-#define vsync wait_vbl_done
+// Pic-n-Rec compatible version of vsync()
+#if defined(NINTENDO)
+void sync_vblank(void) PRESERVES_REGS(b, c, d, e);
+#else
+#define sync_vblank vsync
 #endif
 
 #ifndef S_PAL

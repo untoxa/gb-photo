@@ -406,7 +406,7 @@ void flasher_read_slots(void) {
 }
 
 void flasher_refresh_folders(void) {
-    vsync();
+    sync_vblank();
     screen_clear_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4 * 2, WHITE_ON_BLACK);
     for (uint8_t i = 0; i != MAX_FLASH_SLOTS; i++) {
         if (flash_slots[i]) {
@@ -439,7 +439,7 @@ void flasher_toss_images(void) {
 }
 
 uint8_t flasher_thumbnails_diaplay(uint8_t start) {
-    vsync();
+    sync_vblank();
     uint8_t slot_bank = slot_to_sector(current_slot, 0);
     screen_clear_rect(FLASHER_THUMBS_DISPLAY_X, FLASHER_THUMBS_DISPLAY_Y, FLASHER_THUMBS_DISPLAY_WIDTH, FLASHER_THUMBS_DISPLAY_HEIGHT, WHITE_ON_BLACK);
     for (uint8_t i = start, j = 0; (i < VECTOR_LEN(flash_image_slots)) && (j != MAX_FLASHER_THUMBNAILS); i++, j++) {
@@ -458,7 +458,7 @@ void flasher_refresh_thumbnails(void) {
         flasher_toss_images();
         flasher_thumbnails_diaplay(thumbnails_page_no * MAX_FLASHER_THUMBNAILS);
     } else {
-        vsync();
+        sync_vblank();
         screen_clear_rect(FLASHER_THUMBS_DISPLAY_X, FLASHER_THUMBS_DISPLAY_Y, FLASHER_THUMBS_DISPLAY_WIDTH, FLASHER_THUMBS_DISPLAY_HEIGHT, WHITE_ON_BLACK);
         VECTOR_CLEAR(flash_image_slots);
     }
@@ -473,7 +473,7 @@ static void refresh_usage_indicator(void) {
 }
 
 static void refresh_screen(void) {
-    vsync();
+    sync_vblank();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Flash directory");

@@ -57,6 +57,6 @@ void main(void) {
             call_far(&PROGRAM_STATES[OLD_PROGRAM_STATE = CURRENT_PROGRAM_STATE].ENTER);
         }
         // call state update and wait for VBlank if requested
-        if (call_far(&PROGRAM_STATES[CURRENT_PROGRAM_STATE].UPDATE)) vsync();
+        if (call_far(&PROGRAM_STATES[CURRENT_PROGRAM_STATE].UPDATE)) sync_vblank();
     }
 }

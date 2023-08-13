@@ -162,7 +162,7 @@ uint8_t onIdleAEBMenu(const struct menu_t * menu, const struct menu_item_t * sel
         }
     }
 
-    vsync();
+    sync_vblank();
     return 0;
 }
 
@@ -413,7 +413,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing() && !recording_video) vsync();
+    if (!is_capturing() && !recording_video) sync_vblank();
     return 0;
 }
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {

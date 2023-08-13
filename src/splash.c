@@ -149,8 +149,8 @@ void logo_fade(const mask_t * mask) BANKED {
         counters[i] = i + (WIDTH(GBDK2020) + 1);
 
     while (counters[LENGTH(counters) - 1]) {
-        vsync();
-        vsync();
+        sync_vblank();
+        sync_vblank();
         for (j = 0; j != WIDTH(GBDK2020); j++) {
             if (counters[j]) {
                 if (--counters[j] < 8) {
@@ -196,7 +196,7 @@ uint8_t INIT_module_splash(void) BANKED {
     logo_fade(&mask_in);
     for (uint8_t i = 0; i != 2 * 60; i++) {
         PROCESS_INPUT();
-        if (KEY_PRESSED(J_ANY)) break; else vsync();
+        if (KEY_PRESSED(J_ANY)) break; else sync_vblank();
     }
     logo_fade(&mask_out);
     return 0;

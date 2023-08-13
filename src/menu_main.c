@@ -155,7 +155,7 @@ uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * se
     last_menu_item = selection;
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
     hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, (menu->x << 3) + selection->ofs_x, (menu->y << 3) + selection->ofs_y), MAX_HARDWARE_SPRITES);
-    vsync();
+    sync_vblank();
     return 0;
 }
 uint8_t onShowMain(const menu_t * self, uint8_t * param) {

@@ -93,6 +93,6 @@ uint8_t onIdleSpinEdit(const struct menu_t * menu, const struct menu_item_t * se
         }
     }
 
-    vsync();
+    sync_vblank();
     return 0;
 }
