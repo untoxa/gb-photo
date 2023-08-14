@@ -62,9 +62,9 @@ BANKREF(state_camera)
 
 camera_state_options_t camera_state;
 
-uint8_t image_live_preview = TRUE;
-uint8_t recording_video = FALSE;
-uint8_t camera_do_shutter = FALSE;
+bool image_live_preview = true;
+bool recording_video = false;
+bool camera_do_shutter = false;
 
 COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
@@ -72,6 +72,7 @@ COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
 COUNTER_DECLARE(camera_AEB_counter, uint8_t, 0);
 uint16_t AEB_exposure_list[MAX_AEB_IMAGES];
 #define last_AEB_exposure (AEB_exposure_list[MIDDLE_AEB_IMAGE])
+bool AEB_capture_in_progress = false;
 
 camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
@@ -266,7 +267,7 @@ void RENDER_EDGE_FROM_EXPOSURE(void) {
     RENDER_CAM_REG_EXPTIME();
 }
 
-void display_last_seen(uint8_t restore) {
+void display_last_seen(bool restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
     screen_load_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen, OPTION(flip_live_view));
@@ -322,7 +323,7 @@ static void refresh_usage_indicator(void) {
 
 static void refresh_screen(void) {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    display_last_seen(TRUE);
+    display_last_seen(true);
     refresh_usage_indicator();
     scrollbar_repaint_all();
 }
@@ -359,13 +360,14 @@ void shutter_VBL_ISR(void) NONBANKED {
     if (!vbl_frames_counter--) {
         vbl_frames_counter = 60;
         if (COUNTER(camera_shutter_timer)) {
-            if (!--COUNTER(camera_shutter_timer)) camera_do_shutter = TRUE;
+            if (!--COUNTER(camera_shutter_timer)) camera_do_shutter = true;
         }
     }
 }
 
 void reset_AEB(void) {
-    if (COUNTER(camera_AEB_counter)) {
+    if (AEB_capture_in_progress) {
+        AEB_capture_in_progress = false;
         COUNTER_RESET(camera_AEB_counter);
         SETTING(current_exposure) = last_AEB_exposure;
         // if AEB capture process was cancelled, then restore exposure
@@ -651,7 +653,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         COUNTER_SET(camera_AEB_counter, 0);
                         break;
                     case trigger_mode_AEB: {
-                            if (COUNTER(camera_AEB_counter)) break;
+                            if (AEB_capture_in_progress) break;
+                            AEB_capture_in_progress = true;
                             uint8_t aeb_over_counter = MIN(OPTION(aeb_overexp_count), MAX_AEB_OVEREXPOSURE);
                             uint8_t aeb_shift = (OPTION(aeb_overexp_step) & 0x01) + 3;
                             COUNTER_SET(camera_AEB_counter, (aeb_over_counter << 1) + 1);
@@ -668,7 +671,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                             break;
                         }
                     default:
-                        camera_do_shutter = TRUE;
+                        camera_do_shutter = true;
                         break;
                 }
                 break;
@@ -681,7 +684,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
             COUNTER_RESET(camera_repeat_counter);
             screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
-            camera_do_shutter = FALSE;
+            camera_do_shutter = false;
             capture_triggered = false;
         } else {
             if (OPTION(camera_mode) == camera_mode_auto) {
@@ -843,7 +846,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             if (!is_capturing()) image_capture();
             capture_triggered = true;
         }
-        camera_do_shutter = FALSE;
+        camera_do_shutter = false;
     }
 
     // check image was captured, if yes, then restart capturing process
@@ -866,7 +869,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             default:
                 break;
         }
-        display_last_seen(FALSE);
+        display_last_seen(false);
         if (capture_triggered) {
             capture_triggered = false;
             // check save confirmation
@@ -908,12 +911,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
                 sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_AEB_counter));
                 menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
-                camera_do_shutter = TRUE;
+                camera_do_shutter = true;
                 // set new calculated exposure here instead of this:
                 SETTING(current_exposure) = AEB_exposure_list[--COUNTER(camera_AEB_counter) + (MIDDLE_AEB_IMAGE - MIN(OPTION(aeb_overexp_count), MAX_AEB_OVEREXPOSURE))];
             } else {
                 screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
                 SETTING(current_exposure) = last_AEB_exposure;
+                AEB_capture_in_progress = false;
             }
             SWITCH_RAM(CAMERA_BANK_REGISTERS);
             RENDER_CAM_REG_EXPTIME();
@@ -1091,7 +1095,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                     screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
                     COUNTER_RESET(camera_repeat_counter);
                     screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
-                    camera_do_shutter = FALSE;
+                    camera_do_shutter = false;
                 };
             } else PLAY_SFX(sound_error);
             remote_activate(REMOTE_ENABLED);
@@ -1103,16 +1107,17 @@ uint8_t UPDATE_state_camera(void) BANKED {
             remote_activate(REMOTE_ENABLED);
             break;
         case ACTION_MAIN_MENU:
-            recording_video = FALSE;
+            recording_video = false;
+            reset_AEB();
             if (!menu_main_execute()) {
-                reset_AEB();
                 COUNTER_RESET(camera_shutter_timer);
                 COUNTER_RESET(camera_repeat_counter);
                 refresh_screen();
             }
             break;
         case ACTION_CAMERA_SUBMENU: {
-            recording_video = FALSE;
+            recording_video = false;
+            reset_AEB();
             do {
                 switch (menu_result = menu_popup_camera_execute()) {
                     case ACTION_MODE_MANUAL:
@@ -1158,7 +1163,6 @@ uint8_t UPDATE_state_camera(void) BANKED {
                 }
                 save_camera_state();
             } while (menu_result == MENU_RESULT_NO);
-            reset_AEB();
             COUNTER_RESET(camera_shutter_timer);
             COUNTER_RESET(camera_repeat_counter);
             camera_scrollbars_reinit();
@@ -1175,7 +1179,8 @@ uint8_t UPDATE_state_camera(void) BANKED {
 
 uint8_t LEAVE_state_camera(void) BANKED {
     fade_out_modal();
-    recording_video = FALSE;
+    recording_video = false;
+    reset_AEB();
     gbprinter_set_handler(NULL, 0);
     if (_is_COLOR) ir_sense_stop();
     scrollbar_destroy_all();

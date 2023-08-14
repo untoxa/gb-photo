@@ -138,7 +138,7 @@ CHECK_SIZE_NOT_LARGER(image_metadata_t, CAMERA_THUMB_TILE_WIDTH * 4 * 2);   // 4
 #define CURRENT_SETTINGS current_settings[OPTION(camera_mode)]
 extern camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
-extern uint8_t recording_video;
+extern bool recording_video;
 
 extern camera_shadow_regs_t SHADOW;
 
