@@ -66,6 +66,15 @@ typedef enum {
     idBrightness
 } camera_menu_e;
 
+typedef enum {
+    area_center = 0,
+    area_top,
+    area_right,
+    area_bottom,
+    area_left,
+    N_AUTOEXP_AREAS
+} autoexp_area_e;
+
 typedef struct table_value_t {
     uint8_t value;
     const uint8_t * caption;
@@ -98,6 +107,7 @@ typedef struct camera_state_options_t {
     bool display_exposure           : 1;
     uint8_t aeb_overexp_count;
     uint8_t aeb_overexp_step;
+    autoexp_area_e autoexp_area;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT

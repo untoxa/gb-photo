@@ -89,6 +89,13 @@
 #define ACTION_PRINT_FRAME_FIRST    ACTION_PRINT_FRAME0
 #define ACTION_PRINT_FRAME_LAST     ACTION_PRINT_FRAME11
 
+// autoexp areas
+#define ACTION_AUTOEXP_CENTER       110
+#define ACTION_AUTOEXP_TOP          111
+#define ACTION_AUTOEXP_RIGHT        112
+#define ACTION_AUTOEXP_BOTTOM       113
+#define ACTION_AUTOEXP_LEFT         114
+
 // global actions
 #define ACTION_MAIN_MENU            150
 #define ACTION_ABOUT                151

@@ -78,6 +78,8 @@ camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
 
+#define AUTOEXP_AREA_X      18
+#define AUTOEXP_AREA_Y      10
 #define SHUTTER_REPEAT_X    18
 #define SHUTTER_REPEAT_Y    12
 #define SHUTTER_TIMER_X     18
@@ -321,10 +323,28 @@ static void refresh_usage_indicator(void) {
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
+static void refresh_autoexp_area(void) {
+    switch(OPTION(autoexp_area)) {
+        case area_top:
+            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_TOP);
+            break;
+        case area_right:
+            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_RIGHT);
+            break;
+        case area_bottom:
+            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_BOTTOM);
+            break;
+        case area_left:
+            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_LEFT);
+            break;
+    }
+}
+
 static void refresh_screen(void) {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     display_last_seen(true);
     refresh_usage_indicator();
+    refresh_autoexp_area();
     scrollbar_repaint_all();
 }
 
@@ -924,7 +944,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
 #ifdef ENABLE_AUTOEXP
         else if (OPTION(camera_mode) == camera_mode_auto) {
-            int16_t error = (calculate_histogram() - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
+            int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
             SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
             int32_t new_exposure, current_exposure = SETTING(current_exposure);
@@ -1152,6 +1172,16 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                         break;
                     }
+                    case ACTION_AUTOEXP_CENTER:
+                    case ACTION_AUTOEXP_TOP:
+                    case ACTION_AUTOEXP_RIGHT:
+                    case ACTION_AUTOEXP_BOTTOM:
+                    case ACTION_AUTOEXP_LEFT:
+                        static const autoexp_area_e aareas[] = {
+                            area_center, area_top, area_right, area_bottom, area_left
+                        };
+                        OPTION(autoexp_area) = aareas[menu_result - ACTION_AUTOEXP_CENTER];
+                        break;
                     case ACTION_RESTORE_DEFAULTS:
                         restore_default_mode_settings(OPTION(camera_mode));
                         RENDER_CAM_REGISTERS();

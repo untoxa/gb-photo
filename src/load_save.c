@@ -37,7 +37,8 @@ const camera_state_options_t default_camera_state_options = {
     .cgb_palette_idx = 0,
     .display_exposure = false,
     .aeb_overexp_count = 4,
-    .aeb_overexp_step = 0
+    .aeb_overexp_step = 0,
+    .autoexp_area = area_center
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {

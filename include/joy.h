@@ -43,6 +43,10 @@ inline uint8_t KEY_PRESSED(uint8_t key) {
     return ((joy & ~old_joy) & key);
 }
 
+inline uint8_t KEY_DOWN(uint8_t key) {
+    return (joy & key);
+}
+
 inline void JOYPAD_RESET(void) {
     joy = old_joy = 0;
 #if (INT_DRIVEN_JOYPAD==1)

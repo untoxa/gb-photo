@@ -61,6 +61,12 @@
 #define ICON_SELECT         "\x1c\x1d"
 #define ICON_START          "\x1e\x1f"
 
+// autoexp areas
+#define ICON_AUTOEXP_TOP    "\x02\x01"
+#define ICON_AUTOEXP_RIGHT  "\x02\x02"
+#define ICON_AUTOEXP_BOTTOM "\x02\x03"
+#define ICON_AUTOEXP_LEFT   "\x02\x04"
+
 BANKREF_EXTERN(module_misc_assets)
 
 inline void misc_render_progressbar(uint8_t value, uint8_t size, uint8_t * buffer) {

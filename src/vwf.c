@@ -84,12 +84,19 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str) {
     while (*ui_text_ptr) {
         switch (*ui_text_ptr) {
             case 0x01:
+                // activate font
                 vwf_activate_font(*++ui_text_ptr);
                 break;
+            case 0x02:
+                // escape character
+                vwf_print_render(*++ui_text_ptr);
+                break;
             case 0x03:
+                // set inverse map
                 vwf_inverse_map = *++ui_text_ptr;
                 break;
             case '\t':
+                // tab character
                 set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                 if (!vwf_current_offset) {
                     vwf_current_tile += VWF_TILE_SIZE;

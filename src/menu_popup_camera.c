@@ -28,6 +28,7 @@ typedef enum {
     idPopupCameraMode,
     idPopupCameraTrigger,
     idPopupCameraAction,
+    idPopupCameraArea,
     idPopupTriggerAButton,
     idPopupTriggerTimerValue,
     idPopupTriggerTimerCounter,
@@ -313,9 +314,56 @@ const menu_t ActionSubMenu = {
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
 
+const menu_item_t AutoexpAreaSubMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 1, .width = 9,
+        .caption = " Center",
+        .helpcontext = " Center exposure area",
+        .onPaint = NULL,
+        .result = ACTION_AUTOEXP_CENTER
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 2, .width = 9,
+        .caption = " Top",
+        .helpcontext = " Top exposure area",
+        .onPaint = NULL,
+        .result = ACTION_AUTOEXP_TOP
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 9,
+        .caption = " Right",
+        .helpcontext = " Right exposure area",
+        .onPaint = NULL,
+        .result = ACTION_AUTOEXP_RIGHT
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 9,
+        .caption = " Bottom",
+        .helpcontext = " Bottom exposure area",
+        .onPaint = NULL,
+        .result = ACTION_AUTOEXP_BOTTOM
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 5, .width = 9,
+        .caption = " Left",
+        .helpcontext = " Left exposure area",
+        .onPaint = NULL,
+        .result = ACTION_AUTOEXP_LEFT
+    }
+};
+const menu_t AutoexpAreaSubMenu = {
+    .x = 5, .y = 4, .width = 11, .height = LENGTH(AutoexpAreaSubMenuItems) + 2,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
+    .items = AutoexpAreaSubMenuItems, .last_item = LAST_ITEM(AutoexpAreaSubMenuItems),
+    .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
+    .onTranslateKey = NULL, .onTranslateSubResult = NULL
+};
+
 
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t onCameraPopupMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t CameraMenuItems[] = {
     {
         .sub = &CameraModeSubMenu, .sub_params = NULL,
@@ -324,6 +372,7 @@ const menu_item_t CameraMenuItems[] = {
         .caption = " Mode\t\t%s",
         .helpcontext = " Select camera mode",
         .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
         .result = MENU_RESULT_NONE
     }, {
         .sub = &TriggerSubMenu, .sub_params = NULL,
@@ -332,6 +381,7 @@ const menu_item_t CameraMenuItems[] = {
         .caption = " Trigger\t%s",
         .helpcontext = " Trigger behavior",
         .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
         .result = MENU_RESULT_NONE
     }, {
         .sub = &ActionSubMenu, .sub_params = NULL,
@@ -340,14 +390,25 @@ const menu_item_t CameraMenuItems[] = {
         .caption = " Action\t\t%s",
         .helpcontext = " Post-processing action",
         .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
+        .result = MENU_RESULT_NONE
+    }, {
+        .sub = &AutoexpAreaSubMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 13,
+        .id = idPopupCameraArea,
+        .caption = " Exp. area\t%s",
+        .helpcontext = " Select exposure area",
+        .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
         .result = MENU_RESULT_NONE
     }, {
         .sub = &YesNoMenu, .sub_params = "Restore defaults?",
-        .ofs_x = 1, .ofs_y = 4, .width = 13,
+        .ofs_x = 1, .ofs_y = 5, .width = 13,
         .id = idPopupCameraRestore,
         .caption = " Restore defaults",
         .helpcontext = " Restore default settings",
         .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_RESTORE_DEFAULTS
     }
 };
@@ -391,6 +452,14 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [after_action_picnrec_video]    = "[P'n'R " ICON_REC "]",
         [after_action_transfer_video]   = "[Trn " ICON_REC"]"
     };
+    static const uint8_t * const autoexp_areas[N_AUTOEXP_AREAS] = {
+        [area_center]                   = "[Center]",
+        [area_top]                      = "[Top]",
+        [area_right]                    = "[Right]",
+        [area_bottom]                   = "[Bottom]",
+        [area_left]                     = "[Left]"
+    };
+
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
             strcpy(text_buffer, self->caption);
@@ -404,11 +473,23 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         case idPopupCameraAction:
             sprintf(text_buffer, self->caption, after_actions[OPTION(after_action)]);
             break;
+        case idPopupCameraArea:
+            sprintf(text_buffer, self->caption, autoexp_areas[OPTION(autoexp_area)]);
+            break;
         default:
             *text_buffer = 0;
             break;
     }
     return text_buffer;
+}
+uint8_t onCameraPopupMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
+    switch ((camera_popup_menu_e)self->id) {
+        case idPopupCameraArea:
+            return (OPTION(camera_mode) == camera_mode_auto) ? ITEM_DEFAULT : ITEM_DISABLED;
+        default:
+            return ITEM_DEFAULT;
+    }
 }
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
@@ -422,7 +503,6 @@ uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t *
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
     return 0;
 }
-
 
 uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_timer_value = OPTION(shutter_timer);
