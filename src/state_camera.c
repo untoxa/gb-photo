@@ -662,11 +662,11 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                             AEB_exposure_list[MIDDLE_AEB_IMAGE] = SETTING(current_exposure);
                             // under-exposure in i steps
                             for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MIDDLE_AEB_IMAGE - aeb_over_counter); i--) {
-                                AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> aeb_shift), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                                AEB_exposure_list[i - 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] - (AEB_exposure_list[i] >> aeb_shift), (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
                             }
                             // over-exposure in i steps
                             for (uint8_t i = MIDDLE_AEB_IMAGE; i != (MIDDLE_AEB_IMAGE + aeb_over_counter); i++) {
-                                AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> aeb_shift), AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+                                AEB_exposure_list[i + 1] = CONSTRAINT((int32_t)AEB_exposure_list[i] + (AEB_exposure_list[i] >> aeb_shift), (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
                             }
                             break;
                         }
@@ -952,7 +952,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 new_exposure = current_exposure + ((error_negative) ? -1 : 1);
             } else new_exposure = current_exposure;
 
-            uint16_t result_exposure = CONSTRAINT(new_exposure, AUTOEXP_LOW_LIMIT, AUTOEXP_HIGH_LIMIT);
+            uint16_t result_exposure = CONSTRAINT(new_exposure, (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
             if (result_exposure != SETTING(current_exposure)) {
                 SETTING(current_exposure) = result_exposure;
                 RENDER_EDGE_FROM_EXPOSURE();

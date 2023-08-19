@@ -11,6 +11,9 @@
 #define TO_EXPOSURE_VALUE(A) ((uint16_t)((A) >> 4))
 #define FROM_EXPOSURE_VALUE(A) (((uint32_t)(A)) << 4)
 
+#define EXPOSURE_LOW_LIMIT TO_EXPOSURE_VALUE(256)
+#define EXPOSURE_HIGH_LIMIT CAM02_MAX_VALUE
+
 BANKREF_EXTERN(state_camera)
 
 typedef enum {
