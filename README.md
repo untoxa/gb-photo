@@ -19,7 +19,7 @@ After booting, the user has access to **Camera Mode**, for taking pictures, to *
 
 ## Main interface
 
-![Main menu](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main%20menu.png)
+![Main menu](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
 
 ## Camera Mode
 
