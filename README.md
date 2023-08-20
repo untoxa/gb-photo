@@ -42,7 +42,7 @@ The main interface brings you to the 5 main menus by pressing START after boot. 
 - **A Button** is the most simple action: press A once to get an **Action**.
 - **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**.
 - **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**.
-- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images).
+- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). Images can be processed together to make and HDR image (High definition range) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
 
 **Timer** and **Repeat** can be cancelled by pressing B button.
 
