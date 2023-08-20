@@ -67,6 +67,7 @@ const menu_item_t AboutMenuItems[] = {
 };
 const menu_t AboutMenu = {
     .x = 1, .y = 0, .width = 18, .height = 18,
+    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = AboutMenuItems, .last_item = LAST_ITEM(AboutMenuItems),
     .onShow = onShowAbout, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
