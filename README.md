@@ -15,7 +15,7 @@ Photo! is also compatible with [mBGA](https://mgba.io/) and [PizzaBoy](https://p
 # Photo! with its serial remote controller
 ![Showcase](doc/Showcase.jpg)
 
-Example of use: Photo! working on a GB Boy Colour and remotely controlled from a Game Boy Color.
+Example of use: Photo! working on a GB Boy Colour and remotely controlled from a Game Boy Color with a serial cable.
 
 # User Manual in brief
 
