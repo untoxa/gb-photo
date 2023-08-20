@@ -80,6 +80,8 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 ![multiple selection mode](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_ram_2.png)
 
+You can access a thumbnail viewer by pressing A when viewing an image. It allows batch selecting, erasing, printing and transfering images.
+
 ## Save slots in rom
 
 ![Slots in rom](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_rom.png)
