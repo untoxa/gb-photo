@@ -15,6 +15,8 @@ Photo! is also compatible with [mBGA](https://mgba.io/) and [PizzaBoy](https://p
 # Photo! with its serial remote controller
 ![Showcase](doc/Showcase.jpg)
 
+Example of use: Photo! working on a GB Boy Colour and remotely controlled from a Game Boy Color.
+
 # User Manual in brief
 
 The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features slow transfer rate and a unique "color" palette. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
