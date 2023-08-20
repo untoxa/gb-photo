@@ -8,20 +8,20 @@ This project is a homebrew enhancing the capabilities of the Game Boy Camera by 
 
 This project requires the reflashable Game Boy Camera cart. PCB's and building instructions may be found [in this first project](https://github.com/HDR/Gameboy-Camera-Flashcart/) or [in this second project](https://github.com/2BitWizard/GB_Mini_Camera). The two projects are not covered by the same license so read carefully the disclaimers before choosing one. Both require advanced skill in soldering and are not recommended for beginners. Additionnaly, a generic flashable cartridge is necessary to remote control the camera via serial cable.
 
-The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data. It can even fix bad saves.
+The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data. Technically all camera parameters are stored in various empty area of the camera working ram. They do not interfere with a regular camera rom as all checksums are systematically verified.
 
 # Photo! with its serial remote controller
 ![Showcase](doc/Showcase.jpg)
 
 # User Manual in brief
 
-The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features slow transfer rate and a unique "color" palette. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible.
+The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features slow transfer rate and a unique "color" palette. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
 
 ## Main interface
 
 ![Main menu](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
 
-The main interface brings you to the 5 main menus by pressing START after boot.
+The main interface brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A.
 
 - The **Camera mode** is where you take photos. It features 3 mode of image capturing.
 - The **Camera roll in ram** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is limited to 30 images.
@@ -42,6 +42,7 @@ The main interface brings you to the 5 main menus by pressing START after boot.
 - **A Button** is the most simple action: press A once to get an **Action**.
 - **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**.
 - **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**.
+- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images).
 
 **Timer** and **Repeat** can be cancelled by pressing B button.
 
@@ -58,10 +59,13 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/).
 - **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/)
 
+### Exp. area menu
+- Allows varying the area of image where exposure is calculated in **Auto Mode**. Can be centred, left, right, top or bottom. 
+
 ### Restore Default menu
 - Allows to come back to factory settings, in particular if situation is becoming messy in **Manual Mode**.
 
-## Image Gallery
+## Camera roll in ram (or Gallery)
 
 ![Image Gallery mode](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_ram.png)
 
