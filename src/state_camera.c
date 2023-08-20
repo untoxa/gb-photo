@@ -324,20 +324,11 @@ static void refresh_usage_indicator(void) {
 }
 
 static void refresh_autoexp_area(void) {
-    switch(OPTION(autoexp_area)) {
-        case area_top:
-            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_TOP);
-            break;
-        case area_right:
-            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_RIGHT);
-            break;
-        case area_bottom:
-            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_BOTTOM);
-            break;
-        case area_left:
-            menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ICON_AUTOEXP_LEFT);
-            break;
-    }
+    static const uint8_t * const area_indicators[N_AUTOEXP_AREAS] = {
+        "", " " ICON_AUTOEXP_TOP, " " ICON_AUTOEXP_RIGHT, " " ICON_AUTOEXP_BOTTOM, " " ICON_AUTOEXP_LEFT
+    };
+    if (OPTION(camera_mode) != camera_mode_auto) return;
+    menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, area_indicators[OPTION(autoexp_area)]);
 }
 
 static void refresh_screen(void) {
