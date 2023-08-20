@@ -82,7 +82,7 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 You can access a thumbnail viewer by pressing A when viewing an image. It allows batch selecting, erasing, printing and transfering images.
 
-## Save slots in rom
+## Save slots in rom (or flash storage)
 
 ![Slots in rom](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_rom.png)
 
