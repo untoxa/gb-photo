@@ -90,9 +90,17 @@ You can access a thumbnail viewer by pressing A when viewing an image. It allows
 
 ![Main options](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_options.png)
 
-- **Frame** allows selecting no frame, normal frame or wild frames.
-- **Fast Printing** allows switching all print mode from 8 kHz (1 kB/s) to 256 kHz (32 kB/s) by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
-- **Alt. SGB borders** allows switching between two Super Game Boy borders.
+- **Frame** allows selecting no frame, normal frame or wild frames. Try'm all !
+- **Palette** proposes a choice of fancy palettes for the Game Boy Color and Game Boy Advance
+- **Fast printing** allows switching all print mode from 8 kHz (1 kB/s) to 256 kHz (32 kB/s) by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
+- **Alt. SGB borders** allows switching between two Super Game Boy borders. Compatible with PAL and NTSC Super NES !
+- **Show screen grid** displays crosses following the rule of thirds.
+- **Save confirmation** adds or removes the double A input to save an image. Without save confirmation, camera acts like a burst mode. With save confirmation, like a real Game Boy Camera.
+- **IR remote** enable using the IR port to trigger image capture. Any IR emitting device (TV remote control, other Game Boy Color, IR LED) does the job !
+- **Quick Boot** Shunts any boot screen and drive you immediately to the **Camera mode**. Ideal for sneak attack !
+- **Flip live image** reverses the screen so that image appears in correct orientation when using a GBA SP, without the need for any additionnal device.
+- **Double speed** enables the Game Boy Color Double Speed Mode where everything goes twice faster (internal clock, printing, screen refreshing, inputs, etc.). This mode draws more current, avoid this when using a modded Game Boy Pocket. This mode also drives the sensor twice faster, so exposure times are all divided by 2.
+- **Display exposure** indicates the exposure time of the sensor in **Auto mode**.
 
 ## Some technical considerations
 The Mitsubishi M64282FP artificial retina is one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of [masked pixels](doc/Mitsubishi%20M64282FP_detail%20of%20light%20sensors.png) uses to measure the voltage response of sensor in full darkness. The [sensor documentation](doc/M64282FP-datasheet.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
@@ -106,7 +114,6 @@ The M64282FP working parameters are set by 8 bytes (plus their 3-bits addresses)
 - The **Sensor Voltage Reference** (register V, 3 bits) is a crude voltage bias applied to the output. It is not modified by the Game Boy Camera (and set by default to 1.5 volts). It typically allows to have a match between the min/max output voltage and the min/max input voltage allowed by the external ADC converter used with the sensor. The M64282FP is able to automatically set the the voltage reading of dark pixels at the **Sensor Voltage Reference** via the **Sensor Zero Point** register Z.
 - The **Inverse Output** (register I, 1 bit) performs an hardware negative image.
 - The **Edge enhancement** is performed by playing on the **Sensor Edge Operation** (register VH, 2 bits), the **Sensor Edge Ratio** (register E, 4 bits) and the **Sensor Edge Exclusive** (register N, 1 bit). It drastically improves the sharpness of the sensor image which is natively very soft without this feature.
-
 Surprisingly, the **Contrast** is not modified by the sensor itself but is set by the MAC-GBD by sending [dithering matrices](src/dither_patterns.c) derived from [Bayer matrices](https://en.wikipedia.org/wiki/Ordered_dithering).
 
 ## Remote control packet format
