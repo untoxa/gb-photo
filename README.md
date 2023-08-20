@@ -21,6 +21,14 @@ The repo contains two sets of roms. One set is compiled for DMG Game boy and Gam
 
 ![Main menu](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
 
+The main interface brings you to the 5 main menus by pressing START after boot.
+
+- The **Camera mode** is where you take photos. It features 3 mode of image capturing.
+- The **Camera roll in ram** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is limited to 30 images.
+- The **Camera roll in rom** is a storage menu. Photo! is a 128kB rom and the MAC-GBD allows dealing with 1MB roms. All space after the 128kB of rom are writable by Photo! to store camera rolls. It allows storing 7 rolls of 30 images into flash memory, increasing the total number of images stored in Photo! to 240 (30 in ram, 210 in flash memory).
+- The **Main options** menu features general parameters like palettes, Double Speed Mode, SGB borders, etc.
+- The **Credits** features... the credits to the Photo! authors, artists, coders, debuggers.
+
 ## Camera Mode
 
 ![Camera mode](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Camera_Mode.png)
