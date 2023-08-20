@@ -4,18 +4,18 @@
 
 **[More recent builds may be downloaded from the CI](https://github.com/untoxa/gb-photo/actions)** under the "Build and package ROM" link (you must be logged into github to download the build artifacts). Please note, that those are development builds and may not be properly tested and thus contain imcomplete features or bugs, use them on your own risk.
 
-This project requires the reflashable Game Boy Camera cart. PCB's and build instructions may be found [here](https://github.com/HDR/Gameboy-Camera-Flashcart/). Additionnaly, a generic flashable cartridge is necessary to remote control the camera via serial cable.
-
 This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with all known models of Game Boy printer and Game Boy printer emulator. The project features Game Boy And Game Boy Color versions.
 
-The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data.
+This project requires the reflashable Game Boy Camera cart. PCB's and building instructions may be found [in this first project](https://github.com/HDR/Gameboy-Camera-Flashcart/) or [in this second project](https://github.com/2BitWizard/GB_Mini_Camera). Both require advanced skill in soldering and are not recommended for beginners. Additionnaly, a generic flashable cartridge is necessary to remote control the camera via serial cable.
+
+The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data. It can even fix bad saves.
 
 # Photo! with its serial remote controller
 ![Showcase](doc/Showcase.jpg)
 
-# User Manual
+# User Manual in brief
 
-After booting, the user has access to **Camera Mode**, for taking pictures, to **Image Gallery** to view and print pictures and to **Settings** for tuning general parameters. To use the remote controller feature, just plug a serial cable connected to a Game Boy playing the `photo-remote.gb or .gbc` rom.
+The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features slow transfer rate and a unique "color" palette. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible.
 
 ## Main interface
 
