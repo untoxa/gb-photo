@@ -95,7 +95,7 @@ The flash storage of images is a unique feature from Photo! It allows dumping th
 - **Load from slot** moves all the images contained in one slected slot to the sram. Beware, it wipes all the preceding images on ram !
 - **Erase slot** well, erases a selected slot. Image are still recoverable with a dedicated tool in case of mistake.
 - **Print slot** sends the whole roll in slot to any GB printer compatible device.
-- **Transfer slot** sends the whole roll in slot to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) at high baudrate.
+- **Transfer slot** sends the whole roll in slot to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) at high baudrate. **Compatible with Game Boy Color only !**
 - **Clear roll** erases the current roll (the ram). So **Save roll to slot** + **Clear roll** = **Move roll to slot.**
 
 ## Settings
