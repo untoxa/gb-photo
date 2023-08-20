@@ -172,6 +172,7 @@ static void refresh_screen(void) {
     thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
 
     sprintf(text_buffer, "%hd/%hd", (uint8_t)((OPTION(gallery_picture_idx) < images_taken()) ? (OPTION(gallery_picture_idx) + 1) : 0), (uint8_t)images_taken());
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_A " select " ICON_START "/" ICON_SELECT " for menus");
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
 }
 
@@ -226,13 +227,13 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
             }
         };
         PLAY_SFX(sound_menu_alter);
-    } else if (KEY_PRESSED(J_A)) {
+    } else if (KEY_PRESSED(J_B)) {
         OPTION(gallery_picture_idx) = coords_to_picture_no(cx, cy);
         save_camera_state();
         PLAY_SFX(sound_ok);
         CHANGE_STATE(state_gallery);
         return 0;
-    } else if (KEY_PRESSED(J_B)) {
+    } else if (KEY_PRESSED(J_A)) {
         uint8_t idx = coords_to_index(cx, cy);
         if (idx < VECTOR_LEN(used_slots)) {
             selected_images[idx] = !selected_images[idx];
