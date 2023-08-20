@@ -10,7 +10,7 @@ This project requires a reflashable Game Boy Camera cart. PCB's and building ins
 
 The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data. Technically all camera parameters are stored in various empty area of the camera working ram. They do not interfere with a regular camera rom as all checksums are systematically verified.
 
-Photo! is also compatible with [mBGA](https://mgba.io/) and [PizzaBoy](https://play.google.com/store/apps/details?id=it.dbtecno.pizzaboypro&hl=fr&gl=US) among other non yet tested emulators.
+Photo! is also compatible with [mBGA](https://mgba.io/), [SameBoy](https://sameboy.github.io/) and [PizzaBoy](https://play.google.com/store/apps/details?id=it.dbtecno.pizzaboypro&hl=fr&gl=US) among other non yet tested emulators.
 
 # Photo! with its serial remote controller
 ![Showcase](doc/Showcase.jpg)
