@@ -698,25 +698,29 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             camera_do_shutter = false;
             capture_triggered = false;
         } else {
-            if (OPTION(camera_mode) == camera_mode_auto) {
-                PLAY_SFX(sound_menu_alter);
-                // reset both brightness and contrast to defaults, adjust the sliders
-                scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
-                scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_SETS);
-                save_camera_mode_settings(OPTION(camera_mode));
-                // change of contrast means reloading of the dithering pattern
-                SWITCH_RAM(CAMERA_BANK_REGISTERS);
-                RENDER_CAM_REG_DITHERPATTERN();
-            }
+            // open the main menu
+            capture_triggered = false;
+            return ACTION_MAIN_MENU;
         }
     } else if (KEY_PRESSED(J_SELECT)) {
         // select opens popup-menu
         capture_triggered = false;
         return ACTION_CAMERA_SUBMENU;
     } else if (KEY_PRESSED(J_START)) {
-        // start open main menu
-        capture_triggered = false;
-        return ACTION_MAIN_MENU;
+        if (OPTION(camera_mode) == camera_mode_auto) {
+            PLAY_SFX(sound_menu_alter);
+            // reset both brightness and contrast to defaults, adjust the sliders
+            scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
+            scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_SETS);
+            save_camera_mode_settings(OPTION(camera_mode));
+            // change of contrast means reloading of the dithering pattern
+            SWITCH_RAM(CAMERA_BANK_REGISTERS);
+            RENDER_CAM_REG_DITHERPATTERN();
+        } else {
+            // open main menu in other modes
+            capture_triggered = false;
+            return ACTION_MAIN_MENU;
+        }
     }
 
     static uint8_t selection_item_id;
