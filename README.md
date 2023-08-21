@@ -25,7 +25,7 @@ The repo contains two sets of roms. One set is compiled for DMG Game boy and Gam
 
 ![Main Hub](doc/Images/Main_Hub.png)
 
-The main hub brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A/B/SELECT.
+The **main hub** brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A/B/SELECT.
 
 - The **Camera mode** is where you take photos. It features 3 different mode for image capturing (see next section).
 - The **Gallery** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is natively limited to 30 images.
@@ -94,7 +94,7 @@ You can access a thumbnail viewer by pressing A when viewing an image. It allows
 
 ![Flash Storage](doc/Images/Flash_storage.png)
 
-The flash storage of images is a unique feature from Photo! It allows dumping the whole ram (a "roll") to dedicated areas (the "slots") in the flash memory after the 128 kB of rom. It is intended to be used as film storage in case you do not have a printer with you. 7 storage slots of 30 images capacity are available in total. In the main menu, just choosing a full slot by pushing A allows browsing, printing, restoring to ram and transfering its images. The [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) and the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager) are able to directly get the images from a rom dump without moving them into ram. The [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) is also able to get a roll directly without moving it to ram.
+The **flash storage** of images is a unique feature from Photo! It allows dumping the whole ram (a "roll") to dedicated areas (the "slots") in the flash memory after the 128 kB of rom. It is intended to be used as film storage in case you do not have a printer with you. 7 storage slots of 30 images capacity are available in total. In the main menu, just choosing a full slot by pushing A allows browsing, printing, restoring to ram and transfering its images. The [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) and the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager) are able to directly get the images from a rom dump without moving them into ram. The [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) is also able to get a roll directly without moving it to ram.
 
 - **Save roll to slot** is the action of dumping the whole ram (roll) to a flash memory slot. **Its does not erase the pictures from ram.**
 - **Move roll to slot** do the same as **Save roll to slot** but **it wipes all images from ram.**
