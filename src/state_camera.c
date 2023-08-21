@@ -661,7 +661,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         COUNTER_SET(camera_repeat_counter, OPTION(shutter_counter));
                     case trigger_mode_timer:
                         camera_charge_timer(OPTION(shutter_timer));
-                        COUNTER_SET(camera_AEB_counter, 0);
+                        COUNTER_RESET(camera_AEB_counter);
                         break;
                     case trigger_mode_AEB: {
                             if (AEB_capture_in_progress) break;
