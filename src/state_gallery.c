@@ -455,11 +455,9 @@ uint8_t UPDATE_state_gallery(void) BANKED {
                 break;
         }
         OPTION(gallery_picture_idx) = refresh_screen();
-    } else if (KEY_PRESSED(J_START)) {
+    } else if (KEY_PRESSED(J_START) || KEY_PRESSED(J_B)) {
         // run Main Menu
         if (!menu_main_execute()) refresh_screen();
-    } else if (KEY_PRESSED(J_B)) {
-        PLAY_SFX(sound_error);
     }
     return TRUE;
 }

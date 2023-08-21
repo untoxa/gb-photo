@@ -544,8 +544,6 @@ void update_mode_folders(void) {
             if (VECTOR_LEN(flash_image_slots) % MAX_FLASHER_THUMBNAILS) thumbnails_num_pages++;
             PLAY_SFX(sound_menu_alter);
         } else PLAY_SFX(sound_error);
-    } else if (KEY_PRESSED(J_B)) {
-        PLAY_SFX(sound_error);
     }
     update_mode_folders_cursor();
 }
@@ -702,7 +700,7 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                 refresh_screen();
             } else PLAY_SFX(sound_error);
         }
-    } else if (KEY_PRESSED(J_START)) {
+    } else if (KEY_PRESSED(J_START) || ((browse_mode == browse_mode_folders) && (KEY_PRESSED(J_B)))) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         if (!menu_main_execute()) refresh_screen();
