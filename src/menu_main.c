@@ -59,15 +59,15 @@ uint8_t onShowAbout(const struct menu_t * self, uint8_t * param);
 const menu_item_t AboutMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 13, .ofs_y = 16, .width = 4,
+        .ofs_x = 13, .ofs_y = 14, .width = 4,
         .caption = " " ICON_A " Ok",
         .onPaint = NULL,
-        .result = MENU_RESULT_OK
+        .result = ACTION_NONE
     }
 };
 const menu_t AboutMenu = {
-    .x = 1, .y = 0, .width = 18, .height = 18,
-    .cancel_mask = J_B, .cancel_result = ACTION_NONE,
+    .x = 1, .y = 1, .width = 18, .height = 16,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = AboutMenuItems, .last_item = LAST_ITEM(AboutMenuItems),
     .onShow = onShowAbout, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
@@ -83,14 +83,12 @@ uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     menu_text_out(self->x +  1, self->y +  4, 0, BLACK_ON_WHITE, "Development:");
     menu_text_out(self->x +  2, self->y +  5, 0, DK_GR_ON_WHITE, "Toxa, Andreas Hahn");
     menu_text_out(self->x +  2, self->y +  6, 0, DK_GR_ON_WHITE, "Raphael Boichot, Hatch");
-    menu_text_out(self->x +  1, self->y +  7, 0, BLACK_ON_WHITE, "Sound:");
-    menu_text_out(self->x +  2, self->y +  8, 0, DK_GR_ON_WHITE, "Tronimal");
-    menu_text_out(self->x +  1, self->y +  9, 0, BLACK_ON_WHITE, "Art:");
-    menu_text_out(self->x +  2, self->y + 10, 0, DK_GR_ON_WHITE, "rembrandx, 2BitPit");
-    menu_text_out(self->x +  2, self->y + 11, 0, DK_GR_ON_WHITE, "NeoRame, bbbbbr");
-    menu_text_out(self->x +  1, self->y + 12, 0, BLACK_ON_WHITE, "Special thanks:");
-    menu_text_out(self->x +  2, self->y + 13, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
-    menu_text_out(self->x +  2, self->y + 14, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
+    menu_text_out(self->x +  1, self->y +  7, 0, BLACK_ON_WHITE, "Art and Sound:");
+    menu_text_out(self->x +  2, self->y +  8, 0, DK_GR_ON_WHITE, "Tronimal, 2BitPit, bbbbbr");
+    menu_text_out(self->x +  2, self->y +  9, 0, DK_GR_ON_WHITE, "rembrandx, NeoRame");
+    menu_text_out(self->x +  1, self->y + 10, 0, BLACK_ON_WHITE, "Special thanks:");
+    menu_text_out(self->x +  2, self->y + 11, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
+    menu_text_out(self->x +  2, self->y + 12, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
     vwf_activate_font(0);
     return MENU_PROP_NO_FRAME;
 }
@@ -99,7 +97,6 @@ uint8_t onTranslateKeyMainMenu(const struct menu_t * menu, const struct menu_ite
 uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onShowMain(const menu_t * self, uint8_t * param);
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection);
-uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 const menu_item_t MainMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
@@ -143,7 +140,7 @@ const menu_t MainMenu = {
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = MainMenuItems, .last_item = LAST_ITEM(MainMenuItems),
     .onShow = onShowMain, .onIdle = onIdleMainMenu, .onHelpContext = onHelpMainMenu,
-    .onTranslateKey = onTranslateKeyMainMenu, .onTranslateSubResult = onTranslateSubResultMainMenu
+    .onTranslateKey = onTranslateKeyMainMenu, .onTranslateSubResult = NULL
 };
 
 uint8_t onTranslateKeyMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
@@ -167,13 +164,6 @@ uint8_t onShowMain(const menu_t * self, uint8_t * param) {
     screen_load_image_banked(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H, main_menu_tiles, BANK(main_menu), IMAGE_NORMAL);
     screen_restore_rect(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H);
     return (MENU_PROP_SHADOW | MENU_PROP_SELECTION);
-}
-uint8_t onTranslateSubResultMainMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
-    menu;
-    if (self->sub == &AboutMenu) {
-        return (value == MENU_RESULT_OK) ? self->result : ACTION_NONE;
-    }
-    return value;
 }
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
