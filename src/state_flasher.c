@@ -601,8 +601,11 @@ bool clear_camera_roll(void) {
 
 uint8_t UPDATE_state_flasher(void) BANKED {
     static uint8_t menu_result;
+    static enum brows_mode_e old_browse_mode;
+
     PROCESS_INPUT();
 
+    old_browse_mode = browse_mode;
     if (browse_mode == browse_mode_folders) update_mode_folders(); else update_mode_thumbnails();
 
     if (KEY_PRESSED(J_SELECT)) {
@@ -700,7 +703,7 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                 refresh_screen();
             } else PLAY_SFX(sound_error);
         }
-    } else if (KEY_PRESSED(J_START) || ((browse_mode == browse_mode_folders) && (KEY_PRESSED(J_B)))) {
+    } else if (KEY_PRESSED(J_START) || ((old_browse_mode == browse_mode_folders) && (KEY_PRESSED(J_B)))) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         if (!menu_main_execute()) refresh_screen();
