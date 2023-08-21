@@ -23,7 +23,7 @@ The repo contains two sets of roms. One set is compiled for DMG Game boy and Gam
 
 ## Main hub
 
-![doc/Images/Main_Hub.png](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
+![Main Hub](doc/Images/Main_Hub.png)
 
 The main hub brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A.
 
@@ -35,7 +35,7 @@ The main hub brings you to the 5 main menus by pressing START after boot. You ca
 
 ## Camera Mode
 
-![doc/Images/Camera_Mode.png](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Camera_Mode.png)
+![Camera Mode](doc/Images/Camera_Mode.png)
 
 ### Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
