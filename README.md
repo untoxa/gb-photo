@@ -29,7 +29,7 @@ The main hub brings you to the 5 main menus by pressing START after boot. You ca
 
 - The **Camera mode** is where you take photos. It features 3 mode of image capturing.
 - The **Gallery** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is limited to 30 images.
-- The **Flash storage ** is a local mass storage system for images. Photo! is a 128kB rom and the MAC-GBD allows dealing with 1MB roms. All space after the 128kB of rom are writable by Photo! to store camera rolls. It allows storing 7 rolls of 30 images into flash memory, increasing the total number of images stored in Photo! to 240 (30 in ram, 210 in flash memory).
+- The **Flash storage** is a local mass storage system for images. Photo! is a 128kB rom and the MAC-GBD allows dealing with 1MB roms. All space after the 128kB of rom are writable by Photo! to store camera rolls. It allows storing 7 rolls of 30 images into flash memory, increasing the total number of images stored in Photo! to 240 (30 in ram, 210 in flash memory).
 - The **Main options** menu features general parameters like palettes, Double Speed Mode, SGB borders, etc.
 - The **Credits** features... the credits to the Photo! authors, artists, coders, debuggers.
 
