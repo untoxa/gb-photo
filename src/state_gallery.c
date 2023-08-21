@@ -332,7 +332,7 @@ uint8_t gallery_print_info(void) {
 static uint8_t refresh_screen(void) {
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Camera roll");
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_START "/" ICON_SELECT " for menus");
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_B "/" ICON_START " or " ICON_SELECT " for menus");
     return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }
 
