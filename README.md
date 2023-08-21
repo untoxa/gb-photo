@@ -19,16 +19,16 @@ Example of use: Photo! working on a GB Boy Colour and remotely controlled from a
 
 # User Manual in brief
 
-The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features slow transfer rate and a unique "color" palette. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
+The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features same slow transfer rate and a default "color" palette, as the original camera. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
 
 ## Main hub
 
 ![Main Hub](doc/Images/Main_Hub.png)
 
-The main hub brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A.
+The main hub brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A/B/SELECT.
 
-- The **Camera mode** is where you take photos. It features 3 mode of image capturing.
-- The **Gallery** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is limited to 30 images.
+- The **Camera mode** is where you take photos. It features 3 different mode for image capturing (see next section).
+- The **Gallery** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is natively limited to 30 images.
 - The **Flash storage** is a local mass storage system for images. Photo! is a 128kB rom and the MAC-GBD allows dealing with 1MB roms. All space after the 128kB of rom are writable by Photo! to store camera rolls. It allows storing 7 rolls of 30 images into flash memory, increasing the total number of images stored in Photo! to 240 (30 in ram, 210 in flash memory).
 - The **Main options** menu features general parameters like palettes, Double Speed Mode, SGB borders, etc.
 - The **Credits** features... the credits to the Photo! authors, artists, coders, debuggers.
@@ -37,21 +37,23 @@ The main hub brings you to the 5 main menus by pressing START after boot. You ca
 
 ![Camera Mode](doc/Images/Camera_Mode.png)
 
+The camera modes was created to propose many more features than a regular camera like infinite time-lapse, ultra-fast transmission, full manual mode, support of third party devices, etc.
+
 ### Capture Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
 - The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time.
-- The **Manual Mode** allows **modifying all the parameters** of the camera sensor that can be sent to the MAC-GBD.
+- The **Manual Mode** allows **modifying all the parameters** of the camera sensor that can be sent to the MAC-GBD. Glitches in perspective !
 
 ### Trigger menu
 - **A Button** is the most simple action: press A once to get an **Action**.
 - **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**.
 - **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**.
-- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). The more you take images, the farther it goes in EV. Images can be processed together to make and HDR image (High definition range) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
+- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). The more you take images, the farther it goes in EV. Images can be processed together to make and HDR image (**H**igh **D**efinition **R**ange) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
 
-**Timer** and **Repeat** can be cancelled by pressing B button.
+**Timer**, **Repeat** and **EAB mode** can be cancelled by pressing B button.
 
 ### Action menu
-- **Save** just saves image in one of the 30 memory slots of the Camera save ram. If memory is full, it will play an error sound.
+- **Save** just saves image in one of the 30 memory slots of the Camera save ram. If memory is full, it will play an error sound but continues to loop.
 - **Print** sends the image with the chosen border directly to the printer without saving.
 - **Save & Print** cumulates the two features but continues to print if the memory slots are all occupied.
 - **Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
@@ -72,6 +74,8 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 ## Gallery
 
 ![Gallery](doc/Images/Gallery.png)
+
+The **Gallery** acts as the regular camera gallery but proposes batch image erase/unerase, displaying the image parameters and many printing options compatible with basically all the printer emulators available on the market. It of course can print on the original one !
 
 - **Info** displays a thumbnail and the camera registers used. It allows printing these informations too.
 - **Print** prints the current displayed image with the chosen border at a clock frequency of 8 kHz (1kB/s) or 256 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
@@ -103,6 +107,8 @@ The flash storage of images is a unique feature from Photo! It allows dumping th
 ## Settings
 
 ![Main options](doc/Images/Main_options.png)
+
+Some fancy general parameters like palette, Super Game Boy borders, regular and wild borders, GBA SP mode, overclocking, etc.
 
 - **Frame** allows selecting no frame, normal frame or wild frames. Made by passionate pixel artists. Try'm all !
 - **Palette** proposes a choice of fancy palettes for the Game Boy Color and Game Boy Advance.
