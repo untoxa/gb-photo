@@ -76,14 +76,14 @@ uint8_t ENTER_state_logo(void) BANKED {
 
 uint8_t UPDATE_state_logo(void) BANKED {
     PROCESS_INPUT();
-    if (KEY_PRESSED(~J_START)) {
+    if (KEY_PRESSED(J_START) || KEY_PRESSED(J_B)) {
+        // run Main Menu
+        if (!menu_main_execute()) refresh_screen();
+    } else if (KEY_PRESSED(J_ANY)) {
         // any key but start enters the default state
         PLAY_SFX(sound_ok);
         CHANGE_STATE(MAIN_STATE);
         return 0;
-    } else if (KEY_PRESSED(J_START)) {
-        // run Main Menu
-        if (!menu_main_execute()) refresh_screen();
     }
     return TRUE;
 }
