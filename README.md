@@ -33,11 +33,11 @@ The main hub brings you to the 5 main menus by pressing START after boot. You ca
 - The **Main options** menu features general parameters like palettes, Double Speed Mode, SGB borders, etc.
 - The **Credits** features... the credits to the Photo! authors, artists, coders, debuggers.
 
-## Camera Modes
+## Camera Mode
 
 ![Camera Mode](doc/Images/Camera_Mode.png)
 
-The camera modes were created to propose many more features than a regular camera like infinite time-lapse, ultra-fast transmission, full manual mode, support of third party devices, etc.
+The **camera mode** was created to propose many more features than a regular camera like infinite time-lapse, ultra-fast transmission, full manual mode, support of third party devices, etc. It was polished by people passionate by the Game Boy Camera.
 
 ### Capture Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
