@@ -106,7 +106,7 @@ The **flash storage** of images is a unique feature from Photo! It allows dumpin
 
 ## Settings
 
-![Main options](doc/Images/Main_options.png)
+![Settings](doc/Images/Settings.png)
 
 Some fancy general parameters like palette, Super Game Boy borders, regular and wild borders, GBA SP mode, overclocking, etc.
 
