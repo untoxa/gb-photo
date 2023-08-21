@@ -117,7 +117,7 @@ Some fancy general parameters like palette, Super Game Boy borders, regular and 
 - **Show screen grid** displays crosses following the rule of thirds.
 - **Save confirmation** adds or removes the double A input to save an image. Without save confirmation, camera acts like a burst mode. With save confirmation, like a real Game Boy Camera.
 - **IR remote** enables using the IR port to trigger image capture. Any IR emitting device (TV remote control, other Game Boy Color, IR LED) does the job !
-- **Quick Boot** Shunts any boot screen and drive you immediately to the **Camera mode**. Ideal for sneak attack !
+- **Quick Boot** shunts any boot screen and drive you immediately to the **Camera mode**. Ideal for sneak attack !
 - **Flip live image** reverses the screen so that image appears in correct orientation when using a GBA SP, without the need for any additionnal device.
 - **Double speed** enables the Game Boy Color Double Speed Mode where everything goes twice faster (internal clock, printing, screen refreshing, inputs, etc.). This mode draws more current, avoid this when using a modded Game Boy Pocket. This mode also drives the sensor twice faster, so exposure times are all divided by 2.
 - **Display exposure** indicates the exposure time of the sensor in **Auto mode**.
