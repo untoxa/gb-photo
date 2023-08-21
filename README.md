@@ -21,15 +21,15 @@ Example of use: Photo! working on a GB Boy Colour and remotely controlled from a
 
 The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features slow transfer rate and a unique "color" palette. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
 
-## Main interface
+## Main hub
 
-![Main menu](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
+![Main hub](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
 
-The main interface brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A.
+The main hub brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A.
 
 - The **Camera mode** is where you take photos. It features 3 mode of image capturing.
-- The **Camera roll in ram** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is limited to 30 images.
-- The **Camera roll in rom** is a storage menu. Photo! is a 128kB rom and the MAC-GBD allows dealing with 1MB roms. All space after the 128kB of rom are writable by Photo! to store camera rolls. It allows storing 7 rolls of 30 images into flash memory, increasing the total number of images stored in Photo! to 240 (30 in ram, 210 in flash memory).
+- The **Gallery** is your main image viewer/printer/eraser, dealing with images stored into ram. It features the same options as the Gallery of the Game Boy Camera. It is limited to 30 images.
+- The **Save to Flash** is a storage menu. Photo! is a 128kB rom and the MAC-GBD allows dealing with 1MB roms. All space after the 128kB of rom are writable by Photo! to store camera rolls. It allows storing 7 rolls of 30 images into flash memory, increasing the total number of images stored in Photo! to 240 (30 in ram, 210 in flash memory).
 - The **Main options** menu features general parameters like palettes, Double Speed Mode, SGB borders, etc.
 - The **Credits** features... the credits to the Photo! authors, artists, coders, debuggers.
 
@@ -46,7 +46,7 @@ The main interface brings you to the 5 main menus by pressing START after boot. 
 - **A Button** is the most simple action: press A once to get an **Action**.
 - **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**.
 - **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**.
-- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). Images can be processed together to make and HDR image (High definition range) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
+- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). The more you take images, the farther it goes in EV. Images can be processed together to make and HDR image (High definition range) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
 
 **Timer** and **Repeat** can be cancelled by pressing B button.
 
@@ -69,9 +69,9 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 ### Restore Default menu
 - Allows to come back to factory settings, in particular if situation is becoming messy in **Manual Mode**.
 
-## Camera roll in ram (or Gallery)
+## Gallery
 
-![Image Gallery mode](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_ram.png)
+![Gallery](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_ram.png)
 
 - **Info** displays a thumbnail and the camera registers used. It allows printing these informations too.
 - **Print** prints the current displayed image with the chosen border at a clock frequency of 8 kHz (1kB/s) or 256 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
@@ -86,9 +86,9 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 You can access a thumbnail viewer by pressing A when viewing an image. It allows batch selecting, erasing, printing and transfering images.
 
-## Save slots in rom (or flash storage)
+## Flash Storage
 
-![Slots in rom](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_rom.png)
+![Flash Storage](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_rom.png)
 
 The flash storage of images is a unique feature from Photo! It allows dumping the whole ram (a "roll") to dedicated areas (the "slots") in the flash memory after the 128 kB of rom. It is intended to be used as film storage in case you do not have a printer with you. 7 storage slots of 30 images capacity are available in total. In the main menu, just choosing a full slot by pushing A allows browsing, printing, restoring to ram and transfering its images. The [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) and the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager) are able to directly get the images from a rom dump without moving them into ram. The [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) is also able to get a roll directly without moving it to ram.
 
