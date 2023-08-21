@@ -13,7 +13,7 @@ The save format used here is retro-compatible with any version of the Game Boy C
 Photo! is also compatible with [mBGA](https://mgba.io/), [SameBoy](https://sameboy.github.io/) and [PizzaBoy](https://play.google.com/store/apps/details?id=it.dbtecno.pizzaboypro&hl=fr&gl=US) among other non yet tested emulators.
 
 # Photo! with its serial remote controller
-![Showcase](doc/Showcase.jpg)
+![Showcase](doc/Images/Showcase.jpg)
 
 Example of use: Photo! working on a GB Boy Colour and remotely controlled from a Game Boy Color with a serial cable.
 
@@ -23,7 +23,7 @@ The repo contains two sets of roms. One set is compiled for DMG Game boy and Gam
 
 ## Main hub
 
-![Main hub](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
+![doc/Images/Main_Hub.png](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_menu.png)
 
 The main hub brings you to the 5 main menus by pressing START after boot. You can skip it and going directly to **Camera Mode** by pressing A.
 
@@ -35,7 +35,7 @@ The main hub brings you to the 5 main menus by pressing START after boot. You ca
 
 ## Camera Mode
 
-![Camera mode](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Camera_Mode.png)
+![doc/Images/Camera_Mode.png](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Camera_Mode.png)
 
 ### Mode menu
 - The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
@@ -71,7 +71,7 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 ## Gallery
 
-![Gallery](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_ram.png)
+![Gallery](doc/Images/Gallery.png)
 
 - **Info** displays a thumbnail and the camera registers used. It allows printing these informations too.
 - **Print** prints the current displayed image with the chosen border at a clock frequency of 8 kHz (1kB/s) or 256 kHz (32 kB/s) in **Fast Printing** mode (GBC only).
@@ -82,13 +82,13 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 - **Delete All** declares all the memory slots as free (without erasing data).
 - **Undelete All** declares all the memory slots as containing an image (whatever the slots content).
 
-![multiple selection mode](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_ram_2.png)
+![multiple selection mode](doc/Images/Gallery_2.png)
 
 You can access a thumbnail viewer by pressing A when viewing an image. It allows batch selecting, erasing, printing and transfering images.
 
 ## Flash Storage
 
-![Flash Storage](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Roll_in_rom.png)
+![Flash Storage](doc/Images/Flash_storage.png)
 
 The flash storage of images is a unique feature from Photo! It allows dumping the whole ram (a "roll") to dedicated areas (the "slots") in the flash memory after the 128 kB of rom. It is intended to be used as film storage in case you do not have a printer with you. 7 storage slots of 30 images capacity are available in total. In the main menu, just choosing a full slot by pushing A allows browsing, printing, restoring to ram and transfering its images. The [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) and the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager) are able to directly get the images from a rom dump without moving them into ram. The [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) is also able to get a roll directly without moving it to ram.
 
@@ -102,7 +102,7 @@ The flash storage of images is a unique feature from Photo! It allows dumping th
 
 ## Settings
 
-![Main options](https://github.com/Raphael-Boichot/gb-photo/blob/master/doc/Main_options.png)
+![Main options](doc/Images/Main_options.png)
 
 - **Frame** allows selecting no frame, normal frame or wild frames. Made by passionate pixel artists. Try'm all !
 - **Palette** proposes a choice of fancy palettes for the Game Boy Color and Game Boy Advance.
@@ -117,7 +117,7 @@ The flash storage of images is a unique feature from Photo! It allows dumping th
 - **Display exposure** indicates the exposure time of the sensor in **Auto mode**.
 
 ## Some technical considerations
-The Mitsubishi M64282FP artificial retina is one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of [masked pixels](doc/Mitsubishi%20M64282FP_detail%20of%20light%20sensors.png) uses to measure the voltage response of sensor in full darkness. The [sensor documentation](doc/M64282FP-datasheet.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
+The Mitsubishi M64282FP artificial retina is one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of masked pixels uses to measure the voltage response of sensor in full darkness. The [sensor documentation](doc/M64282FP-datasheet.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
 
 ## Effect of the main adressable parameters
 The M64282FP working parameters are set by 8 bytes (plus their 3-bits addresses) containing various registers. The MAC-GBD itself, mapper of the Game Boy Camera, can only receive 5 bytes of data to tune the sensor so 3 equivalent-bytes of data are not modifiable on the Game Boy Camera (more precisely P, M and X, 3x8 bits, registers also called **Filtering Kernels** are never modified). The mapping between sensor registers and MAC-GBD registers is given [as comment in the project code](include/gbcamera.h#L86). Here is a detailed description of the registers that can be modified:
