@@ -165,6 +165,8 @@ Download a Python script from [here](https://bootstrap.pypa.io/get-pip.py), then
     python get-pip.py
     python -m pip install --upgrade pip
 
+If "python" command is not recognized under Cygwin, use "py" instead, which is more generic under Windows.
+
 Then install Pillow and wave libraries:
 
     python -m pip install --upgrade Pillow
