@@ -165,7 +165,7 @@ Download a Python script from [here](https://bootstrap.pypa.io/get-pip.py), then
     python get-pip.py
     python -m pip install --upgrade pip
 
-If "python" command is not recognized under Cygwin, use "py" instead, which is more generic under Windows.
+If `python` command is not recognized, you will have to manually create its own environment variable. Create a `Path` environment variable which targets your Python installation folder (for example C:\Program Files\Python...) or if `Path` exists, edit it. Close and reopen Cygwin and get back to previous steps. Using `py` command (more generic call to Python under Windows) instead of `python` will aparently fix the issue but compiler will not accept that trick.
 
 Then install Pillow and wave libraries:
 
