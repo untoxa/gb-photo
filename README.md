@@ -62,8 +62,8 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 - **Transfer REC** allows continuous transmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
-- **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). The Double Speed Mode (see Settings section) is not supported by the Pic'n'rec device at the moment with this action.
-- **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). The Double Speed Mode (see Settings section) is not supported by the Pic'n'rec device at the moment with this action.
+- **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). This action **is not compatible with the Double Speed Mode**.
+- **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). This action **is not compatible with the Double Speed Mode**.
 
 ### Exp. area menu
 - Allows varying the area of image where exposure is calculated in **Auto Mode**. Can be centred, left, right, top or bottom. 
