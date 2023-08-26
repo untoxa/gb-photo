@@ -190,7 +190,7 @@ void frame_get_desc(uint8_t * desc, uint8_t frame) BANKED {
 }
 void frame_display_thumbnail(uint8_t x, uint8_t y, uint8_t frame, uint8_t color) BANKED {
     if ((frame < LENGTH(print_frames)) && (print_frames[frame].thumb)) {
-        screen_load_image_banked(x, y, 4, 4, print_frames[frame].thumb, print_frames[frame].thumb_bank, false);
+        screen_load_image_banked(x, y, 4, 4, print_frames[frame].thumb, print_frames[frame].thumb_bank);
         screen_restore_rect(x, y, 4, 4);
     } else screen_clear_rect(x, y, 4, 4, color);
 }

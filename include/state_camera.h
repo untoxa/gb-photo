@@ -105,6 +105,7 @@ typedef struct camera_state_options_t {
     uint8_t shutter_counter;
     uint8_t cgb_palette_idx         : 4;
     bool display_exposure           : 1;
+    bool enable_DMA                 : 1;
     uint8_t aeb_overexp_count;
     uint8_t aeb_overexp_step;
     autoexp_area_e autoexp_area;

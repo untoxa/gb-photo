@@ -28,12 +28,13 @@
 #define ACTION_SETTINGS_FLIP_IMAGE  27
 #define ACTION_SETTINGS_DOUBLESPEED 28
 #define ACTION_SETTINGS_DISPLAY_EXP 29
+#define ACTION_SETTINGS_ENABLE_DMA  30
 
 // state switching actions
-#define ACTION_GALLERY              30
-#define ACTION_CAMERA               31
-#define ACTION_SETTINGS             32
-#define ACTION_FLASHER              33
+#define ACTION_GALLERY              35
+#define ACTION_CAMERA               36
+#define ACTION_SETTINGS             37
+#define ACTION_FLASHER              38
 
 // camera popup menu actions
 #define ACTION_MODE_MANUAL          40

@@ -391,8 +391,7 @@ uint8_t onShowImagePreviewMenu(const menu_t * self, uint8_t * param) {
     uint8_t slot_bank = slot_to_sector(current_slot, 0);
     screen_load_image_banked(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
                              (uint8_t *)picture_addr[image_index & 0x03],
-                             slot_bank + (((image_index >> 1) + 1) >> 1),
-                             IMAGE_NORMAL);
+                             slot_bank + (((image_index >> 1) + 1) >> 1));
     screen_restore_rect(self->x, self->y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
     return MENU_PROP_NO_FRAME;
 }
@@ -410,9 +409,9 @@ void flasher_refresh_folders(void) {
     screen_clear_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4 * 2, WHITE_ON_BLACK);
     for (uint8_t i = 0; i != MAX_FLASH_SLOTS; i++) {
         if (flash_slots[i]) {
-            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_full_tiles, BANK(flasher_folder_full), IMAGE_NORMAL);
+            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_full_tiles, BANK(flasher_folder_full));
         } else {
-            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_empty_tiles, BANK(flasher_folder_empty), IMAGE_NORMAL);
+            screen_load_image_banked(folder_coords[i].x, folder_coords[i].y, 4, 4, flasher_folder_empty_tiles, BANK(flasher_folder_empty));
         }
     }
     screen_restore_rect(FLASHER_FOLDER_DISPLAY_X1, FLASHER_FOLDER_DISPLAY_Y1, FLASHER_FOLDER_DISPLAY_ROW1, 4);

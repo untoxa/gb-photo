@@ -46,7 +46,8 @@ typedef enum {
     idSettingsBootToCamera,
     idSettingsFlipImage,
     idSettingsDoubleSpeed,
-    idSettingsDisplayExposure
+    idSettingsDisplayExposure,
+    idSettingsEnableDMA
 } settings_menu_e;
 
 
@@ -193,8 +194,49 @@ const menu_item_t SettingsMenuItems[] = {
         .onPaint = onSettingsMenuItemPaint,
         .result = MENU_RESULT_OK
     }, {
-        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+        .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 2, .width = 13,
+        .id = idSettingsShowGrid,
+        .caption = " Show screen grid\t\t%s",
+        .helpcontext = " Show grid on the live view",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_SHOW_GRID
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 3, .width = 13,
+        .id = idSettingsSaveConfirm,
+        .caption = " Save confirmation\t%s",
+        .helpcontext = " Confirm saving of picture",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_SAVE_CONF
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 4, .width = 13,
+        .id = idSettingsBootToCamera,
+        .caption = " Quick boot\t\t\t%s",
+        .helpcontext = " Boot into the camera mode",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_BOOT_TO_CAM
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 5, .width = 13,
+        .id = idSettingsFlipImage,
+        .caption = " Flip live image\t\t\t%s",
+        .helpcontext = " Flip the live view image",
+        .onPaint = onSettingsMenuItemPaint,
+        .result = ACTION_SETTINGS_FLIP_IMAGE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 6, .width = 13,
+        .id = idSettingsDisplayExposure,
+        .caption = " Display exposure\t\t%s",
+        .helpcontext = " Exposure display in auto mode",
+        .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
+        .result = ACTION_SETTINGS_DISPLAY_EXP
+    }, {
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+        .ofs_x = 1, .ofs_y = 7, .width = 13,
         .id = idSettingsCGBPalette,
         .caption = " Palette\t[%s]",
         .helpcontext = " Select CGB palette",
@@ -203,7 +245,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_CGB_PALETTE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 3, .width = 13,
+        .ofs_x = 1, .ofs_y = 8, .width = 13,
         .id = idSettingsPrintFast,
         .caption = " Fast printing\t\t\t%s",
         .helpcontext = " Enable CGB fast printing",
@@ -212,54 +254,13 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_PRINT_FAST
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 4, .width = 13,
-        .id = idSettingsAltBorder,
-        .caption = " Alt. SGB border\t\t%s",
-        .helpcontext = " Switch different SGB borders",
-        .onPaint = onSettingsMenuItemPaint,
-        .onGetProps = onSettingsMenuItemProps,
-        .result = ACTION_SETTINGS_ALT_BORDER
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 5, .width = 13,
-        .id = idSettingsShowGrid,
-        .caption = " Show screen grid\t\t%s",
-        .helpcontext = " Show grid on the live view",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_SHOW_GRID
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 6, .width = 13,
-        .id = idSettingsSaveConfirm,
-        .caption = " Save confirmation\t%s",
-        .helpcontext = " Confirm saving of picture",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_SAVE_CONF
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 7, .width = 13,
+        .ofs_x = 1, .ofs_y = 9, .width = 13,
         .id = idSettingsIRRemoteShutter,
         .caption = " IR remote\t\t\t\t%s",
         .helpcontext = " CGB IR sensor as shutter",
         .onPaint = onSettingsMenuItemPaint,
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_IR_REMOTE
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 8, .width = 13,
-        .id = idSettingsBootToCamera,
-        .caption = " Quick boot\t\t\t%s",
-        .helpcontext = " Boot into the camera mode",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_BOOT_TO_CAM
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 9, .width = 13,
-        .id = idSettingsFlipImage,
-        .caption = " Flip live image\t\t\t%s",
-        .helpcontext = " Flip the live view image",
-        .onPaint = onSettingsMenuItemPaint,
-        .result = ACTION_SETTINGS_FLIP_IMAGE
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 10, .width = 13,
@@ -272,16 +273,25 @@ const menu_item_t SettingsMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 11, .width = 13,
-        .id = idSettingsDisplayExposure,
-        .caption = " Display exposure\t\t%s",
-        .helpcontext = " Exposure display in auto mode",
+        .id = idSettingsEnableDMA,
+        .caption = " Enable DMA\t\t\t%s",
+        .helpcontext = " Enable CGB DMA transfers",
         .onPaint = onSettingsMenuItemPaint,
         .onGetProps = onSettingsMenuItemProps,
-        .result = ACTION_SETTINGS_DISPLAY_EXP
+        .result = ACTION_SETTINGS_ENABLE_DMA
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 12, .width = 13,
+        .id = idSettingsAltBorder,
+        .caption = " Alt. SGB border\t\t%s",
+        .helpcontext = " Switch different SGB borders",
+        .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
+        .result = ACTION_SETTINGS_ALT_BORDER
     }
 };
 const menu_t GlobalSettingsMenu = {
-    .x = 2, .y = 2, .width = 15, .height = LENGTH(SettingsMenuItems) + 2,
+    .x = 2, .y = 1, .width = 15, .height = LENGTH(SettingsMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = ACTION_NONE,
     .items = SettingsMenuItems, .last_item = LAST_ITEM(SettingsMenuItems),
     .onShow = onShowSettings, .onIdle = onIdleSettings, .onHelpContext = onHelpSettings,
@@ -368,6 +378,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsDisplayExposure:
             sprintf(text_buffer, self->caption, checkbox[OPTION(display_exposure)]);
             break;
+        case idSettingsEnableDMA:
+            sprintf(text_buffer, self->caption, checkbox[OPTION(enable_DMA)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -381,6 +394,7 @@ uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_it
         case idSettingsCGBPalette:
         case idSettingsIRRemoteShutter:
         case idSettingsDoubleSpeed:
+        case idSettingsEnableDMA:
             return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idSettingsAltBorder:
             return (_is_SUPER) ? ITEM_DEFAULT : ITEM_DISABLED;
@@ -461,6 +475,10 @@ void menu_settings_execute(void) BANKED {
                     break;
                 case ACTION_SETTINGS_DISPLAY_EXP:
                     OPTION(display_exposure) = !OPTION(display_exposure);
+                    save_camera_state();
+                    break;
+                case ACTION_SETTINGS_ENABLE_DMA:
+                    OPTION(enable_DMA) = !OPTION(enable_DMA);
                     save_camera_state();
                     break;
                 case MENU_RESULT_OK:

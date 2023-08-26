@@ -74,7 +74,7 @@ const menu_t AboutMenu = {
 uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     param;
     menu_draw_frame(self);
-    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about), IMAGE_NORMAL);
+    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
     screen_restore_rect(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
     menu_text_out(self->x + 13, self->y     , 0, BLACK_ON_WHITE, "v." QUOTE(VERSION));
@@ -159,9 +159,9 @@ uint8_t onIdleMainMenu(const struct menu_t * menu, const struct menu_item_t * se
 uint8_t onShowMain(const menu_t * self, uint8_t * param) {
     param; self;
     menu_draw_frame(self);
-    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about), IMAGE_NORMAL);
+    screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
     screen_restore_rect(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
-    screen_load_image_banked(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H, main_menu_tiles, BANK(main_menu), IMAGE_NORMAL);
+    screen_load_image_banked(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H, main_menu_tiles, BANK(main_menu));
     screen_restore_rect(self->x, self->y + 2, main_menu_WIDTH / main_menu_TILE_W, main_menu_HEIGHT / main_menu_TILE_H);
     return (MENU_PROP_SHADOW | MENU_PROP_SELECTION);
 }

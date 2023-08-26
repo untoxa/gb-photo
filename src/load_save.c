@@ -36,6 +36,7 @@ const camera_state_options_t default_camera_state_options = {
     .shutter_counter = 5,
     .cgb_palette_idx = 0,
     .display_exposure = false,
+    .enable_DMA = false,
     .aeb_overexp_count = 4,
     .aeb_overexp_step = 0,
     .autoexp_area = area_center
