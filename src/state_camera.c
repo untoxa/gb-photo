@@ -272,7 +272,10 @@ void RENDER_EDGE_FROM_EXPOSURE(void) {
 void display_last_seen(bool restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
-    screen_load_live_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, last_seen, OPTION(flip_live_view), ((_is_COLOR) && OPTION(enable_DMA)));
+    screen_load_live_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
+                           last_seen,
+                           OPTION(flip_live_view),
+                           ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video))));
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
