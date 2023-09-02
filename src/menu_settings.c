@@ -187,17 +187,17 @@ const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits"
 
 static uint8_t spinedit_carttype_value = 0;
 const spinedit_value_names_t CartTypeSpinEditNames[] = {
-    { .next = CartTypeSpinEditNames + 1, .value = 0, .name = " HDR cart\t" },
-    { .next = NULL,                      .value = 1, .name = " IG AIO\t\t" }
+    { .next = CartTypeSpinEditNames + 1, .value = cart_type_HDR,    .name = " HDR cart\t" },
+    { .next = NULL,                      .value = cart_type_iG_AIO, .name = " iG AIO\t\t" }
 };
 const spinedit_params_t CartTypeSpinEditParams = {
     .caption = "Cart type:",
-    .min_value = 0,
+    .min_value = cart_type_HDR,
     .max_value = MAX_INDEX(CartTypeSpinEditNames),
     .value = &spinedit_carttype_value,
     .names = CartTypeSpinEditNames
 };
-const uint8_t * const CartTypeNames[] = { "HDR cart", "IG AIO" };
+const uint8_t * const CartTypeNames[] = { "HDR cart", "iG AIO" };
 
 const menu_item_t SettingsMenuItems[] = {
     {

@@ -77,7 +77,7 @@ typedef enum {
 
 typedef enum {
     cart_type_HDR = 0,
-    cart_type_IG,
+    cart_type_iG_AIO,
     N_CART_TYPES
 } cart_type_e;
 
