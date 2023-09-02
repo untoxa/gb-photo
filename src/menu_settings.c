@@ -191,7 +191,7 @@ const spinedit_value_names_t CartTypeSpinEditNames[] = {
     { .next = NULL,                      .value = 1, .name = " IG AIO\t\t" }
 };
 const spinedit_params_t CartTypeSpinEditParams = {
-    .caption = "Cart:",
+    .caption = "Cart type:",
     .min_value = 0,
     .max_value = MAX_INDEX(CartTypeSpinEditNames),
     .value = &spinedit_carttype_value,

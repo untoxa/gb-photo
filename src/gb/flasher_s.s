@@ -228,7 +228,6 @@ _save_sram_banks::
         ld      h, (hl)
         ld      l, a                            ; hl = negative offset
 
-        ld      a, l
         cpl
         inc     a                               ; a = positive length
 
@@ -414,7 +413,6 @@ _erase_flash::
         ld      h, (hl)
         ld      l, a                            ; hl = negative offset
 
-        ld      a, l
         cpl
         inc     a                               ; a = positive length
 
