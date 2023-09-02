@@ -1,4 +1,4 @@
-# Photo!
+![Logo](doc/Images/Logo.png)
 
 **[The latest release version may be downloaded here](https://github.com/untoxa/gb-photo/releases/latest/)**.
 
