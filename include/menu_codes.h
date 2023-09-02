@@ -29,6 +29,7 @@
 #define ACTION_SETTINGS_DOUBLESPEED 28
 #define ACTION_SETTINGS_DISPLAY_EXP 29
 #define ACTION_SETTINGS_ENABLE_DMA  30
+#define ACTION_SETTINGS_CARTTYPE    31
 
 // state switching actions
 #define ACTION_GALLERY              35

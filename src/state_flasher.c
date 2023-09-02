@@ -112,23 +112,27 @@ inline uint8_t coords_to_picture_no(uint8_t x, uint8_t y) {
 static const uint8_t MAGIC_SAVE_VALUE[] = {'M', 'a', 'g', 'i', 'c'};
 
 uint8_t flash_save_gallery_to_slot(uint8_t slot) {
+    cart_type_e cart_type = OPTION(cart_type);
     // erase the sector and save first 8 SRAM banks
     save_sram_bank_offset = FIRST_HALF_OFS;
     save_rom_bank = slot_to_sector(slot, 0);
-    if (!erase_flash()) return FALSE;
-    if (!save_sram_banks(FIRST_HALF_LEN)) return FALSE;
+    if (!erase_flash(cart_type)) return FALSE;
+    save_sram_bank_count = FIRST_HALF_LEN;
+    if (!save_sram_banks(cart_type)) return FALSE;
     // erase the next sector and save the next 8 sram banks
     save_sram_bank_offset = SECOND_HALF_OFS;
     save_rom_bank = slot_to_sector(slot, 1);
-    if (!erase_flash()) return FALSE;
-    return save_sram_banks(SECOND_HALF_LEN);
+    if (!erase_flash(cart_type)) return FALSE;
+    save_sram_bank_count = SECOND_HALF_LEN;
+    return save_sram_banks(cart_type);
 }
 
 uint8_t flash_erase_slot(uint8_t slot) {
+    cart_type_e cart_type = OPTION(cart_type);
     save_rom_bank = slot_to_sector(slot, 0);
-    if (!erase_flash()) return FALSE;
+    if (!erase_flash(cart_type)) return FALSE;
     save_rom_bank = slot_to_sector(slot, 1);
-    return erase_flash();
+    return erase_flash(cart_type);
 }
 
 void flasher_load_gallery_from_slot(uint8_t slot) {

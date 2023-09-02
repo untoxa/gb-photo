@@ -39,7 +39,8 @@ const camera_state_options_t default_camera_state_options = {
     .enable_DMA = false,
     .aeb_overexp_count = 4,
     .aeb_overexp_step = 0,
-    .autoexp_area = area_center
+    .autoexp_area = area_center,
+    .cart_type = cart_type_HDR
 };
 
 const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {

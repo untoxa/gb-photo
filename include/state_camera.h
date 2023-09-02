@@ -75,6 +75,12 @@ typedef enum {
     N_AUTOEXP_AREAS
 } autoexp_area_e;
 
+typedef enum {
+    cart_type_HDR = 0,
+    cart_type_IG,
+    N_CART_TYPES
+} cart_type_e;
+
 typedef struct table_value_t {
     uint8_t value;
     const uint8_t * caption;
@@ -108,7 +114,8 @@ typedef struct camera_state_options_t {
     bool enable_DMA                 : 1;
     uint8_t aeb_overexp_count;
     uint8_t aeb_overexp_step;
-    autoexp_area_e autoexp_area;
+    autoexp_area_e autoexp_area     : 4;
+    cart_type_e cart_type           : 4;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT

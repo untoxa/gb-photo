@@ -47,7 +47,8 @@ typedef enum {
     idSettingsFlipImage,
     idSettingsDoubleSpeed,
     idSettingsDisplayExposure,
-    idSettingsEnableDMA
+    idSettingsEnableDMA,
+    idSettingsCartType
 } settings_menu_e;
 
 
@@ -184,6 +185,20 @@ const spinedit_params_t PaletteSpinEditParams = {
 };
 const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits", "Grape", "Japan", "Bavaria" };
 
+static uint8_t spinedit_carttype_value = 0;
+const spinedit_value_names_t CartTypeSpinEditNames[] = {
+    { .next = CartTypeSpinEditNames + 1, .value = 0, .name = " HDR cart\t" },
+    { .next = NULL,                      .value = 1, .name = " IG AIO\t\t" }
+};
+const spinedit_params_t CartTypeSpinEditParams = {
+    .caption = "Cart:",
+    .min_value = 0,
+    .max_value = MAX_INDEX(CartTypeSpinEditNames),
+    .value = &spinedit_carttype_value,
+    .names = CartTypeSpinEditNames
+};
+const uint8_t * const CartTypeNames[] = { "HDR cart", "IG AIO" };
+
 const menu_item_t SettingsMenuItems[] = {
     {
         .sub = &PrinterFramesMenu, .sub_params = NULL,
@@ -235,8 +250,17 @@ const menu_item_t SettingsMenuItems[] = {
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_DISPLAY_EXP
     }, {
-        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&CartTypeSpinEditParams,
         .ofs_x = 1, .ofs_y = 7, .width = 13,
+        .id = idSettingsCartType,
+        .caption = " Cart type\t[%s]",
+        .helpcontext = " Select flash cart type",
+        .onPaint = onSettingsMenuItemPaint,
+        .onGetProps = onSettingsMenuItemProps,
+        .result = ACTION_SETTINGS_CARTTYPE
+    }, {
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&PaletteSpinEditParams,
+        .ofs_x = 1, .ofs_y = 8, .width = 13,
         .id = idSettingsCGBPalette,
         .caption = " Palette\t[%s]",
         .helpcontext = " Select CGB palette",
@@ -245,7 +269,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_CGB_PALETTE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 8, .width = 13,
+        .ofs_x = 1, .ofs_y = 9, .width = 13,
         .id = idSettingsPrintFast,
         .caption = " Fast printing\t\t\t%s",
         .helpcontext = " Enable CGB fast printing",
@@ -254,7 +278,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_PRINT_FAST
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 9, .width = 13,
+        .ofs_x = 1, .ofs_y = 10, .width = 13,
         .id = idSettingsIRRemoteShutter,
         .caption = " IR remote\t\t\t\t%s",
         .helpcontext = " CGB IR sensor as shutter",
@@ -263,7 +287,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_IR_REMOTE
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 10, .width = 13,
+        .ofs_x = 1, .ofs_y = 11, .width = 13,
         .id = idSettingsDoubleSpeed,
         .caption = " Double speed\t\t\t%s",
         .helpcontext = " CGB double speed mode",
@@ -272,7 +296,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_DOUBLESPEED
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 11, .width = 13,
+        .ofs_x = 1, .ofs_y = 12, .width = 13,
         .id = idSettingsEnableDMA,
         .caption = " Enable DMA\t\t\t%s",
         .helpcontext = " Enable CGB DMA transfers",
@@ -281,7 +305,7 @@ const menu_item_t SettingsMenuItems[] = {
         .result = ACTION_SETTINGS_ENABLE_DMA
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 12, .width = 13,
+        .ofs_x = 1, .ofs_y = 13, .width = 13,
         .id = idSettingsAltBorder,
         .caption = " Alt. SGB border\t\t%s",
         .helpcontext = " Switch different SGB borders",
@@ -304,6 +328,7 @@ uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct me
     menu;
     switch (self->id) {
         case idSettingsCGBPalette:
+        case idSettingsCartType:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
         default:
             break;
@@ -381,6 +406,9 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
         case idSettingsEnableDMA:
             sprintf(text_buffer, self->caption, checkbox[OPTION(enable_DMA)]);
             break;
+        case idSettingsCartType:
+            sprintf(text_buffer, self->caption, CartTypeNames[OPTION(cart_type)]);
+            break;
         default:
             *text_buffer = 0;
             break;
@@ -408,6 +436,7 @@ void menu_settings_execute(void) BANKED {
     settings_menu_repaint = true;
     settings_menu_last_selection = NULL;
     spinedit_palette_value = OPTION(cgb_palette_idx);
+    spinedit_carttype_value = OPTION(cart_type);
     do {
         menu_result = menu_execute(&GlobalSettingsMenu, NULL, settings_menu_last_selection), settings_menu_repaint = false;
         if ((menu_result >= ACTION_PRINT_FRAME_FIRST) && (menu_result <= ACTION_PRINT_FRAME_LAST)) {
@@ -480,6 +509,11 @@ void menu_settings_execute(void) BANKED {
                 case ACTION_SETTINGS_ENABLE_DMA:
                     OPTION(enable_DMA) = !OPTION(enable_DMA);
                     save_camera_state();
+                    break;
+                case ACTION_SETTINGS_CARTTYPE:
+                    OPTION(cart_type) = (cart_type_e)spinedit_carttype_value;
+                    save_camera_state();
+                    settings_menu_repaint = true;
                     break;
                 case MENU_RESULT_OK:
                     settings_menu_repaint = true;
