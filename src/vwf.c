@@ -2,18 +2,19 @@
 
 #if defined(NINTENDO)
 #define VWF_DEFAULT_BASE_ADDRESS 0x9800
-#define VWF_TILE_SIZE_BITS 4
+#define DEVICE_TILE_SIZE_BITS 4
 #elif defined(SEGA)
 #define VWF_DEFAULT_BASE_ADDRESS 0x7800
-#define VWF_TILE_SIZE_BITS 5
+#define DEVICE_TILE_SIZE_BITS 5
 #endif
-#define DEVICE_TILE_SIZE 8u
-#define VWF_TILE_SIZE (1 << VWF_TILE_SIZE_BITS)
+#define DEVICE_TILE_WIDTH 8u
+#define DEVICE_TILE_SIZE (1 << DEVICE_TILE_SIZE_BITS)
+#define VWF_TILE_SIZE 8u
 
 vwf_farptr_t vwf_fonts[4];
 
 uint8_t vwf_current_offset = 0;
-uint8_t vwf_tile_data[DEVICE_TILE_SIZE * 2];
+uint8_t vwf_tile_data[VWF_TILE_SIZE * 2];
 uint8_t vwf_current_mask;
 uint8_t vwf_current_rotate;
 uint8_t vwf_inverse_map = 0;
@@ -57,14 +58,14 @@ uint8_t vwf_print_render(const unsigned char ch) {
         if ((uint8_t)(vwf_current_offset + width) > 8u) {
             vwf_current_rotate = dx | 0x80u;
             vwf_current_mask = 0xffu >> (width - dx);
-            vwf_print_shift_char(vwf_tile_data + DEVICE_TILE_SIZE, bitmap, vwf_current_font_bank);
+            vwf_print_shift_char(vwf_tile_data + VWF_TILE_SIZE, bitmap, vwf_current_font_bank);
         }
         vwf_current_offset += width;
 
         if (vwf_current_offset > 7u) {
             vwf_current_offset -= 8u;
             set_1bpp_data(vwf_current_tile, (vwf_current_offset) ? 2 : 1, vwf_tile_data);
-            vwf_current_tile += VWF_TILE_SIZE;
+            vwf_current_tile += DEVICE_TILE_SIZE;
             vwf_swap_tiles();
             return TRUE;
         };
@@ -96,7 +97,7 @@ uint8_t vwf_text_width(const unsigned char * str) {
             str++;
         }
     } else {
-        while(*str++) total_width += DEVICE_TILE_SIZE;
+        while(*str++) total_width += DEVICE_TILE_WIDTH;
     }
     return total_width;
 }
@@ -124,12 +125,12 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str, uint
                 // tab character
                 set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                 if (!vwf_current_offset) {
-                    vwf_current_tile += VWF_TILE_SIZE;
+                    vwf_current_tile += DEVICE_TILE_SIZE;
                     vwf_swap_tiles();
                 } else vwf_print_reset(vwf_next_tile(), 0);
-                while ((uint8_t)((uint16_t)(vwf_current_tile - base_tile) >> VWF_TILE_SIZE_BITS) % vwf_tab_size) {
+                while ((uint8_t)((uint16_t)(vwf_current_tile - base_tile) >> DEVICE_TILE_SIZE_BITS) % vwf_tab_size) {
                     set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
-                    vwf_current_tile += VWF_TILE_SIZE;
+                    vwf_current_tile += DEVICE_TILE_SIZE;
                     vwf_swap_tiles();
                 }
                 break;
@@ -141,7 +142,7 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str, uint
     }
     if (vwf_current_offset) set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
 
-    return  ((uint16_t)(vwf_current_tile - base_tile) >> VWF_TILE_SIZE_BITS) + ((vwf_current_offset) ? 1 : 0);
+    return  ((uint16_t)(vwf_current_tile - base_tile) >> DEVICE_TILE_SIZE_BITS) + ((vwf_current_offset) ? 1 : 0);
 }
 
 void vwf_load_font(uint8_t idx, const void * font, uint8_t bank) {
@@ -156,5 +157,5 @@ void vwf_activate_font(uint8_t idx) {
 }
 
 uint8_t * vwf_next_tile(void) {
-    return (vwf_current_offset) ? vwf_current_tile + VWF_TILE_SIZE : vwf_current_tile;
+    return (vwf_current_offset) ? vwf_current_tile + DEVICE_TILE_SIZE : vwf_current_tile;
 }

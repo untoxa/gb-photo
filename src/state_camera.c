@@ -426,28 +426,35 @@ uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings, bool divide_exposure);
 
 // --- Save confirmation namu ------------------------
+uint8_t onSaveConfirmMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t SaveConfirmMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 0, .ofs_y = 0, .width = 6,
-        .caption = " Keep",
+        .ofs_x = 0, .ofs_y = 0, .width = 7,
+        .caption = "Save image",
         .onPaint = NULL,
+        .onGetProps = onSaveConfirmMenuItemProps,
         .result = MENU_RESULT_YES
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 6, .ofs_y = 0, .width = 6,
-        .caption = " " ICON_B " Discard",
+        .ofs_x = 7, .ofs_y = 0, .width = 7,
+        .caption = ICON_B " Discard",
         .onPaint = NULL,
+        .onGetProps = onSaveConfirmMenuItemProps,
         .result = MENU_RESULT_NO
     }
 };
 const menu_t SaveConfirmMenu = {
-    .x = 3, .y = 17, .width = 0, .height = 0,
+    .x = 2, .y = 17, .width = 0, .height = 0,
     .flags = MENU_FLAGS_INVERSE,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = SaveConfirmMenuItems, .last_item = LAST_ITEM(SaveConfirmMenuItems),
     .onTranslateKey = onTranslateKeyCameraMenu, .onTranslateSubResult = NULL
 };
+uint8_t onSaveConfirmMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu; self;
+    return ITEM_TEXT_CENTERED;
+}
 
 // --- Assisted menu ---------------------------------
 const menu_item_t CameraMenuItemsAssisted[] = {
