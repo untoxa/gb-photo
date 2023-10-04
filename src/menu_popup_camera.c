@@ -136,8 +136,8 @@ uint8_t onShowAEBMenu(const menu_t * self, uint8_t * param) {
     param;
     menu_draw_frame(self);
     menu_draw_shadow(self);
-    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, AEBOverexpSpinEditParams.caption);
-    menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, AEBStepSpinEditParams.caption);
+    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, ITEM_DEFAULT, AEBOverexpSpinEditParams.caption);
+    menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, ITEM_DEFAULT, AEBStepSpinEditParams.caption);
     return MENU_PROP_NO_FRAME;
 }
 uint8_t onTranslateKeyAEBMenu(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
@@ -500,7 +500,7 @@ uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t *
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 

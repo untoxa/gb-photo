@@ -53,7 +53,7 @@ inline uint8_t slot_to_sector(uint8_t slot, uint8_t ofs) {
 
 inline void flasher_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
     misc_render_progressbar(value, size, text_buffer);
-    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
 extern uint8_t erase_flash(uint8_t cart_type) OLDCALL BANKED;                // erases FLASH sector: 64K or 4 banks

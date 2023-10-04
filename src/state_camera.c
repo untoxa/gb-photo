@@ -323,7 +323,7 @@ static void refresh_usage_indicator(void) {
             sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
             break;
     }
-    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
 static void refresh_autoexp_area(void) {
@@ -331,7 +331,7 @@ static void refresh_autoexp_area(void) {
         "", " " ICON_AUTOEXP_TOP, " " ICON_AUTOEXP_RIGHT, " " ICON_AUTOEXP_BOTTOM, " " ICON_AUTOEXP_LEFT
     };
     if (OPTION(camera_mode) != camera_mode_auto) return;
-    menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, area_indicators[OPTION(autoexp_area)]);
+    menu_text_out(AUTOEXP_AREA_X, AUTOEXP_AREA_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, area_indicators[OPTION(autoexp_area)]);
 }
 
 static void refresh_screen(void) {
@@ -344,7 +344,7 @@ static void refresh_screen(void) {
 
 static uint8_t onPrinterProgress(void) BANKED {
     misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
-    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
     return 0;
 }
 
@@ -832,9 +832,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (COUNTER_CHANGED(camera_shutter_timer)) {
         if (camera_shutter_timer) {
             PLAY_SFX(sound_timer);
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, " " ICON_CLOCK);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_CLOCK);
             sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
+            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
         } else {
             screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
             if (COUNTER(camera_repeat_counter)) {
@@ -847,12 +847,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // process the repeat counter
     if (COUNTER_CHANGED(camera_repeat_counter)) {
         if (COUNTER(camera_repeat_counter)) {
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
+            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_MULTIPLE);
             if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, " Inf");
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, " Inf");
             } else {
                 sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
             }
         } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
     }
@@ -926,9 +926,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // process AEB counter
         if (COUNTER_CHANGED(camera_AEB_counter)) {
             if (COUNTER(camera_AEB_counter)) {
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, " " ICON_MULTIPLE);
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_MULTIPLE);
                 sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_AEB_counter));
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, text_buffer);
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
                 camera_do_shutter = true;
                 // set new calculated exposure here instead of this:
                 SETTING(current_exposure) = AEB_exposure_list[--COUNTER(camera_AEB_counter) + (MIDDLE_AEB_IMAGE - MIN(OPTION(aeb_overexp_count), MAX_AEB_OVEREXPOSURE))];
@@ -975,7 +975,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 SETTING(current_exposure) = result_exposure;
                 RENDER_EDGE_FROM_EXPOSURE();
 
-                if (OPTION(display_exposure)) menu_text_out(14, 0, 6, WHITE_ON_BLACK, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
+                if (OPTION(display_exposure)) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
             }
     #if (DEBUG_AUTOEXP==1)
             sprintf(text_buffer, "%d", (uint16_t)error);
@@ -1070,7 +1070,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
+    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 

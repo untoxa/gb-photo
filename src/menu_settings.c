@@ -343,9 +343,9 @@ uint8_t onHelpSettings(const struct menu_t * menu, const struct menu_item_t * se
         uint8_t frame_no = selection->result - ACTION_PRINT_FRAME_FIRST;
         frame_get_desc(text_buffer_extra, frame_no);
         sprintf(text_buffer, selection->helpcontext, text_buffer_extra);
-        menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, text_buffer);
+        menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, text_buffer);
         frame_display_thumbnail(menu->x + 10, menu->y + 5, frame_no, BLACK_ON_WHITE);
-    } else menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
+    } else menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 uint8_t onShowSettings(const menu_t * self, uint8_t * param) {

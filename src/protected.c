@@ -358,23 +358,23 @@ uint8_t INIT_module_sysmessages(void) BANKED {
 
     uint8_t y = 0;
 
-    menu_text_out(0, y++, 0, WHITE_ON_BLACK, "Save file errors were detected.");
+    menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "Save file errors were detected.");
     if (protected_status != PROTECTED_CORRECT) {
         y++;
-        menu_text_out(0, y++, 0, WHITE_ON_BLACK, "Fixing checksums to prevent wiping");
-        menu_text_out(0, y++, 0, WHITE_ON_BLACK, "data by the original camera ROM.");
+        menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "Fixing checksums to prevent wiping");
+        menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "data by the original camera ROM.");
         y++;
         for (uint8_t i = protected_status, * const *ptr = repair_messages; (i); i >>= 1, ptr++) {
-            menu_text_out(0, y++, 0, WHITE_ON_BLACK, *ptr);
+            menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, *ptr);
         }
     }
     if (camera_settings_reset) {
         y++;
-        menu_text_out(0, y++, 0, WHITE_ON_BLACK, "Camera settings were not found.");
+        menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "Camera settings were not found.");
         y++;
-        menu_text_out(0, y++, 0, WHITE_ON_BLACK, "  Reset to defaults...\tOK!");
+        menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "  Reset to defaults...\tOK!");
     }
-    menu_text_out(0, ++y, 0, WHITE_ON_BLACK, "Press " ICON_START " to continue...");
+    menu_text_out(0, ++y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "Press " ICON_START " to continue...");
 
     fade_in_modal();
 

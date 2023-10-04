@@ -118,7 +118,7 @@ uint8_t onTranslateSubResultThumbnailMenu(const struct menu_t * menu, const stru
 }
 uint8_t onHelpThumbnailMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 
@@ -146,7 +146,7 @@ void tumbnail_refresh(uint8_t index) {
         uint8_t slot = VECTOR_GET(used_slots, index);
         SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(thumbnail_coords[pos].x, thumbnail_coords[pos].y, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0xFF);
-        if (selected_images[index]) menu_text_out(thumbnail_coords[pos].x + 3, thumbnail_coords[pos].y + 3, 0, WHITE_ON_BLACK, ICON_CBX_CHECKED);
+        if (selected_images[index]) menu_text_out(thumbnail_coords[pos].x + 3, thumbnail_coords[pos].y + 3, 0, WHITE_ON_BLACK, ITEM_DEFAULT, ICON_CBX_CHECKED);
         screen_restore_rect(thumbnail_coords[pos].x, thumbnail_coords[pos].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     } else {
         screen_clear_rect(thumbnail_coords[pos].x, thumbnail_coords[pos].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT, WHITE_ON_BLACK);
@@ -160,20 +160,20 @@ void thumbnails_diaplay(uint8_t start) {
         uint8_t slot = VECTOR_GET(used_slots, i);
         SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(thumbnail_coords[j].x, thumbnail_coords[j].y, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0xFF);
-        if (selected_images[i]) menu_text_out(thumbnail_coords[j].x + 3, thumbnail_coords[j].y + 3, 0, WHITE_ON_BLACK, ICON_CBX_CHECKED);
+        if (selected_images[i]) menu_text_out(thumbnail_coords[j].x + 3, thumbnail_coords[j].y + 3, 0, WHITE_ON_BLACK, ITEM_DEFAULT, ICON_CBX_CHECKED);
         screen_restore_rect(thumbnail_coords[j].x, thumbnail_coords[j].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     }
 }
 
 static void refresh_screen(void) {
     screen_clear_rect(0, 0, 20, 18, WHITE_ON_BLACK);
-    menu_text_out(0, 0, 20, WHITE_ON_BLACK, " Thumbnail view");
+    menu_text_out(0, 0, 20, WHITE_ON_BLACK, ITEM_DEFAULT, " Thumbnail view");
 
     thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
 
     sprintf(text_buffer, "%hd/%hd", (uint8_t)((OPTION(gallery_picture_idx) < images_taken()) ? (OPTION(gallery_picture_idx) + 1) : 0), (uint8_t)images_taken());
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, " " ICON_A " select " ICON_START "/" ICON_SELECT " for menus");
-    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_A " select " ICON_START "/" ICON_SELECT " for menus");
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
 uint8_t INIT_state_thumbnails(void) BANKED {

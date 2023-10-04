@@ -37,9 +37,9 @@ void vwf_swap_tiles(void) OLDCALL;
 
 void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data);
 
-void vwf_print_reset(const uint8_t * tile) {
+void vwf_print_reset(const uint8_t * tile, uint8_t offset) {
     vwf_current_tile = (uint8_t *)tile;
-    vwf_current_offset = 0;
+    vwf_current_offset = offset & 0x07;
     vwf_swap_tiles();
     vwf_swap_tiles();
 }
@@ -76,11 +76,36 @@ uint8_t vwf_print_render(const unsigned char ch) {
     }
 }
 
-uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str) {
+uint8_t vwf_text_width(const unsigned char * str) {
+    uint8_t total_width = 0;
+    if (vwf_current_font_desc.attr & FONT_VWF) {
+        while(*str) {
+            uint8_t letter;
+            switch (*str) {
+                case 0x01:
+                case 0x03:
+                    str++;
+                    break;
+                case 0x02:
+                    str++;
+                default:
+                    letter = vwf_read_banked_ubyte(vwf_current_font_desc.recode_table + (*str & ((vwf_current_font_desc.attr & RECODE_7BIT) ? 0x7fu : 0xffu)), vwf_current_font_bank);
+                    total_width += vwf_read_banked_ubyte(vwf_current_font_desc.widths + letter, vwf_current_font_bank);
+                    break;
+            }
+            str++;
+        }
+    } else {
+        while(*str++) total_width += DEVICE_TILE_SIZE;
+    }
+    return total_width;
+}
+
+uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str, uint8_t offset) {
     static const uint8_t * ui_text_ptr;
     ui_text_ptr = str;
 
-    vwf_print_reset(base_tile);
+    vwf_print_reset(base_tile, offset);
     while (*ui_text_ptr) {
         switch (*ui_text_ptr) {
             case 0x01:
@@ -101,7 +126,7 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str) {
                 if (!vwf_current_offset) {
                     vwf_current_tile += VWF_TILE_SIZE;
                     vwf_swap_tiles();
-                } else vwf_print_reset(vwf_next_tile());
+                } else vwf_print_reset(vwf_next_tile(), 0);
                 while ((uint8_t)((uint16_t)(vwf_current_tile - base_tile) >> VWF_TILE_SIZE_BITS) % vwf_tab_size) {
                     set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
                     vwf_current_tile += VWF_TILE_SIZE;

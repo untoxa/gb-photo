@@ -357,7 +357,7 @@ uint8_t onTranslateSubResultFlasherMenu(const struct menu_t * menu, const struct
 }
 uint8_t onHelpFlasherMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 uint8_t onFlasherMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
@@ -466,20 +466,20 @@ void flasher_refresh_thumbnails(void) {
         VECTOR_CLEAR(flash_image_slots);
     }
     sprintf(text_buffer, " Slot: %hd Images: %hd", (uint8_t)(current_slot + 1), VECTOR_LEN(flash_image_slots));
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
     return;
 }
 
 static void refresh_usage_indicator(void) {
     sprintf(text_buffer, "%hd/%hd", (uint8_t)images_taken(), (uint8_t)images_total());
-    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
 static void refresh_screen(void) {
     sync_vblank();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, " Flash directory");
+    menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " Flash directory");
     refresh_usage_indicator();
 
     // folders

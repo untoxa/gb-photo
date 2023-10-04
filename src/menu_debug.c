@@ -50,25 +50,25 @@ static void render_cam_game_data(uint8_t * data_ptr, uint8_t x, uint8_t y) {
 
     for (uint8_t i = 0; i != 3; i++, y++) {
         data_ptr = render_array(text_buffer, data_ptr, 8);
-        menu_text_out(x, y, 0, BLACK_ON_WHITE, text_buffer);
+        menu_text_out(x, y, 0, BLACK_ON_WHITE, ITEM_DEFAULT, text_buffer);
     }
     data_ptr = render_array(text_buffer, data_ptr, 6);
-    menu_text_out(x, y++, 0, BLACK_ON_WHITE, text_buffer);
+    menu_text_out(x, y++, 0, BLACK_ON_WHITE, ITEM_DEFAULT, text_buffer);
 
     memcpy(text_buffer, data_ptr, sizeof(cam_game_data.magic)), text_buffer[sizeof(cam_game_data.magic)] = 0;
     data_ptr += sizeof(cam_game_data.magic);
-    menu_text_out(x, y, 0, BLACK_ON_WHITE, text_buffer);
+    menu_text_out(x, y, 0, BLACK_ON_WHITE, ITEM_DEFAULT, text_buffer);
 
     data_ptr = render_array(text_buffer, data_ptr, 2);
-    menu_text_out(x + 6, y, 0, BLACK_ON_WHITE, text_buffer);
+    menu_text_out(x + 6, y, 0, BLACK_ON_WHITE, ITEM_DEFAULT, text_buffer);
 }
 
 uint8_t onShowDebug(const menu_t * self, uint8_t * param) {
     param;
     vwf_set_tab_size(2);
     menu_draw_frame(self);
-    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, head_string);
-    menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, "Image index:");
+    menu_text_out(self->x + 1, self->y + 1, 0, BLACK_ON_WHITE, ITEM_DEFAULT, head_string);
+    menu_text_out(self->x + 1, self->y + 2, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "Image index:");
     render_cam_game_data((uint8_t *)&cam_game_data, self->x + 1, self->y + 3);
     render_cam_game_data((uint8_t *)&cam_game_data_echo, self->x + 1, self->y + 8);
     return MENU_PROP_NO_FRAME;

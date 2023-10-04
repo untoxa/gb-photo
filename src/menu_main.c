@@ -56,12 +56,14 @@ static const metasprite_t hand_cursor3[] = {
 static const metasprite_t* const hand_cursor[] = {hand_cursor0, hand_cursor1, hand_cursor2, hand_cursor3};
 
 uint8_t onShowAbout(const struct menu_t * self, uint8_t * param);
+uint8_t onAboutMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t AboutMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 13, .ofs_y = 14, .width = 4,
-        .caption = " " ICON_A " Ok",
+        .caption = ICON_A " Ok",
         .onPaint = NULL,
+        .onGetProps = onAboutMenuItemProps,
         .result = ACTION_NONE
     }
 };
@@ -71,24 +73,28 @@ const menu_t AboutMenu = {
     .items = AboutMenuItems, .last_item = LAST_ITEM(AboutMenuItems),
     .onShow = onShowAbout, .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
+uint8_t onAboutMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu; self;
+    return ITEM_TEXT_CENTERED;
+}
 uint8_t onShowAbout(const menu_t * self, uint8_t * param) {
     param;
     menu_draw_frame(self);
     screen_load_image_banked(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H, logo_about_tiles, BANK(logo_about));
     screen_restore_rect(self->x + ((self->width - (logo_about_WIDTH / logo_about_TILE_W)) >> 1), self->y, logo_about_WIDTH / logo_about_TILE_W, logo_about_HEIGHT / logo_about_TILE_H);
     vwf_activate_font(1);
-    menu_text_out(self->x + 13, self->y     , 0, BLACK_ON_WHITE, "v." QUOTE(VERSION));
-    menu_text_out(self->x +  1, self->y +  2, 0, BLACK_ON_WHITE, "Original idea:");
-    menu_text_out(self->x +  2, self->y +  3, 0, DK_GR_ON_WHITE, "Andreas Hahn");
-    menu_text_out(self->x +  1, self->y +  4, 0, BLACK_ON_WHITE, "Development:");
-    menu_text_out(self->x +  2, self->y +  5, 0, DK_GR_ON_WHITE, "Toxa, Andreas Hahn");
-    menu_text_out(self->x +  2, self->y +  6, 0, DK_GR_ON_WHITE, "Raphael Boichot, Hatch");
-    menu_text_out(self->x +  1, self->y +  7, 0, BLACK_ON_WHITE, "Art and Sound:");
-    menu_text_out(self->x +  2, self->y +  8, 0, DK_GR_ON_WHITE, "Tronimal, 2BitPit, bbbbbr");
-    menu_text_out(self->x +  2, self->y +  9, 0, DK_GR_ON_WHITE, "rembrandx, NeoRame");
-    menu_text_out(self->x +  1, self->y + 10, 0, BLACK_ON_WHITE, "Special thanks:");
-    menu_text_out(self->x +  2, self->y + 11, 0, DK_GR_ON_WHITE, "bbbbbr, AlexiG, HDR,");
-    menu_text_out(self->x +  2, self->y + 12, 0, DK_GR_ON_WHITE, "crizzlycruz, christianr");
+    menu_text_out(self->x + 13, self->y     , 0, BLACK_ON_WHITE, ITEM_DEFAULT, "v." QUOTE(VERSION));
+    menu_text_out(self->x +  1, self->y +  2, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "Original idea:");
+    menu_text_out(self->x +  2, self->y +  3, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "Andreas Hahn");
+    menu_text_out(self->x +  1, self->y +  4, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "Development:");
+    menu_text_out(self->x +  2, self->y +  5, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "Toxa, Andreas Hahn");
+    menu_text_out(self->x +  2, self->y +  6, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "Raphael Boichot, Hatch");
+    menu_text_out(self->x +  1, self->y +  7, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "Art and Sound:");
+    menu_text_out(self->x +  2, self->y +  8, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "Tronimal, 2BitPit, bbbbbr");
+    menu_text_out(self->x +  2, self->y +  9, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "rembrandx, NeoRame");
+    menu_text_out(self->x +  1, self->y + 10, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "Special thanks:");
+    menu_text_out(self->x +  2, self->y + 11, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "bbbbbr, AlexiG, HDR,");
+    menu_text_out(self->x +  2, self->y + 12, 0, DK_GR_ON_WHITE, ITEM_DEFAULT, "crizzlycruz, christianr");
     vwf_activate_font(0);
     return MENU_PROP_NO_FRAME;
 }
@@ -168,7 +174,7 @@ uint8_t onShowMain(const menu_t * self, uint8_t * param) {
 uint8_t onHelpMainMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 

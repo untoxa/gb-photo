@@ -30,7 +30,7 @@ inline uint8_t images_free(void) {
 
 inline void gallery_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
     misc_render_progressbar(value, size, text_buffer);
-    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, text_buffer);
+    menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
 uint8_t gallery_print_picture(uint8_t image_no, uint8_t frame_no) BANKED;

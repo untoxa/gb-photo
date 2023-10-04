@@ -30,7 +30,8 @@ extern uint8_t vwf_tab_size;
 
 void vwf_load_font(uint8_t idx, const void * font, uint8_t bank);
 void vwf_activate_font(uint8_t idx);
-uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str);
+uint8_t vwf_text_width(const unsigned char * str);
+uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str, uint8_t offset);
 uint8_t * vwf_next_tile(void);
 
 inline void vwf_set_colors(uint8_t fgcolor, uint8_t bgcolor) {

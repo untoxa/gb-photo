@@ -15,14 +15,22 @@
 
 #include "sound_menu_move.h"
 
-void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text) {
-    uint8_t len;
+void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, uint8_t props, const uint8_t * text) {
+    uint8_t len, width = 0, lead = 0;
     if (text) {
+        if (props & ITEM_TEXT_CENTERED) {
+            width = vwf_text_width(text);
+            if ((w << 3) > width) {
+                width = ((w << 3) - width) >> 1;
+                lead = width >> 3;
+                if (lead) screen_clear_rect(x, y, lead, 1, c);
+            }
+        }
         vwf_set_colors(FG_COLOR(c), BG_COLOR(c));
-        len = vwf_draw_text(screen_tile_addresses[y] + (x << 4), text);
-        screen_restore_rect(x, y, len, 1);
+        len = vwf_draw_text(screen_tile_addresses[y] + ((x + lead) << 4), text, width & 0x07);
+        screen_restore_rect(x + lead, y, len, 1);
     } else len = 0;
-    if (len < w) screen_clear_rect(x + len, y, w - len, 1, c);
+    if ((lead + len) < w) screen_clear_rect(x + lead + len, y, w - lead - len, 1, c);
 }
 
 inline uint8_t menu_item_get_props(const menu_t * menu, const menu_item_t * item) {
@@ -35,11 +43,13 @@ const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t *
         uint8_t item_props = menu_item_get_props(menu, selection);
         menu_text_out(menu->x + selection->ofs_x, menu->y + selection->ofs_y, selection->width,
                       items_colors[(bool)(item_props & ITEM_DISABLED)][(bool)(menu->flags & MENU_FLAGS_INVERSE)],
+                      item_props,
                       (selection->onPaint) ? selection->onPaint(menu, selection) : (uint8_t *)selection->caption);
     }
     if (new_selection)
         menu_text_out(menu->x + new_selection->ofs_x, menu->y + new_selection->ofs_y, new_selection->width,
                       ((menu->flags & MENU_FLAGS_INVERSE) ? BLACK_ON_WHITE : WHITE_ON_BLACK),
+                      (new_selection->onGetProps) ? new_selection->onGetProps(menu, new_selection) : ITEM_DEFAULT,
                       (new_selection->onPaint) ? new_selection->onPaint(menu, new_selection) : (uint8_t *)new_selection->caption);
     return (new_selection) ? new_selection : selection;
 }

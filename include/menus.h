@@ -21,6 +21,7 @@ typedef struct menu_item_t;
 
 #define ITEM_DEFAULT            0x00
 #define ITEM_DISABLED           0x01
+#define ITEM_TEXT_CENTERED      0x02
 
 typedef uint8_t menu_handler_t (const struct menu_t * self, uint8_t * param);
 typedef uint8_t idle_handler_t (const struct menu_t * menu, const struct menu_item_t * selection);
@@ -59,7 +60,7 @@ typedef struct menu_t {
     menu_translate_t * onTranslateSubResult;
 } menu_t;
 
-void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, const uint8_t * text);
+void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, uint8_t props, const uint8_t * text);
 const menu_item_t * menu_move_selection(const menu_t * menu, const menu_item_t * selection, const menu_item_t * new_selection);
 void menu_draw_frame(const menu_t * menu);
 void menu_draw_shadow(const menu_t * menu);
