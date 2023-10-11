@@ -48,9 +48,9 @@ The **camera mode** was created to propose many more features than a regular cam
 - **A Button** is the most simple action: press A once to get an **Action**.
 - **Timer** launch a remote timer between 1 and 99 seconds and trigger an **Action**.
 - **Repeat** allows triggering an **Action** repetitively, it is cumulative with **Timer**.
-- **EAB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). The more you take images, the farther it goes in EV. Images can be processed together to make and HDR image (**H**igh **D**efinition **R**ange) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
+- **AEB mode** (for Automatic Exposure Bracketing) is an automatic burst mode were each image has a different exposure. You can choose the number of **Steps** (for example 14 steps means 14 images gradually under-exposed + 14 images gradually over-exposed + a central image, so 29 images taken in total) and the maximal possible **Range** possible in EV (indicated here for 29 images). The more you take images, the farther it goes in EV. Images can be processed together to make and HDR image (**H**igh **D**efinition **R**ange) by using the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer), the [Game Boy Camera Gallery](https://herrzatacke.github.io/gb-printer-web/#/home) or the [GB Camera Android Manager](https://github.com/Mraulio/GBCamera-Android-Manager).
 
-**Timer**, **Repeat** and **EAB mode** can be cancelled by pressing B button.
+**Timer**, **Repeat** and **AEB mode** can be cancelled by pressing B button.
 
 ### Action menu
 - **Save** just saves image in one of the 30 memory slots of the Camera save ram. If memory is full, it will play an error sound but continues to loop.
