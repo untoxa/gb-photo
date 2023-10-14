@@ -14,15 +14,15 @@ BANKREF_EXTERN(module_screen)
 BANKREF_EXTERN(module_display_off)
 BANKREF_EXTERN(module_display_on)
 
-extern const uint8_t * const screen_tile_addresses[18];
-extern const uint8_t screen_tile_map[360];
+extern const uint8_t * const screen_tile_addresses[DEVICE_SCREEN_HEIGHT];
+extern const uint8_t screen_tile_map[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH];
 
 inline uint8_t screen_clear_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color) {
     return (w) ? fill_bkg_rect(x, y, w, h, SLD_WHITE + BG_COLOR(color)), w : w;
 }
 
 inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-    return (w) ? set_bkg_submap(x, y, w, h, screen_tile_map, 20), w : w;
+    return (w) ? set_bkg_submap(x, y, w, h, screen_tile_map, DEVICE_SCREEN_WIDTH), w : w;
 }
 
 #define IMAGE_NORMAL  false
