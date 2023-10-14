@@ -78,6 +78,8 @@ camera_mode_settings_t current_settings[N_CAMERA_MODES];
 
 camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
 
+volatile uint8_t camera_PnR_delay;  // PicNRec delay counter
+
 #define AUTOEXP_AREA_X      18
 #define AUTOEXP_AREA_Y      10
 #define SHUTTER_REPEAT_X    18
@@ -377,6 +379,7 @@ void shutter_VBL_ISR(void) NONBANKED {
             if (!--COUNTER(camera_shutter_timer)) camera_do_shutter = true;
         }
     }
+    if (camera_PnR_delay) camera_PnR_delay--;
 }
 
 void reset_AEB(void) {
@@ -508,7 +511,7 @@ const menu_item_t CameraMenuItemsAuto[] = {
         .ofs_x = 0, .ofs_y = 0, .width = 0,
         .id = idNone,
         .caption = " Automatic mode",
-        .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " and "ICON_CONTRAST,
+        .helpcontext = " D-Pad adjusts " ICON_BRIGHTNESS " and " ICON_CONTRAST,
         .onPaint = onCameraMenuItemPaint,
         .result = MENU_RESULT_NONE
     }
@@ -903,8 +906,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     (OPTION(after_action) == after_action_print) ||
                     (OPTION(after_action) == after_action_printsave) ||
                     (OPTION(after_action) == after_action_transfer) ||
-                    (OPTION(after_action) == after_action_transfersave) ||
-                    (OPTION(after_action) == after_action_picnrec)) {
+                    (OPTION(after_action) == after_action_transfersave)) {
                         if (isSaveCancelled()) return ACTION_NONE;
                         onHelpCameraMenu(menu, selection);
                 }
