@@ -163,19 +163,19 @@ extern bool recording_video;
 
 extern camera_shadow_regs_t SHADOW;
 
-#define PNR_DELAY_FRAMES 10
+#define PNR_DELAY_FRAMES 6
 extern volatile uint8_t camera_PnR_delay;
 
-inline bool is_capturing(void) {
-    if (camera_PnR_delay) return false;
+inline uint8_t is_capturing(void) {
+    if (camera_PnR_delay) return FALSE;
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     return (CAM_REG_CAPTURE & CAM00F_CAPTURING);
 }
-inline bool image_captured(void) {
-    if (camera_PnR_delay) return false;
+inline uint8_t image_captured(void) {
+    if (camera_PnR_delay) return FALSE;
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     uint8_t v = CAM_REG_CAPTURE;
-    bool r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
+    uint8_t r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
     SHADOW.CAM_REG_CAPTURE = v;
     return r;
 }
