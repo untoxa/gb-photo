@@ -24,7 +24,7 @@ uint8_t send_joypad(uint8_t j, uint8_t id) {
 #define MS_PULSE_LENGTH 10
 #define MS_PACKET_LENGTH 250
 
-uint8_t send_ir_shutter() CRITICAL {
+uint8_t send_ir_shutter(void) CRITICAL {
     for (uint8_t i = 0; i != MS_PACKET_LENGTH / MS_PULSE_LENGTH; i++) {
         RP_REG ^= 0x1;
         delay(MS_PULSE_LENGTH);
@@ -77,7 +77,7 @@ void main(void) {
     DISPLAY_ON;
 
     // delay a bit for aesthetics
-    for (uint8_t i = 30; i != 0; i--) wait_vbl_done();
+    for (uint8_t i = 30; i != 0; i--) vsync();
 
     // refresh link state
     static uint8_t connected, old_connected;
@@ -105,7 +105,7 @@ void main(void) {
                         (remote_WIDTH / remote_TILE_W));
             old_connected = connected;
         }
-        wait_vbl_done();
+        vsync();
     }
 
 }
