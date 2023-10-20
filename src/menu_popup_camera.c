@@ -494,7 +494,7 @@ uint8_t onCameraPopupMenuItemProps(const struct menu_t * menu, const struct menu
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu; selection;
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing() && !recording_video) sync_vblank();
+    if (!image_is_capturing() && !recording_video) sync_vblank();
     return 0;
 }
 uint8_t onHelpCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {

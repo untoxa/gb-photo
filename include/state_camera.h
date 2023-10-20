@@ -166,23 +166,9 @@ extern camera_shadow_regs_t SHADOW;
 #define PNR_DELAY_FRAMES 6
 extern volatile uint8_t camera_PnR_delay;
 
-inline uint8_t is_capturing(void) {
-    if (camera_PnR_delay) return FALSE;
+inline bool image_is_capturing(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    return (CAM_REG_CAPTURE & CAM00F_CAPTURING);
-}
-inline uint8_t image_captured(void) {
-    if (camera_PnR_delay) return FALSE;
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    uint8_t v = CAM_REG_CAPTURE;
-    uint8_t r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
-    SHADOW.CAM_REG_CAPTURE = v;
-    return r;
-}
-inline void image_capture(void) {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
-    if ((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video)) camera_PnR_delay = PNR_DELAY_FRAMES;
+    return ((camera_PnR_delay) || (CAM_REG_CAPTURE & CAM00F_CAPTURING));
 }
 
 uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;

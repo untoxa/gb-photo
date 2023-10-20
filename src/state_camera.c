@@ -271,6 +271,27 @@ void RENDER_EDGE_FROM_EXPOSURE(void) {
     RENDER_CAM_REG_EXPTIME();
 }
 
+bool image_captured(void) {
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    if (camera_PnR_delay) return false;
+    uint8_t v = CAM_REG_CAPTURE;
+    bool r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
+    SHADOW.CAM_REG_CAPTURE = v;
+    return r;
+}
+void image_capture(void) {
+    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
+    switch (OPTION(after_action)) {
+        case after_action_picnrec:
+        case after_action_picnrec_video:
+            camera_PnR_delay = PNR_DELAY_FRAMES;
+            break;
+        default:
+            break;
+    }
+}
+
 void display_last_seen(bool restore) {
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
@@ -665,7 +686,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             case after_action_transfer_video:
                 // toggle recording and start image capture
                 recording_video = !recording_video;
-                if (recording_video && !is_capturing()) image_capture();
+                if (recording_video && !image_is_capturing()) image_capture();
                 refresh_usage_indicator();
                 break;
             default:
@@ -871,7 +892,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (camera_do_shutter) {
         if (!capture_triggered) {
             music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask, MUSIC_SFX_PRIORITY_NORMAL);
-            if (!is_capturing()) image_capture();
+            if (!image_is_capturing()) image_capture();
             capture_triggered = true;
         }
         camera_do_shutter = false;
@@ -999,7 +1020,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     hide_sprites_range(scrollbar_render_all(grid_render(0)), MAX_HARDWARE_SPRITES);
 
     // wait for VBlank if not capturing (avoid HALT CPU state)
-    if (!is_capturing() && !recording_video) sync_vblank();
+    if (!image_is_capturing() && !recording_video) sync_vblank();
+
     return 0;
 }
 uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings, bool divide_exposure) {
@@ -1109,7 +1131,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
             break;
     }
     // wait until capturing process is finished
-    while (is_capturing());
+    while (image_is_capturing());
     // process menu result
     switch (menu_result) {
         case ACTION_CAMERA_PRINT:
