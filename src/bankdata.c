@@ -90,9 +90,9 @@ uint8_t read_banked_ubyte(const uint8_t * ptr, uint8_t bank) NONBANKED {
 uint8_t * read_banked_ptr(const uint8_t ** ptr, uint8_t bank) NONBANKED {
     _save = _current_bank;
     SWITCH_ROM(bank);
-    uint8_t * res = *ptr;
+    const uint8_t * res = *ptr;
     SWITCH_ROM(_save);
-    return res;
+    return (uint8_t *)res;
 }
 
 void set_banked_data(uint8_t *vram_addr, const uint8_t *data, uint16_t len, uint8_t bank) NONBANKED {
