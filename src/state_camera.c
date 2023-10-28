@@ -316,25 +316,32 @@ inline void camera_scrollbars_reinit(void) {
 }
 
 bool camera_image_save(void) {
+    static const uint8_t msgCameraRollFull[] = "Camera roll is full!";
     static image_metadata_t image_metadata;
     uint8_t n_images = images_taken();
-    if (n_images >= CAMERA_MAX_IMAGE_SLOTS) return false;
-    // modify index
-    uint8_t slot = VECTOR_POP(free_slots);
-    protected_modify_slot(slot, n_images);
-    // copy image data
-    protected_lastseen_to_slot(slot, OPTION(flip_live_view));
-    // generate thumbnail
-    protected_generate_thumbnail(slot);
-    // save metadata
-    image_metadata.raw_regs = SHADOW;
-    image_metadata.settings = current_settings[OPTION(camera_mode)];
-    image_metadata.settings.cpu_fast = _is_CPU_FAST;
-    image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
-    protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
-    // add slot to used list
-    VECTOR_ADD(used_slots, slot);
-    return true;
+    if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
+        // modify index
+        uint8_t slot = VECTOR_POP(free_slots);
+        protected_modify_slot(slot, n_images);
+        // copy image data
+        protected_lastseen_to_slot(slot, OPTION(flip_live_view));
+        // generate thumbnail
+        protected_generate_thumbnail(slot);
+        // save metadata
+        image_metadata.raw_regs = SHADOW;
+        image_metadata.settings = current_settings[OPTION(camera_mode)];
+        image_metadata.settings.cpu_fast = _is_CPU_FAST;
+        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
+        protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
+        // add slot to used list
+        VECTOR_ADD(used_slots, slot);
+        return true;
+    } else {
+        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
+        MessageBox(msgCameraRollFull);
+        display_last_seen(true);
+        return false;
+    }
 }
 
 static void refresh_usage_indicator(void) {
@@ -413,6 +420,14 @@ void reset_AEB(void) {
         SWITCH_RAM(CAMERA_BANK_REGISTERS);
         RENDER_CAM_REG_EXPTIME();
     }
+}
+void reset_shutter(void) {
+    reset_AEB();
+    // cancel timers and counters
+    COUNTER_RESET(camera_shutter_timer);
+    screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
+    COUNTER_RESET(camera_repeat_counter);
+    screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
 }
 
 uint8_t INIT_state_camera(void) BANKED {
@@ -669,8 +684,6 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         [shutter_sound_0] = {BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01)},
         [shutter_sound_1] = {BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02)}
     };
-    static const uint8_t msgCameraRollFull[] = "Camera roll is full!";
-
     static change_direction_e change_direction;
     static bool capture_triggered = false;       // state of static variable persists between calls
 
@@ -725,14 +738,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
     } else if (KEY_PRESSED(J_B)) {
         if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_AEB_counter)) {
-            reset_AEB();
-            // cancel timers and counters
-            COUNTER_RESET(camera_shutter_timer);
-            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
-            COUNTER_RESET(camera_repeat_counter);
-            screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
-            camera_do_shutter = false;
-            capture_triggered = false;
+            reset_shutter();
+            camera_do_shutter = capture_triggered = false;
         } else {
             // open the main menu
             capture_triggered = false;
@@ -938,27 +945,21 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             switch (OPTION(after_action)) {
                 case after_action_save:
                     if (!camera_image_save()) {
-                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
-                        MessageBox(msgCameraRollFull);
-                        display_last_seen(true);
-                        if (COUNTER(camera_AEB_counter)) COUNTER(camera_AEB_counter) = 0;
+                        reset_shutter();
+                        camera_do_shutter = capture_triggered = false;
                     } else refresh_usage_indicator();
                     break;
                 case after_action_printsave:
                     if (!camera_image_save()) {
-                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
-                        MessageBox(msgCameraRollFull);
-                        display_last_seen(true);
-                        if (COUNTER(camera_AEB_counter)) COUNTER(camera_AEB_counter) = 0;
+                        reset_shutter();
+                        camera_do_shutter = capture_triggered = false;
                     } else refresh_usage_indicator();
                 case after_action_print:
                     return ACTION_CAMERA_PRINT;
                 case after_action_transfersave:
                     if (!camera_image_save()) {
-                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
-                        MessageBox(msgCameraRollFull);
-                        display_last_seen(true);
-                        if (COUNTER(camera_AEB_counter)) COUNTER(camera_AEB_counter) = 0;
+                        reset_shutter();
+                        camera_do_shutter = capture_triggered = false;
                     } else refresh_usage_indicator();
                 case after_action_transfer:
                     return ACTION_CAMERA_TRANSFER;
