@@ -33,7 +33,7 @@ BANKREF(module_splash)
 #if defined(NINTENDO)
 static uint8_t mask_counter;
 #endif
-void apply_mask(uint8_t * sour, uint8_t *mask, uint8_t * dest) NONBANKED NAKED {
+void apply_mask(uint8_t * sour, uint8_t *mask, uint8_t * dest) NAKED {
     sour; mask; dest;
 __asm
 #if defined(NINTENDO)
@@ -140,7 +140,7 @@ const mask_t mask_in = {
     {0x00,0x00,0x11,0x00,0x00,0x00,0x11,0x00}
 };
 
-void logo_fade(const mask_t * mask) BANKED {
+void logo_fade(const mask_t * mask) {
     static uint8_t i, j;
     static uint16_t offset;
     static uint8_t counters[WIDTH(GBDK2020)];
