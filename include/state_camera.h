@@ -166,6 +166,9 @@ extern camera_shadow_regs_t SHADOW;
 #define PNR_DELAY_FRAMES 6
 extern volatile uint8_t camera_PnR_delay;
 
+inline void set_image_refresh_dalay(uint8_t delay) {
+    camera_PnR_delay = delay;
+}
 inline bool image_is_capturing(void) {
     SWITCH_RAM(CAMERA_BANK_REGISTERS);
     return ((camera_PnR_delay) || (CAM_REG_CAPTURE & CAM00F_CAPTURING));

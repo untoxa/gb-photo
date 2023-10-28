@@ -51,6 +51,7 @@
 #include "menu_codes.h"
 #include "menu_main.h"
 #include "menu_popup_camera.h"
+#include "menu_msgbox.h"
 
 // dither patterns
 #include "dither_patterns.h"
@@ -285,7 +286,7 @@ void image_capture(void) {
     switch (OPTION(after_action)) {
         case after_action_picnrec:
         case after_action_picnrec_video:
-            camera_PnR_delay = PNR_DELAY_FRAMES;
+            set_image_refresh_dalay(PNR_DELAY_FRAMES);
             break;
         default:
             break;
@@ -314,26 +315,26 @@ inline void camera_scrollbars_reinit(void) {
     }
 }
 
-void camera_image_save(void) {
+bool camera_image_save(void) {
     static image_metadata_t image_metadata;
     uint8_t n_images = images_taken();
-    if (n_images < CAMERA_MAX_IMAGE_SLOTS) {
-        // modify index
-        uint8_t slot = VECTOR_POP(free_slots);
-        protected_modify_slot(slot, n_images);
-        // copy image data
-        protected_lastseen_to_slot(slot, OPTION(flip_live_view));
-        // generate thumbnail
-        protected_generate_thumbnail(slot);
-        // save metadata
-        image_metadata.raw_regs = SHADOW;
-        image_metadata.settings = current_settings[OPTION(camera_mode)];
-        image_metadata.settings.cpu_fast = _is_CPU_FAST;
-        image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
-        protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
-        // add slot to used list
-        VECTOR_ADD(used_slots, slot);
-    } else music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH); // high priority, override shutter sound!
+    if (n_images >= CAMERA_MAX_IMAGE_SLOTS) return false;
+    // modify index
+    uint8_t slot = VECTOR_POP(free_slots);
+    protected_modify_slot(slot, n_images);
+    // copy image data
+    protected_lastseen_to_slot(slot, OPTION(flip_live_view));
+    // generate thumbnail
+    protected_generate_thumbnail(slot);
+    // save metadata
+    image_metadata.raw_regs = SHADOW;
+    image_metadata.settings = current_settings[OPTION(camera_mode)];
+    image_metadata.settings.cpu_fast = _is_CPU_FAST;
+    image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
+    protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
+    // add slot to used list
+    VECTOR_ADD(used_slots, slot);
+    return true;
 }
 
 static void refresh_usage_indicator(void) {
@@ -668,6 +669,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         [shutter_sound_0] = {BANK(shutter01), shutter01, SFX_MUTE_MASK(shutter01)},
         [shutter_sound_1] = {BANK(shutter02), shutter02, SFX_MUTE_MASK(shutter02)}
     };
+    static const uint8_t msgCameraRollFull[] = "Camera roll is full!";
 
     static change_direction_e change_direction;
     static bool capture_triggered = false;       // state of static variable persists between calls
@@ -935,17 +937,29 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             // perform after action(s)
             switch (OPTION(after_action)) {
                 case after_action_save:
-                    camera_image_save();
-                    refresh_usage_indicator();
+                    if (!camera_image_save()) {
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
+                        MessageBox(msgCameraRollFull);
+                        display_last_seen(true);
+                        if (COUNTER(camera_AEB_counter)) COUNTER(camera_AEB_counter) = 0;
+                    } else refresh_usage_indicator();
                     break;
                 case after_action_printsave:
-                    camera_image_save();
-                    refresh_usage_indicator();
+                    if (!camera_image_save()) {
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
+                        MessageBox(msgCameraRollFull);
+                        display_last_seen(true);
+                        if (COUNTER(camera_AEB_counter)) COUNTER(camera_AEB_counter) = 0;
+                    } else refresh_usage_indicator();
                 case after_action_print:
                     return ACTION_CAMERA_PRINT;
                 case after_action_transfersave:
-                    camera_image_save();
-                    refresh_usage_indicator();
+                    if (!camera_image_save()) {
+                        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
+                        MessageBox(msgCameraRollFull);
+                        display_last_seen(true);
+                        if (COUNTER(camera_AEB_counter)) COUNTER(camera_AEB_counter) = 0;
+                    } else refresh_usage_indicator();
                 case after_action_transfer:
                     return ACTION_CAMERA_TRANSFER;
                 default:
