@@ -171,21 +171,21 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
     bool apply_dither;
     uint16_t exposure = SETTING(current_exposure);
     if (_is_CPU_FAST) {
-        if (exposure < TO_EXPOSURE_VALUE((768 << 1))) {
+        if (exposure < TO_EXPOSURE_VALUE(1536)) {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
             SETTING(voltage_out)        = 160;
             SETTING(current_gain)       = 0;        // CAM01_GAIN_140
             if (apply_dither = (SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = false;// dither HIGH
-        } else if (exposure < TO_EXPOSURE_VALUE((32000 << 1))) {
+        } else if (exposure < TO_EXPOSURE_VALUE(64000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
             SETTING(voltage_out)        = 192;
             SETTING(current_gain)       = 0;        // CAM01_GAIN_140
             if (apply_dither = (SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = false;// dither HIGH
-        } else if (exposure < TO_EXPOSURE_VALUE((282000 << 1))) {
+        } else if (exposure < TO_EXPOSURE_VALUE(564000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
             SETTING(voltage_out)        = 224;
@@ -248,7 +248,7 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
 void RENDER_EDGE_FROM_EXPOSURE(void) {
     uint16_t exposure = SETTING(current_exposure);
     if (_is_CPU_FAST) {
-        if (exposure < TO_EXPOSURE_VALUE((768 << 1))) {
+        if (exposure < TO_EXPOSURE_VALUE(1536)) {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
         } else {
