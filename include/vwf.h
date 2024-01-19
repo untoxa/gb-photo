@@ -25,7 +25,6 @@ typedef struct font_desc_t {
 
 extern vwf_farptr_t vwf_fonts[4];
 extern uint8_t vwf_mode;
-extern uint8_t vwf_inverse_map;
 extern uint8_t vwf_tab_size;
 
 void vwf_load_font(uint8_t idx, const void * font, uint8_t bank);
@@ -36,10 +35,6 @@ uint8_t * vwf_next_tile(void);
 
 inline void vwf_set_colors(uint8_t fgcolor, uint8_t bgcolor) {
     set_1bpp_colors(fgcolor, bgcolor);
-}
-
-inline void vwf_set_mask(uint8_t mask) {
-    vwf_inverse_map = mask;
 }
 
 inline void vwf_set_tab_size(uint8_t tab_size) {

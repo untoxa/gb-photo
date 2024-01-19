@@ -15,9 +15,7 @@ vwf_farptr_t vwf_fonts[4];
 
 uint8_t vwf_current_offset = 0;
 uint8_t vwf_tile_data[VWF_TILE_SIZE * 2];
-uint8_t vwf_current_mask;
 uint8_t vwf_current_rotate;
-uint8_t vwf_inverse_map = 0;
 uint8_t * vwf_current_tile;
 uint8_t vwf_tab_size = 2;
 
@@ -25,15 +23,17 @@ font_desc_t vwf_current_font_desc;
 uint8_t vwf_current_font_bank;
 
 #if defined(NINTENDO)
-void vwf_print_shift_char(void * dest, const void * src, uint8_t bank);
+void vwf_print_shift_char_right(void * dest, const void * src, uint8_t bank);
+void vwf_print_shift_char_left(void * dest, const void * src, uint8_t bank);
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) OLDCALL;
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank);
-void vwf_swap_tiles(void) OLDCALL;
+void vwf_swap_tiles(void);
 #elif defined(SEGA)
-void vwf_print_shift_char(void * dest, const void * src, uint8_t bank) __z88dk_callee;
+void vwf_print_shift_char_right(void * dest, const void * src, uint8_t bank) __z88dk_callee;
+void vwf_print_shift_char_left(void * dest, const void * src, uint8_t bank) __z88dk_callee;
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) __z88dk_callee;
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank) __z88dk_callee;
-void vwf_swap_tiles(void) OLDCALL;
+void vwf_swap_tiles(void);
 #endif
 
 void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data);
@@ -50,21 +50,18 @@ uint8_t vwf_print_render(const unsigned char ch) {
     const uint8_t * bitmap = vwf_current_font_desc.bitmaps + (uint16_t)letter * 8;
     if (vwf_current_font_desc.attr & FONT_VWF) {
         uint8_t width = vwf_read_banked_ubyte(vwf_current_font_desc.widths + letter, vwf_current_font_bank);
-        uint8_t dx = (8u - vwf_current_offset);
-        vwf_current_mask = (0xffu << dx) | (0xffu >> (vwf_current_offset + width));
 
         vwf_current_rotate = vwf_current_offset;
-        vwf_print_shift_char(vwf_tile_data, bitmap, vwf_current_font_bank);
+        vwf_print_shift_char_right(vwf_tile_data, bitmap, vwf_current_font_bank);
         if ((uint8_t)(vwf_current_offset + width) > 8u) {
-            vwf_current_rotate = dx | 0x80u;
-            vwf_current_mask = 0xffu >> (width - dx);
-            vwf_print_shift_char(vwf_tile_data + VWF_TILE_SIZE, bitmap, vwf_current_font_bank);
+            vwf_current_rotate = (8u - vwf_current_offset);
+            vwf_print_shift_char_left(vwf_tile_data + VWF_TILE_SIZE, bitmap, vwf_current_font_bank);
         }
         vwf_current_offset += width;
 
         if (vwf_current_offset > 7u) {
             vwf_current_offset -= 8u;
-            set_1bpp_data(vwf_current_tile, (vwf_current_offset) ? 2 : 1, vwf_tile_data);
+            set_1bpp_data(vwf_current_tile, 1, vwf_tile_data);
             vwf_current_tile += DEVICE_TILE_SIZE;
             vwf_swap_tiles();
             return TRUE;
@@ -116,10 +113,6 @@ uint8_t vwf_draw_text(const uint8_t * base_tile, const unsigned char * str, uint
             case 0x02:
                 // escape character
                 vwf_print_render(*++ui_text_ptr);
-                break;
-            case 0x03:
-                // set inverse map
-                vwf_inverse_map = *++ui_text_ptr;
                 break;
             case '\t':
                 // tab character

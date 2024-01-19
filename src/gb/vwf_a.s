@@ -1,10 +1,12 @@
         .include        "global.s"
 
-        .globl _vwf_current_rotate, _vwf_current_mask, _vwf_inverse_map, _vwf_tile_data, _vwf_inverse_map
+        .globl _vwf_current_rotate, _vwf_tile_data
 
         .area _DATA
 
 __save:
+        .ds 0x01
+__counter:
         .ds 0x01
 
         .area _CODE
@@ -67,8 +69,8 @@ _vwf_read_banked_ubyte::
         ld a, e
         ret
 
-; void vwf_print_shift_char(void * dest, const void * src, UBYTE bank);
-_vwf_print_shift_char::
+; void vwf_print_shift_char_right(void * dest, const void * src, UBYTE bank);
+_vwf_print_shift_char_right::
         ldhl sp, #2
 
         ldh a, (__current_bank)
@@ -77,57 +79,37 @@ _vwf_print_shift_char::
         ldh (__current_bank), a
         ld  (rROMB0), a
 
+        ld hl, #__counter
+        ld (hl), #8
+11$:
+        ld hl, #10$
+        ld a, (_vwf_current_rotate)
+        add a
+        sub l
+        cpl
+        inc a
+        ld l, a
+        jr c, 12$
+        dec h
+12$:
+        ld a, (bc)
+        inc bc
+        jp (hl)
+
+        .rept 7
+            srl a
+        .endm
+10$:
         ld h, d
         ld l, e
-        ld d, b
-        ld e, c
-
-        ld b, #8
-3$:
-        ld a, (de)
-        ld c, a
-        ld a, (_vwf_inverse_map)
-        xor c
-        ld c, a
-        inc de
-
-        ld a, (_vwf_current_rotate)
-        sla a
-        jr z, 1$
-        jr c, 4$
-        srl a
-        srl a
-        jr nc, 6$
-        srl c
-6$:
-        or a
-        jr z, 1$
-2$:
-        srl c
-        srl c
-        dec a
-        jr nz, 2$
-        jr 1$
-4$:
-        srl a
-        srl a
-        jr nc, 7$
-        sla c
-7$:     or a
-        jr z, 1$
-5$:
-        sla c
-        sla c
-        dec a
-        jr nz, 5$
-1$:
-        ld a, (_vwf_current_mask)
-        and (hl)
-        or c
+        xor (hl)
         ld (hl+), a
+        ld d, h
+        ld e, l
 
-        dec b
-        jr nz, 3$
+        ld hl, #__counter
+        dec (hl)
+        jr nz, 11$
 
         pop af
         ldh (__current_bank),a
@@ -137,17 +119,68 @@ _vwf_print_shift_char::
         inc sp
         jp (hl)
 
-_vwf_swap_tiles::
-        ld      hl, #_vwf_tile_data
-        ld      de, #(_vwf_tile_data + 8)
-        .rept 8
-                ld      a, (de)
-                inc     de
-                ld      (hl+), a
-        .endm
-        ld      a, (_vwf_inverse_map)
+; void vwf_print_shift_char_left(void * dest, const void * src, UBYTE bank);
+_vwf_print_shift_char_left::
+        ldhl sp, #2
+
+        ldh a, (__current_bank)
+        push af
+        ld a, (hl)
+        ldh (__current_bank), a
+        ld  (rROMB0), a
+
+        ld hl, #__counter
+        ld (hl), #8
+11$:
+        ld hl, #10$
+        ld a, (_vwf_current_rotate)
+        add a
+        sub l
+        cpl
+        inc a
+        ld l, a
+        jr c, 12$
+        dec h
+12$:
+        ld a, (bc)
+        inc bc
+        jp (hl)
+
         .rept 7
-        ld      (hl+), a
+            sla a
         .endm
-        ld      (hl), a
+10$:
+        ld h, d
+        ld l, e
+        xor (hl)
+        ld (hl+), a
+        ld d, h
+        ld e, l
+
+        ld hl, #__counter
+        dec (hl)
+        jr nz, 11$
+
+        pop af
+        ldh (__current_bank),a
+        ld  (rROMB0), a
+
+        pop hl
+        inc sp
+        jp (hl)
+
+
+_vwf_swap_tiles::
+        ld hl, #_vwf_tile_data
+        ld de, #(_vwf_tile_data + 8)
+        .rept 8
+            ld a, (de)
+            inc de
+            ld (hl+), a
+        .endm
+        xor a
+        .rept 7
+            ld (hl+), a
+        .endm
+        ld (hl), a
         ret
