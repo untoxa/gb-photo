@@ -16,29 +16,29 @@ _vwf_memcpy::
         ldh a, (__current_bank)
         ld  (#__save),a
 
-        ldhl sp, #8
-        ld  a, (hl-)
+        ldhl sp, #4
+        ld a, (hl-)
+
         ldh (__current_bank),a
         ld  (rROMB0), a
 
         ld a, (hl-)
-        ld b, a
-        ld a, (hl-)
-        ld c, a
-        ld a, (hl-)
-        ld d, a
-        ld a, (hl-)
-        ld e, a
-        ld a, (hl-)
         ld l, (hl)
         ld h, a
+
+        ld a, b
+        ld b, h
+        ld h, a
+        ld a, c
+        ld c, l
+        ld l, a
 
         inc b
         inc c
         jr 2$
 1$:
-        ld a, (de)
-        ld (hl+), a
+        ld a, (hl+)
+        ld (de), a
         inc de
 2$:
         dec c
@@ -49,6 +49,9 @@ _vwf_memcpy::
         ld  a, (#__save)
         ldh (__current_bank),a
         ld  (rROMB0), a
+
+        pop hl
+        add sp, #3
         ret
 
 ; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank);

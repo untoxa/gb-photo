@@ -25,7 +25,7 @@ uint8_t vwf_current_font_bank;
 #if defined(NINTENDO)
 void vwf_print_shift_char_right(void * dest, const void * src, uint8_t bank);
 void vwf_print_shift_char_left(void * dest, const void * src, uint8_t bank);
-void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) OLDCALL;
+void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank);
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank);
 void vwf_swap_tiles(void);
 #elif defined(SEGA)
