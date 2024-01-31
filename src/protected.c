@@ -49,20 +49,13 @@ uint16_t protected_scale_line_part(const void * ptr) NAKED {
         ld a, (hl-)
         .SHIFT_6_2 regh
 .endm
-.macro  .ADD_A_HL
-        add l
-        ld l, a
-        adc h
-        sub l
-        ld h, a
-.endm
         ld h, d
         ld l, e
+        ld de, #16
 
         .rept 3
             .SCALE b,c
-            ld a, #16
-            .ADD_A_HL
+            add hl, de
         .endm
         .SCALE b,c
 
