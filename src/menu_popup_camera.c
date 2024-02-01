@@ -32,7 +32,8 @@ typedef enum {
     idPopupTriggerAButton,
     idPopupTriggerTimerValue,
     idPopupTriggerTimerCounter,
-    idPopupTriggerAEB
+    idPopupTriggerAEB,
+    idPopupCameraDither
 } camera_popup_menu_e;
 
 
@@ -83,15 +84,16 @@ const spinedit_params_t AEBOverexpSpinEditParams = {
     .value = &spinedit_aeb_overexp_count
 };
 const spinedit_value_names_t AEBStepNames[] = {
-    { .next = AEBStepNames + 1, .value = 0, .name = " " ICON_SPIN_UP " 2 EV\t" ICON_SPIN_DOWN },
-    { .next = NULL,             .value = 1, .name = " " ICON_SPIN_UP " 1 EV\t" ICON_SPIN_DOWN}
+    { .value = 0, .name = " " ICON_SPIN_UP " 2 EV\t" ICON_SPIN_DOWN },
+    { .value = 1, .name = " " ICON_SPIN_UP " 1 EV\t" ICON_SPIN_DOWN}
 };
 const spinedit_params_t AEBStepSpinEditParams = {
     .caption = "Range:",
     .min_value = 0,
     .max_value = MAX_INDEX(AEBStepNames),
     .value = &spinedit_aeb_exp_step,
-    .names = AEBStepNames
+    .names = AEBStepNames,
+    .last_name = LAST_ITEM(AEBStepNames)
 };
 const menu_item_t AEBMenuItems[] = {
     {
@@ -123,9 +125,9 @@ uint8_t * onAEBMenuItemPaint(const struct menu_t * menu, const struct menu_item_
         const spinedit_params_t * params = (const spinedit_params_t *)self->sub_params;
         uint8_t value = *params->value;
         const spinedit_value_names_t * current_name = params->names;
-        while (current_name) {
+        while (current_name <= params->last_name) {
             if (current_name->value == value) return strcpy(text_buffer, current_name->name);
-            current_name = current_name->next;
+            current_name++;
         }
         sprintf(text_buffer, self->caption, value);
         return text_buffer;
@@ -176,16 +178,16 @@ const spinedit_params_t TimerSpinEditParams = {
     .max_value = 99,
     .value = &spinedit_timer_value
 };
-const spinedit_value_names_t CounterSpinEditInfinite = {
-    .next = NULL,
-    .value = COUNTER_INFINITE_VALUE, .name = " " ICON_SPIN_UP " Inf\t" ICON_SPIN_DOWN
+const spinedit_value_names_t CounterSpinEditInfinite[] = {
+    { .value = COUNTER_INFINITE_VALUE, .name = " " ICON_SPIN_UP " Inf\t" ICON_SPIN_DOWN }
 };
 const spinedit_params_t CounterSpinEditParams = {
     .caption = "Counter:",
     .min_value = 1,
     .max_value = 31,
     .value = &spinedit_counter_value,
-    .names = &CounterSpinEditInfinite
+    .names = CounterSpinEditInfinite,
+    .last_name = LAST_ITEM(CounterSpinEditInfinite)
 };
 const menu_item_t TriggerSubMenuItems[] = {
     {
@@ -361,6 +363,29 @@ const menu_t AutoexpAreaSubMenu = {
 };
 
 
+static uint8_t spinedit_dither_value = 0;
+const spinedit_value_names_t DitherSpinEditNames[] = {
+    { .value = 0, .name = " Off\t\t"   },
+    { .value = 1, .name = " Default\t" },
+    { .value = 2, .name = " 2x2\t\t"   },
+    { .value = 3, .name = " Grid\t\t"  },
+    { .value = 4, .name = " Maze\t\t"  },
+    { .value = 5, .name = " Nest\t\t"  },
+    { .value = 6, .name = " Fuzz\t\t"  },
+    { .value = 7, .name = " Vert.\t\t" },
+    { .value = 8, .name = " Hoziz.\t\t"},
+    { .value = 9, .name = " Mix\t\t"     }
+};
+const spinedit_params_t DitherSpinEditParams = {
+    .caption = "Dithering:",
+    .min_value = 0,
+    .max_value = MAX_INDEX(DitherSpinEditNames),
+    .value = &spinedit_dither_value,
+    .names = DitherSpinEditNames,
+    .last_name = LAST_ITEM(DitherSpinEditNames)
+};
+const uint8_t * const DitherNames[] = { "Off", "Default", "2x2", "Grid", "Maze", "Nest", "Fuzz", "Vert.", "Horiz.", "Mix" };
+
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onCameraPopupMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
@@ -402,8 +427,17 @@ const menu_item_t CameraMenuItems[] = {
         .onGetProps = onCameraPopupMenuItemProps,
         .result = MENU_RESULT_NONE
     }, {
-        .sub = &YesNoMenu, .sub_params = "Restore defaults?",
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&DitherSpinEditParams,
         .ofs_x = 1, .ofs_y = 5, .width = 13,
+        .id = idPopupCameraDither,
+        .caption = " Dithering\t%s",
+        .helpcontext = " Select dithering pattern",
+        .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
+        .result = ACTION_SET_DITHERING
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Restore defaults?",
+        .ofs_x = 1, .ofs_y = 6, .width = 13,
         .id = idPopupCameraRestore,
         .caption = " Restore defaults",
         .helpcontext = " Restore default settings",
@@ -422,6 +456,7 @@ const menu_t CameraPopupMenu = {
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     switch (self->id) {
+        case idPopupCameraDither:
         case idPopupCameraRestore:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
         default:
@@ -459,6 +494,9 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [area_bottom]                   = "[Bottom]",
         [area_left]                     = "[Left]"
     };
+    static const uint8_t * const dither_patterns[] = {
+        "[Off]", "[Default]", "[2x2]", "[Grid]", "[Maze]", "[Nest]", "[Fuzz]", "[Vert.]", "[Horiz.]", "[Mix]"
+    };
 
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
@@ -475,6 +513,9 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
             break;
         case idPopupCameraArea:
             sprintf(text_buffer, self->caption, autoexp_areas[OPTION(autoexp_area)]);
+            break;
+        case idPopupCameraDither:
+            sprintf(text_buffer, self->caption, dither_patterns[SETTING(dithering)]);
             break;
         default:
             *text_buffer = 0;
@@ -509,6 +550,7 @@ uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_counter_value = OPTION(shutter_counter);
     spinedit_aeb_overexp_count = OPTION(aeb_overexp_count);
     spinedit_aeb_exp_step = OPTION(aeb_overexp_step);
+    spinedit_dither_value = SETTING(dithering);
     uint8_t menu_result;
     switch (menu_result = menu_execute(&CameraPopupMenu, NULL, NULL)) {
         case ACTION_TRIGGER_TIMER:
@@ -520,6 +562,9 @@ uint8_t menu_popup_camera_execute(void) BANKED {
         case ACTION_TRIGGER_AEB:
             OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
             OPTION(aeb_overexp_step) = spinedit_aeb_exp_step;
+            break;
+        case ACTION_SET_DITHERING:
+            SETTING(dithering) = spinedit_dither_value;
             break;
         default:
             break;

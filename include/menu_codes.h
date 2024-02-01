@@ -54,6 +54,7 @@
 #define ACTION_ACTION_PICNREC_VIDEO 53
 #define ACTION_ACTION_TRANSF_VIDEO  54
 #define ACTION_RESTORE_DEFAULTS     55
+#define ACTION_SET_DITHERING        56
 
 // camera actions
 #define ACTION_CAMERA_PRINT         60

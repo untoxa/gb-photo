@@ -46,9 +46,9 @@ uint8_t * onSpineditMenuItemPaint(const struct menu_t * menu, const struct menu_
     if (spinedit_current_params) {
         uint8_t value = *spinedit_current_params->value;
         const spinedit_value_names_t * current_name = spinedit_current_params->names;
-        while (current_name) {
+        while (current_name <= spinedit_current_params->last_name) {
             if (current_name->value == value) return strcpy(text_buffer, current_name->name);
-            current_name = current_name->next;
+            current_name++;
         }
         sprintf(text_buffer, self->caption, value);
         return text_buffer;

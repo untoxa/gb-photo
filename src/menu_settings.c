@@ -168,34 +168,36 @@ const menu_t PrinterFramesMenu = {
 
 static uint8_t spinedit_palette_value = 0;
 const spinedit_value_names_t PaletteSpinEditNames[] = {
-    { .next = PaletteSpinEditNames + 1, .value = 0, .name = " Arctic\t\t" },
-    { .next = PaletteSpinEditNames + 2, .value = 1, .name = " Cyan\t\t"   },
-    { .next = PaletteSpinEditNames + 3, .value = 2, .name = " Thermal\t"  },
-    { .next = PaletteSpinEditNames + 4, .value = 3, .name = " Circuits\t" },
-    { .next = PaletteSpinEditNames + 5, .value = 4, .name = " Grape\t\t"  },
-    { .next = PaletteSpinEditNames + 6, .value = 5, .name = " Japan\t\t"  },
-    { .next = NULL,                     .value = 6, .name = " Bavaria\t"  }
+    { .value = 0, .name = " Arctic\t\t" },
+    { .value = 1, .name = " Cyan\t\t"   },
+    { .value = 2, .name = " Thermal\t"  },
+    { .value = 3, .name = " Circuits\t" },
+    { .value = 4, .name = " Grape\t\t"  },
+    { .value = 5, .name = " Japan\t\t"  },
+    { .value = 6, .name = " Bavaria\t"  }
 };
 const spinedit_params_t PaletteSpinEditParams = {
     .caption = "Palette:",
     .min_value = 0,
     .max_value = MAX_INDEX(PaletteSpinEditNames),
     .value = &spinedit_palette_value,
-    .names = PaletteSpinEditNames
+    .names = PaletteSpinEditNames,
+    .last_name = LAST_ITEM(PaletteSpinEditNames)
 };
 const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits", "Grape", "Japan", "Bavaria" };
 
 static uint8_t spinedit_carttype_value = 0;
 const spinedit_value_names_t CartTypeSpinEditNames[] = {
-    { .next = CartTypeSpinEditNames + 1, .value = cart_type_HDR,    .name = " HDR cart\t" },
-    { .next = NULL,                      .value = cart_type_iG_AIO, .name = " iG AIO\t\t" }
+    { .value = cart_type_HDR,    .name = " HDR cart\t" },
+    { .value = cart_type_iG_AIO, .name = " iG AIO\t\t" }
 };
 const spinedit_params_t CartTypeSpinEditParams = {
     .caption = "Cart type:",
     .min_value = cart_type_HDR,
     .max_value = MAX_INDEX(CartTypeSpinEditNames),
     .value = &spinedit_carttype_value,
-    .names = CartTypeSpinEditNames
+    .names = CartTypeSpinEditNames,
+    .last_name = LAST_ITEM(CartTypeSpinEditNames)
 };
 const uint8_t * const CartTypeNames[] = { "HDR cart", "iG AIO" };
 

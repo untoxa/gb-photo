@@ -8,7 +8,6 @@ typedef struct spinedit_params_t spinedit_params_t;
 typedef uint8_t change_handler_t (const struct menu_t * menu, const struct menu_item_t * selection, spinedit_params_t * param);
 
 typedef struct spinedit_value_names_t {
-    const struct spinedit_value_names_t * next;
     uint8_t value;
     uint8_t * name;
 } spinedit_value_names_t;
@@ -19,6 +18,7 @@ typedef struct spinedit_params_t {
     uint8_t max_value;
     uint8_t * value;
     const spinedit_value_names_t * names;
+    const spinedit_value_names_t * last_name;
     change_handler_t * onChange;
 } spinedit_params_t;
 

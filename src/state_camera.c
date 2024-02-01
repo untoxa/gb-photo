@@ -1230,6 +1230,9 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         restore_default_mode_settings(OPTION(camera_mode));
                         RENDER_CAM_REGISTERS();
                         break;
+                    case ACTION_SET_DITHERING:
+                        RENDER_CAM_REG_DITHERPATTERN();
+                        break;
                     default:
                         // unknown command or cancel
                         PLAY_SFX(sound_ok);
