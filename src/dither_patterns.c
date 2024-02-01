@@ -1,7 +1,6 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
-#include <string.h>
 
 #include "dither_patterns.h"
 #include "gbcamera.h"
@@ -129,16 +128,16 @@ const uint8_t pattern_diagonal[PATTERN_MATRIX_SIZE] = {
 };
 
 const uint8_t * const * dithering_patterns[NUM_ONOFF_SETS][NUM_INTERVALS] = {
-    {pattern_null,          pattern_null,       pattern_null},
-    {pattern_standard,      pattern_standard,   pattern_standard},
-    {pattern_2x2,           pattern_2x2,        pattern_2x2},
-    {pattern_grid,          pattern_grid,       pattern_grid},
-    {pattern_maze,          pattern_maze,       pattern_maze},
-    {pattern_nest,          pattern_nest,       pattern_nest},
-    {pattern_fuzz,          pattern_fuzz,       pattern_fuzz},
-    {pattern_vertical,      pattern_vertical,   pattern_vertical},
-    {pattern_horizontal,    pattern_horizontal, pattern_horizontal},
-    {pattern_horizontal,    pattern_diagonal,   pattern_vertical}
+    {pattern_null,       pattern_null,       pattern_null},
+    {pattern_standard,   pattern_standard,   pattern_standard},
+    {pattern_2x2,        pattern_2x2,        pattern_2x2},
+    {pattern_grid,       pattern_grid,       pattern_grid},
+    {pattern_maze,       pattern_maze,       pattern_maze},
+    {pattern_nest,       pattern_nest,       pattern_nest},
+    {pattern_fuzz,       pattern_fuzz,       pattern_fuzz},
+    {pattern_vertical,   pattern_vertical,   pattern_vertical},
+    {pattern_horizontal, pattern_horizontal, pattern_horizontal},
+    {pattern_horizontal, pattern_diagonal,   pattern_vertical}
 };
 
 void dither_gen_base_values(uint8_t a, uint8_t b, uint8_t * buffer) {
