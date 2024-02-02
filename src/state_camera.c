@@ -1228,10 +1228,9 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         break;
                     case ACTION_RESTORE_DEFAULTS:
                         restore_default_mode_settings(OPTION(camera_mode));
-                        RENDER_CAM_REGISTERS();
-                        break;
                     case ACTION_SET_DITHERING:
-                        RENDER_CAM_REG_DITHERPATTERN();
+                        RENDER_CAM_REGISTERS();
+                        save_camera_mode_settings(OPTION(camera_mode));
                         break;
                     default:
                         // unknown command or cancel
