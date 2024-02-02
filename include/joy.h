@@ -19,15 +19,25 @@ BANKREF_EXTERN(module_joy)
 extern volatile uint8_t joy_isr_value;
 #endif
 
+extern volatile uint8_t joy_poll_value;
+
 extern uint8_t joy, old_joy;
 extern uint16_t joy_ts;
+
+inline uint8_t JOYPAD_LAST(void) {
+    return joy_poll_value;
+}
+
+inline uint8_t JOYPAD_POLL(void) {
+    return (joy_poll_value = (joypad() | remote_joypad()));
+}
 
 inline void JOYPAD_INPUT(void) {
     old_joy = ((sys_time - joy_ts) > AUTOREPEAT_RATE) ? 0 : joy;
 #if (INT_DRIVEN_JOYPAD==1)
     joy = joy_isr_value, joy_isr_value = 0;
 #else
-    joy = (joypad() | remote_joypad());
+    joy = JOYPAD_POLL();
 #endif
 }
 inline void JOYPAD_AUTOREPEAT(void) {
