@@ -66,6 +66,7 @@ camera_state_options_t camera_state;
 bool image_live_preview = true;
 bool recording_video = false;
 bool camera_do_shutter = false;
+bool one_iteration_autoexp = false;
 
 COUNTER_DECLARE(camera_shutter_timer, uint8_t, 0);
 COUNTER_DECLARE(camera_repeat_counter, uint8_t, 0);
@@ -701,7 +702,23 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
-    if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
+    if (KEY_PRESSED(J_START)) {
+        if (OPTION(camera_mode) == camera_mode_auto) {
+            PLAY_SFX(sound_menu_alter);
+            // reset both brightness and contrast to defaults, adjust the sliders
+            scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
+            scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_VALUES);
+            save_camera_mode_settings(OPTION(camera_mode));
+            // change of contrast means reloading of the dithering pattern
+            SWITCH_RAM(CAMERA_BANK_REGISTERS);
+            RENDER_CAM_REG_DITHERPATTERN();
+        } else {
+#ifdef ENABLE_AUTOEXP
+            // perform one step of autoexposure if J_START is held in manual or assisted mode
+            one_iteration_autoexp = true;
+#endif
+        }
+    } else if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -756,21 +773,6 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // select opens popup-menu
         capture_triggered = false;
         return ACTION_CAMERA_SUBMENU;
-    } else if (KEY_PRESSED(J_START)) {
-        if (OPTION(camera_mode) == camera_mode_auto) {
-            PLAY_SFX(sound_menu_alter);
-            // reset both brightness and contrast to defaults, adjust the sliders
-            scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
-            scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_VALUES);
-            save_camera_mode_settings(OPTION(camera_mode));
-            // change of contrast means reloading of the dithering pattern
-            SWITCH_RAM(CAMERA_BANK_REGISTERS);
-            RENDER_CAM_REG_DITHERPATTERN();
-        } else {
-            // open main menu in other modes
-            capture_triggered = false;
-            return ACTION_MAIN_MENU;
-        }
     }
 
     static uint8_t selection_item_id;
@@ -993,7 +995,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             RENDER_CAM_REG_EXPTIME();
         }
 #ifdef ENABLE_AUTOEXP
-        else if (OPTION(camera_mode) == camera_mode_auto) {
+        else if ((one_iteration_autoexp) || (OPTION(camera_mode) == camera_mode_auto)) {
             int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
             SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
@@ -1027,12 +1029,27 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 SETTING(current_exposure) = result_exposure;
                 RENDER_EDGE_FROM_EXPOSURE();
 
-                if (OPTION(display_exposure)) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
+                if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
             }
     #if (DEBUG_AUTOEXP==1)
             sprintf(text_buffer, "%d", (uint16_t)error);
             menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
     #endif
+            if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
+                one_iteration_autoexp = false;
+                // restore exposure index from exposure
+                for (uint8_t i = 0; i <= MAX_INDEX(exposures); i += (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2) {
+                    if (exposures[i] > SETTING(current_exposure)) {
+                        SETTING(current_exposure_idx) = i - 1;
+                        SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
+                        if (OPTION(camera_mode) == camera_mode_assisted) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
+                        break;
+                    }
+                }
+                // redraw menu
+                PLAY_SFX(sound_menu_alter);
+                menu_redraw(menu, NULL, selection);
+            }
         }
 #endif
         if ((image_live_preview) || (recording_video)) image_capture();
@@ -1134,6 +1151,7 @@ uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, came
 uint8_t UPDATE_state_camera(void) BANKED {
     static uint8_t menu_result;
     JOYPAD_RESET();
+    one_iteration_autoexp = false;
     // start capturing of the image
     if ((image_live_preview) || (recording_video)) image_capture();
     // execute menu for the mode
