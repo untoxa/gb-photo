@@ -5,11 +5,6 @@
 #include "dither_patterns.h"
 #include "gbcamera.h"
 
-#define NUM_INTERVALS 3
-#define NUM_CONTRAST_VALUES 16
-#define NUM_BASE_VALUES 16
-#define PATTERN_MATRIX_SIZE (4 * 4)
-
 const uint8_t dither_high_light_values[NUM_CONTRAST_VALUES][4] = {
     {0x80, 0x8F, 0xD0, 0xE6},
     {0x82, 0x90, 0xC8, 0xE3},
@@ -127,17 +122,17 @@ const uint8_t pattern_diagonal[PATTERN_MATRIX_SIZE] = {
     0x0B, 0x07, 0x0F, 0x03
 };
 
-const uint8_t * const * dithering_patterns[NUM_ONOFF_SETS][NUM_INTERVALS] = {
-    {pattern_null,       pattern_null,       pattern_null},
-    {pattern_standard,   pattern_standard,   pattern_standard},
-    {pattern_2x2,        pattern_2x2,        pattern_2x2},
-    {pattern_grid,       pattern_grid,       pattern_grid},
-    {pattern_maze,       pattern_maze,       pattern_maze},
-    {pattern_nest,       pattern_nest,       pattern_nest},
-    {pattern_fuzz,       pattern_fuzz,       pattern_fuzz},
-    {pattern_vertical,   pattern_vertical,   pattern_vertical},
-    {pattern_horizontal, pattern_horizontal, pattern_horizontal},
-    {pattern_horizontal, pattern_diagonal,   pattern_vertical}
+const uint8_t * const * dithering_patterns[N_DITHER_TYPES][NUM_INTERVALS] = {
+    [dither_type_Off]        = {pattern_null,       pattern_null,       pattern_null},
+    [dither_type_Default]    = {pattern_standard,   pattern_standard,   pattern_standard},
+    [dither_type_2x2]        = {pattern_2x2,        pattern_2x2,        pattern_2x2},
+    [dither_type_Grid]       = {pattern_grid,       pattern_grid,       pattern_grid},
+    [dither_type_Maze]       = {pattern_maze,       pattern_maze,       pattern_maze},
+    [dither_type_Nest]       = {pattern_nest,       pattern_nest,       pattern_nest},
+    [dither_type_Fuzz]       = {pattern_fuzz,       pattern_fuzz,       pattern_fuzz},
+    [dither_type_Vertical]   = {pattern_vertical,   pattern_vertical,   pattern_vertical},
+    [dither_type_Horizonral] = {pattern_horizontal, pattern_horizontal, pattern_horizontal},
+    [dither_type_Mix]        = {pattern_horizontal, pattern_diagonal,   pattern_vertical}
 };
 
 void dither_gen_base_values(uint8_t a, uint8_t b, uint8_t * buffer) {

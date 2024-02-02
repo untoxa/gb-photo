@@ -127,10 +127,17 @@ static const table_value_t gains[] = {
     { CAM01_GAIN_440, "44.0" }, { CAM01_GAIN_455, "45.5" }, { CAM01_GAIN_470, "47.0" }, { CAM01_GAIN_515, "51.5" },
     { CAM01_GAIN_575, "57.5" }
 };
-static const table_value_t dither_patterns[NUM_ONOFF_SETS] = {
-    { 0, "Off" },  { 1, "Def"},   { 2, "2x2"},   { 3, "Grid"},
-    { 4, "Maze"},  { 5, "Nest"},  { 6, "Fuzz"},  { 7, "Vert"},
-    { 8, "Hori"},  { 10, "Mix"}
+static const table_value_t dither_patterns[N_DITHER_TYPES] = {
+    [dither_type_Off]        = { dither_type_Off        , "Off"  },
+    [dither_type_Default]    = { dither_type_Default    , "Def"  },
+    [dither_type_2x2]        = { dither_type_2x2        , "2x2"  },
+    [dither_type_Grid]       = { dither_type_Grid       , "Grid" },
+    [dither_type_Maze]       = { dither_type_Maze       , "Maze" },
+    [dither_type_Nest]       = { dither_type_Nest       , "Nest" },
+    [dither_type_Fuzz]       = { dither_type_Fuzz       , "Fuzz" },
+    [dither_type_Vertical]   = { dither_type_Vertical   , "Vert" },
+    [dither_type_Horizonral] = { dither_type_Horizonral , "Hori" },
+    [dither_type_Mix]        = { dither_type_Mix        , "Mix"  }
 };
 static const table_value_t zero_points[] = {
     { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
@@ -311,7 +318,7 @@ inline void camera_scrollbars_reinit(void) {
         scrollbar_set_position(&ss_brightness, SETTING(current_brightness), 0, HISTOGRAM_MAX_VALUE);
         // init and set contrast scrollbar
         scrollbar_add(&ss_contrast, SS_CONTRAST_X, SS_CONTRAST_Y, SS_CONTRAST_LEN, false);
-        scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
+        scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_VALUES);
     }
 }
 
@@ -754,7 +761,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             PLAY_SFX(sound_menu_alter);
             // reset both brightness and contrast to defaults, adjust the sliders
             scrollbar_set_position(&ss_brightness, (SETTING(current_brightness) = HISTOGRAM_TARGET_VALUE), 0, HISTOGRAM_MAX_VALUE);
-            scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_SETS);
+            scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_VALUES);
             save_camera_mode_settings(OPTION(camera_mode));
             // change of contrast means reloading of the dithering pattern
             SWITCH_RAM(CAMERA_BANK_REGISTERS);
@@ -814,7 +821,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
             case idDither:
                 temp_uint8 = SETTING(dithering);
-                if (settings_changed = inc_dec_int8(&temp_uint8, 1, 0, NUM_ONOFF_SETS - 1, change_direction)) {
+                if (settings_changed = inc_dec_int8(&temp_uint8, 1, 0, N_DITHER_TYPES - 1, change_direction)) {
                     SETTING(dithering) = temp_uint8;
                     RENDER_CAM_REG_DITHERPATTERN();
                 }
@@ -824,9 +831,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 RENDER_CAM_REG_DITHERPATTERN();
                 break;
             case idContrast:
-                if (settings_changed = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_SETS, change_direction)) {
+                if (settings_changed = inc_dec_int8(&SETTING(current_contrast), 1, 1, NUM_CONTRAST_VALUES, change_direction)) {
                     RENDER_CAM_REG_DITHERPATTERN();
-                    scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_SETS);
+                    scrollbar_set_position(&ss_contrast, SETTING(current_contrast), 1, NUM_CONTRAST_VALUES);
                     redraw_selection = (OPTION(camera_mode) != camera_mode_auto);
                 }
                 break;

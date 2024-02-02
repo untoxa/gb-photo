@@ -11,6 +11,7 @@
 #include "joy.h"
 
 #include "state_camera.h"
+#include "dither_patterns.h"
 
 #include "misc_assets.h"
 
@@ -364,17 +365,17 @@ const menu_t AutoexpAreaSubMenu = {
 
 
 static uint8_t spinedit_dither_value = 0;
-const spinedit_value_names_t DitherSpinEditNames[] = {
-    { .value = 0, .name = " Off\t\t"   },
-    { .value = 1, .name = " Default\t" },
-    { .value = 2, .name = " 2x2\t\t"   },
-    { .value = 3, .name = " Grid\t\t"  },
-    { .value = 4, .name = " Maze\t\t"  },
-    { .value = 5, .name = " Nest\t\t"  },
-    { .value = 6, .name = " Fuzz\t\t"  },
-    { .value = 7, .name = " Vert.\t\t" },
-    { .value = 8, .name = " Horiz.\t\t"},
-    { .value = 9, .name = " Mix\t\t"   }
+const spinedit_value_names_t DitherSpinEditNames[N_DITHER_TYPES] = {
+    { .value = dither_type_Off,         .name = " Off\t\t"   },
+    { .value = dither_type_Default,     .name = " Default\t" },
+    { .value = dither_type_2x2,         .name = " 2x2\t\t"   },
+    { .value = dither_type_Grid,        .name = " Grid\t\t"  },
+    { .value = dither_type_Maze,        .name = " Maze\t\t"  },
+    { .value = dither_type_Nest,        .name = " Nest\t\t"  },
+    { .value = dither_type_Fuzz,        .name = " Fuzz\t\t"  },
+    { .value = dither_type_Vertical,    .name = " Vert.\t\t" },
+    { .value = dither_type_Horizonral,  .name = " Horiz.\t\t"},
+    { .value = dither_type_Mix,         .name = " Mix\t\t"   }
 };
 const spinedit_params_t DitherSpinEditParams = {
     .caption = "Dithering:",
@@ -384,7 +385,18 @@ const spinedit_params_t DitherSpinEditParams = {
     .names = DitherSpinEditNames,
     .last_name = LAST_ITEM(DitherSpinEditNames)
 };
-const uint8_t * const DitherNames[] = { "Off", "Default", "2x2", "Grid", "Maze", "Nest", "Fuzz", "Vert.", "Horiz.", "Mix" };
+const uint8_t * const DitherNames[N_DITHER_TYPES] = {
+    [dither_type_Off]        = "Off",
+    [dither_type_Default]    = "Default",
+    [dither_type_2x2]        = "2x2",
+    [dither_type_Grid]       = "Grid",
+    [dither_type_Maze]       = "Maze",
+    [dither_type_Nest]       = "Nest",
+    [dither_type_Fuzz]       = "Fuzz",
+    [dither_type_Vertical]   = "Vert.",
+    [dither_type_Horizonral] = "Horiz.",
+    [dither_type_Mix]        = "Mix"
+};
 
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
@@ -494,8 +506,17 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [area_bottom]                   = "[Bottom]",
         [area_left]                     = "[Left]"
     };
-    static const uint8_t * const dither_patterns[] = {
-        "[Off]", "[Default]", "[2x2]", "[Grid]", "[Maze]", "[Nest]", "[Fuzz]", "[Vert.]", "[Horiz.]", "[Mix]"
+    static const uint8_t * const dither_patterns[N_DITHER_TYPES] = {
+        [dither_type_Off]               = "[Off]",
+        [dither_type_Default]           = "[Default]",
+        [dither_type_2x2]               = "[2x2]",
+        [dither_type_Grid]              = "[Grid]",
+        [dither_type_Maze]              = "[Maze]",
+        [dither_type_Nest]              = "[Nest]",
+        [dither_type_Fuzz]              = "[Fuzz]",
+        [dither_type_Vertical]          = "[Vert.]",
+        [dither_type_Horizonral]        = "[Horiz.]",
+        [dither_type_Mix]               = "[Mix]"
     };
 
     switch ((camera_popup_menu_e)self->id) {

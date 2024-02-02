@@ -3,8 +3,10 @@
 
 #include <gbdk/platform.h>
 #include <stdbool.h>
+
 #include "gbcamera.h"
 #include "globals.h"
+
 #include "systemdetect.h"
 #include "systemhelpers.h"
 
