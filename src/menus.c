@@ -85,16 +85,8 @@ void menu_draw_shadow(const menu_t * menu) {
     fill_bkg_rect(menu->x + menu->width, menu->y + 1,            1,            menu->height - 1, SLD_DARK_GRAY);
 }
 
-uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
-    const menu_item_t * selection;
+uint8_t menu_redraw(const menu_t * menu, uint8_t * param, const menu_item_t * selection) {
     uint8_t result;
-
-    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-
-    // initialize selection
-    selection = (select) ? select : (menu->items);
-    // move selection if the current item is disabled
-    if (menu_item_get_props(menu, selection) & ITEM_DISABLED) selection = menu_next(menu, selection);
 
     // call onShow handler if present
     result = (menu->onShow) ? menu->onShow(menu, param) : MENU_PROP_DEFAULT;
@@ -115,8 +107,23 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         }
     }
 
+    return result;
+}
+
+uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
+    const menu_item_t * selection;
+
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+
+    // initialize selection
+    selection = (select) ? select : (menu->items);
+    // move selection if the current item is disabled
+    if (menu_item_get_props(menu, selection) & ITEM_DISABLED) selection = menu_next(menu, selection);
+
+    menu_redraw(menu, param, selection);
+
     // process menu
-    result = MENU_RESULT_NONE;
+    uint8_t result = MENU_RESULT_NONE;
     do {
         // process input
         JOYPAD_INPUT();

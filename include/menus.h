@@ -96,7 +96,7 @@ inline uint8_t inc_dec_int16(int16_t * value, int16_t delta, int16_t min, int16_
     return (v != *value);
 }
 
-
+uint8_t menu_redraw(const menu_t * menu, uint8_t * param, const menu_item_t * selection);
 uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select);
 
 #endif
