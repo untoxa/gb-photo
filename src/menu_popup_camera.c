@@ -373,8 +373,8 @@ const spinedit_value_names_t DitherSpinEditNames[] = {
     { .value = 5, .name = " Nest\t\t"  },
     { .value = 6, .name = " Fuzz\t\t"  },
     { .value = 7, .name = " Vert.\t\t" },
-    { .value = 8, .name = " Hoziz.\t\t"},
-    { .value = 9, .name = " Mix\t\t"     }
+    { .value = 8, .name = " Horiz.\t\t"},
+    { .value = 9, .name = " Mix\t\t"   }
 };
 const spinedit_params_t DitherSpinEditParams = {
     .caption = "Dithering:",
