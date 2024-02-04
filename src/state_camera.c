@@ -694,6 +694,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     };
     static change_direction_e change_direction;
     static bool capture_triggered = false;       // state of static variable persists between calls
+    static bool render_registers;
 
     // If enabled, sense remote shutters. IR sensing takes time but only if initially high
     static bool remote_shutter_triggered;
@@ -1027,22 +1028,18 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             uint16_t result_exposure = CONSTRAINT(new_exposure, (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
             if (result_exposure != SETTING(current_exposure)) {
                 SETTING(current_exposure) = result_exposure;
-                RENDER_EDGE_FROM_EXPOSURE();
-
+                render_registers = true;
                 if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
-            }
-    #if (DEBUG_AUTOEXP==1)
-            sprintf(text_buffer, "%d", (uint16_t)error);
-            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
-    #endif
+            } else render_registers = false;
+
             if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
                 one_iteration_autoexp = false;
                 // restore exposure index from exposure
                 for (uint8_t i = 0; i <= MAX_INDEX(exposures); i += (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2) {
                     if (exposures[i] > SETTING(current_exposure)) {
-                        SETTING(current_exposure_idx) = i - 1;
+                        SETTING(current_exposure_idx) = i;
                         SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
-                        if (OPTION(camera_mode) == camera_mode_assisted) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
+                        render_registers = true;
                         break;
                     }
                 }
@@ -1050,6 +1047,22 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 PLAY_SFX(sound_menu_alter);
                 menu_redraw(menu, NULL, selection);
             }
+
+            if (render_registers) {
+                switch (OPTION(camera_mode)) {
+                    case camera_mode_assisted:
+                        RENDER_REGS_FROM_EXPOSURE();
+                        break;
+                    default:
+                        RENDER_EDGE_FROM_EXPOSURE();
+                        break;
+                }
+            }
+
+    #if (DEBUG_AUTOEXP==1)
+            sprintf(text_buffer, "%d", (uint16_t)error);
+            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
+    #endif
         }
 #endif
         if ((image_live_preview) || (recording_video)) image_capture();
