@@ -374,7 +374,7 @@ static void refresh_autoexp_area(void) {
 }
 
 static void refresh_screen(void) {
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+    screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     display_last_seen(true);
     refresh_usage_indicator();
     refresh_autoexp_area();
@@ -383,7 +383,7 @@ static void refresh_screen(void) {
 
 static uint8_t onPrinterProgress(void) BANKED {
     misc_render_progressbar(printer_completion, PRN_MAX_PROGRESS, text_buffer);
-    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
+    menu_text_out(0, 0 + 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
     return 0;
 }
 
@@ -683,7 +683,7 @@ uint8_t onTranslateKeyCameraMenu(const struct menu_t * menu, const struct menu_i
     return joypad_swap_dpad(value);
 }
 bool isSaveCancelled(void) {
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, 1, WHITE_ON_BLACK);
+    screen_clear_rect(0, 17, HELP_CONTEXT_WIDTH, 1, WHITE_ON_BLACK);
     uint8_t menu_result = menu_execute(&SaveConfirmMenu, NULL, NULL);
     return (menu_result != MENU_RESULT_YES);
 }
@@ -1153,7 +1153,7 @@ uint8_t * onCameraMenuItemPaint(const struct menu_t * menu, const struct menu_it
 uint8_t onHelpCameraMenu(const struct menu_t * menu, const struct menu_item_t * selection) {
     menu;
     // we draw help context here
-    menu_text_out(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET + 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, HELP_CONTEXT_COLOR, ITEM_DEFAULT, selection->helpcontext);
     return 0;
 }
 

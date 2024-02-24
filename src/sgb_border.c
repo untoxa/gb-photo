@@ -63,7 +63,7 @@ void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED{
     // clear SCREEN
     vmemset(_VRAM8800, 0, 16);
 
-    fill_bkg_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0x80);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0x80);
 
     BGP_REG = BGP_save;
 

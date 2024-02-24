@@ -51,12 +51,12 @@ static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, cons
 static void refresh_screen(void) {
     sync_vblank();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    screen_load_picture(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, logo_WIDTH / logo_TILE_W, logo_HEIGHT / logo_TILE_H, logo_map, logo_tiles, BANK(logo));
+    screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+    screen_load_picture(0, 0, logo_WIDTH / logo_TILE_W, logo_HEIGHT / logo_TILE_H, logo_map, logo_tiles, BANK(logo));
     screen_text_render(0, 16, " (c) 2022..2024, Toxa");
     screen_text_render(0, 17, version_string);
     sync_vblank();
-    screen_restore_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT);
+    screen_restore_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT);
 }
 
 uint8_t INIT_state_logo(void) BANKED {

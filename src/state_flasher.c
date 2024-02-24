@@ -478,7 +478,7 @@ static void refresh_usage_indicator(void) {
 static void refresh_screen(void) {
     sync_vblank();
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+    screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " Flash directory");
     refresh_usage_indicator();
 
@@ -492,7 +492,7 @@ static void refresh_screen(void) {
 void flasher_show_icon(void) {
     fade_out_modal();
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-    screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+    screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     banked_vmemcpy(_VRAM, flash_tiles, sizeof(flash_tiles), BANK(flash));
     hide_sprites_range(move_metasprite(flasher, 0, 0, (DEVICE_SCREEN_PX_WIDTH - 32) >> 1, (DEVICE_SCREEN_PX_HEIGHT - 32) >> 1), MAX_HARDWARE_SPRITES);
     fade_in_modal();
@@ -580,7 +580,7 @@ void update_mode_thumbnails(void) {
         PLAY_SFX(sound_menu_alter);
     } else if (KEY_PRESSED(J_A)) {
         if ((current_slot_image = coords_to_picture_no(cx, cy)) < slot_images_taken()) {
-            screen_clear_rect(DEVICE_SCREEN_X_OFFSET, DEVICE_SCREEN_Y_OFFSET, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
+            screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
             menu_execute(&ImagePreviewMenu, NULL, NULL);
             PLAY_SFX(sound_ok);
             refresh_screen();
