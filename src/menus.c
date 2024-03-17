@@ -111,7 +111,7 @@ uint8_t menu_redraw(const menu_t * menu, uint8_t * param, const menu_item_t * se
 }
 
 uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * select) {
-    const menu_item_t * selection;
+    const menu_item_t * selection, * new_selection;
 
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
 
@@ -131,15 +131,15 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
         JOYPAD_AUTOREPEAT();
         // process menu keys
         if (KEY_PRESSED(J_UP)) {
-            if (menu->items != menu->last_item) {
+            if ((new_selection = menu_previous(menu, selection)) != selection) {
                 PLAY_SFX(sound_menu_move);
-                selection = menu_move_selection(menu, selection, menu_previous(menu, selection));
+                selection = menu_move_selection(menu, selection, new_selection);
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_DOWN)) {
-            if (menu->items != menu->last_item) {
+            if ((new_selection = menu_next(menu, selection)) != selection) {
                 PLAY_SFX(sound_menu_move);
-                selection = menu_move_selection(menu, selection, menu_next(menu, selection));
+                selection = menu_move_selection(menu, selection, new_selection);
                 if (menu->onHelpContext) menu->onHelpContext(menu, selection);
             }
         } else if (KEY_PRESSED(J_A)) {
