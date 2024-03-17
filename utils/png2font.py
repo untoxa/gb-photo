@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 import wave
 from pathlib import Path
@@ -68,7 +69,7 @@ def main(argv=None):
         outfilename = Path(options.outfilename)
         
     if options.identifier == None:
-        identifier = str(Path(infilename.name).with_suffix(''))
+        identifier = str(Path(infilename.name).with_suffix('')).translate(str.maketrans('', '', '!@#$+-><='))
     else: 
         identifier = options.identifier
 
