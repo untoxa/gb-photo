@@ -54,7 +54,7 @@ void gallery_toss_images(void) BANKED {
     VECTOR_CLEAR(free_slots);
     uint8_t elem;
     for (uint8_t i = 0; i != CAMERA_MAX_IMAGE_SLOTS; i++) {
-        uint8_t order = cam_game_data.imageslots[i];
+        uint8_t order = cam_image_slots.imageslots[i];
         if (order < CAMERA_MAX_IMAGE_SLOTS) {
             elem = VECTOR_GET(used_slots, order);
             if (elem == CAMERA_IMAGE_DELETED) VECTOR_SET_DIRECT(used_slots, order, i); else VECTOR_ADD(free_slots, i);

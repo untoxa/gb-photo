@@ -298,7 +298,7 @@ uint8_t INIT_module_protected(void) BANKED {
         memcpy(&prot_vector_echo, &prot_vector, PROTECTED_BLOCK_SIZE(VECTOR_LENGTH));
         protected_status |= PROTECTED_REPAIR_VECTOR;
     }
-    SWITCH_RAM(1);
+    SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
     if (prot_owner_crc.crc != protected_checksum(&prot_owner, OWNER_LENGTH)) {
         memset(&prot_owner, 0, OWNER_LENGTH);
         prot_owner_crc = magic;

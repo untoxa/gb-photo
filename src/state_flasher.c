@@ -80,7 +80,7 @@ static const metasprite_t hand_cursor3[] = {
 };
 static const metasprite_t* const hand_cursor[] = {hand_cursor0, hand_cursor1, hand_cursor2, hand_cursor3};
 
-static cam_game_data_t AT(0x4000 + (0xB1B2 - 0xA000)) slot_game_data;
+static cam_image_slots_t AT(0x4000 + (0xB1B2 - 0xA000)) slot_game_data;
 
 static const item_coord_t folder_coords[] = {{2, 1}, {6, 1}, {10, 1}, {14, 1}, {4, 5}, {8, 5}, {12, 5}};
 

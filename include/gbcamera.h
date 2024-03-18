@@ -34,16 +34,29 @@ typedef struct cam_magic_struct_t {
     };
 } cam_magic_struct_t;
 
-/** Images are stored in 30 sram slots and the state of each slot is stored in a vector state of 30 bytes, in the same order
+/** In the stock ROM images are stored in 30 sram slots and the state of each slot is stored in a vector of 30 bytes, in the same order
     0xFF means that the slot is free or erased, any number between 0x00 and 0x1D indicates the # of image in the album corresponding to the # of the memory slot
     Deleting an image replace its value by 0xFF but does not erase the memory slot.
 */
 #define CAMERA_IMAGE_DELETED 0xFF
 
-typedef struct cam_game_data_t {
+typedef struct cam_image_slots_t {
     uint8_t imageslots[CAMERA_MAX_IMAGE_SLOTS];
     cam_magic_struct_t magic;
-} cam_game_data_t;
+} cam_image_slots_t;
+
+/** Camera orner data
+*/
+
+typedef struct cam_owner_data_t {
+    uint32_t user_id;
+    uint8_t user_name[9];
+    uint8_t gender_blood;
+    uint16_t year;
+    uint8_t datepart1;
+    uint8_t datepart2;
+    cam_magic_struct_t magic;
+} cam_owner_data_t;
 
 /*
  * Area 0x0000 to 0x1FFF in RAM
@@ -60,8 +73,13 @@ static uint8_t AT(0xA800) last_seen_lower[CAMERA_IMAGE_SIZE >> 1];
 //static uint8_t AT(0xAF00) last_seen_padding[256];
 //static uint8_t AT(0xB000) game_data_meta_pad_0[434];
 
-static cam_game_data_t AT(0xB1B2) cam_game_data;
-static cam_game_data_t AT(0xB1D7) cam_game_data_echo;
+static cam_image_slots_t AT(0xB1B2) cam_image_slots;
+static cam_image_slots_t AT(0xB1D7) cam_image_slots_echo;
+
+#define CAMERA_BANK_OWNER_DATA 1
+
+static cam_owner_data_t AT(0xAFB8) cam_owner_data;
+static cam_owner_data_t AT(0xAFD1) cam_owner_data_echo;
 
 //static uint8_t AT(0xB1FC) game_data_meta[3588];
 
@@ -136,7 +154,7 @@ static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 #define CAM01_GAIN_140   0b00000000 // 14.0 (gbcam gain:  5.01)
 #define CAM01_GAIN_155   0b00000001 // 15.5
 #define CAM01_GAIN_170   0b00000010 // 17.0
-#define CAM01_GAIN_185   0b00000010 // 18.5
+#define CAM01_GAIN_185   0b00000011 // 18.5
 #define CAM01_GAIN_200   0b00000100 // 20.0 (gbcam gain: 10.00)
 #define CAM01_GAIN_200_D 0b00010000 // 20.0 (d)
 #define CAM01_GAIN_215   0b00000101 // 21.5
@@ -144,7 +162,7 @@ static volatile uint8_t AT(0xA000) CAM_REG_CAPTURE;
 #define CAM01_GAIN_230   0b00000110 // 23.0
 #define CAM01_GAIN_230_D 0b00010010 // 23.0 (d)
 #define CAM01_GAIN_245   0b00000111 // 24.5
-#define CAM01_GAIN_245_D 0b00010010 // 24.5 (d)
+#define CAM01_GAIN_245_D 0b00010011 // 24.5 (d)
 #define CAM01_GAIN_260   0b00001000 // 26.0 (gbcam gain: 19.95)
 #define CAM01_GAIN_260_D 0b00010100 // 26.0 (d)
 #define CAM01_GAIN_275   0b00010101 // 27.5

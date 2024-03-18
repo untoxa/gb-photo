@@ -12,6 +12,7 @@
 
 #include "state_camera.h"
 #include "dither_patterns.h"
+#include "userinfo.h"
 
 #include "misc_assets.h"
 
@@ -34,7 +35,12 @@ typedef enum {
     idPopupTriggerTimerValue,
     idPopupTriggerTimerCounter,
     idPopupTriggerAEB,
-    idPopupCameraDither
+    idPopupCameraDither,
+    idPopupCameraOwnerOk,
+    idPopupCameraOwnerInfo,
+    idPopupCameraOwnerName,
+    idPopupCameraOwnerGender,
+    idPopupCameraOwnerBirth
 } camera_popup_menu_e;
 
 
@@ -398,6 +404,95 @@ const uint8_t * const DitherNames[N_DITHER_TYPES] = {
     [dither_type_Mix]        = "Mix"
 };
 
+
+uint8_t onShowUserInfo(const struct menu_t * self, uint8_t * param);
+uint8_t * onUserInfoItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
+uint8_t onUserInfoMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
+const menu_item_t UserInfoMenuItems[] = {
+    {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 10, .ofs_y = 7, .width = 4,
+        .id = idPopupCameraOwnerOk,
+        .caption = ICON_A " Ok",
+        .onPaint = NULL,
+        .onGetProps = onUserInfoMenuItemProps,
+        .result = ACTION_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 3, .width = 10,
+        .id = idPopupCameraOwnerName,
+        .caption = " %s",
+        .onPaint = onUserInfoItemPaint,
+        .onGetProps = onUserInfoMenuItemProps,
+        .result = ACTION_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 4, .width = 10,
+        .id = idPopupCameraOwnerGender,
+        .caption = " %s",
+        .onPaint = onUserInfoItemPaint,
+        .onGetProps = onUserInfoMenuItemProps,
+        .result = ACTION_NONE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 5, .ofs_y = 5, .width = 10,
+        .id = idPopupCameraOwnerBirth,
+        .caption = " %s",
+        .onPaint = onUserInfoItemPaint,
+        .onGetProps = onUserInfoMenuItemProps,
+        .result = ACTION_NONE
+    }
+};
+const menu_t UserInfoMenu = {
+    .x = 2, .y = 4, .width = 16, .height = 9,
+    .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
+    .items = UserInfoMenuItems, .last_item = LAST_ITEM(UserInfoMenuItems),
+    .onShow = onShowUserInfo, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+};
+uint8_t onUserInfoMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu; self;
+    switch (self->id) {
+        case idPopupCameraOwnerName:
+        case idPopupCameraOwnerGender:
+        case idPopupCameraOwnerBirth:
+            return ITEM_DISABLED;
+        default:
+            return ITEM_TEXT_CENTERED;
+    }
+}
+uint8_t * onUserInfoItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu;
+    static const uint8_t * const genders[] = {"not set", "male", "female"};
+    switch (self->id) {
+        case idPopupCameraOwnerName:
+            sprintf(text_buffer, self->caption, userinfo_get_username(text_buffer_extra));
+            break;
+        case idPopupCameraOwnerGender:
+            sprintf(text_buffer, self->caption, genders[userinfo_get_gender()]);
+            break;
+        case idPopupCameraOwnerBirth:
+            sprintf(text_buffer, self->caption, userinfo_get_birthdate(text_buffer_extra));
+            break;
+        default:
+            *text_buffer = 0;
+            break;
+    }
+    return text_buffer;
+}
+uint8_t onShowUserInfo(const menu_t * self, uint8_t * param) {
+    param;
+    menu_draw_frame(self);
+    menu_draw_shadow(self);
+    menu_text_out(self->x +  1, self->y,      14, BLACK_ON_WHITE, ITEM_TEXT_CENTERED, "User information:");
+    menu_text_out(self->x +  1, self->y +  2,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "UserID:");
+    menu_text_out(self->x +  5, self->y +  2, 11, BLACK_ON_WHITE, ITEM_TEXT_CENTERED, userinfo_get_userid(text_buffer_extra));
+    menu_text_out(self->x +  1, self->y +  3,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Name:");
+    menu_text_out(self->x +  1, self->y +  4,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Gender:");
+    menu_text_out(self->x +  1, self->y +  5,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Birth:");
+    return MENU_PROP_NO_FRAME;
+}
+
+
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onCameraPopupMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
@@ -448,8 +543,17 @@ const menu_item_t CameraMenuItems[] = {
         .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_SET_DITHERING
     }, {
-        .sub = &YesNoMenu, .sub_params = "Restore defaults?",
+        .sub = &UserInfoMenu, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 6, .width = 13,
+        .id = idPopupCameraOwnerInfo,
+        .caption = " Owner information...",
+        .helpcontext = " Set camera owner data",
+        .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
+        .result = ACTION_SET_OWNER_INFO
+    }, {
+        .sub = &YesNoMenu, .sub_params = "Restore defaults?",
+        .ofs_x = 1, .ofs_y = 7, .width = 13,
         .id = idPopupCameraRestore,
         .caption = " Restore defaults",
         .helpcontext = " Restore default settings",
@@ -521,6 +625,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
 
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
+        case idPopupCameraOwnerInfo:
             strcpy(text_buffer, self->caption);
             break;
         case idPopupCameraMode:

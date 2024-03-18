@@ -55,6 +55,7 @@
 #define ACTION_ACTION_TRANSF_VIDEO  54
 #define ACTION_RESTORE_DEFAULTS     55
 #define ACTION_SET_DITHERING        56
+#define ACTION_SET_OWNER_INFO       57
 
 // camera actions
 #define ACTION_CAMERA_PRINT         60
