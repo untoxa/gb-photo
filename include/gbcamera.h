@@ -45,7 +45,7 @@ typedef struct cam_image_slots_t {
     cam_magic_struct_t magic;
 } cam_image_slots_t;
 
-/** Camera orner data
+/** Camera owner data
 */
 
 typedef struct cam_owner_data_t {
@@ -55,8 +55,36 @@ typedef struct cam_owner_data_t {
     uint16_t year;
     uint8_t datepart1;
     uint8_t datepart2;
-    cam_magic_struct_t magic;
 } cam_owner_data_t;
+
+typedef struct cam_owner_data_block_t {
+    cam_owner_data_t user_info;
+    cam_magic_struct_t magic;
+} cam_owner_data_block_t;
+
+/** Camera image metadata
+*/
+
+typedef struct cam_image_metadata_t {
+    uint8_t unknown0[3];
+    uint8_t comment[27];
+    uint8_t unknown1[3]; // 0x00
+    uint8_t is_image_copy;
+    uint16_t image_crc;
+    uint8_t hotspot_active[5]; // 0x01 == on
+    uint8_t hotspot_x[5];
+    uint8_t hotspot_y[5];
+    uint8_t hotspot_sound[5]; // 0xff == off
+    uint8_t hotspot_visual[5]; // 0xff == off
+    uint8_t hotspot_jump[5]; // 0xff == off
+    uint8_t image_border;
+} cam_image_metadata_t;
+
+typedef struct cam_image_metadata_block_t {
+    cam_owner_data_t user_info;
+    cam_image_metadata_t meta;
+    cam_magic_struct_t magic;
+} cam_image_metadata_block_t;
 
 /*
  * Area 0x0000 to 0x1FFF in RAM
@@ -78,8 +106,8 @@ static cam_image_slots_t AT(0xB1D7) cam_image_slots_echo;
 
 #define CAMERA_BANK_OWNER_DATA 1
 
-static cam_owner_data_t AT(0xAFB8) cam_owner_data;
-static cam_owner_data_t AT(0xAFD1) cam_owner_data_echo;
+static cam_owner_data_block_t AT(0xAFB8) cam_owner_data;
+static cam_owner_data_block_t AT(0xAFD1) cam_owner_data_echo;
 
 //static uint8_t AT(0xB1FC) game_data_meta[3588];
 
@@ -94,19 +122,19 @@ static uint8_t AT(0xA000) image_first[CAMERA_IMAGE_SIZE];
 static uint8_t AT(0xA000) image_first_upper[CAMERA_IMAGE_SIZE >> 1];
 static uint8_t AT(0xA700) image_first_lower[CAMERA_IMAGE_SIZE >> 1];
 static uint8_t AT(0xAE00) image_first_thumbnail[CAMERA_THUMB_SIZE];
-static uint8_t AT(0xAF00) image_first_meta[92];
-static uint8_t AT(0xAF5C) image_first_meta_echo[92];
+static cam_image_metadata_block_t AT(0xAF00) image_first_meta;
+static cam_image_metadata_block_t AT(0xAF5C) image_first_meta_echo;
 // static uint8_t AT(0xAFB8) image_first_padding[51];
- static uint8_t AT(0xAFEB) image_first_unused[21]; // THIS AREA IS UNUSED BY THE ORIGINAL ROM - PXLR Stores data here in RAM bank 1!
+ static uint8_t AT(0xAFEB) image_first_unused[21]; // THIS AREA IS UNUSED BY THE ORIGINAL ROM
 
 static uint8_t AT(0xB000) image_second[CAMERA_IMAGE_SIZE];
 static uint8_t AT(0xB000) image_second_upper[CAMERA_IMAGE_SIZE >> 1];
 static uint8_t AT(0xB700) image_second_lower[CAMERA_IMAGE_SIZE >> 1];
 static uint8_t AT(0xBE00) image_second_thumbnail[CAMERA_THUMB_SIZE];
-static uint8_t AT(0xBF00) image_second_meta[92];
-static uint8_t AT(0xBF5C) image_second_meta_echo[92];
+static cam_image_metadata_block_t AT(0xBF00) image_second_meta;
+static cam_image_metadata_block_t AT(0xBF5C) image_second_meta_echo;
 // static uint8_t AT(0xBFB8) image_second_padding[51];
-// static uint8_t AT(0xBFEB) image_second_unused[21]; // THIS AREA IS UNUSED BY THE ORIGINAL ROM - PXLR may store data here in the future
+// static uint8_t AT(0xBFEB) image_second_unused[21]; // THIS AREA IS UNUSED BY THE ORIGINAL ROM
 
 /*
  * 0x0000 to 0x0035
