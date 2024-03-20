@@ -341,6 +341,7 @@ bool camera_image_save(void) {
         image_metadata.settings.cpu_fast = _is_CPU_FAST;
         image_metadata.crc = protected_calculate_crc((uint8_t *)&image_metadata.settings, sizeof(image_metadata.settings), PROTECTED_SEED);
         protected_metadata_write(slot, (uint8_t *)&image_metadata, sizeof(image_metadata));
+        protected_image_owner_write(slot);
         // add slot to used list
         VECTOR_ADD(used_slots, slot);
         return true;
