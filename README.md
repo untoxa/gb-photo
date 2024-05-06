@@ -196,7 +196,7 @@ Your roms will be in `./build` folders, enjoy !
 - [Andreas Hahn](https://github.com/HerrZatacke) - original idea. 
 - [Toxa](https://github.com/untoxa) lead developer.
 - [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks. THX [Hatch](https://github.com/hatchman) for your frames and the permission to use and change your graphics (Zebra and PCB)
-- [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves)/auto-exposure algorithm.
+- [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves) and the auto-exposure algorithm.
 - [Tronimal](https://tronimal.de/game-boy-music-software/) for the original SFX effects.
 - [Cristofer Cruz](https://github.com/cristofercruz) for debugging and feature ideas.
 - [bbbbbr](https://github.com/bbbbbr) for support in programming.
