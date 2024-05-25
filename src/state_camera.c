@@ -28,6 +28,7 @@
 #include "scrollbar.h"
 #include "ir.h"
 #include "sd.h"
+#include "mode_slitscan.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -316,7 +317,7 @@ void display_last_seen(bool restore) {
                            last_seen,
                            OPTION(flip_live_view),
                            ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video))));
-    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
+    if (restore == SCREEN_RESTORE_YES) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
 inline void camera_scrollbars_reinit(void) {
@@ -356,7 +357,7 @@ bool camera_image_save(void) {
     } else {
         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
         MessageBox(msgCameraRollFull);
-        display_last_seen(true);
+        display_last_seen(SCREEN_RESTORE_YES);
         return false;
     }
 }
@@ -396,7 +397,7 @@ static void refresh_autoexp_area(void) {
 
 static void refresh_screen(void) {
     screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    display_last_seen(true);
+    display_last_seen(SCREEN_RESTORE_YES);
     refresh_usage_indicator();
     refresh_autoexp_area();
     scrollbar_repaint_all();
@@ -741,6 +742,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 #endif
         }
     } else if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
+
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -750,6 +752,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (recording_video && !image_is_capturing()) image_capture();
                 refresh_usage_indicator();
                 break;
+            case after_action_slitscan_mode:
+                slitscan_mode_on_trigger();
+                // Request a frame capture
+                camera_do_shutter = true;
+                break;
+            // No after action enabled
             default:
                 switch (OPTION(trigger_mode)) {
                     case trigger_mode_repeat:
@@ -776,6 +784,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                             }
                             break;
                         }
+                    // No special trigger mode
                     default:
                         camera_do_shutter = true;
                         break;
@@ -955,10 +964,27 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     remote_activate(REMOTE_ENABLED);
                 }
                 break;
+            case after_action_slitscan_mode:
+                if (slitscan_active()) {
+                    if (slitscan_mode_on_image_captured() == SLITSCAN_STATE_STILL_CAPTURING) {
+                        // If still capturing scanlines then capture_triggered should be FALSE
+                        // and enqueue a new frame capture
+                        capture_triggered = false;
+                        image_capture();
+                    } else {
+                        // When done capturing capture_triggered becomes TRUE
+                        // which allows the completed image to be saved
+                        capture_triggered = true;
+                    }
+                }
+                break;
             default:
                 break;
         }
-        display_last_seen(false);
+
+        if ((OPTION(after_action) != after_action_slitscan_mode) || (slitscan_active() == false)) // || (capture_triggered == true))
+            display_last_seen(SCREEN_RESTORE_NO);
+
         if (capture_triggered) {
             capture_triggered = false;
             // check save confirmation
@@ -968,7 +994,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     (OPTION(after_action) == after_action_printsave) ||
                     (OPTION(after_action) == after_action_transfer) ||
                     (OPTION(after_action) == after_action_transfersave) ||
-                    (OPTION(after_action) == after_action_savesd)) {
+                    (OPTION(after_action) == after_action_savesd) ||
+                    (OPTION(after_action) == after_action_slitscan_mode)) {
                         if (isSaveCancelled()) return ACTION_NONE;
                         onHelpCameraMenu(menu, selection);
                 }
@@ -976,6 +1003,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             // perform after action(s)
             switch (OPTION(after_action)) {
                 case after_action_save:
+                case after_action_slitscan_mode:
                     if (!camera_image_save()) {
                         reset_shutter();
                         camera_do_shutter = capture_triggered = false;
@@ -1273,6 +1301,10 @@ uint8_t UPDATE_state_camera(void) BANKED {
                             music_setup_timer_ex(_is_CPU_FAST);
                             fade_in_modal();
                         }
+                    case ACTION_ACTION_SLITSCAN_MODE:
+                        // TODO: UI hack for now to deal with not re-numbering ACTION_ACTION...
+                        // Recalc the slitscan mode as if it was after transfer video
+                        menu_result = ACTION_ACTION_TRANSF_VIDEO + 1u;
                     case ACTION_ACTION_SAVE:
                     case ACTION_ACTION_PRINT:
                     case ACTION_ACTION_SAVEPRINT:
@@ -1283,7 +1315,8 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         static const after_action_e aactions[] = {
                             after_action_save, after_action_print, after_action_printsave,
                             after_action_transfer, after_action_transfersave, after_action_picnrec,
-                            after_action_picnrec_video, after_action_transfer_video, after_action_savesd
+                            after_action_picnrec_video, after_action_transfer_video, after_action_savesd,
+                            after_action_slitscan_mode
                         };
                         OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                         break;

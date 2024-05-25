@@ -6,10 +6,16 @@
 #include <stdint.h>
 
 #if defined(NINTENDO)
+#define VWF_DEFAULT_BASE_ADDRESS 0x9800
 #define DEVICE_TILE_SIZE_BITS 4
 #elif defined(SEGA)
+#define VWF_DEFAULT_BASE_ADDRESS 0x7800
 #define DEVICE_TILE_SIZE_BITS 5
 #endif
+
+#define DEVICE_TILE_WIDTH 8u
+#define DEVICE_TILE_SIZE (1 << DEVICE_TILE_SIZE_BITS)
+#define VWF_TILE_SIZE 8u
 
 #define __VWF_BANK_PREFIX(A) __bank_##A
 #define TO_VWF_FARPTR(A) {.bank = (char)&(__VWF_BANK_PREFIX(A)), .ptr = (void *)&(A)}
