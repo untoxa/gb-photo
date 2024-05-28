@@ -753,10 +753,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 refresh_usage_indicator();
                 break;
             case after_action_slitscan_mode:
-                slitscan_mode_on_trigger();
-                // Request a frame capture
-                camera_do_shutter = true;
-                break;
+                // Fall through to default action so slitscan can use standard triggers
             // No after action enabled
             default:
                 switch (OPTION(trigger_mode)) {
@@ -908,43 +905,55 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
     }
 
-    // process the timer
-    if (COUNTER_CHANGED(camera_shutter_timer)) {
-        if (camera_shutter_timer) {
-            PLAY_SFX(sound_timer);
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_CLOCK);
-            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
-        } else {
-            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
-            if (COUNTER(camera_repeat_counter)) {
-                if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
-                if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) COUNTER_SET(camera_repeat_counter, COUNTER_INFINITE_VALUE);
-            }
-        }
-    }
-
-    // process the repeat counter
-    if (COUNTER_CHANGED(camera_repeat_counter)) {
-        if (COUNTER(camera_repeat_counter)) {
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_MULTIPLE);
-            if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, " Inf");
+    // Don't process trigger counters while a slitscan frame is in progress
+    if (slitscan_is_capturing() != true) {
+        // process the timer
+        if (COUNTER_CHANGED(camera_shutter_timer)) {
+            if (camera_shutter_timer) {
+                PLAY_SFX(sound_timer);
+                menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_CLOCK);
+                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
+                menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
             } else {
-                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
+                screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
+                if (COUNTER(camera_repeat_counter)) {
+                    if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
+                    if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) COUNTER_SET(camera_repeat_counter, COUNTER_INFINITE_VALUE);
+                }
             }
-        } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+        }
+
+        // process the repeat counter
+        if (COUNTER_CHANGED(camera_repeat_counter)) {
+            if (COUNTER(camera_repeat_counter)) {
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_MULTIPLE);
+                if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
+                    menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, " Inf");
+                } else {
+                    sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
+                    menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
+                }
+            } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+        }
     }
 
-    // make the picture if not in progress yet
-    if (camera_do_shutter) {
-        if (!capture_triggered) {
-            music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask, MUSIC_SFX_PRIORITY_NORMAL);
-            if (!image_is_capturing()) image_capture();
-            capture_triggered = true;
+    // Don't start a new capture while a slitscan frame is already in progress
+    // This gating is necessary to prevent the Repeat Trigger from interrupting scanline frame captures mid-way
+    if (slitscan_is_capturing() != true) {
+        // make the picture if not in progress yet
+        if (camera_do_shutter) {
+            if (!capture_triggered) {
+
+                // If scanline mode then prepare for a new frame (reset some counters, etc)
+                if (OPTION(after_action) == after_action_slitscan_mode)
+                    slitscan_mode_on_trigger();
+
+                music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask, MUSIC_SFX_PRIORITY_NORMAL);
+                if (!image_is_capturing()) image_capture();
+                capture_triggered = true;
+            }
+            camera_do_shutter = false;
         }
-        camera_do_shutter = false;
     }
 
     // check image was captured, if yes, then restart capturing process
@@ -965,7 +974,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 }
                 break;
             case after_action_slitscan_mode:
-                if (slitscan_active()) {
+                if (slitscan_is_capturing()) {
                     if (slitscan_mode_on_image_captured() == SLITSCAN_STATE_STILL_CAPTURING) {
                         // If still capturing scanlines then capture_triggered should be FALSE
                         // and enqueue a new frame capture
@@ -982,7 +991,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
 
-        if ((OPTION(after_action) != after_action_slitscan_mode) || (slitscan_active() == false)) // || (capture_triggered == true))
+        // Block display redraws while a slitscan frame is in progress
+        if (slitscan_is_capturing() != true)
             display_last_seen(SCREEN_RESTORE_NO);
 
         if (capture_triggered) {
@@ -1002,8 +1012,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             }
             // perform after action(s)
             switch (OPTION(after_action)) {
-                case after_action_save:
                 case after_action_slitscan_mode:
+                    // Slitscan is same as standard save action
+                case after_action_save:
                     if (!camera_image_save()) {
                         reset_shutter();
                         camera_do_shutter = capture_triggered = false;

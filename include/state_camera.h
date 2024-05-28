@@ -125,7 +125,6 @@ typedef struct camera_state_options_t {
     autoexp_area_e autoexp_area     : 4;
     cart_type_e cart_type           : 4;
     bool slitscan_singleline        : 1;
-    bool slitscan_continuous        : 1;
     uint8_t slitscan_delay;
     uint8_t slitscan_motiontrigger;
 } camera_state_options_t;

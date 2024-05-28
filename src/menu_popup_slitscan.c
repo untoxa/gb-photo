@@ -30,7 +30,6 @@ typedef enum {
     idPopupNone = 0,
 
     idPopupSlitscanSingleLine,
-    idPopupSlitscanContinuous,
     idPopupSlitscanDelay,
     idPopupSlitscanMotionTrigger
 } slitscan_popup_menu_e;
@@ -97,17 +96,8 @@ const menu_item_t SlitscanMenuItems[] = {
         .onGetProps = onSlitscanPopupMenuItemProps,
         .result = ACTION_SLITSCAN_SINGLELINE
     }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 2, .width = 10,
-        .id = idPopupSlitscanContinuous,
-        .caption = " Continuous\t\t%s",
-        .helpcontext = " Repeating capture\t\t",
-        .onPaint = onSlitscanSubMenuItemPaint,
-        .onGetProps = onSlitscanPopupMenuItemProps,
-        .result = ACTION_SLITSCAN_CONTINUOUS
-    }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&SlitscanDelaySpinEditParams,
-        .ofs_x = 1, .ofs_y = 3, .width = 10,
+        .ofs_x = 1, .ofs_y = 2, .width = 10,
         .id = idPopupSlitscanDelay,
         .caption = " Delay\t\t\t[%s]",
         .helpcontext = " Delay between captures\t\t",
@@ -116,7 +106,7 @@ const menu_item_t SlitscanMenuItems[] = {
         .result = ACTION_SLITSCAN_DELAY
     }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&SlitscanMotionTriggerSpinEditParams,
-        .ofs_x = 1, .ofs_y = 4, .width = 10,
+        .ofs_x = 1, .ofs_y = 3, .width = 10,
         .id = idPopupSlitscanMotionTrigger,
         .caption = " Motion Trigger [%s]",
         .helpcontext = " Motion trigger threshold",
@@ -127,7 +117,7 @@ const menu_item_t SlitscanMenuItems[] = {
 };
 // The menu itself
 const menu_t SlitscanSubMenu = {
-    .x = 2, .y = 4, .width = 14, .height = 6,
+    .x = 2, .y = 4, .width = 14, .height = 5,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = SlitscanMenuItems, .last_item = LAST_ITEM(SlitscanMenuItems),
     .onShow = NULL, .onTranslateKey = NULL,
@@ -154,8 +144,6 @@ uint8_t onSlitscanPopupMenuItemProps(const struct menu_t * menu, const struct me
     switch ((slitscan_popup_menu_e)self->id) {
         case idPopupSlitscanMotionTrigger:
             return (OPTION(slitscan_singleline) == true) ? ITEM_DEFAULT : ITEM_DISABLED;
-        case idPopupSlitscanContinuous:
-            return ITEM_DISABLED;
         default:
             return ITEM_DEFAULT;
     }
@@ -188,10 +176,6 @@ void menu_slitscan_submenu_execute(void) BANKED {
                 OPTION(slitscan_singleline) = !OPTION(slitscan_singleline);
                 save_camera_state();
                 break;
-            case ACTION_SLITSCAN_CONTINUOUS:
-                OPTION(slitscan_continuous) = !OPTION(slitscan_continuous);
-                save_camera_state();
-                break;
             case ACTION_SLITSCAN_DELAY:
                 OPTION(slitscan_delay) = spinedit_delay_value;
                 save_camera_state();
@@ -216,9 +200,6 @@ uint8_t * onSlitscanSubMenuItemPaint(const struct menu_t * menu, const struct me
     switch (self->id) {
         case idPopupSlitscanSingleLine:
             sprintf(text_buffer, self->caption, checkbox[OPTION(slitscan_singleline)]);
-            break;
-        case idPopupSlitscanContinuous:
-            sprintf(text_buffer, self->caption, checkbox[OPTION(slitscan_continuous)]);
             break;
         case idPopupSlitscanDelay:
             sprintf(text_buffer, self->caption, SlitscanDelayNames[OPTION(slitscan_delay)]);

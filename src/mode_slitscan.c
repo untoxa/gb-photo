@@ -35,7 +35,7 @@
 #define DISPLAY_CAM_COL_ADDR_OFFSET  (DISPLAY_CAM_COL_OFFSET * BYTES_PER_TILE)
 
 // Number of frames to continue capturing for after a motion trigger (provides some hysteresis)
-#define SLITSCAN_MOTION_ADDITIONAL_FRAMES 5u
+#define SLITSCAN_MOTION_ADDITIONAL_FRAMES 3u  // TODO: maybe make adjustable
 
 static uint8_t src_line_camera;      // Which camera scanline to read from
 static uint8_t dest_line_slitscan;   // Resulting image scanline to write to
@@ -78,7 +78,7 @@ const uint16_t slitscan_motiontriggers[N_SLITSCAN_MOTIONTRIGGERS] = {
 
 
 // Returns whether a slitscan capture is currently being captured
-bool slitscan_active(void) NONBANKED {
+bool slitscan_is_capturing(void) NONBANKED {
     return slitscan_in_progress;
 }
 
