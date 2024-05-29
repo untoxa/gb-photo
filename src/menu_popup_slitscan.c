@@ -66,12 +66,15 @@ const uint8_t * const SlitscanDelayNames[] = { "none", "1/20 sec", "1/10 sec", "
 static uint8_t spinedit_motiontrigger_value = 0;
 const spinedit_value_names_t SlitscanMotionTriggerSpinEditNames[] = {
     { .value = slitscan_MotionTrigger_none, .name = " none" },
+    { .value = slitscan_MotionTrigger_10,   .name = " 10\t" },
+    { .value = slitscan_MotionTrigger_20,   .name = " 20\t" },
+    { .value = slitscan_MotionTrigger_30,   .name = " 30\t" },
     { .value = slitscan_MotionTrigger_50,   .name = " 50\t" },
+    { .value = slitscan_MotionTrigger_75,   .name = " 75\t" },
     { .value = slitscan_MotionTrigger_100,  .name = " 100\t" },
+    { .value = slitscan_MotionTrigger_150,  .name = " 150\t" },
     { .value = slitscan_MotionTrigger_200,  .name = " 200\t" },
-    { .value = slitscan_MotionTrigger_400,  .name = " 400\t" },
-    { .value = slitscan_MotionTrigger_800,  .name = " 800\t" },
-    { .value = slitscan_MotionTrigger_1600, .name = " 1600" }
+    { .value = slitscan_MotionTrigger_250,  .name = " 250\t" }
 };
 const spinedit_params_t SlitscanMotionTriggerSpinEditParams = {
     .caption = "Threshold:",
@@ -81,8 +84,7 @@ const spinedit_params_t SlitscanMotionTriggerSpinEditParams = {
     .names = SlitscanMotionTriggerSpinEditNames,
     .last_name = LAST_ITEM(SlitscanMotionTriggerSpinEditNames)
 };
-const uint8_t * const SlitscanMotionTriggerNames[] = { "none", "50", "100", "200", "400", "800", "1600" };
-
+const uint8_t * const SlitscanMotionTriggerNames[] = { "none", "10", "20", "30", "50", "75", "100", "150", "200", "250" };
 
 // Main menu entries
 const menu_item_t SlitscanMenuItems[] = {

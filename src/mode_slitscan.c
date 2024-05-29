@@ -6,12 +6,9 @@
 #include "mode_slitscan.h"
 
 #include <string.h>
-// #include <gbdk/emu_debug.h>
 
 #pragma bank 255
 
-// TODO: Change slitscan from action to slitscan sub menu ON/OFF
-// TODO: Motion trigger compare pixel difference instead of sum of intensity difference
 // TODO: OPTIONAL: programatic exposure stepping
 
 #define BYTES_PER_TILE_ROW       2u
@@ -42,7 +39,6 @@ static bool slitscan_in_progress = false;
 uint16_t slitscan_opt_motiontrigger;
 uint8_t  slitscan_opt_delay_frames;
 
-static uint16_t motion_y_linesum_last = 0;
 static uint16_t motion_additional_frames = 0;
 
 
@@ -63,14 +59,24 @@ const uint8_t slitscan_delays[N_SLITSCAN_DELAYS] = {
     [slitscan_delay_1_00_sec]  = SECOND_TO_FRAMES(1.0),
 };
 
+// ~Range: Min:0 ... Max:336 ((14 * 8) + ((14 * 8) << 1))
 const uint16_t slitscan_motiontriggers[N_SLITSCAN_MOTIONTRIGGERS] = {
     [slitscan_MotionTrigger_none] = 0u,
+    [slitscan_MotionTrigger_10]   = 10u,
+    [slitscan_MotionTrigger_20]   = 20u,
+    [slitscan_MotionTrigger_30]   = 30u,
     [slitscan_MotionTrigger_50]   = 50u,
+    [slitscan_MotionTrigger_75]   = 75u,
     [slitscan_MotionTrigger_100]  = 100u,
+    [slitscan_MotionTrigger_150]  = 150u,
     [slitscan_MotionTrigger_200]  = 200u,
-    [slitscan_MotionTrigger_400]  = 400u,
-    [slitscan_MotionTrigger_800]  = 800u,
-    [slitscan_MotionTrigger_1600] = 1600u
+    [slitscan_MotionTrigger_250]  = 250u
+};
+
+// Lookup Table for number of bits enabled in a given nybble
+const uint8_t nybble_bit_count[] = {
+    // 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
+       0u,   1u,   1u,   2u,   1u,   2u,   2u,   3u,   1u,   2u,   2u,   3u,   2u,   3u,   3u,   4u
 };
 
 
@@ -92,6 +98,12 @@ void slitscan_check_delay(void) {
 }
 
 
+static uint8_t count_diff_bits(uint8_t a, uint8_t b) {
+    uint8_t temp = a ^ b;
+    return nybble_bit_count[temp & 0x0Fu] + nybble_bit_count[temp >> 4];
+}
+
+
 // Check if a new line is over the motion threshold
 static bool slitscan_check_motion_trigger(void) {
 
@@ -100,37 +112,27 @@ static bool slitscan_check_motion_trigger(void) {
             return true;
 
     // If the feature isn't enabled then always return TRUE, found motion
-    if (slitscan_opt_motiontrigger == false)
+    if (slitscan_opt_motiontrigger == 0)
             return true;
 
-    const uint8_t * src_addr  = src_addr_camera;
-    uint16_t y_linesum = 0u;
+    const uint8_t * src_addr = src_addr_camera;  // Current scanline in camera image
+    const uint8_t * ref_addr = slitscan_picture; // First scanline recorded in slitscan image is used as reference
+    uint16_t line_diff_pixel_count = 0u;
 
-    // Calculate sum of pixel brightness for the scanline
+    // Calculate number of different pixels for the scanline
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     for (uint8_t tile_col = 0; tile_col < CAMERA_IMAGE_TILE_WIDTH; tile_col++) {
-        y_linesum += *src_addr++;
-        y_linesum += *src_addr << 1;
+        line_diff_pixel_count += count_diff_bits(*src_addr++, *ref_addr++);
+        line_diff_pixel_count += count_diff_bits(*src_addr,   *ref_addr) << 1; // Second bitplane
         // Move to next tile column
         src_addr  += DEVICE_TILE_SIZE - 1u;
+        ref_addr  += DEVICE_TILE_SIZE - 1u;
     }
 
     // Check if it's above the difference threshold vs the last line
     // If so, reset the additional frame/line capture counter
-    // if (y_linesum != motion_y_linesum_last)
-    //     motion_additional_frames = SLITSCAN_MOTION_ADDITIONAL_FRAMES;
-    if (y_linesum > motion_y_linesum_last) {
-        if ((y_linesum - motion_y_linesum_last) > slitscan_opt_motiontrigger) // SLITSCAN_MOTION_THRESHOLD)
-            motion_additional_frames = SLITSCAN_MOTION_ADDITIONAL_FRAMES;
-    } else {
-        if ((motion_y_linesum_last - y_linesum) > slitscan_opt_motiontrigger) // SLITSCAN_MOTION_THRESHOLD)
-            motion_additional_frames = SLITSCAN_MOTION_ADDITIONAL_FRAMES;
-    }
-
-    // Update the previous line record
-    // Only update the motion reference value on the first captured line
-    if (dest_line_slitscan == 0)
-        motion_y_linesum_last = y_linesum;
+    if (line_diff_pixel_count > slitscan_opt_motiontrigger) // SLITSCAN_MOTION_THRESHOLD)
+        motion_additional_frames = SLITSCAN_MOTION_ADDITIONAL_FRAMES;
 
     if (motion_additional_frames > 0) {
         motion_additional_frames--;
@@ -193,8 +195,7 @@ void slitscan_mode_on_trigger(void) BANKED {
     memset(slitscan_picture, 0, CAMERA_IMAGE_SIZE);
     slitscan_display_picture(slitscan_picture);
 
-    if (slitscan_opt_motiontrigger) {
-        motion_y_linesum_last = 0;
+    if (slitscan_opt_motiontrigger > 0) {
         motion_additional_frames = SLITSCAN_MOTION_ADDITIONAL_FRAMES;
     }
 

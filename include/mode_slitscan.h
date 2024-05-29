@@ -17,12 +17,15 @@ typedef enum {
 
 typedef enum {
     slitscan_MotionTrigger_none = 0,
+    slitscan_MotionTrigger_10,
+    slitscan_MotionTrigger_20,
+    slitscan_MotionTrigger_30,
     slitscan_MotionTrigger_50,
+    slitscan_MotionTrigger_75,
     slitscan_MotionTrigger_100,
+    slitscan_MotionTrigger_150,
     slitscan_MotionTrigger_200,
-    slitscan_MotionTrigger_400,
-    slitscan_MotionTrigger_800,
-    slitscan_MotionTrigger_1600,
+    slitscan_MotionTrigger_250,
     N_SLITSCAN_MOTIONTRIGGERS
 } slitscan_motiontrigger_e;
 
