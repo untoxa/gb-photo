@@ -1,12 +1,5 @@
 #include "vwf.h"
 
-#if defined(NINTENDO)
-#define VWF_DEFAULT_BASE_ADDRESS 0x9800
-#define DEVICE_TILE_SIZE_BITS 4
-#elif defined(SEGA)
-#define VWF_DEFAULT_BASE_ADDRESS 0x7800
-#define DEVICE_TILE_SIZE_BITS 5
-#endif
 #define DEVICE_TILE_WIDTH 8u
 #define DEVICE_TILE_SIZE (1 << DEVICE_TILE_SIZE_BITS)
 #define VWF_TILE_SIZE 8u
@@ -28,15 +21,15 @@ void vwf_print_shift_char_left(void * dest, const void * src, uint8_t bank);
 void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank);
 uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank);
 void vwf_swap_tiles(void);
-#elif defined(SEGA)
-void vwf_print_shift_char_right(void * dest, const void * src, uint8_t bank) __z88dk_callee;
-void vwf_print_shift_char_left(void * dest, const void * src, uint8_t bank) __z88dk_callee;
-void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) __z88dk_callee;
-uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank) __z88dk_callee;
-void vwf_swap_tiles(void);
-#endif
-
 void set_1bpp_data(uint8_t *first_tile, uint8_t nb_tiles, const uint8_t *data);
+#elif defined(SEGA)
+void vwf_print_shift_char_right(void * dest, const void * src, uint8_t bank) __sdcccall(0) __z88dk_callee;
+void vwf_print_shift_char_left(void * dest, const void * src, uint8_t bank) __sdcccall(0) __z88dk_callee;
+void vwf_memcpy(void* to, const void* from, size_t n, uint8_t bank) __sdcccall(0) __z88dk_callee;
+uint8_t vwf_read_banked_ubyte(const void * src, uint8_t bank) __sdcccall(0) __z88dk_callee;
+void vwf_swap_tiles(void);
+void set_1bpp_data(uint8_t *first_tile, uint16_t nb_tiles, const uint8_t *data) __sdcccall(0) __z88dk_callee;
+#endif
 
 void vwf_print_reset(const uint8_t * tile, uint8_t offset) {
     vwf_current_tile = (uint8_t *)tile;

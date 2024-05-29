@@ -27,6 +27,7 @@
 #include "math.h"
 #include "scrollbar.h"
 #include "ir.h"
+#include "sd.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -350,6 +351,18 @@ bool camera_image_save(void) {
         MessageBox(msgCameraRollFull);
         display_last_seen(true);
         return false;
+    }
+}
+
+bool camera_image_save_sd(void) {
+    static const uint8_t msgCameraSDError[] = "SD card error!";
+    if (!lastseen_to_sd(OPTION(flip_live_view))) {
+        music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
+        MessageBox(msgCameraSDError);
+        display_last_seen(true);
+        return false;
+    } else {
+        return true;
     }
 }
 
@@ -947,7 +960,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     (OPTION(after_action) == after_action_print) ||
                     (OPTION(after_action) == after_action_printsave) ||
                     (OPTION(after_action) == after_action_transfer) ||
-                    (OPTION(after_action) == after_action_transfersave)) {
+                    (OPTION(after_action) == after_action_transfersave) ||
+                    (OPTION(after_action) == after_action_savesd)) {
                         if (isSaveCancelled()) return ACTION_NONE;
                         onHelpCameraMenu(menu, selection);
                 }
@@ -974,6 +988,12 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     } else refresh_usage_indicator();
                 case after_action_transfer:
                     return ACTION_CAMERA_TRANSFER;
+                case after_action_savesd:
+                    if (!camera_image_save_sd()) {
+                        reset_shutter();
+                        camera_do_shutter = capture_triggered = false;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -1246,11 +1266,12 @@ uint8_t UPDATE_state_camera(void) BANKED {
                     case ACTION_ACTION_SAVETRANSFER:
                     case ACTION_ACTION_PICNREC:
                     case ACTION_ACTION_PICNREC_VIDEO:
-                    case ACTION_ACTION_TRANSF_VIDEO: {
+                    case ACTION_ACTION_TRANSF_VIDEO:
+                    case ACTION_ACTION_SAVESD: {
                         static const after_action_e aactions[] = {
                             after_action_save, after_action_print, after_action_printsave,
                             after_action_transfer, after_action_transfersave, after_action_picnrec,
-                            after_action_picnrec_video, after_action_transfer_video
+                            after_action_picnrec_video, after_action_transfer_video, after_action_savesd
                         };
                         OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                         break;

@@ -27,7 +27,7 @@ void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, uint8_t props, co
             }
         }
         vwf_set_colors(FG_COLOR(c), BG_COLOR(c));
-        len = vwf_draw_text(screen_tile_addresses[y] + ((x + lead) << 4), text, width & 0x07);
+        len = vwf_draw_text(screen_tile_addresses[y] + ((x + lead) << DEVICE_TILE_SIZE_BITS), text, width & 0x07);
         screen_restore_rect(x + lead, y, len, 1);
     } else len = 0;
     if ((lead + len) < w) screen_clear_rect(x + lead + len, y, w - lead - len, 1, c);
