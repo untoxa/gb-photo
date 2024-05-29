@@ -10,11 +10,9 @@
 
 #pragma bank 255
 
-// TODO: Ability to cancel capture in progress
 // TODO: Change slitscan from action to slitscan sub menu ON/OFF
 // TODO: Motion trigger compare pixel difference instead of sum of intensity difference
-
-// Slitscan UI options not showing tooltip entries at bottom of screen
+// TODO: OPTIONAL: programatic exposure stepping
 
 #define BYTES_PER_TILE_ROW       2u
 #define BYTES_PER_TILE           (DEVICE_TILE_HEIGHT * BYTES_PER_TILE_ROW)
@@ -176,6 +174,11 @@ static void slitscan_display_picture(uint8_t * src_pic) {
                            src_pic,
                            OPTION(flip_live_view),
                            ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video))));
+}
+
+// Called from state_camera main loop to cancel a capture in progress
+void slitscan_mode_on_cancel(void) BANKED {
+    slitscan_in_progress = false;
 }
 
 

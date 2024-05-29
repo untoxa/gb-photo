@@ -789,7 +789,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     } else if (KEY_PRESSED(J_B)) {
-        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_AEB_counter)) {
+        if (slitscan_is_capturing()) {
+            slitscan_mode_on_cancel();
+            // Also cancel possible triggers/etc
+            reset_shutter();
+            camera_do_shutter = capture_triggered = false;
+        }
+        else if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_AEB_counter)) {
             reset_shutter();
             camera_do_shutter = capture_triggered = false;
         } else {

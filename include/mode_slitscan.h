@@ -36,6 +36,7 @@ extern const uint16_t slitscan_motiontriggers[N_SLITSCAN_MOTIONTRIGGERS];
 #define SLITSCAN_STATE_DONE             1
 
 bool slitscan_is_capturing(void) NONBANKED;
+void slitscan_mode_on_cancel(void) BANKED;
 void slitscan_mode_on_trigger(void) BANKED;
 uint8_t slitscan_mode_on_image_captured(void) BANKED;
 
