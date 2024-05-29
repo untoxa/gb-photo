@@ -11,7 +11,7 @@ __save:
 
         .area _CODE
 
-; void vwf_memcpy(void* to, const void* from, size_t n, UBYTE bank)  __z88dk_callee;
+; void vwf_memcpy(void* to, const void* from, size_t n, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_memcpy::
         pop iy
         pop de
@@ -31,7 +31,7 @@ _vwf_memcpy::
         ld  (.MAP_FRAME1),a
         ret
 
-; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank) __z88dk_callee;
+; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_read_banked_ubyte::
         ld  a, (.MAP_FRAME1)
         ld  (#__save), a
@@ -51,7 +51,7 @@ _vwf_read_banked_ubyte::
         ld (.MAP_FRAME1), a
         ret
 
-; void vwf_print_shift_char_right(void * dest, const void * src, UBYTE bank);
+; void vwf_print_shift_char_right(void * dest, const void * src, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_print_shift_char_right::
         ld  a, (.MAP_FRAME1)
         ld  (#__save), a
@@ -90,7 +90,7 @@ _vwf_print_shift_char_right::
         dec a
         jr nz, 2$
 1$:
-        ld a, (c)
+        ld a, c
         or (hl)
         ld (hl), a
         inc hl
@@ -103,7 +103,7 @@ _vwf_print_shift_char_right::
 
         ret
 
-; void vwf_print_shift_char_left(void * dest, const void * src, UBYTE bank);
+; void vwf_print_shift_char_left(void * dest, const void * src, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_print_shift_char_left::
         ld  a, (.MAP_FRAME1)
         ld  (#__save), a
@@ -141,7 +141,7 @@ _vwf_print_shift_char_left::
         dec a
         jr nz, 5$
 1$:
-        ld a, (c)
+        ld a, c
         or (hl)
         ld (hl), a
         inc hl
