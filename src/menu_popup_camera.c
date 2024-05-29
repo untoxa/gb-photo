@@ -40,7 +40,8 @@ typedef enum {
     idPopupCameraOwnerInfo,
     idPopupCameraOwnerName,
     idPopupCameraOwnerGender,
-    idPopupCameraOwnerBirth
+    idPopupCameraOwnerBirth,
+    idPopupActionSaveSD
 } camera_popup_menu_e;
 
 
@@ -254,6 +255,7 @@ uint8_t onTranslateSubResultTriggerSubMenu(const struct menu_t * menu, const str
 }
 
 
+uint8_t onActionsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
 const menu_item_t ActionSubMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
@@ -297,17 +299,26 @@ const menu_item_t ActionSubMenuItems[] = {
         .helpcontext = " Save then Transfer",
         .onPaint = NULL,
         .result = ACTION_ACTION_SAVETRANSFER
-#if (PICNREC_ENABLED==1)
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 7, .width = 10,
+        .id =  idPopupActionSaveSD,
+        .caption = " Save to SD",
+        .helpcontext = " Save to SD card",
+        .onPaint = NULL,
+        .onGetProps = onActionsMenuItemProps,
+        .result = ACTION_ACTION_SAVESD
+#if (PICNREC_ENABLED==1)
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 8, .width = 10,
         .caption = " Pic'n'Rec",
         .helpcontext = " Save images to Pic'n'Rec",
         .onPaint = NULL,
         .result = ACTION_ACTION_PICNREC
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 8, .width = 10,
+        .ofs_x = 1, .ofs_y = 9, .width = 10,
         .caption = " Pic'n'Rec " ICON_REC,
         .helpcontext = " Record video using Pic'n'Rec",
         .onPaint = NULL,
@@ -322,6 +333,19 @@ const menu_t ActionSubMenu = {
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = NULL
 };
+uint8_t onActionsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
+    menu; self;
+    switch (self->id) {
+        case idPopupActionSaveSD:
+            #if (SD_ENABLED==1)
+            return ITEM_DEFAULT;
+            #else
+            return ITEM_DISABLED;
+            #endif
+        default:
+            return ITEM_DEFAULT;
+    }
+}
 
 const menu_item_t AutoexpAreaSubMenuItems[] = {
     {
@@ -601,7 +625,8 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [after_action_transfersave]     = "[S & T]",
         [after_action_picnrec]          = "[Pic'n'Rec]",
         [after_action_picnrec_video]    = "[P'n'R " ICON_REC "]",
-        [after_action_transfer_video]   = "[Trn " ICON_REC"]"
+        [after_action_transfer_video]   = "[Trn " ICON_REC"]",
+        [after_action_savesd]           = "[Save to SD]"
     };
     static const uint8_t * const autoexp_areas[N_AUTOEXP_AREAS] = {
         [area_center]                   = "[Center]",
