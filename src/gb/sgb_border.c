@@ -23,7 +23,7 @@
 static unsigned char map_buf[2];
 static border_descriptor_t border_desc;
 
-void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED{
+void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED {
     banked_memcpy(&border_desc, desc, sizeof(border_desc), bank);
 
     SGB_TRANSFER(map_buf, (SGB_MASK_EN << 3) | 1, SGB_SCR_FREEZE);
