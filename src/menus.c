@@ -81,8 +81,8 @@ void menu_draw_frame(const menu_t * menu) {
 }
 void menu_draw_shadow(const menu_t * menu) {
     // shadow
-    fill_bkg_rect(menu->x + 1,           menu->y + menu->height, menu->width,  1,                SLD_DARK_GRAY);
-    fill_bkg_rect(menu->x + menu->width, menu->y + 1,            1,            menu->height - 1, SLD_DARK_GRAY);
+    fill_rect(menu->x + 1,           menu->y + menu->height, menu->width,  1,                SLD_DARK_GRAY);
+    fill_rect(menu->x + menu->width, menu->y + 1,            1,            menu->height - 1, SLD_DARK_GRAY);
 }
 
 uint8_t menu_redraw(const menu_t * menu, uint8_t * param, const menu_item_t * selection) {

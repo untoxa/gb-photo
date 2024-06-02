@@ -174,12 +174,12 @@ void logo_init(void) {
 #if defined(NINTENDO)
     if (_is_COLOR) {
         VBK_REG = 1;
-        fill_bkg_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0);
+        fill_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0);
         set_tile_map(CENTER_X(GBDK2020), CENTER_Y(GBDK2020), WIDTH(GBDK2020), HEIGHT(GBDK2020), GBDK2020_map_attributes);
         VBK_REG = 0;
     }
 #endif
-    fill_bkg_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0);
+    fill_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, 0);
     set_tile_map(CENTER_X(GBDK2020), CENTER_Y(GBDK2020), WIDTH(GBDK2020), HEIGHT(GBDK2020), GBDK2020_map);
 
     SHOW_BKG;
