@@ -1070,72 +1070,77 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
 #ifdef ENABLE_AUTOEXP
         else if ((one_iteration_autoexp) || (OPTION(camera_mode) == camera_mode_auto)) {
-            int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
-            CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
-            int32_t new_exposure, current_exposure = SETTING(current_exposure);
+            // Don't update exposure while slitscan capture is in progress        
+            if (slitscan_is_capturing() != true) {
 
-            bool error_negative = (error < 0) ? true : false;
-            uint16_t abs_error = abs(error);
+                int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
+            		CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
-            // real camera uses a very similar autoexposure mechanism with steps of
-            // 1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
-            // 1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
-            // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
-            // algorithm here is globally faster and simplier than a real camera
+                int32_t new_exposure, current_exposure = SETTING(current_exposure);
 
-            if (abs_error > AUTOEXP_SENSIVITY3) {
-                // raw tuning +- 1EV
-                new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
-            } else if (abs_error > AUTOEXP_SENSIVITY2) {
-                // intermediate tuning +- 1/8 EV
-                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
-            } else if (abs_error > AUTOEXP_SENSIVITY1) {
-                // fine tuning +- 1/16 EV
-                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
-            } else if (abs_error > AUTOEXP_SENSIVITY0) {
-                // very fine tuning +- 1 in C register
-                new_exposure = current_exposure + ((error_negative) ? -1 : 1);
-            } else new_exposure = current_exposure;
+                bool error_negative = (error < 0) ? true : false;
+                uint16_t abs_error = abs(error);
 
-            uint16_t result_exposure = CONSTRAINT(new_exposure, (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
-            if (result_exposure != SETTING(current_exposure)) {
-                SETTING(current_exposure) = result_exposure;
-                render_registers = true;
-                if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
-            } else render_registers = false;
+                // real camera uses a very similar autoexposure mechanism with steps of
+                // 1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
+                // 1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
+                // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
+                // algorithm here is globally faster and simplier than a real camera
 
-            if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
-                one_iteration_autoexp = false;
-                // restore exposure index from exposure
-                for (uint8_t i = 0; i <= MAX_INDEX(exposures); i += (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2) {
-                    if (exposures[i] > SETTING(current_exposure)) {
-                        SETTING(current_exposure_idx) = i;
-                        SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
-                        render_registers = true;
-                        break;
+                if (abs_error > AUTOEXP_SENSIVITY3) {
+                    // raw tuning +- 1EV
+                    new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
+                } else if (abs_error > AUTOEXP_SENSIVITY2) {
+                    // intermediate tuning +- 1/8 EV
+                    new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
+                } else if (abs_error > AUTOEXP_SENSIVITY1) {
+                    // fine tuning +- 1/16 EV
+                    new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
+                } else if (abs_error > AUTOEXP_SENSIVITY0) {
+                    // very fine tuning +- 1 in C register
+                    new_exposure = current_exposure + ((error_negative) ? -1 : 1);
+                } else new_exposure = current_exposure;
+
+                uint16_t result_exposure = CONSTRAINT(new_exposure, (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
+                if (result_exposure != SETTING(current_exposure)) {
+                    SETTING(current_exposure) = result_exposure;
+                    render_registers = true;
+                    if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
+                } else render_registers = false;
+
+                if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
+                    one_iteration_autoexp = false;
+                    // restore exposure index from exposure
+                    for (uint8_t i = 0; i <= MAX_INDEX(exposures); i += (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2) {
+                        if (exposures[i] > SETTING(current_exposure)) {
+                            SETTING(current_exposure_idx) = i;
+                            SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
+                            render_registers = true;
+                            break;
+                        }
+                    }
+                    // redraw menu
+                    PLAY_SFX(sound_menu_alter);
+                    menu_redraw(menu, NULL, selection);
+                }
+
+                if (render_registers) {
+                    switch (OPTION(camera_mode)) {
+                        case camera_mode_assisted:
+                            RENDER_REGS_FROM_EXPOSURE();
+                            break;
+                        default:
+                            if (abs_error > AUTOEXP_THRESHOLD) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
+                            break;
                     }
                 }
-                // redraw menu
-                PLAY_SFX(sound_menu_alter);
-                menu_redraw(menu, NULL, selection);
-            }
 
-            if (render_registers) {
-                switch (OPTION(camera_mode)) {
-                    case camera_mode_assisted:
-                        RENDER_REGS_FROM_EXPOSURE();
-                        break;
-                    default:
-                        if (abs_error > AUTOEXP_THRESHOLD) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
-                        break;
-                }
+            #if (DEBUG_AUTOEXP==1)
+                    sprintf(text_buffer, "%d", (uint16_t)error);
+                    menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
+            #endif
             }
-
-    #if (DEBUG_AUTOEXP==1)
-            sprintf(text_buffer, "%d", (uint16_t)error);
-            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
-    #endif
         }
 #endif
         if ((image_live_preview) || (recording_video)) image_capture();
