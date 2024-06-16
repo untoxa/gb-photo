@@ -26,6 +26,7 @@
 #define DISPLAY_NEXT_TILE_ROW_FROM_END_OF_FIRST_TILE ((DEVICE_SCREEN_WIDTH - 1u) * BYTES_PER_TILE)
 
 #define DISPLAY_CAM_START_ROW        (IMAGE_DISPLAY_Y)
+#define DISPLAY_CAM_START_ROW_MANUAL (IMAGE_DISPLAY_Y + 1)
 #define DISPLAY_CAM_COL_OFFSET       (IMAGE_DISPLAY_X)
 #define DISPLAY_CAM_COL_ADDR_OFFSET  (DISPLAY_CAM_COL_OFFSET * BYTES_PER_TILE)
 
@@ -45,7 +46,8 @@ static uint16_t motion_additional_frames = 0;
 // Pointers into camera source, slitscan output and display buffers
 static const uint8_t * src_addr_camera;
 static       uint8_t * dest_addr_slitscan;
-static       uint8_t * dest_display_addr;
+static       uint8_t * display_addr;
+uint8_t      display_start_row;
 
 // Ref: last_seen[CAMERA_IMAGE_SIZE];
 static uint8_t slitscan_picture[CAMERA_IMAGE_SIZE];
@@ -148,7 +150,7 @@ static void slitscan_copy_and_display_line_horiz(void) {
 
     const uint8_t * src_addr  = src_addr_camera;
           uint8_t * dest_addr = dest_addr_slitscan;
-          uint8_t * disp_addr = dest_display_addr;
+          uint8_t * disp_addr = display_addr;
 
     SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
 
@@ -211,7 +213,10 @@ void slitscan_mode_on_trigger(void) BANKED {
     dest_line_slitscan  = SLITSCAN_DEST_LINE_START;
 
     dest_addr_slitscan  = slitscan_picture;
-    dest_display_addr   = (uint8_t *)screen_tile_addresses[(dest_line_slitscan / 8) + DISPLAY_CAM_START_ROW] + DISPLAY_CAM_COL_ADDR_OFFSET;
+
+    // In Manual exposure mode the display starts 1 row lower
+    display_start_row    = (OPTION(camera_mode) == camera_mode_manual) ? (DISPLAY_CAM_START_ROW_MANUAL) : (DISPLAY_CAM_START_ROW);
+    display_addr    = (uint8_t *)screen_tile_addresses[(dest_line_slitscan / 8) + display_start_row] + DISPLAY_CAM_COL_ADDR_OFFSET;
     slitscan_in_progress = true;
 }
 
@@ -221,13 +226,13 @@ void slitscan_mode_on_trigger(void) BANKED {
 inline void slitscan_handle_line_increment(void) {
     if (!OPTION(slitscan_singleline)) src_addr_camera += BYTES_PER_TILE_ROW;
     dest_addr_slitscan += BYTES_PER_TILE_ROW;
-    dest_display_addr  += BYTES_PER_TILE_ROW;
+    display_addr  += BYTES_PER_TILE_ROW;
 
     // Handle increment when it's a new tile row
     if (LINE_IS_NEW_TILE(dest_line_slitscan)) {
         if (!OPTION(slitscan_singleline)) src_addr_camera += CAMERA_NEXT_TILE_ROW_FROM_END_OF_FIRST_TILE;
         dest_addr_slitscan += CAMERA_NEXT_TILE_ROW_FROM_END_OF_FIRST_TILE;
-        dest_display_addr   = (uint8_t *)screen_tile_addresses[(dest_line_slitscan / 8) + DISPLAY_CAM_START_ROW] + DISPLAY_CAM_COL_ADDR_OFFSET;
+        display_addr   = (uint8_t *)screen_tile_addresses[(dest_line_slitscan / 8) + display_start_row] + DISPLAY_CAM_COL_ADDR_OFFSET;
     }
 }
 
