@@ -90,25 +90,25 @@ const uint8_t * const SlitscanMotionTriggerNames[] = { "none", "10", "20", "30",
 const menu_item_t SlitscanMenuItems[] = {
     {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 1, .width = 10,
+        .ofs_x = 1, .ofs_y = 1, .width = 12,
         .id = idPopupSlitscanSingleLine,
-        .caption = " Single Line\t\t%s",
+        .caption = " Single Line\t %s",
         .helpcontext = " Only use a single scanline",
         .onPaint = onSlitscanSubMenuItemPaint,
         .onGetProps = onSlitscanPopupMenuItemProps,
         .result = ACTION_SLITSCAN_SINGLELINE
     }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&SlitscanDelaySpinEditParams,
-        .ofs_x = 1, .ofs_y = 2, .width = 10,
+        .ofs_x = 1, .ofs_y = 2, .width = 12,
         .id = idPopupSlitscanDelay,
-        .caption = " Delay\t\t\t[%s]",
+        .caption = " Delay\t\t\t [%s]",
         .helpcontext = " Delay between captures\t\t",
         .onPaint = onSlitscanSubMenuItemPaint,
         .onGetProps = onSlitscanPopupMenuItemProps,
         .result = ACTION_SLITSCAN_DELAY
     }, {
         .sub = &SpinEditMenu, .sub_params = (uint8_t *)&SlitscanMotionTriggerSpinEditParams,
-        .ofs_x = 1, .ofs_y = 3, .width = 10,
+        .ofs_x = 1, .ofs_y = 3, .width = 12,
         .id = idPopupSlitscanMotionTrigger,
         .caption = " Motion Trigger [%s]",
         .helpcontext = " Motion trigger threshold",
@@ -119,7 +119,7 @@ const menu_item_t SlitscanMenuItems[] = {
 };
 // The menu itself
 const menu_t SlitscanSubMenu = {
-    .x = 2, .y = 4, .width = 14, .height = 5,
+    .x = 2, .y = 4, .width = 16, .height = 5,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = SlitscanMenuItems, .last_item = LAST_ITEM(SlitscanMenuItems),
     .onShow = NULL, .onTranslateKey = NULL,
