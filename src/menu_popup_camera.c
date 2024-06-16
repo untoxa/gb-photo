@@ -586,8 +586,17 @@ const menu_item_t CameraMenuItems[] = {
         .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_SET_DITHERING
     }, {
-        .sub = &UserInfoMenu, .sub_params = NULL,
+        .sub = NULL,  .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 6, .width = 13,
+        .id = idPopupSlitscanSub,
+        .caption = " Slitscan...",
+        .helpcontext = " Slitscan settings",
+        .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
+        .result = ACTION_SLITSCAN_SUBMENU
+    }, {
+        .sub = &UserInfoMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 7, .width = 13,
         .id = idPopupCameraOwnerInfo,
         .caption = " Owner information...",
         .helpcontext = " Set camera owner data",
@@ -596,7 +605,7 @@ const menu_item_t CameraMenuItems[] = {
         .result = ACTION_SET_OWNER_INFO
     }, {
         .sub = &YesNoMenu, .sub_params = "Restore defaults?",
-        .ofs_x = 1, .ofs_y = 7, .width = 13,
+        .ofs_x = 1, .ofs_y = 8, .width = 13,
         .id = idPopupCameraRestore,
         .caption = " Restore defaults",
         .helpcontext = " Restore default settings",
@@ -604,16 +613,6 @@ const menu_item_t CameraMenuItems[] = {
         .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_RESTORE_DEFAULTS
     }, {
-        .sub = NULL,  .sub_params = NULL,
-        // .sub = &SlitscanSubMenu,  .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 8, .width = 13,
-        .id = idPopupSlitscanSub,
-        .caption = " Slitscan...",
-        .helpcontext = " Slitscan settings",
-        .onPaint = onCameraPopupMenuItemPaint,
-        .onGetProps = onCameraPopupMenuItemProps,
-        .result = ACTION_SLITSCAN_SUBMENU // MENU_RESULT_NONE
-        // .result = MENU_RESULT_NONE
     }
 };
 const menu_t CameraPopupMenu = {
