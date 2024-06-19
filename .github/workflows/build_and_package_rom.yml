@@ -24,7 +24,7 @@ jobs:
         if: matrix.name == 'Linux-x64'
         run: |
           # Pull in GBDK-2020 4.2.0
-          curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/download/4.2.0/gbdk-linux64.tar.gz
+          curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/download/4.3.0/gbdk-linux64.tar.gz
           tar xvfz gbdk-linux64.tar.gz
           python -m pip install --upgrade Pillow
           python -m pip install --upgrade wave
