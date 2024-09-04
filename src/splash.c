@@ -163,6 +163,10 @@ void logo_fade(const mask_t * mask) {
     }
 }
 
+#if defined(MEGADUCK)
+static const uint8_t empty_tile[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+#endif
+
 void logo_init(void) {
     DISPLAY_OFF;
     // set palettes if system supports color
@@ -171,6 +175,10 @@ void logo_init(void) {
     }
     // we don't load tiles into VRAM, because they are loaded by the fading function
     // we set maps as if tiles are loaded
+#if defined(MEGADUCK)
+    // clean up background tile 0
+    set_bkg_data(0, 1, empty_tile);
+#endif
 #if defined(NINTENDO)
     if (_is_COLOR) {
         VBK_REG = 1;
