@@ -75,7 +75,7 @@ uint16_t protected_scale_line_part(const void * ptr) NAKED {
 }
 
 void protected_generate_thumbnail(uint8_t slot) BANKED {
-    SWITCH_RAM((slot >> 1) + 1);
+    CAMERA_SWITCH_RAM((slot >> 1) + 1);
     uint16_t * sour = (slot & 1) ? image_second : image_first;
     uint16_t * dest = (slot & 1) ? image_second_thumbnail : image_first_thumbnail;
     for (uint8_t y = 0; y != 28; y++) {
@@ -184,18 +184,18 @@ void protected_lastseen_to_slot(uint8_t slot, bool flipped) BANKED {
 
     if (!flipped) {
         for (uint8_t i = CAMERA_IMAGE_TILE_HEIGHT; i != 0; i--) {
-            SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+            CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
             copy_data_row(buffer, sour, CAMERA_IMAGE_TILE_WIDTH), sour += sizeof(buffer);
-            SWITCH_RAM(slot_bank);
+            CAMERA_SWITCH_RAM(slot_bank);
             copy_data_row(dest, buffer, CAMERA_IMAGE_TILE_WIDTH), dest += sizeof(buffer);
         }
         return;
     }
     sour += (CAMERA_IMAGE_TILE_HEIGHT - 1) * (CAMERA_IMAGE_TILE_WIDTH * 16);
     for (uint8_t i = CAMERA_IMAGE_TILE_HEIGHT; i != 0; i--) {
-        SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+        CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
         copy_data_row_flipped(buffer, sour, CAMERA_IMAGE_TILE_WIDTH), sour -= sizeof(buffer);
-        SWITCH_RAM(slot_bank);
+        CAMERA_SWITCH_RAM(slot_bank);
         copy_data_row(dest, buffer, CAMERA_IMAGE_TILE_WIDTH), dest += sizeof(buffer);
     }
 }
@@ -208,7 +208,7 @@ static inline uint8_t * thumbnail_last_row(uint8_t slot) {
 
 uint8_t protected_metadata_read(uint8_t slot, uint8_t * dest, uint8_t size) BANKED {
     if (!size) return FALSE;
-    SWITCH_RAM((slot >> 1) + 1);
+    CAMERA_SWITCH_RAM((slot >> 1) + 1);
     uint8_t * s = thumbnail_last_row(slot);
     for (uint8_t i = 0, sz = size, * d = dest; i < LENGTH(meta_offsets); i++) {
         s += meta_offsets[i];
@@ -222,7 +222,7 @@ uint8_t protected_metadata_read(uint8_t slot, uint8_t * dest, uint8_t size) BANK
 
 uint8_t protected_metadata_write(uint8_t slot, uint8_t * sour, uint8_t size) BANKED {
     if (!size) return FALSE;
-    SWITCH_RAM((slot >> 1) + 1);
+    CAMERA_SWITCH_RAM((slot >> 1) + 1);
     uint8_t * d = thumbnail_last_row(slot);
     for (uint8_t i = 0, sz = size, * s = sour; i < LENGTH(meta_offsets); i++) {
         d += meta_offsets[i];
@@ -253,10 +253,10 @@ static inline cam_image_metadata_block_t * cam_image_metadata_echo(uint8_t slot)
 void protected_image_owner_write(uint8_t slot) BANKED {
     cam_owner_data_t owner_info;
     // get owner info
-    SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
     owner_info = cam_owner_data.user_info;
     // set image metadata
-    SWITCH_RAM((slot >> 1) + 1);
+    CAMERA_SWITCH_RAM((slot >> 1) + 1);
     cam_image_metadata_block_t * data = cam_image_metadata(slot);
     data->user_info = owner_info;
     memset(&(data->meta), 0, sizeof(data->meta));
@@ -307,7 +307,7 @@ const uint8_t default_calibration[] = {125, 125, 124, 126, 124, 125, 124, 122, 1
 uint8_t protected_status = PROTECTED_CORRECT;
 
 uint8_t INIT_module_protected(void) BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     if (prot_album_crc.crc != protected_checksum(&prot_album, ALBUM_LENGTH)) {
         memset(&prot_album, 0, ALBUM_LENGTH);
         prot_album_crc = block_magic;
@@ -322,7 +322,7 @@ uint8_t INIT_module_protected(void) BANKED {
         memcpy(&prot_vector_echo, &prot_vector, PROTECTED_BLOCK_SIZE(VECTOR_LENGTH));
         protected_status |= PROTECTED_REPAIR_VECTOR;
     }
-    SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
     if (prot_owner_crc.crc != protected_checksum(&prot_owner, OWNER_LENGTH)) {
         memset(&prot_owner, 0, OWNER_LENGTH);
         prot_owner_crc = block_magic;
@@ -331,7 +331,7 @@ uint8_t INIT_module_protected(void) BANKED {
         protected_status |= PROTECTED_REPAIR_OWNER;
     }
     for (uint8_t i = 1; i != 16; i++) {
-        SWITCH_RAM(i);
+        CAMERA_SWITCH_RAM(i);
         if (image0_owner_crc.crc != protected_checksum(&image0_owner, IMAGE0_OWNER_LENGTH)) {
             memset(&image0_owner, 0, IMAGE0_OWNER_LENGTH);
             image0_owner_crc = block_magic;
@@ -348,13 +348,13 @@ uint8_t INIT_module_protected(void) BANKED {
         }
     }
     if (protected_status != PROTECTED_CORRECT) {
-        SWITCH_RAM(CALIBRATION_BANK);
+        CAMERA_SWITCH_RAM(CALIBRATION_BANK);
         memcpy(&calibration, default_calibration, sizeof(default_calibration));
-        SWITCH_RAM(CALIBRATION_ECHO_BANK);
+        CAMERA_SWITCH_RAM(CALIBRATION_ECHO_BANK);
         memcpy(&calibration_echo, default_calibration, sizeof(default_calibration));
         protected_status |= PROTECTED_REPAIR_CAL;
     }
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     return 0;
 }
 

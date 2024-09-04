@@ -163,7 +163,7 @@ void RENDER_CAM_REG_ZEROVOUT(void)    { CAM_REG_ZEROVOUT    = SHADOW.CAM_REG_ZER
 inline void RENDER_CAM_REG_DITHERPATTERN(void) { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
 
 void RENDER_CAM_REGISTERS(void) {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
     RENDER_CAM_REG_EXPTIME();
     RENDER_CAM_REG_EDRAINVVREF();
@@ -247,7 +247,7 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
                 SETTING(ditheringHighLight) = true; // dither LOW
         }
     }
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
     RENDER_CAM_REG_EXPTIME();
     RENDER_CAM_REG_ZEROVOUT();
@@ -276,13 +276,13 @@ void RENDER_EDGE_FROM_EXPOSURE(void) {
             SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
         }
     }
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     RENDER_CAM_REG_EDEXOPGAIN();
     RENDER_CAM_REG_EXPTIME();
 }
 
 bool image_captured(void) {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (camera_PnR_delay) return false;
     uint8_t v = CAM_REG_CAPTURE;
     bool r = (((v ^ SHADOW.CAM_REG_CAPTURE) & CAM00F_CAPTURING) && !(v & CAM00F_CAPTURING));
@@ -290,7 +290,7 @@ bool image_captured(void) {
     return r;
 }
 void image_capture(void) {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
     switch (OPTION(after_action)) {
         case after_action_picnrec:
@@ -303,7 +303,7 @@ void image_capture(void) {
 }
 
 void display_last_seen(bool restore) {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
     screen_load_live_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
                            last_seen,
@@ -439,7 +439,7 @@ void reset_AEB(void) {
         COUNTER_RESET(camera_AEB_counter);
         SETTING(current_exposure) = last_AEB_exposure;
         // if AEB capture process was cancelled, then restore exposure
-        SWITCH_RAM(CAMERA_BANK_REGISTERS);
+        CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
         RENDER_CAM_REG_EXPTIME();
     }
 }
@@ -725,7 +725,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             scrollbar_set_position(&ss_contrast, (SETTING(current_contrast) = DEFAULT_CONTRAST_VALUE), 1, NUM_CONTRAST_VALUES);
             save_camera_mode_settings(OPTION(camera_mode));
             // change of contrast means reloading of the dithering pattern
-            SWITCH_RAM(CAMERA_BANK_REGISTERS);
+            CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
             RENDER_CAM_REG_DITHERPATTERN();
         } else {
 #ifdef ENABLE_AUTOEXP
@@ -809,7 +809,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
     } else change_direction = changeNone;                   // disable menu when capturing AEB
 
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (change_direction != changeNone) {
         static uint8_t temp_uint8;
         static bool settings_changed, redraw_selection;
@@ -1013,13 +1013,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 SETTING(current_exposure) = last_AEB_exposure;
                 AEB_capture_in_progress = false;
             }
-            SWITCH_RAM(CAMERA_BANK_REGISTERS);
+            CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
             RENDER_CAM_REG_EXPTIME();
         }
 #ifdef ENABLE_AUTOEXP
         else if ((one_iteration_autoexp) || (OPTION(camera_mode) == camera_mode_auto)) {
             int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
-            SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
+            CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
             int32_t new_exposure, current_exposure = SETTING(current_exposure);
 

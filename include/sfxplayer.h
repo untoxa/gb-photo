@@ -42,17 +42,17 @@ inline void sfx_sound_cut(void) {
 #define SFX_CH_4 8
 
 // cut sound on the selected channels
-inline void sfx_sound_cut_mask(uint8_t mask) {
 #if defined(NINTENDO)
+inline void sfx_sound_cut_mask(uint8_t mask) {
     if (mask & SFX_CH_1) NR12_REG = 0, NR14_REG = SFX_CH_RETRIGGER;
     if (mask & SFX_CH_2) NR22_REG = 0, NR24_REG = SFX_CH_RETRIGGER;
     if (mask & SFX_CH_3) NR32_REG = 0;
     if (mask & SFX_CH_4) NR42_REG = 0, NR44_REG = SFX_CH_RETRIGGER;
     NR51_REG = 0xFF;
-#else
-    mask;
-#endif
 }
+#else
+void sfx_sound_cut_mask(uint8_t mask);
+#endif
 
 // stop playing SFX
 inline void sfx_reset_sample(void) {

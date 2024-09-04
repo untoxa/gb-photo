@@ -33,7 +33,7 @@
 
 ___HandleCrash::
         push    hl
-        ld      hl, #rROMB0
+        ld      hl, #_rROMB0_MBC5
         ld      (hl), #b___HandleCrash_banked
         pop     hl
         jp      ___HandleCrash_banked 

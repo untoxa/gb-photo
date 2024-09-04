@@ -1,6 +1,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "musicmanager.h"
 #include "sfxplayer.h"
 
@@ -37,7 +38,7 @@ void music_play_isr(void) NONBANKED {
     if (music_current_track_bank == MUSIC_STOP_BANK) return;
     if (++music_play_isr_counter & music_tick_mask) return;
     uint8_t save_bank = _current_bank;
-    SWITCH_ROM(music_current_track_bank);
+    CAMERA_SWITCH_ROM(music_current_track_bank);
     if (music_next_track) {
         music_sound_cut();
 #if defined(NINTENDO)
@@ -49,7 +50,7 @@ void music_play_isr(void) NONBANKED {
         hUGE_dosound();
 #endif
     }
-    SWITCH_ROM(save_bank);
+    CAMERA_SWITCH_ROM(save_bank);
 }
 
 void music_pause(uint8_t pause) {

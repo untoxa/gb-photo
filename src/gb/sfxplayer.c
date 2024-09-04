@@ -3,11 +3,20 @@
 
 #include "sfxplayer.h"
 
-volatile uint8_t sfx_play_bank = SFX_STOP_BANK;
-const uint8_t * sfx_play_sample = NULL;
-uint8_t sfx_frame_skip;
+#define PERIOD_8192 0x700
+#define LENGTH_8192 0xfe
+#define PERIOD_1920 0x3BB
+#define LENGTH_1920 0x3b
 
-uint8_t sfx_play_isr(void) NONBANKED NAKED {
+#define CH3_LENGTH (LENGTH_8192)
+#define CH3_VALUES (PERIOD_8192 | 0xc000)
+
+
+volatile UINT8 sfx_play_bank = SFX_STOP_BANK;
+const UINT8 * sfx_play_sample = NULL;
+UINT8 sfx_frame_skip;
+
+UINT8 sfx_play_isr(void) NONBANKED NAKED {
 #if defined(__SDCC)
 #if defined(NINTENDO)
 __asm
@@ -44,7 +53,7 @@ lbl:
         ret z                       ; return FALSE
         dec a
         ldh (__current_bank), a
-        ld (_rROMB0), a
+        ld (_rROMB0_MBC5), a
 
         ld d, #0x0f
         ld a, (hl)
@@ -85,13 +94,13 @@ lbl:
 
         ld a, #0x80
         ldh (_NR30_REG),a
-        ld a, #0xFE                 ; length of wave
+        ld a, #(CH3_LENGTH)         ; length of wave
         ldh (_NR31_REG),a
         ld a, #0x20                 ; volume
         ldh (_NR32_REG),a
-        xor a                       ; low freq bits are zero
+        ld a, #<(CH3_VALUES)
         ldh (_NR33_REG),a
-        ld a, #0xC7                 ; start; no loop; high freq bits are 111
+        ld a, #>(CH3_VALUES)
         ldh (_NR34_REG),a
 
 9$:
@@ -128,7 +137,7 @@ lbl:
 
         ld a, e                     ; restore bank
         ldh (__current_bank), a
-        ld (_rROMB0), a
+        ld (_rROMB0_MBC5), a
 
         ld a, d                     ; result in a
 

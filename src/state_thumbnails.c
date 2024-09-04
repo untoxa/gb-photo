@@ -144,7 +144,7 @@ void tumbnail_refresh(uint8_t index) {
     uint8_t pos = index - (thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
     if (index < VECTOR_LEN(used_slots)) {
         uint8_t slot = VECTOR_GET(used_slots, index);
-        SWITCH_RAM((slot >> 1) + 1);
+        CAMERA_SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(thumbnail_coords[pos].x, thumbnail_coords[pos].y, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0xFF);
         if (selected_images[index]) menu_text_out(thumbnail_coords[pos].x + 3, thumbnail_coords[pos].y + 3, 0, WHITE_ON_BLACK, ITEM_DEFAULT, ICON_CBX_CHECKED);
         screen_restore_rect(thumbnail_coords[pos].x, thumbnail_coords[pos].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
@@ -158,7 +158,7 @@ void thumbnails_diaplay(uint8_t start) {
     screen_clear_rect(THUMBNAIL_DISPLAY_X, THUMBNAIL_DISPLAY_Y, THUMBNAIL_DISPLAY_WIDTH, THUMBNAIL_DISPLAY_HEIGHT, WHITE_ON_BLACK);
     for (uint8_t i = start, j = 0; (i < VECTOR_LEN(used_slots)) && (j != MAX_PREVIEW_THUMBNAILS); i++, j++) {
         uint8_t slot = VECTOR_GET(used_slots, i);
-        SWITCH_RAM((slot >> 1) + 1);
+        CAMERA_SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(thumbnail_coords[j].x, thumbnail_coords[j].y, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0xFF);
         if (selected_images[i]) menu_text_out(thumbnail_coords[j].x + 3, thumbnail_coords[j].y + 3, 0, WHITE_ON_BLACK, ITEM_DEFAULT, ICON_CBX_CHECKED);
         screen_restore_rect(thumbnail_coords[j].x, thumbnail_coords[j].y, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);

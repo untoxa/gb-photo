@@ -188,7 +188,7 @@ void logo_init(void) {
 
 uint8_t INIT_module_splash(void) BANKED {
     // skip logo if fast boot
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (OPTION(boot_to_camera_mode)) return 0;
     // show logo
     logo_init();

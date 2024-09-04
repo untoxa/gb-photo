@@ -49,7 +49,7 @@ VECTOR_DECLARE(used_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 VECTOR_DECLARE(free_slots, uint8_t, CAMERA_MAX_IMAGE_SLOTS);
 
 void gallery_toss_images(void) BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     memset(used_slots, CAMERA_IMAGE_DELETED, sizeof(used_slots));
     VECTOR_CLEAR(free_slots);
     uint8_t elem;
@@ -79,7 +79,7 @@ uint8_t gallery_show_picture(uint8_t image_no) {
     uint8_t displayed_index = (image_no < images_taken()) ? image_no : (images_taken() - 1);
 
     uint8_t image_index = VECTOR_GET(used_slots, displayed_index);
-    SWITCH_RAM((image_index >> 1) + 1);
+    CAMERA_SWITCH_RAM((image_index >> 1) + 1);
     screen_load_image(IMAGE_DISPLAY_X, IMAGE_DISPLAY_Y, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT, ((image_index & 1) ? image_second : image_first));
 
     sync_vblank();
@@ -176,7 +176,7 @@ uint8_t onShowImageInfo(const menu_t * self, uint8_t * param) {
             menu_text_out(self->x + 1, self->y + 13, 0, BLACK_ON_WHITE, ITEM_DEFAULT, camera_format_item_text(idEdgeExclusive, strcpy(text_buffer_extra_ex, "Edge excl.\t%s"),   &image_metadata.settings));
             vwf_set_tab_size(2);
         } else menu_text_out(self->x + 4, self->y + 1, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "No data...");
-        SWITCH_RAM((slot >> 1) + 1);
+        CAMERA_SWITCH_RAM((slot >> 1) + 1);
         screen_load_thumbnail(self->x + 12, self->y + 2, ((slot & 1) ? image_second_thumbnail : image_first_thumbnail), 0x00);
         screen_restore_rect(self->x + 12, self->y + 2, CAMERA_THUMB_TILE_WIDTH, CAMERA_THUMB_TILE_HEIGHT);
     } else menu_text_out(self->x + 4, self->y + 1, 0, BLACK_ON_WHITE, ITEM_DEFAULT, "No image...");

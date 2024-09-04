@@ -3,6 +3,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "systemdetect.h"
 #include "sgb_border.h"
 #include "sgb_assets.h"
@@ -49,7 +50,7 @@ inline void sgb_assets_set_palette(uint8_t palette_index) {
 // load the SGB borders and palettes if SGB detected
 uint8_t INIT_module_sgb_assets(void) BANKED {
     if (_is_SUPER) {
-        SWITCH_RAM(CAMERA_BANK_REGISTERS);
+        CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (OPTION(fancy_sgb_border)) {
             set_sgb_border(&sgb_borders[SGB_BORDER_FANCY], BANK(module_sgb_assets));
             sgb_assets_set_palette(SGB_PALETTE_RED);

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "compat.h"
 #include "gbcamera.h"
 #include "vwf.h"
 #include "screen.h"
@@ -46,7 +47,7 @@ static uint8_t *render_array(uint8_t * dest, uint8_t * sour, uint8_t sour_size) 
 }
 
 static void render_cam_image_slots(uint8_t * data_ptr, uint8_t x, uint8_t y) {
-    SWITCH_RAM(0);
+    CAMERA_SWITCH_RAM(0);
 
     for (uint8_t i = 0; i != 3; i++, y++) {
         data_ptr = render_array(text_buffer, data_ptr, 8);
