@@ -19,6 +19,7 @@ void music_play_isr(void) NONBANKED {
         if (!sfx_play_isr()) {
 #if defined(NINTENDO)
             music_driver_mute(MUTE_MASK_NONE);
+            music_driver_reset_wave();
 #endif
 #ifdef FORCE_CUT_SFX
             music_sound_cut_mask(music_mute_mask);

@@ -108,6 +108,8 @@ inline void music_play_sfx(uint8_t bank, const uint8_t * sample, uint8_t mute_ma
 
 #define PLAY_SFX(A) music_play_sfx(BANK(A), A, SFX_MUTE_MASK(A), MUSIC_SFX_PRIORITY_MINIMAL)
 
+// music driver wrapper functions
+
 inline void music_driver_load(const MUSIC_MODULE * module) {
     module;
 }
@@ -117,6 +119,9 @@ inline void music_driver_tick(void) {
 
 inline void music_driver_mute(uint8_t mask) {
     mask;
+}
+
+inline void music_driver_reset_wave(void) {
 }
 
 #endif
