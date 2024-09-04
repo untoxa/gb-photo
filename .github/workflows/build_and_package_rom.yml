@@ -63,13 +63,13 @@ jobs:
         shell: bash
         run: |
           ls -la gb-photo/build
-          ls -la gb-photo/build/gb
+          ls -la gb-photo/build/duck
           ls -la gb-photo/build/gbc
           # Remove debug artifacts
-          rm -f gb-photo/build/gb/*.noi gb-photo/build/gb/*.map gb-photo/build/gb/*.sym gb-photo/build/gb/*.ihx
+          rm -f gb-photo/build/duck/*.noi gb-photo/build/duck/*.map gb-photo/build/duck/*.sym gb-photo/build/duck/*.ihx
           rm -f gb-photo/build/gbc/*.noi gb-photo/build/gbc/*.map gb-photo/build/gbc/*.sym gb-photo/build/gbc/*.ihx
           ls -la gb-photo/build
-          ls -la gb-photo/build/gb
+          ls -la gb-photo/build/duck
           ls -la gb-photo/build/gbc
           # Don't use zip in linux since github will created a double nested zip
           # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
