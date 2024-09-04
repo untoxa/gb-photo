@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "compat.h"
 #include "gbcamera.h"
 
 #define PROTECTED_CORRECT       0x00
@@ -19,7 +20,7 @@ extern uint8_t protected_status;
 #define PROTECTED_SEED 0xAA55u
 
 inline void protected_modify_slot(uint8_t slot, uint8_t value) {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t old = cam_image_slots.imageslots[slot];
     cam_image_slots_echo.imageslots[slot] = cam_image_slots.imageslots[slot] = value;
     cam_image_slots_echo.magic.crc_add = cam_image_slots.magic.crc_add += (value - old);

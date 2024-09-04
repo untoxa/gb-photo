@@ -6,25 +6,28 @@ SHELL := /bin/bash
 ifndef GBDK_HOME
 GBDK_HOME = ../../../gbdk-2020/build/gbdk/
 endif
+GBDK_HOME_UNIX := $(subst ',,$(subst \,/,'$(GBDK_HOME)'))
 
-GBCPU = sm83
+ifndef PYTHON
+PYTHON = python
+endif
 
-LCC = $(GBDK_HOME)bin/lcc
-PNG2ASSET = $(GBDK_HOME)bin/png2asset
+LCC = $(GBDK_HOME_UNIX)/bin/lcc
+PNG2ASSET = $(GBDK_HOME_UNIX)/bin/png2asset
 
 # Set platforms to build here, spaced separated. (These are in the separate Makefile.targets)
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket sms gg
-#TARGETS = gb gbc pocket sms gg
-TARGETS = gb gbc
-#TARGETS = gbc
+#TARGETS = gb gbc pocket sms gg megaduck
+#TARGETS = gb gbc
+TARGETS = gbc megaduck
 
-LIBRARIES = -Wl-llib/$(PORT)/hUGEDriver.lib
+LIBRARIES =
 
 # Configure platform specific LCC flags here:
 LCCFLAGS_gb      = $(LIBRARIES) -Wm-ys -Wl-yt0xFC -Wm-yn"$(PROJECTNAME)"
-LCCFLAGS_pocket  = $(LIBRARIES) -Wm-ys -Wl-yt0xFC -Wm-yn"$(PROJECTNAME)"
 LCCFLAGS_gbc     = $(LIBRARIES) -Wm-ys -Wm-yc -Wl-yt0xFC -Wm-yn"$(PROJECTNAME)"
+LCCFLAGS_duck    = $(LIBRARIES) -Wl-yt0xFC
 LCCFLAGS_sms     =
 LCCFLAGS_gg      =
 
@@ -42,7 +45,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # Optimization
-CFLAGS      += -Wf'--max-allocs-per-node 50000'
+#CFLAGS      += -Wf'--max-allocs-per-node 50000'
 
 # You can set the name of the ROM file here
 PROJECTNAME = photo
@@ -93,11 +96,11 @@ DEPS = $(DEPENDANT:%.o=%.d)
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/sounds/%.vgm $$(wildcard $(RESDIR)/audio/$(PLAT)/sounds/%.vgm.meta)
-	python utils/vgm2data.py -5 -w -3 -d 4 `cat <$<.meta 2>/dev/null` -o $@ $<
+	$(PYTHON) utils/vgm2data.py -5 -w -3 -d 4 `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/sounds/%.sav $$(wildcard $(RESDIR)/audio/$(PLAT)/sounds/%.sav.meta)
-	python utils/fxhammer2data.py -d 4 -c `cat <$<.meta 2>/dev/null` -o $@ $<
+	$(PYTHON) utils/fxhammer2data.py -d 4 -c `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/music/%.uge $$(wildcard $(RESDIR)/audio/$(PLAT)/music/%.uge.meta)
@@ -105,11 +108,11 @@ $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/music/%.uge $$(wildcard $(RESDIR)/audio/$
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/waveforms/%.wav $$(wildcard $(RESDIR)/audio/$(PLAT)/waveforms/%.wav.meta)
-	python utils/wav2data.py `cat <$<.meta 2>/dev/null` -o $@ $<
+	$(PYTHON) utils/wav2data.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.o:	$(RESDIR)/data/%.bin $$(wildcard $(RESDIR)/data/%.bin.meta)
-	python utils/bin2obj.py `cat <$<.meta 2>/dev/null` -o $@ $<
+	$(PYTHON) utils/bin2obj.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 $(OBJDIR)/%.o:	$(RESDIR)/audio/$(PLAT)/%.c
 	$(LCC) $(CFLAGS) -c -o $@ $<
@@ -117,7 +120,7 @@ $(OBJDIR)/%.o:	$(RESDIR)/audio/$(PLAT)/%.c
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/fonts/%.png $$(wildcard $(RESDIR)/gfx/$(PLAT)/fonts/%.png.meta)
-	python utils/png2font.py `cat <$<.meta 2>/dev/null` -o $@ $<
+	$(PYTHON) utils/png2font.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/sprites/%.png $$(wildcard $(RESDIR)/gfx/$(PLAT)/sprites/%.png.meta)

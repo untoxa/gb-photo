@@ -4,6 +4,7 @@
 #include <gbdk/platform.h>
 #include <stdbool.h>
 
+#include "compat.h"
 #include "gbcamera.h"
 #include "globals.h"
 
@@ -173,7 +174,7 @@ inline void set_image_refresh_dalay(uint8_t delay) {
     camera_PnR_delay = delay;
 }
 inline bool image_is_capturing(void) {
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     return ((camera_PnR_delay) || (CAM_REG_CAPTURE & CAM00F_CAPTURING));
 }
 

@@ -61,7 +61,7 @@ static void refresh_screen(void) {
 
 uint8_t INIT_state_logo(void) BANKED {
     // skip logo if fast boot
-    SWITCH_RAM(CAMERA_BANK_REGISTERS);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
     if (OPTION(boot_to_camera_mode)) CHANGE_STATE(MAIN_STATE);
 
     return 0;

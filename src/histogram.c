@@ -3,6 +3,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
 #include "gbcamera.h"
 #include "systemhelpers.h"
 #include "state_camera.h"
@@ -106,7 +107,7 @@ uint16_t calculate_tile(uint8_t * data) NAKED {
 }
 
 int16_t calculate_histogram(autoexp_area_e area) BANKED {
-    SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
+    CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     static uint16_t histogram;
     histogram = 0;
     for (uint8_t i = LENGTH(histogram_points_center), * const * ptr = histogram_areas[area]; i != 0; i--) histogram += calculate_tile(*ptr++);

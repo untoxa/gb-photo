@@ -4,13 +4,13 @@ ifndef GBDK_HOME
 GBDK_HOME = ../../../../gbdk-2020/build/gbdk/
 endif
 
-LCC = $(GBDK_HOME)bin/lcc
-PNG2ASSETS = $(GBDK_HOME)bin/png2asset
+LCC = $(subst ',,$(subst \,/,'$(GBDK_HOME)'))/bin/lcc
+PNG2ASSETS = $(subst ',,$(subst \,/,'$(GBDK_HOME)'))/bin/png2asset
 
 # Set platforms to build here, spaced separated. (These are in the separate Makefile.targets)
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket megaduck sms gg
-TARGETS = gb gbc
+TARGETS = gbc megaduck
 
 # Configure platform specific LCC flags here:
 LCCFLAGS_gb      = -Wl-yt0x19 # Set an MBC for banking (1B-ROM+MBC5+RAM+BATT)
