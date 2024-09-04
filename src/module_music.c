@@ -20,12 +20,6 @@ uint8_t music_paused = FALSE;
 //    if (joy & J_START)  music_pause(music_paused = (!music_paused));
 
 
-#if defined(NINTENDO)
-void hUGETrackerRoutine(unsigned char ch, unsigned char param, unsigned char tick) NONBANKED OLDCALL {
-    ch; param; tick;
-}
-#endif
-
 // initialize the music/SFX driver
 uint8_t INIT_module_music(void) BANKED {
     music_init();

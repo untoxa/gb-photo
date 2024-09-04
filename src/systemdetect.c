@@ -18,7 +18,7 @@ uint8_t INIT_module_detect_system(void) BANKED {
     for (uint8_t i = 0; i != 4; i++) sync_vblank();
 
     _is_SUPER    = sgb_check();
-    _is_COLOR    = ((!_is_SUPER) && (_cpu == CGB_TYPE) && (*(uint8_t *)0x0143 & 0x80));
+    _is_COLOR    = ((!_is_SUPER) && (_cpu == CGB_TYPE));
     _is_ADVANCE  = (_is_GBA && _is_COLOR);
     _is_CPU_FAST = false;
 #elif defined(SEGA)

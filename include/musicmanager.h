@@ -5,12 +5,8 @@
 #include <stdint.h>
 
 #include "sfxplayer.h"
-#if defined(NINTENDO)
-#include "hUGEDriver.h"
-#define MUSIC_MODULE hUGESong_t
-#else
+
 #define MUSIC_MODULE void
-#endif
 
 // SFX priority constants: concurrent effect will play only if its priority level is higher or equal
 #define MUSIC_SFX_PRIORITY_MINIMAL  0
@@ -47,7 +43,7 @@ inline void music_setup_timer_ex(uint8_t is_fast) {
 // set up timer interrupt to 256Hz and set up driver for 256Hz
 inline void music_setup_timer(void) {
 #if defined(NINTENDO)
-    music_setup_timer_ex((_cpu == CGB_TYPE) && (*(UBYTE *)0x0143 & 0x80));
+    music_setup_timer_ex((_cpu == CGB_TYPE));
 #endif
 }
 
@@ -111,5 +107,16 @@ inline void music_play_sfx(uint8_t bank, const uint8_t * sample, uint8_t mute_ma
 }
 
 #define PLAY_SFX(A) music_play_sfx(BANK(A), A, SFX_MUTE_MASK(A), MUSIC_SFX_PRIORITY_MINIMAL)
+
+inline void music_driver_load(const MUSIC_MODULE * module) {
+    module;
+}
+
+inline void music_driver_tick(void) {
+}
+
+inline void music_driver_mute(uint8_t mask) {
+    mask;
+}
 
 #endif

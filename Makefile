@@ -22,7 +22,7 @@ PNG2ASSET = $(GBDK_HOME_UNIX)/bin/png2asset
 #TARGETS = gb gbc
 TARGETS = gbc megaduck
 
-LIBRARIES = -Wl-llib/$(PLAT)/hUGEDriver.lib
+LIBRARIES =
 
 # Configure platform specific LCC flags here:
 LCCFLAGS_gb      = $(LIBRARIES) -Wm-ys -Wl-yt0xFC -Wm-yn"$(PROJECTNAME)"

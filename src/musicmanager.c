@@ -5,10 +5,6 @@
 #include "musicmanager.h"
 #include "sfxplayer.h"
 
-#if defined(NINTENDO)
-#include "hUGEDriver.h"
-#endif
-
 volatile uint8_t music_current_track_bank = MUSIC_STOP_BANK;
 volatile uint8_t music_mute_mask = MUTE_MASK_NONE;
 const MUSIC_MODULE * music_next_track;
@@ -19,12 +15,10 @@ uint8_t music_tick_mask = MUSIC_TICK_MASK_256HZ;
 
 void music_play_isr(void) NONBANKED {
     if (sfx_play_bank != SFX_STOP_BANK) {
-#if defined(NINTENDO)
-        hUGE_mute_mask = music_mute_mask;
-#endif
+        music_driver_mute(music_mute_mask);
         if (!sfx_play_isr()) {
 #if defined(NINTENDO)
-            hUGE_mute_mask = MUTE_MASK_NONE, hUGE_reset_wave();
+            music_driver_mute(MUTE_MASK_NONE);
 #endif
 #ifdef FORCE_CUT_SFX
             music_sound_cut_mask(music_mute_mask);
@@ -41,14 +35,10 @@ void music_play_isr(void) NONBANKED {
     CAMERA_SWITCH_ROM(music_current_track_bank);
     if (music_next_track) {
         music_sound_cut();
-#if defined(NINTENDO)
-        hUGE_init(music_next_track);
-#endif
+        music_driver_load(music_next_track);
         music_next_track = 0;
     } else {
-#if defined(NINTENDO)
-        hUGE_dosound();
-#endif
+        music_driver_tick();
     }
     CAMERA_SWITCH_ROM(save_bank);
 }
