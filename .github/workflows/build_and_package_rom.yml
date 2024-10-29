@@ -76,7 +76,7 @@ jobs:
 
       - name: Store build
         if: (matrix.name == 'Linux-x64')
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: GB Photo! ROM Build
           # path: gb-photo/build/gb/${{ env.BUILD_PACKAGE_FILENAME }}
