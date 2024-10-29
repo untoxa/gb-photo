@@ -158,16 +158,9 @@ Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions)
 
 Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category.
 
-Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/).
+Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/). **Warning:** by default, environment variables and pip are **not installed**, you have to set these in "Advanced Options" and "Optional Features" when installing Python. **Default install does not work for this project !**
 
 Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
-
-Download a Python script from [here](https://bootstrap.pypa.io/get-pip.py), then run from Cygwin in the directory where `get-pip.py` is placed:
-
-    python get-pip.py
-    python -m pip install --upgrade pip
-
-If `python` command is not recognized, you will have to manually create its own environment variable. Create a `Path` environment variable which targets your Python installation folder (the one that contains `python.exe`) or if `Path` exists, edit it and copy your Python installation path. Close and reopen Cygwin and get back to previous steps. Using `py` command (more generic call to Python under Windows) instead of `python` will aparently fix the issue but compiler will not be compatible.
 
 Then install Pillow and wave libraries:
 
