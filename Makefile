@@ -31,7 +31,7 @@ LCCFLAGS_duck    = $(LIBRARIES) -Wl-yt0xFC
 LCCFLAGS_sms     =
 LCCFLAGS_gg      =
 
-LCCFLAGS += $(LCCFLAGS_$(EXT)) -Wm-yS # This adds the current platform specific LCC Flags
+LCCFLAGS += -m$(PORT):$(PLAT) $(LCCFLAGS_$(EXT)) -Wm-yS # This adds the current platform specific LCC Flags
 
 LCCFLAGS += -Wl-j -Wm-yoA -Wm-ya16 -autobank -Wb-ext=.rel
 # LCCFLAGS += -debug # Uncomment to enable debug output
@@ -179,7 +179,7 @@ $(OBJDIR)/%.o:	$(SRCPORT)/%.s
 
 # Link the compiled object files into a .gb ROM file
 $(BINS):	$(RESOBJ) $(OBJS)
-	$(LCC) $(LCCFLAGS) $(CFLAGS) -o $(BINDIR)/$(PROJECTNAME).$(EXT) $^
+	$(LCC) $(LCCFLAGS) -o $(BINDIR)/$(PROJECTNAME).$(EXT) $^
 	cp assets/photo.sav $(BINDIR)/photo.sav
 
 remote:
