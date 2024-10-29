@@ -83,6 +83,13 @@ camera_shadow_regs_t SHADOW;        // camera shadow registers for reading
 
 volatile uint8_t camera_PnR_delay;  // PicNRec delay counter
 
+#define AUTOEXP_SENSIVITY0   5
+#define AUTOEXP_SENSIVITY1  10
+#define AUTOEXP_SENSIVITY2  20
+#define AUTOEXP_SENSIVITY3  95
+
+#define AUTOEXP_THRESHOLD   20
+
 #define AUTOEXP_AREA_X      18
 #define AUTOEXP_AREA_Y      10
 #define SHUTTER_REPEAT_X    18
@@ -183,28 +190,28 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
         if (exposure < TO_EXPOSURE_VALUE(1536)) {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-            SETTING(voltage_out)        = 160;
+            SETTING(voltage_out)        = 64;
             SETTING(current_gain)       = 0;        // CAM01_GAIN_140
             if (apply_dither = (SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = false;// dither HIGH
         } else if (exposure < TO_EXPOSURE_VALUE(64000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 192;
+            SETTING(voltage_out)        = 96;
             SETTING(current_gain)       = 0;        // CAM01_GAIN_140
             if (apply_dither = (SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = false;// dither HIGH
         } else if (exposure < TO_EXPOSURE_VALUE(564000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 224;
+            SETTING(voltage_out)        = 160;
             SETTING(current_gain)       = 4;        // CAM01_GAIN_200
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
         } else {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 416;
+            SETTING(voltage_out)        = 288;
             SETTING(current_gain)       = 8;        // CAM01_GAIN_260
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
@@ -213,36 +220,36 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
         if (exposure < TO_EXPOSURE_VALUE(768)) {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-            SETTING(voltage_out)        = 160;
+            SETTING(voltage_out)        = 64;
             SETTING(current_gain)       = 0;        // CAM01_GAIN_140
             if (apply_dither = (SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = false;// dither HIGH
         } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 192;
+            SETTING(voltage_out)        = 96;
             SETTING(current_gain)       = 0;        // CAM01_GAIN_140
             if (apply_dither = (SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = false;// dither HIGH
         } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 224;
+            SETTING(voltage_out)        = 160;
             SETTING(current_gain)       = 4;        // CAM01_GAIN_200
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
         } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 416;
+            SETTING(voltage_out)        = 288;
             SETTING(current_gain)       = 8;        // CAM01_GAIN_260
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
         } else {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
-            SETTING(voltage_out)        = 480;
-            SETTING(current_gain)       = 12;       // CAM01_GAIN_32
+            SETTING(voltage_out)        = 160;
+            SETTING(current_gain)       = 10;       // CAM01_GAIN_32
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
         }
@@ -1032,16 +1039,16 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
             // algorithm here is globally faster and simplier than a real camera
 
-            if (abs_error > 95) {
+            if (abs_error > AUTOEXP_SENSIVITY3) {
                 // raw tuning +- 1EV
                 new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
-            } else if (abs_error > 20) {
+            } else if (abs_error > AUTOEXP_SENSIVITY2) {
                 // intermediate tuning +- 1/8 EV
                 new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
-            } else if (abs_error > 10) {
+            } else if (abs_error > AUTOEXP_SENSIVITY1) {
                 // fine tuning +- 1/16 EV
                 new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
-            } else if (abs_error > 5) {
+            } else if (abs_error > AUTOEXP_SENSIVITY0) {
                 // very fine tuning +- 1 in C register
                 new_exposure = current_exposure + ((error_negative) ? -1 : 1);
             } else new_exposure = current_exposure;
@@ -1075,7 +1082,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         RENDER_REGS_FROM_EXPOSURE();
                         break;
                     default:
-                        RENDER_EDGE_FROM_EXPOSURE();
+                        if (abs_error > AUTOEXP_THRESHOLD) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
                         break;
                 }
             }
