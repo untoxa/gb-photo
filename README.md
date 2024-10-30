@@ -154,31 +154,24 @@ Sender is a master device for the game boy.
 
 Basic requirement: 20 minutes without any disturbance.
 
-Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link and unzip it into the desired directory.
+Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link and unzip it into the desired directory, for example C:/GBDK
 
-Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category.
+Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category. If you encounter strange errors when compiling or make command is not recognized, get make.exe from the [source site](https://gnuwin32.sourceforge.net/packages/make.htm) and copy paste it in /bin folder of Cygwin.
 
-Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/).
-
-Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
-
-Download a Python script from [here](https://bootstrap.pypa.io/get-pip.py), then run from Cygwin in the directory where `get-pip.py` is placed:
-
-    python get-pip.py
-    python -m pip install --upgrade pip
-
-If `python` command is not recognized, you will have to manually create its own environment variable. Create a `Path` environment variable which targets your Python installation folder (the one that contains `python.exe`) or if `Path` exists, edit it and copy your Python installation path. Close and reopen Cygwin and get back to previous steps. Using `py` command (more generic call to Python under Windows) instead of `python` will aparently fix the issue but compiler will not be compatible.
+Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/). **Use the advanced installation options to add pip and environment variables (both are mandatory).**
 
 Then install Pillow and wave libraries:
 
     python -m pip install --upgrade Pillow
     python -m pip install --upgrade wave
 
+Download and install `Git` built for Windows from [here](https://git-scm.com/download/win).
+
 Now from the Cygwin terminal, clone this git repository to its desired destination (default is `/home/USER`), but may be any:
 
     git clone https://github.com/untoxa/gb-photo
 
-Create a `GBDK_HOME` environment variable which targets your GBDK-2020 folder in the Windows system settings, close and reopen Cygwin.
+Set the `GBDK_HOME` environment variable which targets your GBDK-2020 folder. Best is to stay with the default GBDK_HOME = C:/GBDK. In case of persistent error with makebin, manually modify the Makefile like this: GBDK_HOME = "C:/GBDK/" (for example).
 
 Run make from the Cygwin terminal in the project folder containing the `Makefile`:
 
