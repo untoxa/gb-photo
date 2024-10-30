@@ -187,7 +187,7 @@ Run make from the Cygwin terminal in the project folder containing the `Makefile
 
 Your roms will be in `./build` folders, enjoy !
 
-# Showcase
+# Showcase of images made with Photo!
 ![Showcase](doc/Images/Showcase_2.png)
 (Credit: Raphaël BOICHOT)
 
