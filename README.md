@@ -187,6 +187,10 @@ Run make from the Cygwin terminal in the project folder containing the `Makefile
 
 Your roms will be in `./build` folders, enjoy !
 
+# Showcase
+![Showcase](doc/Images/Showcase_2.png)
+(Credit: Raphaël BOICHOT)
+
 # Resources
 - Mitsubishi M64282FP [Sensor Datasheet](doc/M64282FP-datasheet.pdf)
 - Mitsubishi M64283FP [Sensor Datasheet](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf)
