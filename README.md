@@ -76,7 +76,7 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 - Allows to come back to factory settings, in particular if situation is becoming messy in **Manual Mode**.
 
 ### Dithering menu
-- Gives access to custom dithering patterns.
+- Gives access to custom dithering patterns cooked by some Game Boy Camera artists.
 
 ### Owner informations...
 - Gives access the owner informations entered in the save via the regular camera.
@@ -110,7 +110,9 @@ The **flash storage** of images is a unique feature from Photo! It allows dumpin
 - **Erase slot** well, erases a selected slot. Image are still recoverable with a dedicated tool in case of mistake.
 - **Print slot** sends the whole roll in slot to any GB printer compatible device.
 - **Transfer slot** sends the whole roll in slot to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) at high baudrate. **Compatible with Game Boy Color only !**
-- **Clear roll** erases the current roll (the ram). So **Save roll to slot** + **Clear roll** = **Move roll to slot.**
+- **Clear camera roll** erases the current roll (the ram). So **Save roll to slot** + **Clear roll** = **Move roll to slot.**
+
+From a particular image in a roll, you can **restore it**, **Print it** or **Transfer it** without restoring the whole roll.
 
 ## Settings
 
