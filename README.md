@@ -6,6 +6,8 @@
 
 This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with all known models of Game Boy printer and Game Boy printer emulator. The project features Game Boy And Game Boy Color versions.
 
+A special version compiled for the [Mega Duck, also known as Cougar Boy](https://en.wikipedia.org/wiki/Mega_Duck) is also available. It requires a special adapter that you can build from informations [available here (soon)](https://github.com/bbbbbr/megaduck-info).
+
 This project requires a reflashable Game Boy Camera cart. PCB's and building instructions may be found [in this project](https://github.com/2BitWizard/GB_Mini_Camera) or [in this more detailed fork](https://github.com/Raphael-Boichot/GB_Mini_Camera). Camera modding requires advanced skill in soldering and is not recommended for beginners. [GBxCart flasher from InsideGadget](https://www.gbxcart.com/) is the only known device compatible with camera flashcarts. A generic flashable cartridge is also necessary if you plan to remote control the camera via serial cable.
 
 The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data. Technically all camera parameters are stored in various empty area of the camera working ram. They do not interfere with a regular camera rom as all checksums are systematically verified.
@@ -41,8 +43,8 @@ The **main hub** brings you to the 5 main menus by pressing START after boot. Yo
 The **camera mode** was created to propose many more features than a regular camera like infinite time-lapse, ultra-fast transmission, full manual mode, support of third party devices, etc. It was polished by people passionate by the Game Boy Camera.
 
 ### Capture Mode menu
-- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
-- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time.
+- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147) and adapting them for this particular rom. All other camera registers used are fixed.
+- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. Press START to briefly activate the **Auto Mode** and lock exposure in the closest best position.
 - The **Manual Mode** allows **modifying all the parameters** of the camera sensor that can be sent to the MAC-GBD. Glitches in perspective !
 
 ### Trigger menu
@@ -63,6 +65,7 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 - **Transfer REC** allows continuous transmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
+- **Save to SD** is a planned feature, not yet implemented.
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). This action **is not compatible with the Double Speed Mode**.
 - **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). This action **is not compatible with the Double Speed Mode**.
 
@@ -71,6 +74,12 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 ### Restore Default menu
 - Allows to come back to factory settings, in particular if situation is becoming messy in **Manual Mode**.
+
+### Dithering menu
+- Gives access to custom dithering patterns.
+
+### Owner informations...
+- Gives access the owner informations entered in the save via the regular camera.
 
 ## Gallery
 
@@ -86,8 +95,6 @@ The **Gallery** acts as the regular camera gallery but proposes batch image eras
 - **Delete** declares the memory slot of the displayed image as free (without erasing data).
 - **Delete All** declares all the memory slots as free (without erasing data).
 - **Undelete All** declares all the memory slots as containing an image (whatever the slots content).
-
-![multiple selection mode](doc/Images/Gallery_2.png)
 
 You can access a thumbnail viewer by pressing A when viewing an image. It allows batch selecting, erasing, printing and transfering images.
 
