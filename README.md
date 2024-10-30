@@ -154,7 +154,7 @@ Sender is a master device for the game boy.
 
 Basic requirement: 20 minutes without any disturbance.
 
-Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link and unzip it into the desired directory, for example C:/GBDK/
+Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link and unzip it into the desired directory, for example C:/GBDK
 
 Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category. If you encounter strange errors when compiling or make command is not recognized, get make.exe from the [source site](https://gnuwin32.sourceforge.net/packages/make.htm) and copy paste it in /bin folder of Cygwin.
 
@@ -171,7 +171,7 @@ Now from the Cygwin terminal, clone this git repository to its desired destinati
 
     git clone https://github.com/untoxa/gb-photo
 
-Set the `GBDK_HOME` environment variable which targets your GBDK-2020 folder in the Makefile. Best is to stay with the default GBDK_HOME = "C:/GBDK/"
+Set the `GBDK_HOME` environment variable which targets your GBDK-2020 folder. Best is to stay with the default GBDK_HOME = C:/GBDK
 
 Run make from the Cygwin terminal in the project folder containing the `Makefile`:
 
