@@ -126,7 +126,7 @@ Some fancy general parameters like palette, Super Game Boy borders, regular and 
 - **Quick Boot** shunts any boot screen and drive you immediately to the **Camera mode**. Ideal for sneak attack !
 - **Flip live image** reverses the screen so that image appears in correct orientation when using a GBA SP, without the need for any additionnal device.
 - **Display exposure** indicates the exposure time of the sensor in **Auto mode**.
-- **Cart type** let you select wether you are using an [IG Pic'nred IAO](https://shop.insidegadgets.com/product/gameboy-camera-picnrec-aio/) or just any other **generic flashcart** (non IAO). If you don't know, just use **generic**.
+- **Cart type** lets you select wether you are using an [IG Pic'nred IAO](https://shop.insidegadgets.com/product/gameboy-camera-picnrec-aio/) or just any other **generic flashcart** (non IAO). If you don't know, just use **generic**.
 - **Palette** proposes a choice of fancy palettes for the Game Boy Color and Game Boy Advance.
 - **Fast printing** allows switching all print mode from 8 kHz (1 kB/s) to 256 kHz (32 kB/s) by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
 - **IR remote** enables using the IR port to trigger image capture. Any IR emitting device (TV remote control, other Game Boy Color, IR LED) does the job !
