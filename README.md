@@ -6,6 +6,8 @@
 
 This project is a homebrew enhancing the capabilities of the Game Boy Camera by allowing access to all the possible parameters of the sensor and improving the printing speed and the camera ergonomics in general. This project is compatible with all known models of Game Boy printer and Game Boy printer emulator. The project features Game Boy And Game Boy Color versions.
 
+A special version compiled for the [Mega Duck, also known as Cougar Boy](https://en.wikipedia.org/wiki/Mega_Duck) is also available. It requires a special adapter that you can build from informations [available here (soon)](https://github.com/bbbbbr/megaduck-info).
+
 This project requires a reflashable Game Boy Camera cart. PCB's and building instructions may be found [in this project](https://github.com/2BitWizard/GB_Mini_Camera) or [in this more detailed fork](https://github.com/Raphael-Boichot/GB_Mini_Camera). Camera modding requires advanced skill in soldering and is not recommended for beginners. [GBxCart flasher from InsideGadget](https://www.gbxcart.com/) is the only known device compatible with camera flashcarts. A generic flashable cartridge is also necessary if you plan to remote control the camera via serial cable.
 
 The save format used here is retro-compatible with any version of the Game Boy Camera rom. This means that you can switch between roms while keeping the same save without loosing your precious images and data. Technically all camera parameters are stored in various empty area of the camera working ram. They do not interfere with a regular camera rom as all checksums are systematically verified.
@@ -41,8 +43,8 @@ The **main hub** brings you to the 5 main menus by pressing START after boot. Yo
 The **camera mode** was created to propose many more features than a regular camera like infinite time-lapse, ultra-fast transmission, full manual mode, support of third party devices, etc. It was polished by people passionate by the Game Boy Camera.
 
 ### Capture Mode menu
-- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147). All other camera registers used are fixed.
-- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time.
+- The **Auto Mode** is a mode that mimics the behavior of the stock Game Boy Camera, it modifies automatically the **Exposure time**, and sets the **Gain**, **Sensor Voltage Out** and **Edge enhancement mode** according to rules assessed by datalogging the [MAC-GBD/sensor protocol](src/state_camera.c#L147) and adapting them for this particular rom. All other camera registers used are fixed.
+- The **Assisted Mode** uses the same strategy than Auto Mode with a manual setting of the exposure time. Press START to briefly activate the **Auto Mode** and lock exposure in the closest best position.
 - The **Manual Mode** allows **modifying all the parameters** of the camera sensor that can be sent to the MAC-GBD. Glitches in perspective !
 
 ### Trigger menu
@@ -63,6 +65,7 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 - **Transfer REC** allows continuous transmission to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer).
 - **Save & Transfer** allows fast transmission of one image to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and saving to a memory slot.
+- **Save to SD** is a planned feature, not yet implemented.
 - **Pic'n'rec** allows recording one picture on the [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). This action **is not compatible with the Double Speed Mode**.
 - **Pic'n'rec REC** allows continuous transmission to [InsideGadget's Pic'n'Rec device](https://shop.insidegadgets.com/product/gameboy-camera-picnrec/). This action **is not compatible with the Double Speed Mode**.
 
@@ -71,6 +74,12 @@ The **Transfer** protocol is very similar to standard printing. Only two packets
 
 ### Restore Default menu
 - Allows to come back to factory settings, in particular if situation is becoming messy in **Manual Mode**.
+
+### Dithering menu
+- Gives access to custom dithering patterns cooked by some Game Boy Camera artists.
+
+### Owner informations...
+- Gives access the owner informations entered in the save via the regular camera.
 
 ## Gallery
 
@@ -87,9 +96,7 @@ The **Gallery** acts as the regular camera gallery but proposes batch image eras
 - **Delete All** declares all the memory slots as free (without erasing data).
 - **Undelete All** declares all the memory slots as containing an image (whatever the slots content).
 
-![multiple selection mode](doc/Images/Gallery_2.png)
-
-You can access a thumbnail viewer by pressing A when viewing an image. It allows batch selecting, erasing, printing and transfering images.
+You can access a thumbnail viewer by pressing A when viewing an image. It allows **batch selecting**, **erasing**, **printing** and **transfering** images.
 
 ## Flash Storage
 
@@ -103,7 +110,9 @@ The **flash storage** of images is a unique feature from Photo! It allows dumpin
 - **Erase slot** well, erases a selected slot. Image are still recoverable with a dedicated tool in case of mistake.
 - **Print slot** sends the whole roll in slot to any GB printer compatible device.
 - **Transfer slot** sends the whole roll in slot to the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) at high baudrate. **Compatible with Game Boy Color only !**
-- **Clear roll** erases the current roll (the ram). So **Save roll to slot** + **Clear roll** = **Move roll to slot.**
+- **Clear camera roll** erases the current roll (the ram). So **Save roll to slot** + **Clear roll** = **Move roll to slot.**
+
+From a particular image in a roll, you can **restore it**, **Print it** or **Transfer it** without restoring the whole roll.
 
 ## Settings
 
@@ -112,17 +121,18 @@ The **flash storage** of images is a unique feature from Photo! It allows dumpin
 Some fancy general parameters like palette, Super Game Boy borders, regular and wild borders, GBA SP mode, overclocking, etc.
 
 - **Frame** allows selecting no frame, normal frame or wild frames. Made by passionate pixel artists. Try'm all !
-- **Palette** proposes a choice of fancy palettes for the Game Boy Color and Game Boy Advance.
-- **Fast printing** allows switching all print mode from 8 kHz (1 kB/s) to 256 kHz (32 kB/s) by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
-- **Alt. SGB borders** allows switching between two Super Game Boy borders. Compatible with PAL and NTSC Super NES !
 - **Show screen grid** displays crosses following the rule of thirds.
 - **Save confirmation** adds or removes the double A input to save an image. Without save confirmation, camera acts like a burst mode. With save confirmation, like a real Game Boy Camera.
-- **IR remote** enables using the IR port to trigger image capture. Any IR emitting device (TV remote control, other Game Boy Color, IR LED) does the job !
 - **Quick Boot** shunts any boot screen and drive you immediately to the **Camera mode**. Ideal for sneak attack !
 - **Flip live image** reverses the screen so that image appears in correct orientation when using a GBA SP, without the need for any additionnal device.
-- **Double speed** enables the Game Boy Color Double Speed Mode where everything goes twice faster (internal clock, printing, screen refreshing, inputs, etc.). This mode draws more current, avoid this when using a modded Game Boy Pocket. This mode also drives the sensor twice faster, so exposure times are all divided by 2. **Important note: the Double Speed Mode is not reliably supported by the Pic'n'rec REC at the moment**.
 - **Display exposure** indicates the exposure time of the sensor in **Auto mode**.
+- **Cart type** lets you select wether you are using an [IG Pic'nred IAO](https://shop.insidegadgets.com/product/gameboy-camera-picnrec-aio/) or just any other **generic flashcart** (non IAO). If you don't know, just use **generic**.
+- **Palette** proposes a choice of fancy palettes for the Game Boy Color and Game Boy Advance.
+- **Fast printing** allows switching all print mode from 8 kHz (1 kB/s) to 256 kHz (32 kB/s) by default. **Compatible witn Game Boy Color only !**. This mode is currently supported by the [pico-gb-printer](https://github.com/untoxa/pico-gb-printer) and the [BitBoy](https://gameboyphoto.bigcartel.com/product/bitboy).
+- **IR remote** enables using the IR port to trigger image capture. Any IR emitting device (TV remote control, other Game Boy Color, IR LED) does the job !
+- **Double speed** enables the Game Boy Color Double Speed Mode where everything goes twice faster (internal clock, printing, screen refreshing, inputs, etc.). This mode draws more current, avoid this when using a modded Game Boy Pocket. This mode also drives the sensor twice faster, so exposure times are all divided by 2. **Important note: the Double Speed Mode is not reliably supported by the Pic'n'rec REC at the moment**.
 - **Enable DMA** improves live view and refresh rate in **Game Boy Color only.**
+- **Alt. SGB borders** allows switching between two Super Game Boy borders. Compatible with PAL and NTSC Super NES !
 
 ## Some technical considerations
 The Mitsubishi M64282FP artificial retina is one of the first mass produced CMOS light sensor. This kind of sensor is known for its good behavior in low light conditions and low power consumption. Basically each pixel of the sensor converts the quantity of photons received during an exposure time into a voltage. The sensor is able to perform some basic arithmetics on the voltage values before transfering them to an analog output (inversion, offsetting, 2D operations, multiplication, etc.). This sensor contains 128x128 pixels but only 123 lines returns image information as the first 5 lines are just composed of masked pixels uses to measure the voltage response of sensor in full darkness. The [sensor documentation](doc/M64282FP-datasheet.pdf) is notorious for being crappy and some informations are deduced from the much better documentation of the [Mitsubishi M64283FP sensor](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf) which is an upgrade.
@@ -152,8 +162,6 @@ Sender is a master device for the game boy.
 
 # Fast compiling guide for Windows users
 
-Basic requirement: 20 minutes without any disturbance.
-
 Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link and unzip it into the desired directory, for example C:/GBDK
 
 Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category. If you encounter strange errors when compiling or make command is not recognized, get make.exe from the [source site](https://gnuwin32.sourceforge.net/packages/make.htm) and copy paste it in /bin folder of Cygwin.
@@ -179,6 +187,10 @@ Run make from the Cygwin terminal in the project folder containing the `Makefile
 
 Your roms will be in `./build` folders, enjoy !
 
+# Showcase of images made with Photo!
+![Showcase](doc/Images/Showcase_2.png)
+(Credit: Raphaël BOICHOT)
+
 # Resources
 - Mitsubishi M64282FP [Sensor Datasheet](doc/M64282FP-datasheet.pdf)
 - Mitsubishi M64283FP [Sensor Datasheet](doc/Mitsubishi%20Integrated%20Circuit%20M64283FP%20Image%20Sensor.pdf)
@@ -189,7 +201,7 @@ Your roms will be in `./build` folders, enjoy !
 - [Andreas Hahn](https://github.com/HerrZatacke) - original idea. 
 - [Toxa](https://github.com/untoxa) lead developer.
 - [@rembrandx](https://www.instagram.com/rembrandx/) as well as [NeoRame](https://github.com/NeoRame) and 2bitpit for the logo/splashcreen/artworks. THX [Hatch](https://github.com/hatchman) for your frames and the permission to use and change your graphics (Zebra and PCB)
-- [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves) and the auto-exposure algorithm.
+- [Raphaël Boichot](https://github.com/Raphael-Boichot/) for the in-depth analysis of the [Game Boy Camera's RAM structure](https://github.com/Raphael-Boichot/Inject-pictures-in-your-Game-Boy-Camera-saves) and tuning the auto-exposure algorithm.
 - [Tronimal](https://tronimal.de/game-boy-music-software/) for the original SFX effects.
 - [Cristofer Cruz](https://github.com/cristofercruz) for debugging and feature ideas.
 - [bbbbbr](https://github.com/bbbbbr) for support in programming.
