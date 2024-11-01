@@ -179,8 +179,7 @@ Now from the Cygwin terminal, clone this git repository to its desired destinati
 
     git clone https://github.com/untoxa/gb-photo
 
-Set the `GBDK_HOME` environment variable which targets your GBDK-2020 folder. Best is to stay with the default GBDK_HOME = C:/GBDK. In case of persistent error with makebin, manually modify the Makefile like this: GBDK_HOME = "C:/GBDK/" (for example).
-
+Set the `GBDK_HOME` environment variable which targets your GBDK-2020 folder. Best is to stay with the default GBDK_HOME = "C:/GBDK/"
 Run make from the Cygwin terminal in the project folder containing the `Makefile`:
 
     make
