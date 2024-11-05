@@ -182,8 +182,8 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
     // Gain 14.0dB or 0 | vRef +64 mV | Horizontal edge mode | Exposure time range from  0.5ms to 0.3ms
     // Gain 14.0dB or 0 | vRef +160 mV| 2-D edge mode        | Exposure time range from   67ms to 0.8ms
     // Gain 20.0dB or 4 | vRef +96 mV | 2-D edge mode        | Exposure time range from  282ms to  32ms
-    // Gain 26.0dB or 8 | vRef -96 mV | 2-D edge mode        | Exposure time range from  573ms to 164ms
-    // Gain 32.0dB or 10| vRef -320 mV| No edge Operation    | Exposure time range from 1048ms to 394ms
+    // Gain 26.0dB or 8 | vRef -192 mV| 2-D edge mode        | Exposure time range from  573ms to 164ms
+    // Gain 32.0dB or 10| vRef -416 mV| No edge Operation    | Exposure time range from 1048ms to 394ms
     bool apply_dither;
     uint16_t exposure = SETTING(current_exposure);
     if (_is_CPU_FAST) {
@@ -211,7 +211,7 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
         } else {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = -96;
+            SETTING(voltage_out)        = -192;
             SETTING(current_gain)       = 8;        // CAM01_GAIN_260
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
@@ -241,14 +241,14 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
         } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
             SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
             SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = -96;
+            SETTING(voltage_out)        = -192;
             SETTING(current_gain)       = 8;        // CAM01_GAIN_260
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
         } else {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
-            SETTING(voltage_out)        = -320;
+            SETTING(voltage_out)        = -416;
             SETTING(current_gain)       = 10;       // CAM01_GAIN_32
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
