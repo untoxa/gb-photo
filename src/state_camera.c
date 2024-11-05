@@ -183,7 +183,7 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
     // Gain 14.0dB or 0 | vRef +160 mV| 2-D edge mode        | Exposure time range from   67ms to 0.8ms
     // Gain 20.0dB or 4 | vRef +96 mV | 2-D edge mode        | Exposure time range from  282ms to  32ms
     // Gain 26.0dB or 8 | vRef -96 mV | 2-D edge mode        | Exposure time range from  573ms to 164ms
-    // Gain 32.0dB or 10| vRef -128 mV| No edge Operation    | Exposure time range from 1048ms to 394ms
+    // Gain 32.0dB or 10| vRef -320 mV| No edge Operation    | Exposure time range from 1048ms to 394ms
     bool apply_dither;
     uint16_t exposure = SETTING(current_exposure);
     if (_is_CPU_FAST) {
@@ -248,7 +248,7 @@ void RENDER_REGS_FROM_EXPOSURE(void) {
         } else {
             SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
             SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
-            SETTING(voltage_out)        = -128;
+            SETTING(voltage_out)        = -320;
             SETTING(current_gain)       = 10;       // CAM01_GAIN_32
             if (apply_dither = (!SETTING(ditheringHighLight)))
                 SETTING(ditheringHighLight) = true; // dither LOW
