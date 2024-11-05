@@ -164,7 +164,7 @@ Sender is a master device for the game boy.
 
 Download `GBDK-2020` from [here](https://github.com/gbdk-2020/gbdk-2020/actions) under the `GBDK Build and Package` link and unzip it into the desired directory, for example C:/GBDK
 
-Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category. If you encounter strange errors when compiling or make command is not recognized, get make.exe from the [source site](https://gnuwin32.sourceforge.net/packages/make.htm) and copy paste it in /bin folder of Cygwin.
+Download `Cygwin` built for Windows from [here](https://www.cygwin.com/). Install it with the additional `make` package from `Devel` category. If you encounter strange errors when compiling or make command is not recognized, get make.exe and libssp-0.dll from the [source site](https://github.com/maweil/MakeForWindows) and copy paste it in /bin folder of Cygwin.
 
 Download and install `Python 3` built for Windows from [here](https://www.python.org/downloads/). **Use the advanced installation options to add pip and environment variables (both are mandatory).**
 
