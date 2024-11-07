@@ -1252,29 +1252,34 @@ uint8_t UPDATE_state_camera(void) BANKED {
                 switch (menu_result = menu_popup_camera_execute()) {
                     case ACTION_MODE_MANUAL:
                     case ACTION_MODE_ASSISTED:
-                    case ACTION_MODE_AUTO: {
+                    case ACTION_MODE_AUTO:
                         static const camera_mode_e cmodes[] = {camera_mode_manual, camera_mode_assisted, camera_mode_auto};
                         OPTION(camera_mode) = cmodes[menu_result - ACTION_MODE_MANUAL];
                         RENDER_CAM_REGISTERS();
                         break;
-                    }
                     case ACTION_TRIGGER_ABUTTON:
                     case ACTION_TRIGGER_TIMER:
                     case ACTION_TRIGGER_INTERVAL:
-                    case ACTION_TRIGGER_AEB: {
+                    case ACTION_TRIGGER_AEB:
                         static const trigger_mode_e tmodes[] = {trigger_mode_abutton, trigger_mode_timer, trigger_mode_repeat, trigger_mode_AEB};
                         OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                         break;
-                    }
+                    case ACTION_ACTION_PICNREC:
+                    case ACTION_ACTION_PICNREC_VIDEO:
+                        if ((_is_COLOR) && (OPTION(double_speed))) {
+                            OPTION(double_speed) = false;
+                            fade_out_modal();
+                            CPU_SLOW();
+                            music_setup_timer_ex(_is_CPU_FAST);
+                            fade_in_modal();
+                        }
                     case ACTION_ACTION_SAVE:
                     case ACTION_ACTION_PRINT:
                     case ACTION_ACTION_SAVEPRINT:
                     case ACTION_ACTION_TRANSFER:
                     case ACTION_ACTION_SAVETRANSFER:
-                    case ACTION_ACTION_PICNREC:
-                    case ACTION_ACTION_PICNREC_VIDEO:
                     case ACTION_ACTION_TRANSF_VIDEO:
-                    case ACTION_ACTION_SAVESD: {
+                    case ACTION_ACTION_SAVESD:
                         static const after_action_e aactions[] = {
                             after_action_save, after_action_print, after_action_printsave,
                             after_action_transfer, after_action_transfersave, after_action_picnrec,
@@ -1282,7 +1287,6 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         };
                         OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                         break;
-                    }
                     case ACTION_AUTOEXP_CENTER:
                     case ACTION_AUTOEXP_TOP:
                     case ACTION_AUTOEXP_RIGHT:

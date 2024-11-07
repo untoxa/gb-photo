@@ -41,7 +41,9 @@ typedef enum {
     idPopupCameraOwnerName,
     idPopupCameraOwnerGender,
     idPopupCameraOwnerBirth,
-    idPopupActionSaveSD
+    idPopupActionSaveSD,
+    idPopupActionPicNRec,
+    idPopupActionPicNRecVideo
 } camera_popup_menu_e;
 
 
@@ -312,16 +314,20 @@ const menu_item_t ActionSubMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 8, .width = 10,
+        .id = idPopupActionPicNRec,
         .caption = " Pic'n'Rec",
         .helpcontext = " Save images to Pic'n'Rec",
         .onPaint = NULL,
+        .onGetProps = onActionsMenuItemProps,
         .result = ACTION_ACTION_PICNREC
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 9, .width = 10,
+        .id = idPopupActionPicNRecVideo,
         .caption = " Pic'n'Rec " ICON_REC,
         .helpcontext = " Record video using Pic'n'Rec",
         .onPaint = NULL,
+        .onGetProps = onActionsMenuItemProps,
         .result = ACTION_ACTION_PICNREC_VIDEO
 #endif
     }
@@ -336,6 +342,9 @@ const menu_t ActionSubMenu = {
 uint8_t onActionsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
     menu; self;
     switch (self->id) {
+        case idPopupActionPicNRec:
+        case idPopupActionPicNRecVideo:
+            return (OPTION(cart_type) == cart_type_iG_AIO) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idPopupActionSaveSD:
             #if (SD_ENABLED==1)
             return ITEM_DEFAULT;

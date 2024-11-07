@@ -420,10 +420,11 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
 uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
     switch ((settings_menu_e)self->id) {
+        case idSettingsDoubleSpeed:
+            return ((!_is_COLOR) || (OPTION(cart_type) == cart_type_iG_AIO)) ? ITEM_DISABLED : ITEM_DEFAULT;
         case idSettingsPrintFast:
         case idSettingsCGBPalette:
         case idSettingsIRRemoteShutter:
-        case idSettingsDoubleSpeed:
         case idSettingsEnableDMA:
             return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idSettingsAltBorder:
@@ -496,13 +497,16 @@ void menu_settings_execute(void) BANKED {
                     break;
                 case ACTION_SETTINGS_DOUBLESPEED:
                     OPTION(double_speed) = !OPTION(double_speed);
-                    save_camera_state();
                     if (_is_COLOR) {
                         fade_out_modal();
-                        if (OPTION(double_speed)) CPU_FAST(); else CPU_SLOW();
+                        if (OPTION(double_speed)) {
+                            CPU_FAST();
+                            if ((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video)) OPTION(after_action) = after_action_save;
+                        } else CPU_SLOW();
                         music_setup_timer_ex(_is_CPU_FAST);
                         fade_in_modal();
                     }
+                    save_camera_state();
                     break;
                 case ACTION_SETTINGS_DISPLAY_EXP:
                     OPTION(display_exposure) = !OPTION(display_exposure);
@@ -514,6 +518,17 @@ void menu_settings_execute(void) BANKED {
                     break;
                 case ACTION_SETTINGS_CARTTYPE:
                     OPTION(cart_type) = (cart_type_e)spinedit_carttype_value;
+                    if (OPTION(cart_type) == cart_type_iG_AIO) {
+                        OPTION(double_speed) = false;
+                        if (_is_COLOR) {
+                            fade_out_modal();
+                            CPU_SLOW();
+                            music_setup_timer_ex(_is_CPU_FAST);
+                            fade_in_modal();
+                        }
+                    } else {
+                        if ((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video)) OPTION(after_action) = after_action_save;
+                    }
                     save_camera_state();
                     settings_menu_repaint = true;
                     break;
