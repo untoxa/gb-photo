@@ -192,7 +192,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
         // call printer progress: indicate 100% completion
         printer_completion = PRN_MAX_PROGRESS, call_far(&printer_progress_handler);
     }
-    return PRINTER_SEND_COMMAND(PRN_PKT_STATUS);
+    return PRINTER_SEND_COMMAND(PRN_PKT_INIT);
 }
 
 uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t sh, uint8_t centered) BANKED {
