@@ -1145,10 +1145,6 @@ uint8_t UPDATE_state_camera(void) BANKED {
                             music_setup_timer_ex(_is_CPU_FAST);
                             fade_in_modal();
                         }
-                    case ACTION_ACTION_SLITSCAN_MODE:
-                        // TODO: UI hack for now to deal with not re-numbering ACTION_ACTION...
-                        // Recalc the slitscan mode as if it was after transfer video
-                        menu_result = ACTION_ACTION_TRANSF_VIDEO + 1u;
                     case ACTION_ACTION_SAVE:
                     case ACTION_ACTION_PRINT:
                     case ACTION_ACTION_SAVEPRINT:
@@ -1156,6 +1152,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                     case ACTION_ACTION_SAVETRANSFER:
                     case ACTION_ACTION_TRANSF_VIDEO:
                     case ACTION_ACTION_SAVESD:
+                    case ACTION_ACTION_SLITSCAN_MODE:
                         static const after_action_e aactions[] = {
                             after_action_save, after_action_print, after_action_printsave,
                             after_action_transfer, after_action_transfersave, after_action_picnrec,

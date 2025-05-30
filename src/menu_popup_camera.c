@@ -307,6 +307,13 @@ const menu_item_t ActionSubMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 7, .width = 10,
+        .caption = " SlitScan + Save",
+        .helpcontext = " SlitScan Mode + Save",
+        .onPaint = NULL,
+        .result = ACTION_ACTION_SLITSCAN_MODE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 8, .width = 10,
         .id =  idPopupActionSaveSD,
         .caption = " Save to SD",
         .helpcontext = " Save to SD card",
@@ -316,7 +323,7 @@ const menu_item_t ActionSubMenuItems[] = {
 #if (PICNREC_ENABLED==1)
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 8, .width = 10,
+        .ofs_x = 1, .ofs_y = 9, .width = 10,
         .id = idPopupActionPicNRec,
         .caption = " Pic'n'Rec",
         .helpcontext = " Save images to Pic'n'Rec",
@@ -325,7 +332,7 @@ const menu_item_t ActionSubMenuItems[] = {
         .result = ACTION_ACTION_PICNREC
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 9, .width = 10,
+        .ofs_x = 1, .ofs_y = 10, .width = 10,
         .id = idPopupActionPicNRecVideo,
         .caption = " Pic'n'Rec " ICON_REC,
         .helpcontext = " Record video using Pic'n'Rec",
@@ -333,13 +340,6 @@ const menu_item_t ActionSubMenuItems[] = {
         .onGetProps = onActionsMenuItemProps,
         .result = ACTION_ACTION_PICNREC_VIDEO
 #endif
-    }, {
-        .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 9, .width = 10,
-        .caption = " SlitScan + Save",
-        .helpcontext = " SlitScan Mode + Save",
-        .onPaint = NULL,
-        .result = ACTION_ACTION_SLITSCAN_MODE
     }
 };
 const menu_t ActionSubMenu = {
