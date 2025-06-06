@@ -1,9 +1,5 @@
 #include "vwf.h"
 
-#define DEVICE_TILE_WIDTH 8u
-#define DEVICE_TILE_SIZE (1 << DEVICE_TILE_SIZE_BITS)
-#define VWF_TILE_SIZE 8u
-
 vwf_farptr_t vwf_fonts[4];
 
 uint8_t vwf_current_offset = 0;

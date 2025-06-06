@@ -17,6 +17,9 @@
 #define EXPOSURE_LOW_LIMIT TO_EXPOSURE_VALUE(256)
 #define EXPOSURE_HIGH_LIMIT CAM02_MAX_VALUE
 
+#define SCREEN_RESTORE_YES true
+#define SCREEN_RESTORE_NO false
+
 BANKREF_EXTERN(state_camera)
 
 typedef enum {
@@ -44,6 +47,7 @@ typedef enum {
     after_action_picnrec_video,
     after_action_transfer_video,
     after_action_savesd,
+    after_action_slitscan_mode,
     N_AFTER_ACTIONS
 } after_action_e;
 
@@ -120,6 +124,9 @@ typedef struct camera_state_options_t {
     uint8_t aeb_overexp_step;
     autoexp_area_e autoexp_area     : 4;
     cart_type_e cart_type           : 4;
+    bool slitscan_singleline        : 1;
+    uint8_t slitscan_delay;
+    uint8_t slitscan_motiontrigger;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT

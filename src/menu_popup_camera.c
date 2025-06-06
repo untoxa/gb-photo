@@ -9,6 +9,7 @@
 #include "musicmanager.h"
 #include "screen.h"
 #include "joy.h"
+#include "load_save.h"
 
 #include "state_camera.h"
 #include "dither_patterns.h"
@@ -21,6 +22,7 @@
 #include "menu_codes.h"
 #include "menu_yesno.h"
 #include "menu_spinedit.h"
+#include "menu_popup_slitscan.h"
 
 #include "sound_menu_alter.h"
 
@@ -43,7 +45,8 @@ typedef enum {
     idPopupCameraOwnerBirth,
     idPopupActionSaveSD,
     idPopupActionPicNRec,
-    idPopupActionPicNRecVideo
+    idPopupActionPicNRecVideo,
+    idPopupSlitscanSub
 } camera_popup_menu_e;
 
 
@@ -304,6 +307,13 @@ const menu_item_t ActionSubMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 7, .width = 10,
+        .caption = " SlitScan + Save",
+        .helpcontext = " SlitScan Mode + Save",
+        .onPaint = NULL,
+        .result = ACTION_ACTION_SLITSCAN_MODE
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 8, .width = 10,
         .id =  idPopupActionSaveSD,
         .caption = " Save to SD",
         .helpcontext = " Save to SD card",
@@ -313,7 +323,7 @@ const menu_item_t ActionSubMenuItems[] = {
 #if (PICNREC_ENABLED==1)
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 8, .width = 10,
+        .ofs_x = 1, .ofs_y = 9, .width = 10,
         .id = idPopupActionPicNRec,
         .caption = " Pic'n'Rec",
         .helpcontext = " Save images to Pic'n'Rec",
@@ -322,7 +332,7 @@ const menu_item_t ActionSubMenuItems[] = {
         .result = ACTION_ACTION_PICNREC
     }, {
         .sub = NULL, .sub_params = NULL,
-        .ofs_x = 1, .ofs_y = 9, .width = 10,
+        .ofs_x = 1, .ofs_y = 10, .width = 10,
         .id = idPopupActionPicNRecVideo,
         .caption = " Pic'n'Rec " ICON_REC,
         .helpcontext = " Record video using Pic'n'Rec",
@@ -576,8 +586,17 @@ const menu_item_t CameraMenuItems[] = {
         .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_SET_DITHERING
     }, {
-        .sub = &UserInfoMenu, .sub_params = NULL,
+        .sub = NULL,  .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 6, .width = 13,
+        .id = idPopupSlitscanSub,
+        .caption = " Slitscan...",
+        .helpcontext = " Slitscan settings",
+        .onPaint = onCameraPopupMenuItemPaint,
+        .onGetProps = onCameraPopupMenuItemProps,
+        .result = ACTION_SLITSCAN_SUBMENU
+    }, {
+        .sub = &UserInfoMenu, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 7, .width = 13,
         .id = idPopupCameraOwnerInfo,
         .caption = " Owner information...",
         .helpcontext = " Set camera owner data",
@@ -586,13 +605,14 @@ const menu_item_t CameraMenuItems[] = {
         .result = ACTION_SET_OWNER_INFO
     }, {
         .sub = &YesNoMenu, .sub_params = "Restore defaults?",
-        .ofs_x = 1, .ofs_y = 7, .width = 13,
+        .ofs_x = 1, .ofs_y = 8, .width = 13,
         .id = idPopupCameraRestore,
         .caption = " Restore defaults",
         .helpcontext = " Restore default settings",
         .onPaint = onCameraPopupMenuItemPaint,
         .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_RESTORE_DEFAULTS
+    }, {
     }
 };
 const menu_t CameraPopupMenu = {
@@ -635,7 +655,8 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [after_action_picnrec]          = "[Pic'n'Rec]",
         [after_action_picnrec_video]    = "[P'n'R " ICON_REC "]",
         [after_action_transfer_video]   = "[Trn " ICON_REC"]",
-        [after_action_savesd]           = "[Save to SD]"
+        [after_action_savesd]           = "[Save to SD]",
+        [after_action_slitscan_mode]    = "[SlitScan]"
     };
     static const uint8_t * const autoexp_areas[N_AUTOEXP_AREAS] = {
         [area_center]                   = "[Center]",
@@ -660,6 +681,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
     switch ((camera_popup_menu_e)self->id) {
         case idPopupCameraRestore:
         case idPopupCameraOwnerInfo:
+        case idPopupSlitscanSub:
             strcpy(text_buffer, self->caption);
             break;
         case idPopupCameraMode:
@@ -725,6 +747,11 @@ uint8_t menu_popup_camera_execute(void) BANKED {
             break;
         case ACTION_SET_DITHERING:
             SETTING(dithering) = spinedit_dither_value;
+            break;
+        case ACTION_SLITSCAN_SUBMENU:
+            menu_slitscan_submenu_execute();
+            // Return to the main camera action menu instead of exiting it
+            menu_result = MENU_RESULT_NO;
             break;
         default:
             break;

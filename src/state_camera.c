@@ -28,6 +28,7 @@
 #include "scrollbar.h"
 #include "ir.h"
 #include "sd.h"
+#include "mode_slitscan.h"
 
 #include "globals.h"
 #include "state_camera.h"
@@ -59,6 +60,8 @@
 
 // frames
 #include "print_frames.h"
+
+#include "exposure.h"
 
 BANKREF(state_camera)
 
@@ -107,186 +110,6 @@ static scrollbar_t ss_brightness;
 #define SS_CONTRAST_LEN     16
 static scrollbar_t ss_contrast;
 
-static const uint16_t exposures[] = {
-    TO_EXPOSURE_VALUE(256),     TO_EXPOSURE_VALUE(272),     TO_EXPOSURE_VALUE(304),     TO_EXPOSURE_VALUE(352),
-    TO_EXPOSURE_VALUE(400),     TO_EXPOSURE_VALUE(464),     TO_EXPOSURE_VALUE(512),     TO_EXPOSURE_VALUE(560),
-    TO_EXPOSURE_VALUE(608),     TO_EXPOSURE_VALUE(704),     TO_EXPOSURE_VALUE(800),     TO_EXPOSURE_VALUE(912),
-    TO_EXPOSURE_VALUE(1008),    TO_EXPOSURE_VALUE(1136),    TO_EXPOSURE_VALUE(1264),    TO_EXPOSURE_VALUE(1376),
-    TO_EXPOSURE_VALUE(1504),    TO_EXPOSURE_VALUE(1744),    TO_EXPOSURE_VALUE(2000),    TO_EXPOSURE_VALUE(2256),
-    TO_EXPOSURE_VALUE(2512),    TO_EXPOSURE_VALUE(2752),    TO_EXPOSURE_VALUE(3008),    TO_EXPOSURE_VALUE(3504),
-    TO_EXPOSURE_VALUE(4000),    TO_EXPOSURE_VALUE(4496),    TO_EXPOSURE_VALUE(5008),    TO_EXPOSURE_VALUE(5504),
-    TO_EXPOSURE_VALUE(6000),    TO_EXPOSURE_VALUE(7008),    TO_EXPOSURE_VALUE(8000),    TO_EXPOSURE_VALUE(9008),
-    TO_EXPOSURE_VALUE(10000),   TO_EXPOSURE_VALUE(11264),   TO_EXPOSURE_VALUE(12512),   TO_EXPOSURE_VALUE(13760),
-    TO_EXPOSURE_VALUE(15008),   TO_EXPOSURE_VALUE(17504),   TO_EXPOSURE_VALUE(20000),   TO_EXPOSURE_VALUE(22496),
-    TO_EXPOSURE_VALUE(25008),   TO_EXPOSURE_VALUE(27504),   TO_EXPOSURE_VALUE(30000),   TO_EXPOSURE_VALUE(35008),
-    TO_EXPOSURE_VALUE(40000),   TO_EXPOSURE_VALUE(45008),   TO_EXPOSURE_VALUE(50000),   TO_EXPOSURE_VALUE(55008),
-    TO_EXPOSURE_VALUE(60000),   TO_EXPOSURE_VALUE(65008),   TO_EXPOSURE_VALUE(70000),   TO_EXPOSURE_VALUE(75008),
-    TO_EXPOSURE_VALUE(80000),   TO_EXPOSURE_VALUE(90000),   TO_EXPOSURE_VALUE(100000),  TO_EXPOSURE_VALUE(112496),
-    TO_EXPOSURE_VALUE(125008),  TO_EXPOSURE_VALUE(142496),  TO_EXPOSURE_VALUE(160000),  TO_EXPOSURE_VALUE(180000),
-    TO_EXPOSURE_VALUE(200000),  TO_EXPOSURE_VALUE(225008),  TO_EXPOSURE_VALUE(250000),  TO_EXPOSURE_VALUE(275008),
-    TO_EXPOSURE_VALUE(300000),  TO_EXPOSURE_VALUE(350000),  TO_EXPOSURE_VALUE(400000),  TO_EXPOSURE_VALUE(450000),
-    TO_EXPOSURE_VALUE(500000),  TO_EXPOSURE_VALUE(550000),  TO_EXPOSURE_VALUE(600000),  TO_EXPOSURE_VALUE(700000),
-    TO_EXPOSURE_VALUE(800000),  TO_EXPOSURE_VALUE(900000),  TO_EXPOSURE_VALUE(1000000), TO_EXPOSURE_VALUE(1048560)
-};
-static const table_value_t gains[] = {
-    { CAM01_GAIN_140, "14.0" }, { CAM01_GAIN_155, "15.5" }, { CAM01_GAIN_170, "17.0" }, { CAM01_GAIN_185, "18.5" },
-    { CAM01_GAIN_200, "20.0" }, { CAM01_GAIN_215, "21.5" }, { CAM01_GAIN_230, "23.0" }, { CAM01_GAIN_245, "24.5" },
-    { CAM01_GAIN_260, "26.0" }, { CAM01_GAIN_275, "27.5" }, { CAM01_GAIN_290, "29.0" }, { CAM01_GAIN_305, "30.5" },
-    { CAM01_GAIN_320, "32.0" }, { CAM01_GAIN_350, "35.0" }, { CAM01_GAIN_380, "38.0" }, { CAM01_GAIN_410, "41.0" },
-    { CAM01_GAIN_440, "44.0" }, { CAM01_GAIN_455, "45.5" }, { CAM01_GAIN_470, "47.0" }, { CAM01_GAIN_515, "51.5" },
-    { CAM01_GAIN_575, "57.5" }
-};
-static const table_value_t dither_patterns[N_DITHER_TYPES] = {
-    [dither_type_Off]        = { dither_type_Off        , "Off"  },
-    [dither_type_Default]    = { dither_type_Default    , "Def"  },
-    [dither_type_2x2]        = { dither_type_2x2        , "2x2"  },
-    [dither_type_Grid]       = { dither_type_Grid       , "Grid" },
-    [dither_type_Maze]       = { dither_type_Maze       , "Maze" },
-    [dither_type_Nest]       = { dither_type_Nest       , "Nest" },
-    [dither_type_Fuzz]       = { dither_type_Fuzz       , "Fuzz" },
-    [dither_type_Vertical]   = { dither_type_Vertical   , "Vert" },
-    [dither_type_Horizonral] = { dither_type_Horizonral , "Hori" },
-    [dither_type_Mix]        = { dither_type_Mix        , "Mix"  }
-};
-static const table_value_t zero_points[] = {
-    { CAM05_ZERO_DIS, "None" }, { CAM05_ZERO_POS, "Positv" }, { CAM05_ZERO_NEG, "Negtv" }
-};
-static const table_value_t edge_ratios[] = {
-    { CAM04_EDGE_RATIO_050, "50%" }, { CAM04_EDGE_RATIO_075, "75%" }, { CAM04_EDGE_RATIO_100, "100%" },{ CAM04_EDGE_RATIO_125, "125%" },
-    { CAM04_EDGE_RATIO_200, "200%" },{ CAM04_EDGE_RATIO_300, "300%" },{ CAM04_EDGE_RATIO_400, "400%" },{ CAM04_EDGE_RATIO_500, "500%" },
-};
-static const table_value_t voltage_refs[] = {
-    { CAM04_VOLTAGE_REF_00, "0.0" }, { CAM04_VOLTAGE_REF_05, "0.5" }, { CAM04_VOLTAGE_REF_10, "1.0" }, { CAM04_VOLTAGE_REF_15, "1.5" },
-    { CAM04_VOLTAGE_REF_20, "2.0" }, { CAM04_VOLTAGE_REF_25, "2.5" }, { CAM04_VOLTAGE_REF_30, "3.0" }, { CAM04_VOLTAGE_REF_35, "3.5" },
-};
-static const table_value_t edge_operations[] = {
-    { CAM01_EDGEOP_2D, "2D" }, { CAM01_EDGEOP_HORIZ, "Horiz" }, { CAM01_EDGEOP_VERT, "Vert" },{ CAM01_EDGEOP_NONE, "None" }
-};
-
-void RENDER_CAM_REG_EDEXOPGAIN(void)  { CAM_REG_EDEXOPGAIN  = SHADOW.CAM_REG_EDEXOPGAIN  = ((SETTING(edge_exclusive)) ? CAM01F_EDGEEXCL_V_ON : CAM01F_EDGEEXCL_V_OFF) | edge_operations[SETTING(edge_operation)].value | gains[SETTING(current_gain)].value; }
-void RENDER_CAM_REG_EXPTIME(void)     { CAM_REG_EXPTIME     = SHADOW.CAM_REG_EXPTIME     = swap_bytes(SETTING(current_exposure)); }
-void RENDER_CAM_REG_EDRAINVVREF(void) { CAM_REG_EDRAINVVREF = SHADOW.CAM_REG_EDRAINVVREF = edge_ratios[SETTING(current_edge_ratio)].value | ((SETTING(invertOutput)) ? CAM04F_INV : CAM04F_POS) | voltage_refs[SETTING(current_voltage_ref)].value; }
-void RENDER_CAM_REG_ZEROVOUT(void)    { CAM_REG_ZEROVOUT    = SHADOW.CAM_REG_ZEROVOUT    = zero_points[SETTING(current_zero_point)].value | TO_VOLTAGE_OUT(SETTING(voltage_out)); }
-inline void RENDER_CAM_REG_DITHERPATTERN(void) { dither_pattern_apply(SETTING(dithering), SETTING(ditheringHighLight), SETTING(current_contrast) - 1); }
-
-void RENDER_CAM_REGISTERS(void) {
-    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    RENDER_CAM_REG_EDEXOPGAIN();
-    RENDER_CAM_REG_EXPTIME();
-    RENDER_CAM_REG_EDRAINVVREF();
-    RENDER_CAM_REG_ZEROVOUT();
-    RENDER_CAM_REG_DITHERPATTERN();
-}
-
-void RENDER_REGS_FROM_EXPOSURE(void) {
-    // Gain 14.0dB or 0 | vRef +64 mV | Horizontal edge mode | Exposure time range from  0.5ms to 0.3ms
-    // Gain 14.0dB or 0 | vRef +160 mV| 2-D edge mode        | Exposure time range from   67ms to 0.8ms
-    // Gain 20.0dB or 4 | vRef +96 mV | 2-D edge mode        | Exposure time range from  282ms to  32ms
-    // Gain 26.0dB or 8 | vRef -192 mV| 2-D edge mode        | Exposure time range from  573ms to 164ms
-    // Gain 32.0dB or 10| vRef -416 mV| No edge Operation    | Exposure time range from 1048ms to 394ms
-    bool apply_dither;
-    uint16_t exposure = SETTING(current_exposure);
-    if (_is_CPU_FAST) {
-        if (exposure < TO_EXPOSURE_VALUE(1536)) {
-            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-            SETTING(voltage_out)        = 64;
-            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
-            if (apply_dither = (SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = false;// dither HIGH
-        } else if (exposure < TO_EXPOSURE_VALUE(64000)) {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 160;
-            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
-            if (apply_dither = (SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true;// dither LOW
-        } else if (exposure < TO_EXPOSURE_VALUE(564000)) {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 96;
-            SETTING(current_gain)       = 4;        // CAM01_GAIN_200
-            if (apply_dither = (!SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true; // dither LOW
-        } else {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = -192;
-            SETTING(current_gain)       = 8;        // CAM01_GAIN_260
-            if (apply_dither = (!SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true; // dither LOW
-        }
-    } else {
-        if (exposure < TO_EXPOSURE_VALUE(768)) {
-            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-            SETTING(voltage_out)        = 64;
-            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
-            if (apply_dither = (SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = false;// dither HIGH
-        } else if (exposure < TO_EXPOSURE_VALUE(32000)) {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 160;
-            SETTING(current_gain)       = 0;        // CAM01_GAIN_140
-            if (apply_dither = (SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true;// dither LOW
-        } else if (exposure < TO_EXPOSURE_VALUE(282000)) {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = 96;
-            SETTING(current_gain)       = 4;        // CAM01_GAIN_200
-            if (apply_dither = (!SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true; // dither LOW
-        } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-            SETTING(voltage_out)        = -192;
-            SETTING(current_gain)       = 8;        // CAM01_GAIN_260
-            if (apply_dither = (!SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true; // dither LOW
-        } else {
-            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-            SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
-            SETTING(voltage_out)        = -416;
-            SETTING(current_gain)       = 10;       // CAM01_GAIN_32
-            if (apply_dither = (!SETTING(ditheringHighLight)))
-                SETTING(ditheringHighLight) = true; // dither LOW
-        }
-    }
-    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    RENDER_CAM_REG_EDEXOPGAIN();
-    RENDER_CAM_REG_EXPTIME();
-    RENDER_CAM_REG_ZEROVOUT();
-    if (apply_dither) RENDER_CAM_REG_DITHERPATTERN();
-}
-
-void RENDER_EDGE_FROM_EXPOSURE(void) {
-    uint16_t exposure = SETTING(current_exposure);
-    if (_is_CPU_FAST) {
-        if (exposure < TO_EXPOSURE_VALUE(1536)) {
-            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-        } else {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-        }
-    } else {
-        if (exposure < TO_EXPOSURE_VALUE(768)) {
-            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-            SETTING(edge_operation)     = 1;        // CAM01_EDGEOP_HORIZ
-        } else if (exposure < TO_EXPOSURE_VALUE(573000)) {
-            SETTING(edge_exclusive)     = true;     // CAM01F_EDGEEXCL_V_ON
-            SETTING(edge_operation)     = 0;        // CAM01_EDGEOP_2D
-        } else {
-            SETTING(edge_exclusive)     = false;    // CAM01F_EDGEEXCL_V_OFF
-            SETTING(edge_operation)     = 3;        // CAM01_EDGEOP_NONE
-        }
-    }
-    CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    RENDER_CAM_REG_EDEXOPGAIN();
-    RENDER_CAM_REG_EXPTIME();
-}
 
 bool image_captured(void) {
     CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
@@ -316,7 +139,7 @@ void display_last_seen(bool restore) {
                            last_seen,
                            OPTION(flip_live_view),
                            ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video))));
-    if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
+    if (restore == SCREEN_RESTORE_YES) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
 inline void camera_scrollbars_reinit(void) {
@@ -356,7 +179,7 @@ bool camera_image_save(void) {
     } else {
         music_play_sfx(BANK(sound_error), sound_error, SFX_MUTE_MASK(sound_error), MUSIC_SFX_PRIORITY_HIGH);
         MessageBox(msgCameraRollFull);
-        display_last_seen(true);
+        display_last_seen(SCREEN_RESTORE_YES);
         return false;
     }
 }
@@ -396,7 +219,7 @@ static void refresh_autoexp_area(void) {
 
 static void refresh_screen(void) {
     screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    display_last_seen(true);
+    display_last_seen(SCREEN_RESTORE_YES);
     refresh_usage_indicator();
     refresh_autoexp_area();
     scrollbar_repaint_all();
@@ -741,6 +564,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
 #endif
         }
     } else if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
+
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -750,6 +574,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (recording_video && !image_is_capturing()) image_capture();
                 refresh_usage_indicator();
                 break;
+            case after_action_slitscan_mode:
+                // Fall through to default action so slitscan can use standard triggers
+            // No after action enabled
             default:
                 switch (OPTION(trigger_mode)) {
                     case trigger_mode_repeat:
@@ -776,6 +603,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                             }
                             break;
                         }
+                    // No special trigger mode
                     default:
                         camera_do_shutter = true;
                         break;
@@ -783,7 +611,13 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 break;
         }
     } else if (KEY_PRESSED(J_B)) {
-        if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_AEB_counter)) {
+        if (slitscan_is_capturing()) {
+            slitscan_mode_on_cancel();
+            // Also cancel possible triggers/etc
+            reset_shutter();
+            camera_do_shutter = capture_triggered = false;
+        }
+        else if (COUNTER(camera_shutter_timer) || COUNTER(camera_repeat_counter) || COUNTER(camera_AEB_counter)) {
             reset_shutter();
             camera_do_shutter = capture_triggered = false;
         } else {
@@ -824,8 +658,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         // perform changes when pressing UP/DOWN while menu item with some ID is active
         switch (selection_item_id) {
             case idExposure:
-                if (settings_changed = inc_dec_int8(&SETTING(current_exposure_idx), (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2, 0, MAX_INDEX(exposures), change_direction)) {
-                    SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
+                if (settings_changed = inc_dec_int8(&SETTING(current_exposure_idx), (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2, 0, EXPOSURES_MAX_INDEX, change_direction)) {
+                    SETTING(current_exposure) = GET_EXPOSURES(SETTING(current_exposure_idx));
                     switch (OPTION(camera_mode)) {
                         case camera_mode_assisted:
                             // ToDo: Adjust other registers ("N", Output Ref Voltage) based on index of 'current_exposure_idx'
@@ -838,7 +672,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 }
                 break;
             case idGain:
-                if (settings_changed = inc_dec_int8(&SETTING(current_gain), 1, 0, MAX_INDEX(gains), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (settings_changed = inc_dec_int8(&SETTING(current_gain), 1, 0, GAINS_MAX_INDEX, change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idVOut:
                 if (settings_changed = inc_dec_int16(&SETTING(voltage_out), VOLTAGE_OUT_STEP, MIN_VOLTAGE_OUT, MAX_VOLTAGE_OUT, change_direction)) RENDER_CAM_REG_ZEROVOUT();
@@ -866,20 +700,20 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idZeroPoint:
-                if (settings_changed = inc_dec_int8(&SETTING(current_zero_point), 1, 0, MAX_INDEX(zero_points), change_direction)) RENDER_CAM_REG_ZEROVOUT();
+                if (settings_changed = inc_dec_int8(&SETTING(current_zero_point), 1, 0, ZERO_POINTS_MAX_INDEX, change_direction)) RENDER_CAM_REG_ZEROVOUT();
                 break;
             case idVoltageRef:
-                if (settings_changed = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, MAX_INDEX(voltage_refs), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (settings_changed = inc_dec_int8(&SETTING(current_voltage_ref), 1, 0, VOLTAGE_REFS_MAX_INDEX, change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeRatio:
-                if (settings_changed = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, MAX_INDEX(edge_ratios), change_direction)) RENDER_CAM_REG_EDRAINVVREF();
+                if (settings_changed = inc_dec_int8(&SETTING(current_edge_ratio), 1, 0, EDGE_RATIOS_MAX_INDEX, change_direction)) RENDER_CAM_REG_EDRAINVVREF();
                 break;
             case idEdgeExclusive:
                 SETTING(edge_exclusive) = !SETTING(edge_exclusive);
                 RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idEdgeOperation:
-                if (settings_changed = inc_dec_int8(&SETTING(edge_operation), 1, 0, MAX_INDEX(edge_operations), change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
+                if (settings_changed = inc_dec_int8(&SETTING(edge_operation), 1, 0, EDGE_OPERATIONS_MAX_INDEX, change_direction)) RENDER_CAM_REG_EDEXOPGAIN();
                 break;
             case idBrightness:
                 if (settings_changed = inc_dec_int16(&SETTING(current_brightness), (HISTOGRAM_MAX_VALUE >> 5), 0, HISTOGRAM_MAX_VALUE, change_direction)) {
@@ -899,43 +733,55 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
     }
 
-    // process the timer
-    if (COUNTER_CHANGED(camera_shutter_timer)) {
-        if (camera_shutter_timer) {
-            PLAY_SFX(sound_timer);
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_CLOCK);
-            sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
-            menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
-        } else {
-            screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
-            if (COUNTER(camera_repeat_counter)) {
-                if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
-                if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) COUNTER_SET(camera_repeat_counter, COUNTER_INFINITE_VALUE);
-            }
-        }
-    }
-
-    // process the repeat counter
-    if (COUNTER_CHANGED(camera_repeat_counter)) {
-        if (COUNTER(camera_repeat_counter)) {
-            menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_MULTIPLE);
-            if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, " Inf");
+    // Don't process trigger counters while a slitscan frame is in progress
+    if (slitscan_is_capturing() != true) {
+        // process the timer
+        if (COUNTER_CHANGED(camera_shutter_timer)) {
+            if (camera_shutter_timer) {
+                PLAY_SFX(sound_timer);
+                menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_CLOCK);
+                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_shutter_timer));
+                menu_text_out(SHUTTER_TIMER_X, SHUTTER_TIMER_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
             } else {
-                sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
-                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
+                screen_clear_rect(SHUTTER_TIMER_X, SHUTTER_TIMER_Y, 2, 2, WHITE_ON_BLACK);
+                if (COUNTER(camera_repeat_counter)) {
+                    if (--COUNTER(camera_repeat_counter)) camera_charge_timer(OPTION(shutter_timer));
+                    if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) COUNTER_SET(camera_repeat_counter, COUNTER_INFINITE_VALUE);
+                }
             }
-        } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+        }
+
+        // process the repeat counter
+        if (COUNTER_CHANGED(camera_repeat_counter)) {
+            if (COUNTER(camera_repeat_counter)) {
+                menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 0, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_MULTIPLE);
+                if (OPTION(shutter_counter) == COUNTER_INFINITE_VALUE) {
+                    menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, " Inf");
+                } else {
+                    sprintf(text_buffer, " %hd", (uint8_t)COUNTER(camera_repeat_counter));
+                    menu_text_out(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y + 1, 2, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
+                }
+            } else screen_clear_rect(SHUTTER_REPEAT_X, SHUTTER_REPEAT_Y, 2, 2, WHITE_ON_BLACK);
+        }
     }
 
-    // make the picture if not in progress yet
-    if (camera_do_shutter) {
-        if (!capture_triggered) {
-            music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask, MUSIC_SFX_PRIORITY_NORMAL);
-            if (!image_is_capturing()) image_capture();
-            capture_triggered = true;
+    // Don't start a new capture while a slitscan frame is already in progress
+    // This gating is necessary to prevent the Repeat Trigger from interrupting scanline frame captures mid-way
+    if (slitscan_is_capturing() != true) {
+        // make the picture if not in progress yet
+        if (camera_do_shutter) {
+            if (!capture_triggered) {
+
+                // If scanline mode then prepare for a new frame (reset some counters, etc)
+                if (OPTION(after_action) == after_action_slitscan_mode)
+                    slitscan_mode_on_trigger();
+
+                music_play_sfx(shutter_sounds[OPTION(shutter_sound)].bank, shutter_sounds[OPTION(shutter_sound)].sound, shutter_sounds[OPTION(shutter_sound)].mask, MUSIC_SFX_PRIORITY_NORMAL);
+                if (!image_is_capturing()) image_capture();
+                capture_triggered = true;
+            }
+            camera_do_shutter = false;
         }
-        camera_do_shutter = false;
     }
 
     // check image was captured, if yes, then restart capturing process
@@ -955,10 +801,28 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     remote_activate(REMOTE_ENABLED);
                 }
                 break;
+            case after_action_slitscan_mode:
+                if (slitscan_is_capturing()) {
+                    if (slitscan_mode_on_image_captured() == SLITSCAN_STATE_STILL_CAPTURING) {
+                        // If still capturing scanlines then capture_triggered should be FALSE
+                        // and enqueue a new frame capture
+                        capture_triggered = false;
+                        image_capture();
+                    } else {
+                        // When done capturing capture_triggered becomes TRUE
+                        // which allows the completed image to be saved
+                        capture_triggered = true;
+                    }
+                }
+                break;
             default:
                 break;
         }
-        display_last_seen(false);
+
+        // Block display redraws while a slitscan frame is in progress
+        if (slitscan_is_capturing() != true)
+            display_last_seen(SCREEN_RESTORE_NO);
+
         if (capture_triggered) {
             capture_triggered = false;
             // check save confirmation
@@ -968,13 +832,16 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     (OPTION(after_action) == after_action_printsave) ||
                     (OPTION(after_action) == after_action_transfer) ||
                     (OPTION(after_action) == after_action_transfersave) ||
-                    (OPTION(after_action) == after_action_savesd)) {
+                    (OPTION(after_action) == after_action_savesd) ||
+                    (OPTION(after_action) == after_action_slitscan_mode)) {
                         if (isSaveCancelled()) return ACTION_NONE;
                         onHelpCameraMenu(menu, selection);
                 }
             }
             // perform after action(s)
             switch (OPTION(after_action)) {
+                case after_action_slitscan_mode:
+                    // Slitscan is same as standard save action
                 case after_action_save:
                     if (!camera_image_save()) {
                         reset_shutter();
@@ -1025,72 +892,77 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
         }
 #ifdef ENABLE_AUTOEXP
         else if ((one_iteration_autoexp) || (OPTION(camera_mode) == camera_mode_auto)) {
-            int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
-            CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
-            int32_t new_exposure, current_exposure = SETTING(current_exposure);
+            // Don't update exposure while slitscan capture is in progress        
+            if (slitscan_is_capturing() != true) {
 
-            bool error_negative = (error < 0) ? true : false;
-            uint16_t abs_error = abs(error);
+                int16_t error = (calculate_histogram(OPTION(autoexp_area)) - SETTING(current_brightness)) / HISTOGRAM_POINTS_COUNT;
+            		CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);  // restore register bank after histogram calculating
 
-            // real camera uses a very similar autoexposure mechanism with steps of
-            // 1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
-            // 1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
-            // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
-            // algorithm here is globally faster and simplier than a real camera
+                int32_t new_exposure, current_exposure = SETTING(current_exposure);
 
-            if (abs_error > AUTOEXP_SENSIVITY3) {
-                // raw tuning +- 1EV
-                new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
-            } else if (abs_error > AUTOEXP_SENSIVITY2) {
-                // intermediate tuning +- 1/8 EV
-                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
-            } else if (abs_error > AUTOEXP_SENSIVITY1) {
-                // fine tuning +- 1/16 EV
-                new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
-            } else if (abs_error > AUTOEXP_SENSIVITY0) {
-                // very fine tuning +- 1 in C register
-                new_exposure = current_exposure + ((error_negative) ? -1 : 1);
-            } else new_exposure = current_exposure;
+                bool error_negative = (error < 0) ? true : false;
+                uint16_t abs_error = abs(error);
 
-            uint16_t result_exposure = CONSTRAINT(new_exposure, (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
-            if (result_exposure != SETTING(current_exposure)) {
-                SETTING(current_exposure) = result_exposure;
-                render_registers = true;
-                if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
-            } else render_registers = false;
+                // real camera uses a very similar autoexposure mechanism with steps of
+                // 1-1/4, 1-1/8, 1-1/16, 1-1/32, 1-1/64 on exposure time for over-exposed images
+                // 1+1/8, 1+1/16, 1+1/32, 1+1/64 on exposure time for under-exposed images
+                // jumps in Vref are also taken into account in real camera so that apparent exposure does not jump
+                // algorithm here is globally faster and simplier than a real camera
 
-            if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
-                one_iteration_autoexp = false;
-                // restore exposure index from exposure
-                for (uint8_t i = 0; i <= MAX_INDEX(exposures); i += (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2) {
-                    if (exposures[i] > SETTING(current_exposure)) {
-                        SETTING(current_exposure_idx) = i;
-                        SETTING(current_exposure) = exposures[SETTING(current_exposure_idx)];
-                        render_registers = true;
-                        break;
+                if (abs_error > AUTOEXP_SENSIVITY3) {
+                    // raw tuning +- 1EV
+                    new_exposure = (error_negative) ? (current_exposure >> 1) : (current_exposure << 1);
+                } else if (abs_error > AUTOEXP_SENSIVITY2) {
+                    // intermediate tuning +- 1/8 EV
+                    new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 3), 1)) : MAX((current_exposure >> 3), 1));
+                } else if (abs_error > AUTOEXP_SENSIVITY1) {
+                    // fine tuning +- 1/16 EV
+                    new_exposure = current_exposure + ((error_negative) ? (0 - MAX((current_exposure >> 4), 1)) : MAX((current_exposure >> 4), 1));
+                } else if (abs_error > AUTOEXP_SENSIVITY0) {
+                    // very fine tuning +- 1 in C register
+                    new_exposure = current_exposure + ((error_negative) ? -1 : 1);
+                } else new_exposure = current_exposure;
+
+                uint16_t result_exposure = CONSTRAINT(new_exposure, (_is_CPU_FAST) ? (EXPOSURE_LOW_LIMIT << 1) : EXPOSURE_LOW_LIMIT, EXPOSURE_HIGH_LIMIT);
+                if (result_exposure != SETTING(current_exposure)) {
+                    SETTING(current_exposure) = result_exposure;
+                    render_registers = true;
+                    if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
+                } else render_registers = false;
+
+                if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
+                    one_iteration_autoexp = false;
+                    // restore exposure index from exposure
+                    for (uint8_t i = 0; i <= EXPOSURES_MAX_INDEX; i += (OPTION(camera_mode) == camera_mode_manual) ? 1 : 2) {
+                        if (GET_EXPOSURES(i) > SETTING(current_exposure)) {
+                            SETTING(current_exposure_idx) = i;
+                            SETTING(current_exposure) = GET_EXPOSURES(SETTING(current_exposure_idx));
+                            render_registers = true;
+                            break;
+                        }
+                    }
+                    // redraw menu
+                    PLAY_SFX(sound_menu_alter);
+                    menu_redraw(menu, NULL, selection);
+                }
+
+                if (render_registers) {
+                    switch (OPTION(camera_mode)) {
+                        case camera_mode_assisted:
+                            RENDER_REGS_FROM_EXPOSURE();
+                            break;
+                        default:
+                            if (abs_error > AUTOEXP_THRESHOLD) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
+                            break;
                     }
                 }
-                // redraw menu
-                PLAY_SFX(sound_menu_alter);
-                menu_redraw(menu, NULL, selection);
-            }
 
-            if (render_registers) {
-                switch (OPTION(camera_mode)) {
-                    case camera_mode_assisted:
-                        RENDER_REGS_FROM_EXPOSURE();
-                        break;
-                    default:
-                        if (abs_error > AUTOEXP_THRESHOLD) RENDER_REGS_FROM_EXPOSURE(); else RENDER_EDGE_FROM_EXPOSURE();
-                        break;
-                }
+            #if (DEBUG_AUTOEXP==1)
+                    sprintf(text_buffer, "%d", (uint16_t)error);
+                    menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
+            #endif
             }
-
-    #if (DEBUG_AUTOEXP==1)
-            sprintf(text_buffer, "%d", (uint16_t)error);
-            menu_text_out(14, 1, 6, WHITE_ON_BLACK, text_buffer);
-    #endif
         }
 #endif
         if ((image_live_preview) || (recording_video)) image_capture();
@@ -1136,7 +1008,7 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             break;
         }
         case idGain:
-            sprintf(text_buffer, format, gains[settings->current_gain].caption);
+            sprintf(text_buffer, format, gains_get_caption(text_buffer_extra, settings->current_gain));
             break;
         case idVOut:
             sprintf(text_buffer, format, settings->voltage_out);
@@ -1145,7 +1017,7 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             sprintf(text_buffer, format, settings->current_contrast);
             break;
         case idDither:
-            sprintf(text_buffer, format, dither_patterns[settings->dithering].caption);
+            sprintf(text_buffer, format, dither_patterns_get_caption(text_buffer_extra, settings->dithering));
             break;
         case idDitherLight:
             sprintf(text_buffer, format, low_high[settings->ditheringHighLight]);
@@ -1154,19 +1026,19 @@ uint8_t * formatItemText(camera_menu_e id, const uint8_t * format, camera_mode_s
             sprintf(text_buffer, format, norm_inv[settings->invertOutput]);
             break;
         case idZeroPoint:
-            sprintf(text_buffer, format, zero_points[settings->current_zero_point].caption);
+            sprintf(text_buffer, format, zero_points_get_caption(text_buffer_extra, settings->current_zero_point));
             break;
         case idVoltageRef:
-            sprintf(text_buffer, format, voltage_refs[settings->current_voltage_ref].caption);
+            sprintf(text_buffer, format, voltage_refs_get_caption(text_buffer_extra, settings->current_voltage_ref));
             break;
         case idEdgeRatio:
-            sprintf(text_buffer, format, edge_ratios[settings->current_edge_ratio].caption);
+            sprintf(text_buffer, format, edge_ratios_get_caption(text_buffer_extra, settings->current_edge_ratio));
             break;
         case idEdgeExclusive:
             sprintf(text_buffer, format, on_off[settings->edge_exclusive]);
             break;
         case idEdgeOperation:
-            sprintf(text_buffer, format, edge_operations[settings->edge_operation].caption);
+            sprintf(text_buffer, format, edge_operations_get_caption(text_buffer_extra, settings->edge_operation));
             break;
         default:
             if (format) strcpy(text_buffer, format); else *text_buffer = 0;
@@ -1280,10 +1152,12 @@ uint8_t UPDATE_state_camera(void) BANKED {
                     case ACTION_ACTION_SAVETRANSFER:
                     case ACTION_ACTION_TRANSF_VIDEO:
                     case ACTION_ACTION_SAVESD:
+                    case ACTION_ACTION_SLITSCAN_MODE:
                         static const after_action_e aactions[] = {
                             after_action_save, after_action_print, after_action_printsave,
                             after_action_transfer, after_action_transfersave, after_action_picnrec,
-                            after_action_picnrec_video, after_action_transfer_video, after_action_savesd
+                            after_action_picnrec_video, after_action_transfer_video, after_action_savesd,
+                            after_action_slitscan_mode
                         };
                         OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                         break;
