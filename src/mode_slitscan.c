@@ -50,7 +50,7 @@ static       uint8_t * display_addr;
 uint8_t      display_start_row;
 
 // Ref: last_seen[CAMERA_IMAGE_SIZE];
-static uint8_t slitscan_picture[CAMERA_IMAGE_SIZE];
+uint8_t slitscan_picture[CAMERA_IMAGE_SIZE];
 
 const uint8_t slitscan_delays[N_SLITSCAN_DELAYS] = {
     [slitscan_delay_none]      = SECOND_TO_FRAMES(0),
@@ -216,7 +216,7 @@ void slitscan_mode_on_trigger(void) BANKED {
 
     // In Manual exposure mode the display starts 1 row lower
     display_start_row    = (OPTION(camera_mode) == camera_mode_manual) ? (DISPLAY_CAM_START_ROW_MANUAL) : (DISPLAY_CAM_START_ROW);
-    display_addr    = (uint8_t *)screen_tile_addresses[(dest_line_slitscan / 8) + display_start_row] + DISPLAY_CAM_COL_ADDR_OFFSET;
+    display_addr    = (uint8_t *)(screen_tile_addresses[(dest_line_slitscan >> 3) + display_start_row] + DISPLAY_CAM_COL_ADDR_OFFSET);
     slitscan_in_progress = true;
 }
 
@@ -232,7 +232,7 @@ inline void slitscan_handle_line_increment(void) {
     if (LINE_IS_NEW_TILE(dest_line_slitscan)) {
         if (!OPTION(slitscan_singleline)) src_addr_camera += CAMERA_NEXT_TILE_ROW_FROM_END_OF_FIRST_TILE;
         dest_addr_slitscan += CAMERA_NEXT_TILE_ROW_FROM_END_OF_FIRST_TILE;
-        display_addr   = (uint8_t *)screen_tile_addresses[(dest_line_slitscan / 8) + display_start_row] + DISPLAY_CAM_COL_ADDR_OFFSET;
+        display_addr   = (uint8_t *)(screen_tile_addresses[(dest_line_slitscan >> 3) + display_start_row] + DISPLAY_CAM_COL_ADDR_OFFSET);
     }
 }
 
