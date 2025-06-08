@@ -612,7 +612,6 @@ const menu_item_t CameraMenuItems[] = {
         .onPaint = onCameraPopupMenuItemPaint,
         .onGetProps = onCameraPopupMenuItemProps,
         .result = ACTION_RESTORE_DEFAULTS
-    }, {
     }
 };
 const menu_t CameraPopupMenu = {
