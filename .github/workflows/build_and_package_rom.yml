@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:       
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             name: Linux-x64
     steps:
 
@@ -24,14 +24,14 @@ jobs:
         if: matrix.name == 'Linux-x64'
         run: |
           # Pull in GBDK-2020 4.2.0
-          curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/download/4.3.0/gbdk-linux64.tar.gz
+          curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/latest/download/gbdk-linux64.tar.gz
           tar xvfz gbdk-linux64.tar.gz
           python -m pip install --upgrade Pillow
           python -m pip install --upgrade wave
 
       # ==== Build Steps ====
       - name: Check out Source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: gb-photo
           submodules: false
@@ -81,4 +81,4 @@ jobs:
           name: GB Photo! ROM Build
           # path: gb-photo/build/gb/${{ env.BUILD_PACKAGE_FILENAME }}
           path: gb-photo/build
-          # retention-days: 14
+            retention-days: 90
