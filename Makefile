@@ -33,7 +33,7 @@ LCCFLAGS_gg      =
 
 LCCFLAGS += -m$(PORT):$(PLAT) $(LCCFLAGS_$(EXT)) -Wm-yS # This adds the current platform specific LCC Flags
 
-LCCFLAGS += -Wl-j -Wm-yoA -Wm-ya16 -autobank -Wb-ext=.rel
+LCCFLAGS += -Wl-j -Wl-w -Wm-yoA -Wm-ya16 -autobank -Wb-ext=.rel
 # LCCFLAGS += -debug # Uncomment to enable debug output
 # LCCFLAGS += -v     # Uncomment for lcc verbose output
 
@@ -176,10 +176,16 @@ $(OBJDIR)/%.o:	$(SRCPORT)/%.c
 $(OBJDIR)/%.o:	$(SRCPORT)/%.s
 	$(LCC) $(CFLAGS) -c -o $@ $<
 
+# Create the linkfile
+$(OBJDIR)/list.lk: $(RESOBJ) $(OBJS)
+	@rm -f $@
+	@for file in $^ ; do \
+		echo -e "$${file}" >> $@ ; \
+	done
 
 # Link the compiled object files into a .gb ROM file
-$(BINS):	$(RESOBJ) $(OBJS)
-	$(LCC) $(LCCFLAGS) -o $(BINDIR)/$(PROJECTNAME).$(EXT) $^
+$(BINS): $(OBJDIR)/list.lk
+	$(LCC) $(LCCFLAGS) -o $(BINDIR)/$(PROJECTNAME).$(EXT) -Wl-f$^
 	cp assets/photo.sav $(BINDIR)/photo.sav
 
 remote:
