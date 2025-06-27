@@ -81,4 +81,4 @@ jobs:
           name: GB Photo! ROM Build
           # path: gb-photo/build/gb/${{ env.BUILD_PACKAGE_FILENAME }}
           path: gb-photo/build
-            retention-days: 90
+          # retention-days: 90
