@@ -27,7 +27,7 @@ jobs:
           curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/latest/download/gbdk-linux64.tar.gz
           tar xvfz gbdk-linux64.tar.gz
           python -m pip install --upgrade Pillow
-          python -m pip install --upgrade wave
+          # python -m pip install --upgrade wave
 
       # ==== Build Steps ====
       - name: Check out Source
