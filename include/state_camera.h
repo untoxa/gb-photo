@@ -20,6 +20,12 @@
 BANKREF_EXTERN(state_camera)
 
 typedef enum {
+    camera_flip_none,
+    camera_flip_xy,
+    camera_flip_x
+} camera_flip_e;
+
+typedef enum {
     camera_mode_manual,
     camera_mode_assisted,
     camera_mode_auto,
@@ -109,13 +115,13 @@ typedef struct camera_state_options_t {
     bool save_confirm               : 1;
     bool ir_remote_shutter          : 1;
     bool boot_to_camera_mode        : 1;
-    bool flip_live_view             : 1;
     bool double_speed               : 1;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
     uint8_t cgb_palette_idx         : 4;
     bool display_exposure           : 1;
     bool enable_DMA                 : 1;
+    camera_flip_e flip_live_view    : 2;
     uint8_t aeb_overexp_count;
     uint8_t aeb_overexp_step;
     autoexp_area_e autoexp_area     : 4;

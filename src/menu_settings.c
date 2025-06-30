@@ -186,6 +186,22 @@ const spinedit_params_t PaletteSpinEditParams = {
 };
 const uint8_t * const PaletteNames[] = { "Arctic", "Cyan", "Thermal", "Circuits", "Grape", "Japan", "Bavaria" };
 
+static uint8_t spinedit_flip_value = camera_flip_none;
+const spinedit_value_names_t FlipSpinEditNames[] = {
+    { .value = camera_flip_none, .name = " None\t\t" },
+    { .value = camera_flip_xy,   .name = " Flip XY\t" },
+    { .value = camera_flip_x,    .name = " Flip X\t\t" }
+};
+const spinedit_params_t FlipSpinEditParams = {
+    .caption = "Image flip:",
+    .min_value = camera_flip_none,
+    .max_value = MAX_INDEX(FlipSpinEditNames),
+    .value = &spinedit_flip_value,
+    .names = FlipSpinEditNames,
+    .last_name = LAST_ITEM(FlipSpinEditNames)
+};
+const uint8_t * const FlipNames[] = { "None", "Flip XY", "Flip X" };
+
 static uint8_t spinedit_carttype_value = 0;
 const spinedit_value_names_t CartTypeSpinEditNames[] = {
     { .value = cart_type_HDR,    .name = " Generic\t" },
@@ -235,10 +251,10 @@ const menu_item_t SettingsMenuItems[] = {
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_BOOT_TO_CAM
     }, {
-        .sub = NULL, .sub_params = NULL,
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&FlipSpinEditParams,
         .ofs_x = 1, .ofs_y = 5, .width = 13,
         .id = idSettingsFlipImage,
-        .caption = " Flip live image\t\t\t%s",
+        .caption = " Flip image\t[%s]",
         .helpcontext = " Flip the live view image",
         .onPaint = onSettingsMenuItemPaint,
         .result = ACTION_SETTINGS_FLIP_IMAGE
@@ -330,6 +346,7 @@ uint8_t onTranslateSubResultSettings(const struct menu_t * menu, const struct me
     menu;
     switch (self->id) {
         case idSettingsCGBPalette:
+        case idSettingsFlipImage:
         case idSettingsCartType:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_OK;
         default:
@@ -397,7 +414,7 @@ uint8_t * onSettingsMenuItemPaint(const struct menu_t * menu, const struct menu_
             sprintf(text_buffer, self->caption, checkbox[OPTION(boot_to_camera_mode)]);
             break;
         case idSettingsFlipImage:
-            sprintf(text_buffer, self->caption, checkbox[OPTION(flip_live_view)]);
+            sprintf(text_buffer, self->caption, FlipNames[OPTION(flip_live_view)]);
             break;
         case idSettingsDoubleSpeed:
             sprintf(text_buffer, self->caption, checkbox[OPTION(double_speed)]);
@@ -440,6 +457,7 @@ void menu_settings_execute(void) BANKED {
     settings_menu_last_selection = NULL;
     spinedit_palette_value = OPTION(cgb_palette_idx);
     spinedit_carttype_value = OPTION(cart_type);
+    spinedit_flip_value = OPTION(flip_live_view);
     do {
         menu_result = menu_execute(&GlobalSettingsMenu, NULL, settings_menu_last_selection), settings_menu_repaint = false;
         if ((menu_result >= ACTION_PRINT_FRAME_FIRST) && (menu_result <= ACTION_PRINT_FRAME_LAST)) {
@@ -492,8 +510,9 @@ void menu_settings_execute(void) BANKED {
                     save_camera_state();
                     break;
                 case ACTION_SETTINGS_FLIP_IMAGE:
-                    OPTION(flip_live_view) = !OPTION(flip_live_view);
+                    OPTION(flip_live_view) = (camera_flip_e)spinedit_flip_value;
                     save_camera_state();
+                    settings_menu_repaint = true;
                     break;
                 case ACTION_SETTINGS_DOUBLESPEED:
                     OPTION(double_speed) = !OPTION(double_speed);

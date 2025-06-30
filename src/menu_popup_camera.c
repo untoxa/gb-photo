@@ -602,6 +602,8 @@ const menu_t CameraPopupMenu = {
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
     .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultCameraPopup
 };
+static const menu_item_t * camera_popup_last_selection = NULL;
+
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     switch (self->id) {
@@ -693,7 +695,7 @@ uint8_t onCameraPopupMenuItemProps(const struct menu_t * menu, const struct menu
     }
 }
 uint8_t onIdleCameraPopup(const struct menu_t * menu, const struct menu_item_t * selection) {
-    menu; selection;
+    if (menu == &CameraPopupMenu) camera_popup_last_selection = selection;
     // wait for VBlank if not capturing (avoid HALT CPU state)
     if (!image_is_capturing() && !recording_video) sync_vblank();
     return 0;
@@ -712,7 +714,7 @@ uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_aeb_exp_step = OPTION(aeb_overexp_step);
     spinedit_dither_value = SETTING(dithering);
     uint8_t menu_result;
-    switch (menu_result = menu_execute(&CameraPopupMenu, NULL, NULL)) {
+    switch (menu_result = menu_execute(&CameraPopupMenu, NULL, camera_popup_last_selection)) {
         case ACTION_TRIGGER_TIMER:
             OPTION(shutter_timer) = spinedit_timer_value;
             break;

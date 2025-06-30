@@ -92,7 +92,7 @@ lbl:
 }
 
 static uint8_t hflip_loop;
-uint8_t * set_data_row_flipped(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+uint8_t * set_data_row_flipped_xy(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
     dest; sour; count;
     __asm
 .macro .WAIT_STAT_03 ?lbl
@@ -134,6 +134,49 @@ lbl:
     __endasm;
 }
 
+uint8_t * set_data_row_flipped_x(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+    dest; sour; count;
+    __asm
+.macro .WAIT_STAT_04 ?lbl
+lbl:
+        ldh a, (_STAT_REG)
+        and #STATF_BUSY
+        jr nz, lbl
+.endm
+        ldhl sp, #2
+        ld a, (hl)
+
+        ld h, d
+        ld l, e
+
+1$:
+        ld (#_hflip_loop), a
+
+        .rept 8
+            ld d, #>_flip_recode_table
+            .rept 2
+                ld a, (bc)
+                inc bc
+                ld e, a
+                .WAIT_STAT_04
+                ld a, (de)
+                ld (hl+), a
+            .endm
+        .endm
+
+        ld de, #-32
+        add hl, de
+
+        ld a, (#_hflip_loop)
+        dec a
+        jp nz, 1$
+
+        pop hl
+        inc sp
+        jp (hl)
+    __endasm;
+}
+
 inline const uint8_t * DMA_HBL_TRANSFER(uint8_t tiles, const uint8_t * sour, const uint8_t * dest) {
     rHDMA1 = (uint8_t)((uint16_t)sour >> 8), rHDMA2 = (uint8_t)sour;
     rHDMA3 = (uint8_t)((uint16_t)dest >> 8), rHDMA4 = (uint8_t)dest;
@@ -148,11 +191,18 @@ void screen_transfer_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uin
         while (rHDMA5 != 0xff);
     } while (--h);
 }
-void screen_load_image_flipped(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
+void screen_load_image_flipped_xy(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
     const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y + h - 1);
     uint16_t ofs = (x + w - 1) << 4;
     do {
-        picture = set_data_row_flipped((uint8_t *)(*addr-- + ofs), picture, w);
+        picture = set_data_row_flipped_xy((uint8_t *)(*addr-- + ofs), picture, w);
+    } while (--h);
+}
+void screen_load_image_flipped_x(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
+    const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
+    uint16_t ofs = (x + w - 1) << 4;
+    do {
+        picture = set_data_row_flipped_x((uint8_t *)(*addr++ + ofs), picture, w);
     } while (--h);
 }
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
