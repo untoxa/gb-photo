@@ -11,7 +11,7 @@ const MUSIC_MODULE * music_next_track;
 uint8_t music_play_isr_counter = 0;
 uint8_t music_play_isr_pause = FALSE;
 volatile uint8_t music_sfx_priority = MUSIC_SFX_PRIORITY_MINIMAL;
-uint8_t music_tick_mask = MUSIC_TICK_MASK_256HZ;
+uint8_t music_tick_mask = MUSIC_TICK_MASK_DEFAULT;
 
 void music_play_isr(void) NONBANKED {
     if (sfx_play_bank != SFX_STOP_BANK) {
@@ -29,6 +29,7 @@ void music_play_isr(void) NONBANKED {
             sfx_play_bank = SFX_STOP_BANK;
         }
     }
+#ifdef MUSIC_ENABLE
     if (music_play_isr_pause) return;
     if (music_current_track_bank == MUSIC_STOP_BANK) return;
     if (++music_play_isr_counter & music_tick_mask) return;
@@ -37,13 +38,17 @@ void music_play_isr(void) NONBANKED {
     if (music_next_track) {
         music_sound_cut();
         music_driver_load(music_next_track);
-        music_next_track = 0;
+        music_next_track = NULL;
     } else {
         music_driver_tick();
     }
     CAMERA_SWITCH_ROM(save_bank);
+#endif
 }
 
 void music_pause(uint8_t pause) {
+    pause;
+#ifdef MUSIC_ENABLE
     if (music_play_isr_pause = pause) music_sound_cut();
+#endif
 }

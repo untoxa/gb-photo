@@ -6,6 +6,7 @@
 
 #include "sfxplayer.h"
 
+//#define MUSIC_ENABLE
 #define MUSIC_MODULE void
 
 // SFX priority constants: concurrent effect will play only if its priority level is higher or equal
@@ -22,6 +23,7 @@
 // masks applied to the ISR skip counter
 #define MUSIC_TICK_MASK_60HZ 0x00u
 #define MUSIC_TICK_MASK_256HZ 0x03u
+#define MUSIC_TICK_MASK_DEFAULT MUSIC_TICK_MASK_256HZ
 
 extern volatile uint8_t music_current_track_bank;
 extern volatile uint8_t music_mute_mask;
@@ -37,7 +39,7 @@ inline void music_setup_timer_ex(uint8_t is_fast) {
 #else
     is_fast;
 #endif
-    music_tick_mask = MUSIC_TICK_MASK_256HZ;
+    music_tick_mask = MUSIC_TICK_MASK_DEFAULT;
 }
 
 // set up timer interrupt to 256Hz and set up driver for 256Hz
@@ -81,7 +83,10 @@ void music_play_isr(void);
 
 // load the music module
 inline void music_load(uint8_t bank, const MUSIC_MODULE * data) {
+    bank; data;
+#ifdef MUSIC_ENABLE
     music_current_track_bank = MUSIC_STOP_BANK, music_next_track = data; music_current_track_bank = bank;
+#endif
 }
 
 // pause music
@@ -89,7 +94,9 @@ void music_pause(uint8_t pause);
 
 // stop music
 inline void music_stop(void) {
+#ifdef MUSIC_ENABLE
     music_current_track_bank = MUSIC_STOP_BANK, music_sound_cut();
+#endif
 }
 
 // muting masks
