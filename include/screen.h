@@ -7,6 +7,7 @@
 
 #include "vwf.h"
 #include "misc_assets.h"
+#include "flip.h"
 
 #define TO_TILE_ADDRESS(BASE, NO) ((BASE) + ((NO) << DEVICE_TILE_SIZE_BITS))
 
@@ -46,22 +47,11 @@ inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 }
 
 void screen_transfer_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture);
-void screen_load_image_flipped_xy(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture);
-void screen_load_image_flipped_x(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture);
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture);
 
-inline void screen_load_live_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, uint8_t flip, bool DMA) {
-    switch (flip) {
-        case 1:
-            screen_load_image_flipped_xy(x, y, w, h, picture);
-            break;
-        case 2:
-            screen_load_image_flipped_x(x, y, w, h, picture);
-            break;
-        default:
-            if (DMA) screen_transfer_image(x, y, w, h, picture); else screen_load_image(x, y, w, h, picture);
-            break;
-    }
+inline void screen_load_live_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, camera_flip_e flip, bool DMA) {
+    uint8_t * image = get_flipped_last_seen_image(flip, false);
+    if (DMA) screen_transfer_image(x, y, w, h, image); else screen_load_image(x, y, w, h, image);
 }
 
 void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, uint8_t bank);

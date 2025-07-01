@@ -7,6 +7,7 @@
 
 #include "compat.h"
 #include "gbcamera.h"
+#include "flip.h"
 
 #define PROTECTED_CORRECT       0x00
 #define PROTECTED_REPAIR_ALBUM  0x01
@@ -35,7 +36,7 @@ inline uint16_t protected_calculate_crc(uint8_t * data, uint8_t size, uint16_t s
 
 void protected_pack(uint8_t * v) BANKED;
 void protected_generate_thumbnail(uint8_t slot) BANKED;
-void protected_lastseen_to_slot(uint8_t slot, bool flipped) BANKED;
+void protected_lastseen_to_slot(uint8_t slot, camera_flip_e flip) BANKED;
 uint8_t protected_metadata_read(uint8_t slot, uint8_t * dest, uint8_t size) BANKED;
 uint8_t protected_metadata_write(uint8_t slot, uint8_t * dest, uint8_t size) BANKED;
 void protected_image_owner_write(uint8_t slot) BANKED;

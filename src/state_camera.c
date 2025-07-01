@@ -313,7 +313,6 @@ void display_last_seen(bool restore) {
     CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
     screen_load_live_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
-                           last_seen,
                            OPTION(flip_live_view),
                            ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video))));
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
@@ -951,7 +950,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if (recording_video) {
                     remote_activate(REMOTE_DISABLED);
                     linkcable_transfer_reset();
-                    linkcable_transfer_image(last_seen, CAMERA_BANK_LAST_SEEN);
+                    linkcable_transfer_image(get_flipped_last_seen_image(OPTION(flip_live_view), false), CAMERA_BANK_LAST_SEEN);
                     remote_activate(REMOTE_ENABLED);
                 }
                 break;
@@ -1218,7 +1217,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
         case ACTION_CAMERA_PRINT:
             remote_activate(REMOTE_DISABLED);
             if (gbprinter_detect(PRINTER_DETECT_TIMEOUT) == PRN_STATUS_OK) {
-                if (gbprinter_print_image(last_seen, CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
+                if (gbprinter_print_image(get_flipped_last_seen_image(OPTION(flip_live_view), false), CAMERA_BANK_LAST_SEEN, print_frames + OPTION(print_frame_idx), BANK(print_frames)) == PRN_STATUS_CANCELLED) {
                     // cancel button pressed while printing
                     reset_AEB();
                     COUNTER_RESET(camera_shutter_timer);
@@ -1233,7 +1232,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
         case ACTION_CAMERA_TRANSFER:
             remote_activate(REMOTE_DISABLED);
             linkcable_transfer_reset();
-            linkcable_transfer_image(last_seen, CAMERA_BANK_LAST_SEEN);
+            linkcable_transfer_image(get_flipped_last_seen_image(OPTION(flip_live_view), false), CAMERA_BANK_LAST_SEEN);
             remote_activate(REMOTE_ENABLED);
             break;
         case ACTION_MAIN_MENU:

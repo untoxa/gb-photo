@@ -7,6 +7,7 @@
 #include "compat.h"
 #include "gbcamera.h"
 #include "globals.h"
+#include "flip.h"
 
 #include "systemdetect.h"
 #include "systemhelpers.h"
@@ -18,12 +19,6 @@
 #define EXPOSURE_HIGH_LIMIT CAM02_MAX_VALUE
 
 BANKREF_EXTERN(state_camera)
-
-typedef enum {
-    camera_flip_none,
-    camera_flip_xy,
-    camera_flip_x
-} camera_flip_e;
 
 typedef enum {
     camera_mode_manual,

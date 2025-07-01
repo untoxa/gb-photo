@@ -25,9 +25,9 @@ TARGETS = gbc megaduck
 LIBRARIES =
 
 # Configure platform specific LCC flags here:
-LCCFLAGS_gb      = $(LIBRARIES) -Wm-ys -Wl-yt0xFC -Wm-yn"$(PROJECTNAME)"
-LCCFLAGS_gbc     = $(LIBRARIES) -Wm-ys -Wm-yc -Wl-yt0xFC -Wm-yn"$(PROJECTNAME)"
-LCCFLAGS_duck    = $(LIBRARIES) -Wl-yt0xFC
+LCCFLAGS_gb      = $(LIBRARIES) -Wl-b_DATA=0xCEA0 -Wl-yt0xFC -Wm-ys -Wm-yn"$(PROJECTNAME)"
+LCCFLAGS_gbc     = $(LCCFLAGS_gb) -Wm-yc 
+LCCFLAGS_duck    = $(LIBRARIES) -Wl-b_DATA=0xCEA0 -Wl-yt0xFC
 LCCFLAGS_sms     =
 LCCFLAGS_gg      =
 
