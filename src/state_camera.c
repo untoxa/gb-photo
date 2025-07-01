@@ -301,6 +301,7 @@ void image_capture(void) {
     SHADOW.CAM_REG_CAPTURE = CAM_REG_CAPTURE = (CAM00F_POSITIVE | CAM00F_CAPTURING);
     switch (OPTION(after_action)) {
         case after_action_picnrec:
+        case after_action_printpicnrec:
         case after_action_picnrec_video:
             set_image_refresh_dalay(PNR_DELAY_FRAMES);
             break;
@@ -314,11 +315,11 @@ void display_last_seen(bool restore) {
     uint8_t ypos = (OPTION(camera_mode) == camera_mode_manual) ? (IMAGE_DISPLAY_Y + 1) : IMAGE_DISPLAY_Y;
     screen_load_live_image(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT,
                            OPTION(flip_live_view),
-                           ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_picnrec_video))));
+                           ((_is_COLOR) && OPTION(enable_DMA) && !((OPTION(after_action) == after_action_picnrec) || (OPTION(after_action) == after_action_printpicnrec) || (OPTION(after_action) == after_action_picnrec_video))));
     if (restore) screen_restore_rect(IMAGE_DISPLAY_X, ypos, CAMERA_IMAGE_TILE_WIDTH, CAMERA_IMAGE_TILE_HEIGHT);
 }
 
-inline void camera_scrollbars_reinit(void) {
+void camera_scrollbars_reinit(void) {
     scrollbar_destroy_all();
     if (OPTION(camera_mode) == camera_mode_auto) {
         // init and set brightness scrollbar
@@ -941,6 +942,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     if (image_captured()) {
         switch (OPTION(after_action)) {
             case after_action_picnrec:
+            case after_action_printpicnrec:
                 if (capture_triggered) picnrec_trigger();
                 break;
             case after_action_picnrec_video:
@@ -967,6 +969,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                     (OPTION(after_action) == after_action_printsave) ||
                     (OPTION(after_action) == after_action_transfer) ||
                     (OPTION(after_action) == after_action_transfersave) ||
+                    (OPTION(after_action) == after_action_printpicnrec) ||
                     (OPTION(after_action) == after_action_savesd)) {
                         if (isSaveCancelled()) return ACTION_NONE;
                         onHelpCameraMenu(menu, selection);
@@ -986,6 +989,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                         camera_do_shutter = capture_triggered = false;
                     } else refresh_usage_indicator();
                 case after_action_print:
+                case after_action_printpicnrec:
                     return ACTION_CAMERA_PRINT;
                 case after_action_transfersave:
                     if (!camera_image_save()) {
@@ -1264,6 +1268,7 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         OPTION(trigger_mode) = tmodes[menu_result - ACTION_TRIGGER_ABUTTON];
                         break;
                     case ACTION_ACTION_PICNREC:
+                    case ACTION_ACTION_PRINTPICNREC:
                     case ACTION_ACTION_PICNREC_VIDEO:
                         if ((_is_COLOR) && (OPTION(double_speed))) {
                             OPTION(double_speed) = false;
@@ -1282,7 +1287,8 @@ uint8_t UPDATE_state_camera(void) BANKED {
                         static const after_action_e aactions[] = {
                             after_action_save, after_action_print, after_action_printsave,
                             after_action_transfer, after_action_transfersave, after_action_picnrec,
-                            after_action_picnrec_video, after_action_transfer_video, after_action_savesd
+                            after_action_printpicnrec, after_action_picnrec_video, after_action_transfer_video,
+                            after_action_savesd
                         };
                         OPTION(after_action) = aactions[menu_result - ACTION_ACTION_SAVE];
                         break;

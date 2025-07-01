@@ -43,6 +43,7 @@ typedef enum {
     idPopupCameraOwnerBirth,
     idPopupActionSaveSD,
     idPopupActionPicNRec,
+    idPopupActionPrintPicNRec,
     idPopupActionPicNRecVideo
 } camera_popup_menu_e;
 
@@ -323,6 +324,15 @@ const menu_item_t ActionSubMenuItems[] = {
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 9, .width = 10,
+        .id = idPopupActionPrintPicNRec,
+        .caption = " Print & P'n'R",
+        .helpcontext = " Print & Save to Pic'n'Rec",
+        .onPaint = NULL,
+        .onGetProps = onActionsMenuItemProps,
+        .result = ACTION_ACTION_PRINTPICNREC
+    }, {
+        .sub = NULL, .sub_params = NULL,
+        .ofs_x = 1, .ofs_y = 10, .width = 10,
         .id = idPopupActionPicNRecVideo,
         .caption = " Pic'n'Rec " ICON_REC,
         .helpcontext = " Record video using Pic'n'Rec",
@@ -343,6 +353,7 @@ uint8_t onActionsMenuItemProps(const struct menu_t * menu, const struct menu_ite
     menu; self;
     switch (self->id) {
         case idPopupActionPicNRec:
+        case idPopupActionPrintPicNRec:
         case idPopupActionPicNRecVideo:
             return (OPTION(cart_type) == cart_type_iG_AIO) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idPopupActionSaveSD:
@@ -635,6 +646,7 @@ uint8_t * onCameraPopupMenuItemPaint(const struct menu_t * menu, const struct me
         [after_action_transfer]         = "[Transfer]",
         [after_action_transfersave]     = "[S & T]",
         [after_action_picnrec]          = "[Pic'n'Rec]",
+        [after_action_printpicnrec]     = "[P & P]",
         [after_action_picnrec_video]    = "[P'n'R " ICON_REC "]",
         [after_action_transfer_video]   = "[Trn " ICON_REC"]",
         [after_action_savesd]           = "[Save to SD]"
