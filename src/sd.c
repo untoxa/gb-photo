@@ -12,8 +12,8 @@ FATFS fs;       /* File system object */
 DIR dir;        /* Directory object */
 FILINFO fno;    /* File information */
 
-bool lastseen_to_sd(bool flipped) BANKED {
-    flipped;
+bool lastseen_to_sd(camera_flip_e flip) BANKED {
+    flip;
 
     if (!fs_mounted) {
         if (pf_mount(&fs) == FR_OK) {

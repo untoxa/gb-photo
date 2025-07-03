@@ -4,6 +4,8 @@
 #include <gbdk/platform.h>
 #include <stdbool.h>
 
-bool lastseen_to_sd(bool flipped) BANKED;
+#include "flip.h"
+
+bool lastseen_to_sd(camera_flip_e flip) BANKED;
 
 #endif
