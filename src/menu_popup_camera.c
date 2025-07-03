@@ -343,7 +343,7 @@ const menu_item_t ActionSubMenuItems[] = {
     }
 };
 const menu_t ActionSubMenu = {
-    .x = 5, .y = 4, .width = 12, .height = LENGTH(ActionSubMenuItems) + 2,
+    .x = 5, .y = 2, .width = 12, .height = LENGTH(ActionSubMenuItems) + 2,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_NO,
     .items = ActionSubMenuItems, .last_item = LAST_ITEM(ActionSubMenuItems),
     .onShow = NULL, .onIdle = onIdleCameraPopup, .onHelpContext = onHelpCameraPopup,
