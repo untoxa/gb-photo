@@ -22,9 +22,10 @@ uint8_t INIT_module_remote(void) BANKED;
 
 #else
 
-uint8_t remote_activate(uint8_t value) {
+inline uint8_t remote_activate(uint8_t value) {
+    value;
     return REMOTE_DISABLED;
-};
+}
 uint8_t INIT_module_remote(void) BANKED;
 
 #endif

@@ -31,9 +31,17 @@ uint8_t INIT_module_detect_system(void) BANKED {
 }
 
 uint8_t CPU_FAST(void) BANKED {
+#if defined(NINTENDO)
     return (_is_CPU_FAST = (_is_COLOR) ? (cpu_fast(), true) : false);
+#elif defined(SEGA)
+    return (_is_CPU_FAST = false);
+#endif
 }
 
 void CPU_SLOW(void) BANKED {
+#if defined(NINTENDO)
     if (_is_COLOR) _is_CPU_FAST = (cpu_slow(), false);
+#elif defined(SEGA)
+    _is_CPU_FAST = false;
+#endif
 }

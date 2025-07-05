@@ -1,1 +1,1 @@
--b 255 -spr8x8 -sw 8 -sh 16 -px -8 -py -16 -no_palettes
+-b 255 -spr8x8 -sw 8 -sh 8 -px -8 -py -16 -keep_palette_order -no_palettes -bpp 4 -pack_mode sms

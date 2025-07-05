@@ -13,7 +13,7 @@
 scrollbar_t * scrollbars = NULL;
 
 uint8_t scrollbar_render_all(uint8_t hiwater) NONBANKED {
-    uint8_t save = _current_bank, hw = hiwater;
+    uint8_t save = CURRENT_ROM_BANK, hw = hiwater;
     CAMERA_SWITCH_ROM(BANK(cursors));
     scrollbar_t * current = scrollbars;
     while (current) {

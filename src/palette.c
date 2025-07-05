@@ -25,11 +25,11 @@ static palette_entry_t cgb_palette[] = {
     CGB_PALETTE(RGB8(254,218,27),  RGB8(223,121,37),  RGB8(182,0,119),   RGB8(56,41,119) )   // My Friend from Bavaria
 };
 
-void palette_cgb_zero(uint8_t reg) OLDCALL BANKED NAKED {
+#if defined(NINTENDO)
+void palette_cgb_zero(uint8_t reg) NAKED {
     reg;
 __asm
-        ldhl sp, #6
-        ld c, (hl)
+        ld c, a
         ld a, #0x80
         ldh (c), a
         inc c
@@ -48,6 +48,7 @@ __asm
         ret
 __endasm;
 }
+#endif
 
 void palette_reload(void) BANKED {
     if (_is_COLOR) {
@@ -69,8 +70,10 @@ uint8_t INIT_module_palette(void) BANKED {
     palette_reload();
     fade_init();
     if (_is_COLOR) {
+#if defined(NINTENDO)
         palette_cgb_zero(BCPS_REG_ADDR);
         palette_cgb_zero(OCPS_REG_ADDR);
+#endif
     }
     fade_setspeed(1);
     return 0;

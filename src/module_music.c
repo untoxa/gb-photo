@@ -27,7 +27,7 @@ uint8_t INIT_module_music(void) BANKED {
         music_setup_timer_ex(_is_CPU_FAST);
 #if defined(NINTENDO)
         add_low_priority_TIM(music_play_isr);
-#else
+#elif defined(SEGA)
         add_VBL(music_play_isr);
 #endif
     }

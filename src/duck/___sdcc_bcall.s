@@ -1,5 +1,8 @@
         .include        "global.s"
 
+        .globl __current_rom
+        .globl _rROMB0_MBC5
+
         .area _HOME
 
 ;; !!! ONLY WORKS WITH __sdcccall(0) calling convention
@@ -7,7 +10,7 @@
 ___sdcc_bcall::
 banked_call::                   ; Performs a long call.
         pop     hl              ; Get the return address
-        ldh     a, (__current_bank)
+        ldh     a, (__current_rom)
         push    af              ; Push the current bank onto the stack
         ld      a, (hl+)        ; Fetch the call address
         ld      e, a
@@ -16,7 +19,7 @@ banked_call::                   ; Performs a long call.
         ld      a, (hl+)        ; ...and page
         inc     hl              ; Yes this should be here
         push    hl              ; Push the real return address
-        ldh     (__current_bank), a
+        ldh     (__current_rom), a
         ld      (_rROMB0_MBC5), a
         ld      l, e
         ld      h, d
@@ -24,7 +27,7 @@ banked_call::                   ; Performs a long call.
 banked_ret::
         pop     bc              ; Pop return address
         pop     af              ; Pop the old bank
-        ldh     (__current_bank), a
+        ldh     (__current_rom), a
         ld      (_rROMB0_MBC5), a
         push    bc
         ret

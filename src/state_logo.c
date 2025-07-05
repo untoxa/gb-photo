@@ -43,7 +43,7 @@ static void screen_load_picture(uint8_t x, uint8_t y, uint8_t w, uint8_t h, cons
     for (i = 0; i != h; i++, addr++) {
         for (j = 0; j != w; j++, data++) {
             uint8_t tile = read_banked_ubyte(data, bank);
-            set_banked_data(*addr + ((x + j) << 4), tiles + (tile << 4), 16, bank);
+            set_banked_data(*addr + ((x + j) << DEVICE_TILE_SIZE_BITS), tiles + (tile << DEVICE_TILE_SIZE_BITS), (1 << DEVICE_TILE_SIZE_BITS), bank);
         }
     }
 }

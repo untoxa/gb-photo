@@ -3,22 +3,31 @@
 
 #include <gbdk/platform.h>
 
-#define BLACK_ON_WHITE      ((DMG_BLACK << 2) | DMG_WHITE)
-#define WHITE_ON_BLACK      ((DMG_WHITE << 2) | DMG_BLACK)
+#include "compat.h"
 
-#define DK_GR_ON_WHITE      ((DMG_DARK_GRAY << 2) | DMG_WHITE)
-#define WHITE_ON_DK_GR      ((DMG_WHITE << 2) | DMG_DARK_GRAY)
+#if defined(MASTERSYSTEM)
+#define COLOR_BITS 4
+#else
+#define COLOR_BITS 2
+#endif
 
-#define LT_GR_ON_BLACK      ((DMG_LITE_GRAY << 2) | DMG_BLACK)
-#define BLACK_ON_LT_GR      ((DMG_BLACK << 2) | DMG_LITE_GRAY)
+#define BLACK_ON_WHITE      ((DMG_BLACK << COLOR_BITS) | DMG_WHITE)
+#define WHITE_ON_BLACK      ((DMG_WHITE << COLOR_BITS) | DMG_BLACK)
 
-#define DK_GR_ON_BLACK      ((DMG_DARK_GRAY << 2) | DMG_BLACK)
-#define LT_GR_ON_WHITE      ((DMG_LITE_GRAY << 2) | DMG_WHITE)
+#define DK_GR_ON_WHITE      ((DMG_DARK_GRAY << COLOR_BITS) | DMG_WHITE)
+#define WHITE_ON_DK_GR      ((DMG_WHITE << COLOR_BITS) | DMG_DARK_GRAY)
+
+#define LT_GR_ON_BLACK      ((DMG_LITE_GRAY << COLOR_BITS) | DMG_BLACK)
+#define BLACK_ON_LT_GR      ((DMG_BLACK << COLOR_BITS) | DMG_LITE_GRAY)
+
+#define DK_GR_ON_BLACK      ((DMG_DARK_GRAY << COLOR_BITS) | DMG_BLACK)
+#define LT_GR_ON_WHITE      ((DMG_LITE_GRAY << COLOR_BITS) | DMG_WHITE)
 
 #define HELP_CONTEXT_COLOR  LT_GR_ON_BLACK
 
-#define BG_COLOR(c)         (c & 0b00000011)
-#define FG_COLOR(c)         ((c >> 2) & 0b00000011)
+#define BG_COLOR(c)         (c & ((1 << COLOR_BITS) - 1))
+#define FG_COLOR(c)         ((c >> COLOR_BITS) & ((1 << COLOR_BITS) - 1))
+
 
 #define SLD_WHITE           0xfcu
 #define SLD_LITE_GRAY       0xfdu

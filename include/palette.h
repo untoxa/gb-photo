@@ -4,12 +4,23 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "compat.h"
+
 BANKREF_EXTERN(module_palette)
 
-#define DMG_BLACK 0x03
-#define DMG_DARK_GRAY 0x02
-#define DMG_LITE_GRAY 0x01
-#define DMG_WHITE 0x00
+#if defined(SEGA)
+#if defined(MASTERSYSTEM)
+#define DMG_BLACK     0x01u
+#define DMG_DARK_GRAY 0x0cu
+#define DMG_LITE_GRAY 0x0eu
+#define DMG_WHITE     0x0fu
+#elif defined(GAMEGEAR)
+#define DMG_BLACK     0x03u
+#define DMG_DARK_GRAY 0x02u
+#define DMG_LITE_GRAY 0x01u
+#define DMG_WHITE     0x00u
+#endif
+#endif
 
 #ifndef DMG_PALETTE
 #define DMG_PALETTE(C0, C1, C2, C3) ((uint8_t)((((C3) & 0x03) << 6) | (((C2) & 0x03) << 4) | (((C1) & 0x03) << 2) | ((C0) & 0x03)))
@@ -28,8 +39,6 @@ typedef struct palette_entry_t {
 extern uint8_t DMG_palette[3];
 extern palette_entry_t SprPalette[8];
 extern palette_entry_t BkgPalette[8];
-
-void palette_cgb_zero(UBYTE reg) OLDCALL BANKED;
 
 void palette_reload(void) BANKED;
 uint8_t INIT_module_palette(void) BANKED;

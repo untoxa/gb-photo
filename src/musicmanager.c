@@ -33,7 +33,7 @@ void music_play_isr(void) NONBANKED {
     if (music_play_isr_pause) return;
     if (music_current_track_bank == MUSIC_STOP_BANK) return;
     if (++music_play_isr_counter & music_tick_mask) return;
-    uint8_t save_bank = _current_bank;
+    uint8_t save_bank = CURRENT_ROM_BANK;
     CAMERA_SWITCH_ROM(music_current_track_bank);
     if (music_next_track) {
         music_sound_cut();

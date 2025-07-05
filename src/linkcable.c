@@ -17,6 +17,7 @@ static const uint8_t LNK_DATA_HDR[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT 
 static const uint8_t LNK_DATA_FTR[]  = { PRN_LE(0), PRN_LE(0) };
 
 void linkcable_send_string(const uint8_t * data, uint8_t len) {
+    data; len;
 #ifdef NINTENDO
     for( ; (len); len--) {
         SB_REG = *data++;
@@ -42,10 +43,10 @@ lbl:
         ld (hl), #START_TRANSFER_FAST
 .endm
         ld c, a
-        ldh a, (__current_bank)
+        ldh a, (__current_rom)
         push af
         ld a, c
-        ldh (__current_bank), a
+        ldh (__current_rom), a
         ld (_rROMB0_MBC5), a
 
         ld hl, #_SC_REG
@@ -69,7 +70,7 @@ lbl:
         .SIO_WAIT
 
         pop af
-        ldh (__current_bank), a
+        ldh (__current_rom), a
         ld (_rROMB0_MBC5), a
 
         ret

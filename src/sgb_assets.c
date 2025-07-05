@@ -11,11 +11,14 @@
 #include "gbcamera.h"
 #include "state_camera.h"
 
+#if defined(NINTENDO)
 #include "camera_sgb_border.h"
 #include "camera_sgb_border_default.h"
+#endif
 
 BANKREF(module_sgb_assets)
 
+#if defined(NINTENDO)
 static const uint8_t sgb_palette_gray[] = {
     SGB_PKT(SGB_PAL_01),
     SNES_LE(SNES_WHITE), SNES_LE(SNES_LIGHTGRAY), SNES_LE(SNES_DARKGRAY), SNES_LE(SNES_BLACK),
@@ -46,9 +49,11 @@ static const border_descriptor_t sgb_borders[] = {
 inline void sgb_assets_set_palette(uint8_t palette_index) {
     sgb_transfer((uint8_t *)sgb_palettes[palette_index]);
 }
+#endif
 
 // load the SGB borders and palettes if SGB detected
 uint8_t INIT_module_sgb_assets(void) BANKED {
+#if defined(NINTENDO)
     if (_is_SUPER) {
         CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (OPTION(fancy_sgb_border)) {
@@ -59,5 +64,6 @@ uint8_t INIT_module_sgb_assets(void) BANKED {
             sgb_assets_set_palette(SGB_PALETTE_GRAY);
         }
     }
+#endif
     return 0;
 }

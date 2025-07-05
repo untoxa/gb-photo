@@ -62,13 +62,13 @@ lbl:
         ld h, d
         ld l, e                     ; HL = current position inside the sample
 
-        ldh a, (__current_bank)     ; save bank and switch
+        ldh a, (__current_rom)      ; save bank and switch
         ld e, a
         ld a, (_sfx_play_bank)
         inc a                       ; SFX_STOP_BANK ?
         ret z                       ; return FALSE
         dec a
-        ldh (__current_bank), a
+        ldh (__current_rom), a
         ld (_rROMB0_MBC5), a
 
         ld d, #0x0f
@@ -185,7 +185,7 @@ lbl:
         ld (_sfx_play_sample + 1), a
 
         ld a, e                     ; restore bank
-        ldh (__current_bank), a
+        ldh (__current_rom), a
         ld (_rROMB0_MBC5), a
 
         ld a, d                     ; result in a

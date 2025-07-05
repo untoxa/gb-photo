@@ -46,12 +46,19 @@ inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 #endif
 }
 
+#if defined(NINTENDO)
 void screen_transfer_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture);
+#endif
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture);
 
 inline void screen_load_live_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, camera_flip_e flip, bool DMA) {
+    DMA;
     uint8_t * image = get_flipped_last_seen_image(flip, false);
+#if defined(NINTENDO)
     if (DMA) screen_transfer_image(x, y, w, h, image); else screen_load_image(x, y, w, h, image);
+#elif defined(SEGA)
+    screen_load_image(x, y, w, h, image);
+#endif
 }
 
 void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, uint8_t bank);

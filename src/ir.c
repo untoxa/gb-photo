@@ -1,7 +1,7 @@
 #include <time.h>
 #include <gbdk/platform.h>
-#include <gb/hardware.h>
 
+#include "systemdetect.h"
 #include "ir.h"
 
 // How long to sense for
@@ -11,7 +11,9 @@
 
 
 uint8_t ir_sense_pattern(void) {
-#ifdef _CGB_H
+#if defined(NINTENDO)
+    if (!_is_COLOR) return FALSE;
+
     // If you sense IR, sample for a short period (1 is off)
     if ((RP_REG & RPF_DATAIN) == RPF_DATAIN) {
         return FALSE;

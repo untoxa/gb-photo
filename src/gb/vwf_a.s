@@ -1,5 +1,7 @@
         .include        "global.s"
 
+        .globl __current_rom
+        .globl _rROMB0_MBC5
         .globl _vwf_current_rotate, _vwf_tile_data
 
         .area _DATA
@@ -13,13 +15,13 @@ __counter:
 
 ; void vwf_memcpy(void* to, const void* from, size_t n, UBYTE bank);
 _vwf_memcpy::
-        ldh a, (__current_bank)
+        ldh a, (__current_rom)
         ld  (#__save),a
 
         ldhl sp, #4
         ld a, (hl-)
 
-        ldh (__current_bank),a
+        ldh (__current_rom),a
         ld  (_rROMB0_MBC5), a
 
         ld a, (hl-)
@@ -47,7 +49,7 @@ _vwf_memcpy::
         jr nz, 1$
 
         ld  a, (#__save)
-        ldh (__current_bank),a
+        ldh (__current_rom),a
         ld  (_rROMB0_MBC5), a
 
         pop hl
@@ -56,7 +58,7 @@ _vwf_memcpy::
 
 ; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank);
 _vwf_read_banked_ubyte::
-        ld  hl, #__current_bank
+        ld  hl, #__current_rom
         ld  c, (hl)
 
         ld  (hl), a
@@ -76,10 +78,10 @@ _vwf_read_banked_ubyte::
 _vwf_print_shift_char_right::
         ldhl sp, #2
 
-        ldh a, (__current_bank)
+        ldh a, (__current_rom)
         push af
         ld a, (hl)
-        ldh (__current_bank), a
+        ldh (__current_rom), a
         ld  (_rROMB0_MBC5), a
 
         ld hl, #__counter
@@ -115,7 +117,7 @@ _vwf_print_shift_char_right::
         jr nz, 11$
 
         pop af
-        ldh (__current_bank),a
+        ldh (__current_rom),a
         ld  (_rROMB0_MBC5), a
 
         pop hl
@@ -126,10 +128,10 @@ _vwf_print_shift_char_right::
 _vwf_print_shift_char_left::
         ldhl sp, #2
 
-        ldh a, (__current_bank)
+        ldh a, (__current_rom)
         push af
         ld a, (hl)
-        ldh (__current_bank), a
+        ldh (__current_rom), a
         ld  (_rROMB0_MBC5), a
 
         ld hl, #__counter
@@ -165,7 +167,7 @@ _vwf_print_shift_char_left::
         jr nz, 11$
 
         pop af
-        ldh (__current_bank),a
+        ldh (__current_rom),a
         ld  (_rROMB0_MBC5), a
 
         pop hl

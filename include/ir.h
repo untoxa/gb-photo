@@ -1,21 +1,28 @@
 #ifndef __IR_H_INCLUDE__
 #define __IR_H_INCLUDE__
 
+#include <gbdk/platform.h>
+
+#include "systemdetect.h"
+
 // Turn on IR sensing only on CGB
 inline void ir_sense_start(void) {
-    if (_cpu == CGB_TYPE) {
+#if defined(NINTENDO)
+    if (_is_COLOR) {
         // Turn off IR emit & turn on IR read
         RP_REG = RPF_ENREAD;
     }
+#endif
 }
-
 
 // Turn off IR sensing only on CGB
 inline void ir_sense_stop(void) {
-    if (_cpu == CGB_TYPE) {
+#if defined(NINTENDO)
+    if (_is_COLOR) {
         // Turn off IR emit & read
         RP_REG = 0;
     }
+#endif
 }
 
 // If IR is detected, sense for a short period and return true 

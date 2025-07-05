@@ -1,6 +1,7 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
+#include "gbcamera.h"
 #include "screen.h"
 #include "systemdetect.h"
 
@@ -70,6 +71,65 @@ const uint8_t screen_tile_attr[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH] = {
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
 };
 
+uint8_t * set_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) {
+    dest; count;
+    return (uint8_t *)sour;
+}
+
+void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
+    const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
+    uint16_t ofs = x << 4;
+    do {
+        picture = set_data_row((uint8_t *)(*addr++ + ofs), picture, w);
+    } while (--h);
+}
+
+void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, uint8_t bank) {
+    uint8_t save = CURRENT_ROM_BANK;
+    CAMERA_SWITCH_ROM(bank);
+    screen_load_image(x, y, w, h, picture);
+    CAMERA_SWITCH_ROM(save);
+}
+
+void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank) {
+    uint8_t save = CURRENT_ROM_BANK;
+    CAMERA_SWITCH_ROM(bank);
+    set_data_row((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 4)), tile, 1);
+    CAMERA_SWITCH_ROM(save);
+}
+
+void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
+    dest; sour;
+    // TODO: implement function
+}
+
+void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) {
+    dest; fill;
+    // TODO: implement function
+}
+
+
+void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill) {
+    uint8_t * dest, *sour;
+    for (uint8_t i = 0; i != 32; i++) {
+        dest = (uint8_t *)(screen_tile_addresses[y + (i  / 8)] + (x * 16) + ((i % 8) << 1));
+        if (i < 2 || i > 29) {
+            screen_clear_thumbnail_row(dest, fill);
+        } else {
+            sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH * 16) + (((i - 2) % 8) << 1);
+            screen_copy_thumbnail_row(dest, sour);
+        }
+    }
+}
+
+void screen_load_thumbnail_banked(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill, uint8_t bank) {
+    uint8_t save = CURRENT_ROM_BANK;
+    CAMERA_SWITCH_ROM(bank);
+    screen_load_thumbnail(x, y, picture, fill);
+    CAMERA_SWITCH_ROM(save);
+}
+
+
 uint8_t INIT_module_screen(void) BANKED {
     screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     return 0;
@@ -83,6 +143,10 @@ uint8_t INIT_module_display_off(void) BANKED {
 
 // set LCDC and switch on display
 uint8_t INIT_module_display_on(void) BANKED {
-    LCDC_REG |= (LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8);
+    CRITICAL {
+        __WRITE_VDP_REG_UNSAFE(VDP_R2, R2_MAP_0x3800);
+        __WRITE_VDP_REG_UNSAFE(VDP_R5, R5_SAT_0x3F00);
+    }
+    SPRITES_8x8; SHOW_BKG; SHOW_SPRITES; DISPLAY_ON;
     return 0;
 }

@@ -44,6 +44,7 @@ inline void init_spi (void) {
 uint8_t xmit_spi(int8_t spi_data) NAKED {
     spi_data;
     __asm
+#if defined(NINTENDO)
         ld b, a
 
         ld hl, #_MMCSD_IO_REG
@@ -81,6 +82,10 @@ uint8_t xmit_spi(int8_t spi_data) NAKED {
 
         ld a, b
         ret
+#elif defined(SEGA)
+        ld a, #0xff
+        ret
+#endif
     __endasm;
 }
 

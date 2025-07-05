@@ -4,6 +4,9 @@
 
         .include        "global.s"
 
+        .globl __current_rom
+        .globl _rROMB0_MBC5
+
         SCRN_X    = 160         ; Width of screen in pixels
         SCRN_Y    = 144         ; Height of screen in pixels
         SCRN_X_B  = 20          ; Width of screen in bytes
@@ -470,7 +473,7 @@ loadfont:
         .ascii  " IE:"
         .ascii  "  BANK:"
         .ascii  "R"
-        .dw     __current_bank 
+        .dw     __current_rom 
         .ascii  "V" 
         .dw     vCrashVBK 
         .ascii  "W"

@@ -1,6 +1,7 @@
         .include "global.s"
 
-        .globl __current_bank
+        .globl __current_rom
+        .globl _rROMB0_MBC5
 
 .START_SAVE = 8
 
@@ -30,7 +31,7 @@ _save_sram_bank_count::
 _HDR_flash_data_routine:
         di
 
-        ldh     a, (__current_bank)
+        ldh     a, (__current_rom)
         push    af                              ; save current bank
 
         ld      a, c
@@ -113,7 +114,7 @@ _end_HDR_flash_data_routine:
 _IG_flash_data_routine:
         di
 
-        ldh     a, (__current_bank)
+        ldh     a, (__current_rom)
         push    af                              ; save current bank
 
         ld      a, c
@@ -278,7 +279,7 @@ _save_sram_banks::
 _HDR_erase_flash_sector_routine:
         di
 
-        ldh     a, (__current_bank)
+        ldh     a, (__current_rom)
         push    af                              ; save current bank
 
         .wb     #_rRAMG_MBC5, #0x00             ; disable SRAM
@@ -329,7 +330,7 @@ _end_HDR_erase_flash_sector_routine:
 _IG_erase_flash_sector_routine:
         di
 
-        ldh     a, (#__current_bank)
+        ldh     a, (#__current_rom)
         push    af                              ; save current bank
 
         .wb     #_rRAMG_MBC5, #0x00             ; disable SRAM

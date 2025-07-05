@@ -71,6 +71,10 @@ __asm
 
         ret
 __endasm;
+#elif defined(SEGA)
+__asm
+        ret
+__endasm;
 #endif
 }
 
@@ -126,6 +130,10 @@ __asm
         dec b
         jr nz, 1$
 
+        ret
+__endasm;
+#elif defined(SEGA)
+__asm
         ret
 __endasm;
 #endif
@@ -221,6 +229,8 @@ __endasm;
 }
 
 void fade_apply_palette_change_dmg(uint8_t index) BANKED {
+    index;
+#if defined(NINTENDO)
     if (index > 4) index = 4;
     if (!fade_style) {
         BGP_REG = DMGFadeToWhiteStep(DMG_palette[0], index);
@@ -231,6 +241,7 @@ void fade_apply_palette_change_dmg(uint8_t index) BANKED {
         OBP0_REG = DMGFadeToBlackStep(DMG_palette[1], index);
         OBP1_REG = DMGFadeToBlackStep(DMG_palette[2], index);
     }
+#endif
 }
 
 void fade_init(void) BANKED {

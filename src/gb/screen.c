@@ -114,14 +114,14 @@ void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t
 }
 
 void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture, uint8_t bank) {
-    uint8_t save = _current_bank;
+    uint8_t save = CURRENT_ROM_BANK;
     CAMERA_SWITCH_ROM(bank);
     screen_load_image(x, y, w, h, picture);
     CAMERA_SWITCH_ROM(save);
 }
 
 void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank) {
-    uint8_t save = _current_bank;
+    uint8_t save = CURRENT_ROM_BANK;
     CAMERA_SWITCH_ROM(bank);
     set_data_row((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 4)), tile, 1);
     CAMERA_SWITCH_ROM(save);
@@ -218,7 +218,7 @@ void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill
 }
 
 void screen_load_thumbnail_banked(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill, uint8_t bank) {
-    uint8_t save = _current_bank;
+    uint8_t save = CURRENT_ROM_BANK;
     CAMERA_SWITCH_ROM(bank);
     screen_load_thumbnail(x, y, picture, fill);
     CAMERA_SWITCH_ROM(save);

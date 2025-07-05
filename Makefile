@@ -19,7 +19,7 @@ PNG2ASSET = $(GBDK_HOME_UNIX)/bin/png2asset
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket sms gg
 #TARGETS = gb gbc pocket sms gg megaduck
-#TARGETS = gb gbc
+#TARGETS = gg
 TARGETS = gbc megaduck
 
 LIBRARIES =
