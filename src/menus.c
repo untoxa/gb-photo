@@ -74,15 +74,15 @@ void menu_draw_frame(const menu_t * menu) {
     // field
     screen_clear_rect(menu->x, menu->y, menu->width, menu->height, BLACK_ON_WHITE);
     // corners
-    set_bkg_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
-    set_bkg_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
-    set_bkg_tile_xy(menu->x,                   menu->y + menu->height - 1, CORNER_DL);
-    set_bkg_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
+    screen_set_tile_xy(menu->x,                   menu->y,                    CORNER_UL);
+    screen_set_tile_xy(menu->x + menu->width - 1, menu->y,                    CORNER_UR);
+    screen_set_tile_xy(menu->x,                   menu->y + menu->height - 1, CORNER_DL);
+    screen_set_tile_xy(menu->x + menu->width - 1, menu->y + menu->height - 1, CORNER_DR);
 }
 void menu_draw_shadow(const menu_t * menu) {
     // shadow
-    fill_rect(menu->x + 1,           menu->y + menu->height, menu->width,  1,                SLD_DARK_GRAY);
-    fill_rect(menu->x + menu->width, menu->y + 1,            1,            menu->height - 1, SLD_DARK_GRAY);
+    screen_clear_rect(menu->x + 1,           menu->y + menu->height, menu->width,  1,                SLD_DARK_GRAY);
+    screen_clear_rect(menu->x + menu->width, menu->y + 1,            1,            menu->height - 1, SLD_DARK_GRAY);
 }
 
 uint8_t menu_redraw(const menu_t * menu, uint8_t * param, const menu_item_t * selection) {

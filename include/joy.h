@@ -81,7 +81,23 @@ inline void joy_init(void) {
 
 inline uint8_t joypad_swap_dpad(uint8_t value) {
     // swap J_UP/J_DOWN with J_LEFT/J_RIGHT buttons, because our menus are horizontal
+#if defined(NINTENDO)
+/*
+J_RIGHT      0b00000001
+J_LEFT       0b00000010
+J_UP         0b00000100
+J_DOWN       0b00001000
+*/
     return (value & 0b11110000) | ((value << 1) & 0b00000100) | ((value >> 1) & 0b00000010) | ((value << 3) & 0b00001000) | ((value >> 3) & 0b00000001);
+#elif defined(SEGA)
+/*
+J_UP         0b00000001
+J_DOWN       0b00000010
+J_LEFT       0b00000100
+J_RIGHT      0b00001000
+*/
+    return (value & 0b11110000) | ((value << 2) & 0b00001000) | ((value >> 2) & 0b00000010) | ((value << 2) & 0b00000100) | ((value >> 2) & 0b00000001);
+#endif
 }
 
 uint8_t INIT_module_joy(void) BANKED;

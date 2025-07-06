@@ -30,8 +30,17 @@ extern const uint8_t screen_tile_map[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH]
 extern const uint8_t screen_tile_attr[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH];
 #endif
 
+inline void screen_set_tile_xy(uint8_t x, uint8_t y, uint8_t tile) {
+#if defined(SEGA)
+    VBK_REG = 1;
+    set_bkg_tile_xy(x, y, 0);
+    VBK_REG = 0;
+#endif
+    set_bkg_tile_xy(x, y, tile);
+}
+
 inline uint8_t screen_clear_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color) {
-    return (w) ? fill_bkg_rect(x, y, w, h, SLD_WHITE + BG_COLOR(color)), w : w;
+    return (w) ? fill_rect(x, y, w, h, SLD_WHITE + BG_COLOR(color)), w : w;
 }
 
 inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
