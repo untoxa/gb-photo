@@ -19,7 +19,7 @@
 #include "bankdata.h"
 #include "gbprinter.h"
 #include "linkcable.h"
-#include "fade_manager.h"
+#include "fade.h"
 #include "vector.h"
 #include "counter.h"
 #include "protected.h"

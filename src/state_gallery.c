@@ -17,7 +17,7 @@
 #include "remote.h"
 #include "vector.h"
 #include "load_save.h"
-#include "fade_manager.h"
+#include "fade.h"
 #include "protected.h"
 #include "vwf.h"
 

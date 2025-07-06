@@ -20,7 +20,7 @@ PNG2ASSET = $(GBDK_HOME_UNIX)/bin/png2asset
 # Possible are: gb gbc pocket sms gg
 #TARGETS = gb gbc pocket sms gg megaduck
 #TARGETS = gg
-TARGETS = gbc megaduck
+TARGETS = gbc megaduck gg
 
 LIBRARIES =
 
@@ -29,7 +29,7 @@ LCCFLAGS_gb      = $(LIBRARIES) -Wl-b_DATA=0xCEA0 -Wl-yt0xFC -Wm-ys -Wm-yn"$(PRO
 LCCFLAGS_gbc     = $(LCCFLAGS_gb) -Wm-yc 
 LCCFLAGS_duck    = $(LIBRARIES) -Wl-b_DATA=0xCEA0 -Wl-yt0xFC
 LCCFLAGS_sms     =
-LCCFLAGS_gg      =
+LCCFLAGS_gg      = -Wb-reserve=1:10
 
 LCCFLAGS += -m$(PORT):$(PLAT) $(LCCFLAGS_$(EXT)) -Wm-yS # This adds the current platform specific LCC Flags
 

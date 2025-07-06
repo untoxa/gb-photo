@@ -11,7 +11,7 @@
 #include "screen.h"
 #include "states.h"
 #include "bankdata.h"
-#include "fade_manager.h"
+#include "fade.h"
 #include "gbcamera.h"
 #include "gbprinter.h"
 #include "linkcable.h"

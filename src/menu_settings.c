@@ -13,7 +13,7 @@
 #include "print_frames.h"
 #include "load_save.h"
 #include "palette.h"
-#include "fade_manager.h"
+#include "fade.h"
 #include "joy.h"
 #include "systemhelpers.h"
 #include "ir.h"
@@ -479,7 +479,7 @@ void menu_settings_execute(void) BANKED {
                     save_camera_state();
                     if (_is_COLOR) {
                         palette_reload();
-                        fade_apply_palette_change_color(FADED_IN_FRAME);
+                        palette_apply();
                     }
                     settings_menu_repaint = true;
                     break;

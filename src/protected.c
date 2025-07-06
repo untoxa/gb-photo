@@ -12,7 +12,7 @@
 #include "joy.h"
 #include "screen.h"
 #include "menus.h"
-#include "fade_manager.h"
+#include "fade.h"
 #include "load_save.h"
 #include "flip.h"
 
