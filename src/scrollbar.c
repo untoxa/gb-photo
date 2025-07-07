@@ -18,8 +18,8 @@ uint8_t scrollbar_render_all(uint8_t hiwater) NONBANKED {
     scrollbar_t * current = scrollbars;
     while (current) {
         hw += move_metasprite(cursors_metasprites[1], (0x80 - cursors_TILE_COUNT), hw,
-                              ((current->vertical) ? (current->x << 3) : ((current->x << 3) + current->position + 8)),
-                              ((current->vertical) ? ((current->y << 3) + current->position + 8) : (current->y << 3)));
+                              (DEVICE_SPRITE_PX_OFFSET_X + ((current->vertical) ? (current->x << 3) : ((current->x << 3) + current->position + 8))),
+                              (DEVICE_SPRITE_PX_OFFSET_Y + ((current->vertical) ? ((current->y << 3) + current->position + 8) : (current->y << 3))));
         current = current->prev;
     }
     CAMERA_SWITCH_ROM(save);
@@ -29,18 +29,18 @@ uint8_t scrollbar_render_all(uint8_t hiwater) NONBANKED {
 void scrollbar_paint(scrollbar_t * ss) {
     if (!ss) return;
     if (ss->vertical) {
-        screen_load_tile_banked(ss->x, ss->y, scrollers_tiles + (3 * 16), BANK(scrollers));
+        screen_load_tile_banked(ss->x, ss->y, scrollers_tiles + (3 << DEVICE_TILE_SIZE_BITS), BANK(scrollers));
         for (int8_t i = ss->y + 1; i < (ss->y + ss->len - 1); i++) {
-            screen_load_tile_banked(ss->x, i, scrollers_tiles + (4 * 16), BANK(scrollers));
+            screen_load_tile_banked(ss->x, i, scrollers_tiles + (4 << DEVICE_TILE_SIZE_BITS), BANK(scrollers));
         }
-        screen_load_tile_banked(ss->x, ss->y + ss->len - 1, scrollers_tiles + (5 * 16), BANK(scrollers));
+        screen_load_tile_banked(ss->x, ss->y + ss->len - 1, scrollers_tiles + (5 << DEVICE_TILE_SIZE_BITS), BANK(scrollers));
         screen_restore_rect(ss->x, ss->y, 1, ss->len);
     } else {
-        screen_load_tile_banked(ss->x, ss->y, scrollers_tiles + (0 * 16), BANK(scrollers));
+        screen_load_tile_banked(ss->x, ss->y, scrollers_tiles + (0 << DEVICE_TILE_SIZE_BITS), BANK(scrollers));
         for (int8_t i = ss->x + 1; i < (ss->x + ss->len - 1); i++) {
-            screen_load_tile_banked(i, ss->y, scrollers_tiles + (1 * 16), BANK(scrollers));
+            screen_load_tile_banked(i, ss->y, scrollers_tiles + (1 << DEVICE_TILE_SIZE_BITS), BANK(scrollers));
         }
-        screen_load_tile_banked(ss->x + ss->len - 1, ss->y, scrollers_tiles + (2 * 16), BANK(scrollers));
+        screen_load_tile_banked(ss->x + ss->len - 1, ss->y, scrollers_tiles + (2 << DEVICE_TILE_SIZE_BITS), BANK(scrollers));
         screen_restore_rect(ss->x, ss->y, ss->len, 1);
     }
 }

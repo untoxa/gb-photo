@@ -56,7 +56,7 @@ __BYTE_REG _current_rom;
 #define CAMERA_SWITCH_RAM(b) SWITCH_RAM(b)
 #define CAMERA_SWITCH_ROM(b) SWITCH_ROM(b)
 
-inline void sync_vblank(void) { 
+inline void sync_vblank(void) {
     vsync();
 }
 

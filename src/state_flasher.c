@@ -54,7 +54,7 @@ static enum brows_mode_e browse_mode = browse_mode_folders;
 static uint8_t thumbnails_num_pages = 0, thumbnails_page_no = 0, current_slot = 0, cursor_anim = 0, cx = 0, cy = 0, current_slot_image;
 
 static const metasprite_t flasher[] = {
-    METASPR_ITEM(16,  8,  0,  0), METASPR_ITEM(0,  8,  1,  0), METASPR_ITEM(0,  8,  2,  0), METASPR_ITEM(0,  8,  3,  0),
+    METASPR_ITEM(DEVICE_SPRITE_PX_OFFSET_Y, DEVICE_SPRITE_PX_OFFSET_X, 0, 0), METASPR_ITEM(0, 8, 1, 0), METASPR_ITEM(0, 8, 2, 0), METASPR_ITEM(0, 8, 3, 0),
     METASPR_ITEM( 8,-24,  4,  0), METASPR_ITEM(0,  8,  5,  0), METASPR_ITEM(0,  8,  6,  0), METASPR_ITEM(0,  8,  7,  0),
     METASPR_ITEM( 8,-24,  8,  0), METASPR_ITEM(0,  8,  9,  0), METASPR_ITEM(0,  8, 10,  0), METASPR_ITEM(0,  8, 11,  0),
     METASPR_ITEM( 8,-24, 12,  0), METASPR_ITEM(0,  8, 13,  0), METASPR_ITEM(0,  8, 14,  0), METASPR_ITEM(0,  8, 15,  0),
@@ -63,19 +63,19 @@ static const metasprite_t flasher[] = {
 
 #define HAND_CURSOR_BASE_TILE (0x80 - cursors_TILE_COUNT - hand_cursor_TILE_COUNT)
 static const metasprite_t hand_cursor0[] = {
-    METASPR_ITEM(32, 24, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_ITEM(DEVICE_SPRITE_PX_OFFSET_Y + 16, DEVICE_SPRITE_PX_OFFSET_X + 16, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
     METASPR_TERM
 };
 static const metasprite_t hand_cursor1[] = {
-    METASPR_ITEM(33, 24, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_ITEM(DEVICE_SPRITE_PX_OFFSET_Y + 17, DEVICE_SPRITE_PX_OFFSET_X + 16, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
     METASPR_TERM
 };
 static const metasprite_t hand_cursor2[] = {
-    METASPR_ITEM(33, 25, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_ITEM(DEVICE_SPRITE_PX_OFFSET_Y + 17, DEVICE_SPRITE_PX_OFFSET_X + 17, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
     METASPR_TERM
 };
 static const metasprite_t hand_cursor3[] = {
-    METASPR_ITEM(32, 25, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
+    METASPR_ITEM(DEVICE_SPRITE_PX_OFFSET_Y + 16, DEVICE_SPRITE_PX_OFFSET_X + 17, 0, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 1, (S_PALETTE | S_PAL(1))), METASPR_ITEM(8, -8, 2, (S_PALETTE | S_PAL(1))), METASPR_ITEM(0, 8, 3, (S_PALETTE | S_PAL(1))),
     METASPR_TERM
 };
 static const metasprite_t* const hand_cursor[] = {hand_cursor0, hand_cursor1, hand_cursor2, hand_cursor3};
