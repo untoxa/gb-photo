@@ -149,7 +149,7 @@ void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank)
     CAMERA_SWITCH_ROM(save);
 }
 
-void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
+void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
     dest; sour;
     // TODO: implement function
 }
