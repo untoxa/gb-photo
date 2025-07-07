@@ -438,14 +438,27 @@ uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_it
     menu;
     switch ((settings_menu_e)self->id) {
         case idSettingsDoubleSpeed:
+#if defined(NINTENDO)
             return ((!_is_COLOR) || (OPTION(cart_type) == cart_type_iG_AIO)) ? ITEM_DISABLED : ITEM_DEFAULT;
-        case idSettingsPrintFast:
+#elif defined(SEGA)
+            return ITEM_DISABLED;
+#endif
         case idSettingsCGBPalette:
+            return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
+        case idSettingsPrintFast:
         case idSettingsIRRemoteShutter:
         case idSettingsEnableDMA:
+#if defined(NINTENDO)
             return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
+#elif defined(SEGA)
+            return ITEM_DISABLED;
+#endif
         case idSettingsAltBorder:
+#if defined(NINTENDO)
             return (_is_SUPER) ? ITEM_DEFAULT : ITEM_DISABLED;
+#elif defined(SEGA)
+            return ITEM_DISABLED;
+#endif
         default:
             return ITEM_DEFAULT;
     }
