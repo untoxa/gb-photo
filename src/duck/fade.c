@@ -3,49 +3,63 @@
 #include "fade.h"
 #include "palette.h"
 
-inline int16_t DespRight(int16_t a, uint8_t b) {
-	return a >> b;
-}
+static uint8_t DMGFadeToBlackStep(uint8_t pal, uint8_t step) OLDCALL NAKED {
+    pal; step;
+#if defined(NINTENDO)
+__asm
+        ldhl    SP, #3
+        ld      A, (HL-)
+        ld      E, (HL)
+        or      A
+        ret     Z
 
-inline uint8_t FadeInOp(uint8_t c, uint8_t i) {
-	return (c < i) ? 0: (c - i);
-}
+        ld      D, A
+1$:
+        ld      H, #4
+2$:
+        ld      A, E
+        and     #3
+        cp      #3
+        jr      Z, 3$
+        inc     A
+3$:
+        srl     A
+        rr      L
+        srl     A
+        rr      L
 
-static uint8_t * const pals[] = {&BGP_REG, &OBP0_REG, &OBP1_REG};
+        srl     E
+        srl     E
 
-void FadeDMG(uint8_t fadein) {
-	static uint8_t colors[12];
-	uint8_t i, j;
-	uint8_t* c = colors;
-	uint8_t p;
+        dec     H
+        jr      NZ, 2$
 
-	//Pick current palette colors
-	for(i = 0; i != 3; ++i) {
-		p = DMG_palette[i];
-		for(j = 0; j != 8; j += 2, ++c) {
-			*c = (DespRight(p, j)) & 0x03;
-		}
-	}
+        ld      E, L
 
-	for(i = 0; i != 4; ++i) {
-		p = fadein ? 3 - i : i;
-		for(j = 0; j != 3; ++j) {
-			c = &colors[j << 2];
-			*pals[j] = DMG_PALETTE(FadeInOp(c[0], p), FadeInOp(c[1], p), FadeInOp(c[2], p), FadeInOp(c[3], p));
-		}
-		vsync();
-		vsync();
-		vsync();
-	}
+        dec     D
+        jr      NZ, 1$
+        ret
+__endasm;
+#endif
 }
 
 void fade_out_modal(void) BANKED {
-	FadeDMG(FALSE);
-	DISPLAY_OFF;
+    for(uint8_t index = 0; index != 5; ++index) {
+        BGP_REG  = DMGFadeToBlackStep(DMG_palette[0], index);
+        OBP0_REG = DMGFadeToBlackStep(DMG_palette[1], index);
+        OBP1_REG = DMGFadeToBlackStep(DMG_palette[2], index);
+        vsync();
+        vsync();
+    }
 }
 
 void fade_in_modal(void) BANKED {
-	DISPLAY_ON;
-	FadeDMG(TRUE);
+    for(int8_t index = 4; index != -1; --index) {
+        BGP_REG  = DMGFadeToBlackStep(DMG_palette[0], index);
+        OBP0_REG = DMGFadeToBlackStep(DMG_palette[1], index);
+        OBP1_REG = DMGFadeToBlackStep(DMG_palette[2], index);
+        vsync();
+        vsync();
+    }
 }
 
