@@ -409,7 +409,7 @@ static uint8_t onPrinterProgress(void) BANKED {
 }
 
 const metasprite_t grid_metasprite[] = {
-    METASPR_ITEM(DEVICE_SPRITE_PX_OFFSET_Y + -20, DEVICE_SPRITE_PX_OFFSET_X + -12, 0, 0), METASPR_ITEM(35, 43, 0, 0), METASPR_ITEM(0, 43, 0, 0), METASPR_ITEM(-35, 43, 0, 0),
+    METASPR_ITEM(     -4,  -4, 0, 0), METASPR_ITEM(35, 43, 0, 0), METASPR_ITEM(0, 43, 0, 0), METASPR_ITEM(-35, 43, 0, 0),
     METASPR_ITEM(35 + 43, -43, 0, 0), METASPR_ITEM(35, 43, 0, 0), METASPR_ITEM(-35, -43 - 43, 0, 0), METASPR_ITEM(35, -43, 0, 0),
     METASPR_TERM
 };
@@ -419,7 +419,7 @@ uint8_t grid_render(uint8_t hw) {
                                      DEVICE_SPRITE_PX_OFFSET_X + 16,
                                      ((OPTION(camera_mode) == camera_mode_manual) ? 8 : 0) + DEVICE_SPRITE_PX_OFFSET_Y + 16));
     }
-    return 0;
+    return hw;
 }
 
 
