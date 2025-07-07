@@ -71,14 +71,65 @@ const uint8_t screen_tile_attr[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH] = {
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
 };
 
-uint8_t * set_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) {
-    dest; count;
-    return (uint8_t *)sour;
+uint8_t * set_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+    sour; dest; count;
+__asm
+        ld b, h
+        ld c, l
+
+        ld hl, #__shadow_OAM_OFF
+        inc (hl)
+
+        ld a, c
+        di
+        out (_VDP_CMD), a
+        ld a, b
+        ei
+        out (_VDP_CMD), a
+
+        pop hl
+        dec sp
+        ex (sp), hl
+
+        ld a, h
+        or a
+        ret z
+
+        ld c, #_VDP_DATA
+1$:
+        ld b, #8
+3$:
+        ld a, (de)
+        out (c), a
+        inc de
+        ld a, (de)
+        nop
+        out (c), a
+        inc de
+        xor a
+        jr 5$
+5$:
+        out (c), a
+        jr 6$
+6$:
+        nop
+        out (c), a
+        dec b
+        jr nz, 3$
+2$:
+        dec h
+        jp  nz, 1$
+
+        ld hl, #__shadow_OAM_OFF
+        dec (hl)
+
+        ret
+__endasm;
 }
 
 void screen_load_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t * picture) {
     const uint8_t *const *addr = (const uint8_t *const *)(screen_tile_addresses + y);
-    uint16_t ofs = x << 4;
+    uint16_t ofs = x << 5;
     do {
         picture = set_data_row((uint8_t *)(*addr++ + ofs), picture, w);
     } while (--h);
@@ -94,7 +145,7 @@ void screen_load_image_banked(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const 
 void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank) {
     uint8_t save = CURRENT_ROM_BANK;
     CAMERA_SWITCH_ROM(bank);
-    set_data_row((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 4)), tile, 1);
+    set_data_row((uint8_t *)(*(uint8_t **)(screen_tile_addresses + y) + (x << 5)), tile, 1);
     CAMERA_SWITCH_ROM(save);
 }
 
@@ -112,11 +163,11 @@ void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) {
 void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill) {
     uint8_t * dest, *sour;
     for (uint8_t i = 0; i != 32; i++) {
-        dest = (uint8_t *)(screen_tile_addresses[y + (i  / 8)] + (x * 16) + ((i % 8) << 1));
+        dest = (uint8_t *)(screen_tile_addresses[y + (i  / 8)] + (x << 5) + ((i % 8) << 2));
         if (i < 2 || i > 29) {
             screen_clear_thumbnail_row(dest, fill);
         } else {
-            sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH * 16) + (((i - 2) % 8) << 1);
+            sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH << 5) + (((i - 2) % 8) << 2);
             screen_copy_thumbnail_row(dest, sour);
         }
     }

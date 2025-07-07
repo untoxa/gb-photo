@@ -1,1 +1,1 @@
--b 255 -tiles_only -keep_duplicate_tiles -keep_palette_order -noflip -no_palettes -bpp 4 -pack_mode sms
+-b 255 -tiles_only -keep_duplicate_tiles -keep_palette_order -noflip -no_palettes -bpp 2 -pack_mode gb

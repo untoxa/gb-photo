@@ -1,1 +1,1 @@
--b 255 -noflip -keep_palette_order -no_palettes
+-b 255 -noflip -keep_palette_order -no_palettes -bpp 2 -pack_mode gb
