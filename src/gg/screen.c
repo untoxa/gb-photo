@@ -149,14 +149,129 @@ void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank)
     CAMERA_SWITCH_ROM(save);
 }
 
-void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
+static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
     dest; sour;
-    // TODO: implement function
+    __asm
+        .ez80
+
+        ld b, h
+        ld c, l
+        ld hl, #__shadow_OAM_OFF
+        inc (hl)
+        ld h, b
+        ld l, c
+
+        ld c, #_VDP_CMD
+        di
+        out (c), l
+        ei
+        out (c), h
+
+        ld iyh, d
+        ld iyl, e
+
+        .rept 3
+            ld a, 0 (iy)
+            out (_VDP_DATA), a
+            ld a, 1 (iy)
+            out (_VDP_DATA), a
+            ld a, 0 (iy)
+            xor a
+            out (_VDP_DATA), a
+            ld a, 0 (iy)
+            xor a
+            out (_VDP_DATA), a
+
+            ld de, #16
+            add iy, de
+
+            ld de, #32
+            add hl, de
+
+            di
+            out (c), l
+            ei
+            out (c), h
+        .endm
+
+        ld a, 0 (iy)
+        out (_VDP_DATA), a
+        ld a, 1 (iy)
+        out (_VDP_DATA), a
+        ld a, 0 (iy)
+        xor a
+        out (_VDP_DATA), a
+        ld a, 0 (iy)
+        xor a
+        out (_VDP_DATA), a
+
+        ld hl, #__shadow_OAM_OFF
+        dec (hl)
+
+        ret
+    __endasm;
 }
 
-void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) {
+static void screen_clear_thumbnail_row(uint8_t * dest, uint16_t fill) {
     dest; fill;
-    // TODO: implement function
+    __asm
+        .ez80
+
+        ld b, e
+        ld c, #_VDP_DATA
+
+        ex de, hl
+        ld hl, #__shadow_OAM_OFF
+        inc (hl)
+        ex de, hl
+
+        ld a, l
+        di
+        out (_VDP_CMD), a
+        ld a, h
+        ei
+        out (_VDP_CMD), a
+
+        .rept 3
+            out (c), b
+            xor a
+            push hl
+            pop hl
+            out (c), b
+            push hl
+            pop hl
+            out (c), b
+            push hl
+            pop hl
+            out (c), b
+
+            ld de, #32
+            add hl, de
+            ld a, l
+            di
+            out (_VDP_CMD), a
+            ld a, h
+            ei
+            out (_VDP_CMD), a
+        .endm
+
+        out (c), b
+        xor a
+        push hl
+        pop hl
+        out (c), b
+        push hl
+        pop hl
+        out (c), b
+        push hl
+        pop hl
+        out (c), b
+
+        ld hl, #__shadow_OAM_OFF
+        dec (hl)
+
+        ret
+    __endasm;
 }
 
 
@@ -167,7 +282,7 @@ void screen_load_thumbnail(uint8_t x, uint8_t y, uint8_t * picture, uint8_t fill
         if (i < 2 || i > 29) {
             screen_clear_thumbnail_row(dest, fill);
         } else {
-            sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH << 5) + (((i - 2) % 8) << 2);
+            sour = picture + ((i - 2) / 8) * (CAMERA_THUMB_TILE_WIDTH << 4) + (((i - 2) % 8) << 1);
             screen_copy_thumbnail_row(dest, sour);
         }
     }

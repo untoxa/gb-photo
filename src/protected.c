@@ -37,7 +37,7 @@ void protected_pack(uint8_t * v) BANKED {
 
 uint16_t protected_scale_line_part(const void * ptr) NAKED {
     ptr;
-#ifdef NINTENDO
+#if defined(NINTENDO)
     __asm
 .macro .SHIFT_6_2 reg
         rla
@@ -67,9 +67,36 @@ uint16_t protected_scale_line_part(const void * ptr) NAKED {
 
         ret
     __endasm;
-#else
+#elif defined(SEGA)
     __asm
-        ld hl, #0
+.macro .SHIFT_6_2 reg
+        rla
+        rla
+        rl reg
+        rla
+        rla
+        rla
+        rla
+        rl reg
+.endm
+.macro .SCALE regh regl
+        ld a, (hl)
+        inc hl
+        .SHIFT_6_2 regl
+        ld a, (hl)
+        dec hl
+        .SHIFT_6_2 regh
+.endm
+        ld de, #16
+
+        .rept 3
+            .SCALE b,c
+            add hl, de
+        .endm
+        .SCALE b,c
+
+        ld d, b
+        ld e, c
         ret
     __endasm;
 #endif

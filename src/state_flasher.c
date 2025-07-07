@@ -615,7 +615,7 @@ uint8_t UPDATE_state_flasher(void) BANKED {
     old_browse_mode = browse_mode;
     if (browse_mode == browse_mode_folders) update_mode_folders(); else update_mode_thumbnails();
 
-    if (KEY_PRESSED(J_SELECT)) {
+    if (KEY_PRESSED(J_POPUP_MENU)) {
         if (browse_mode == browse_mode_folders) {
             switch (menu_result = menu_execute(&FlasherMenu, NULL, NULL)) {
                 case ACTION_ERASE_GALLERY:
@@ -710,7 +710,7 @@ uint8_t UPDATE_state_flasher(void) BANKED {
                 refresh_screen();
             } else PLAY_SFX(sound_error);
         }
-    } else if (KEY_PRESSED(J_START) || ((old_browse_mode == browse_mode_folders) && (KEY_PRESSED(J_B)))) {
+    } else if (KEY_PRESSED(J_MAIN_MENU) || ((old_browse_mode == browse_mode_folders) && (KEY_PRESSED(J_B)))) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         if (!menu_main_execute()) refresh_screen();

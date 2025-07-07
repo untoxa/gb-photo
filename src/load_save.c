@@ -68,7 +68,11 @@ const camera_mode_settings_t default_camera_mode_settings[N_CAMERA_MODES] = {
 
 inline void save_wait_sram(void) {
     CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
-    while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
+#if defined(CAMERA_EMULATE_CAPTURE)
+    CAM_REG_CAPTURE &= ~CAM00F_CAPTURING;
+#else
+while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
+#endif
 }
 
 void save_camera_mode_settings(camera_mode_e mode) BANKED {

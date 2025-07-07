@@ -382,7 +382,7 @@ uint8_t UPDATE_state_gallery(void) BANKED {
             CHANGE_STATE(state_thumbnails);
             return FALSE;
         }
-    } else if (KEY_PRESSED(J_SELECT)) {
+    } else if (KEY_PRESSED(J_POPUP_MENU)) {
         switch (menu_result = menu_execute(&GalleryMenu, NULL, NULL)) {
             case ACTION_ERASE_GALLERY:
                 if (images_taken() != 0) {
@@ -462,7 +462,7 @@ uint8_t UPDATE_state_gallery(void) BANKED {
                 break;
         }
         OPTION(gallery_picture_idx) = refresh_screen();
-    } else if (KEY_PRESSED(J_START) || KEY_PRESSED(J_B)) {
+    } else if (KEY_PRESSED(J_MAIN_MENU) || KEY_PRESSED(J_B)) {
         // run Main Menu
         if (!menu_main_execute()) refresh_screen();
     }

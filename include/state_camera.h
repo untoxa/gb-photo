@@ -177,7 +177,12 @@ inline void set_image_refresh_dalay(uint8_t delay) {
 }
 inline bool image_is_capturing(void) {
     CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
+#if defined(CAMERA_EMULATE_CAPTURE)
+    CAM_REG_CAPTURE &= ~CAM00F_CAPTURING;
+    return false;
+#else
     return ((camera_PnR_delay) || (CAM_REG_CAPTURE & CAM00F_CAPTURING));
+#endif
 }
 
 uint8_t * camera_format_item_text(camera_menu_e id, const uint8_t * format, camera_mode_settings_t * settings) BANKED;

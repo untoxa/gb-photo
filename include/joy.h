@@ -10,6 +10,14 @@
 
 BANKREF_EXTERN(module_joy)
 
+#if defined(NINTENDO)
+#define J_POPUP_MENU J_SELECT
+#define J_MAIN_MENU J_START
+#elif defined(SEGA)
+#define J_POPUP_MENU J_START
+#define J_MAIN_MENU J_SELECT
+#endif
+
 #define J_ANY 0xff
 #define AUTOREPEAT_RATE 15
 

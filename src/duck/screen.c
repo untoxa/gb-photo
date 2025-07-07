@@ -52,7 +52,7 @@ const uint8_t screen_tile_map[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH] = {
     0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77
 };
 
-uint8_t * set_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
+static uint8_t * set_data_row(uint8_t * dest, const uint8_t * sour, uint8_t count) NAKED {
     dest; sour; count;
     __asm
 .macro .WAIT_STAT_00 ?lbl
@@ -127,7 +127,7 @@ void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank)
     CAMERA_SWITCH_ROM(save);
 }
 
-void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
+static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
     dest; sour;
     __asm
 .macro .WAIT_STAT_01 ?lbl
@@ -168,7 +168,7 @@ lbl:
     __endasm;
 }
 
-void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) NAKED {
+static void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) NAKED {
     dest; fill;
     __asm
 .macro .WAIT_STAT_02 ?lbl

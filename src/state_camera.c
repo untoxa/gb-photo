@@ -724,6 +724,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
     // save current selection
     last_menu_items[OPTION(camera_mode)] = selection;
     // process joypad buttons
+
+// not enough buttons on the GG for the "Brightness/Contrast reset" and "AutoExp once" features
+#if defined(NINTENDO)
     if (KEY_PRESSED(J_START)) {
         if (OPTION(camera_mode) == camera_mode_auto) {
             PLAY_SFX(sound_menu_alter);
@@ -740,7 +743,9 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             one_iteration_autoexp = true;
 #endif
         }
-    } else if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
+    } else
+#endif
+    if (KEY_PRESSED(J_A) || remote_shutter_triggered) {
         // A is a "shutter" button
         switch (OPTION(after_action)) {
             case after_action_picnrec_video:
@@ -791,7 +796,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
             capture_triggered = false;
             return ACTION_MAIN_MENU;
         }
-    } else if (KEY_PRESSED(J_SELECT)) {
+    } else if (KEY_PRESSED(J_POPUP_MENU)) {
         // select opens popup-menu
         capture_triggered = false;
         return ACTION_CAMERA_SUBMENU;
@@ -1063,6 +1068,8 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 if ((!one_iteration_autoexp) && (OPTION(display_exposure))) menu_text_out(14, 0, 6, WHITE_ON_BLACK, ITEM_DEFAULT, formatItemText(idExposure, "%sms", &CURRENT_SETTINGS, _is_CPU_FAST));
             } else render_registers = false;
 
+            // not enough buttons on the GG for the "AutoExp once" feature
+            #if defined(NINTENDO)
             if ((one_iteration_autoexp) && ((JOYPAD_LAST() & J_START) == 0)) {
                 one_iteration_autoexp = false;
                 // restore exposure index from exposure
@@ -1078,6 +1085,7 @@ uint8_t onIdleCameraMenu(const struct menu_t * menu, const struct menu_item_t * 
                 PLAY_SFX(sound_menu_alter);
                 menu_redraw(menu, NULL, selection);
             }
+            #endif
 
             if (render_registers) {
                 switch (OPTION(camera_mode)) {

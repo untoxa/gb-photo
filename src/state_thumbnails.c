@@ -239,7 +239,7 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
             selected_images[idx] = !selected_images[idx];
             tumbnail_refresh(idx);
         } else PLAY_SFX(sound_error);
-    } else if ((KEY_PRESSED(J_SELECT)) && (selected_image_count = selected_count())) {
+    } else if ((KEY_PRESSED(J_POPUP_MENU)) && (selected_image_count = selected_count())) {
         switch (menu_result = menu_execute(&ThumbnailMenu, NULL, NULL)) {
             case ACTION_DELETE_SELECTED:
                 for (int8_t i = CAMERA_MAX_IMAGE_SLOTS - 1; i >= 0; i--) {
@@ -295,7 +295,7 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
         memset(selected_images, 0, sizeof(selected_images));
 
         refresh_screen();
-    } else if (KEY_PRESSED(J_START)) {
+    } else if (KEY_PRESSED(J_MAIN_MENU)) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         if (!menu_main_execute()) refresh_screen();

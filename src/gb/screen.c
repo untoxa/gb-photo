@@ -127,7 +127,7 @@ void screen_load_tile_banked(uint8_t x, uint8_t y, uint8_t * tile, uint8_t bank)
     CAMERA_SWITCH_ROM(save);
 }
 
-void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
+static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) NAKED {
     dest; sour;
     __asm
 .macro .WAIT_STAT_01 ?lbl
@@ -168,7 +168,7 @@ lbl:
     __endasm;
 }
 
-void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) NAKED {
+static void screen_clear_thumbnail_row(uint8_t * dest, uint8_t fill) NAKED {
     dest; fill;
     __asm
 .macro .WAIT_STAT_02 ?lbl
