@@ -339,7 +339,11 @@ uint8_t gallery_print_info(void) {
 static uint8_t refresh_screen(void) {
     screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     menu_text_out(0, 0, DEVICE_SCREEN_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " Camera roll");
+#if defined(NINTENDO)
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_B "/" ICON_START " or " ICON_SELECT " for menus");
+#elif defined(SEGA)
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_B " or " ICON_START " for menus");
+#endif
     return gallery_show_position(gallery_show_picture(OPTION(gallery_picture_idx)));
 }
 

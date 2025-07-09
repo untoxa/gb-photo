@@ -172,7 +172,11 @@ static void refresh_screen(void) {
     thumbnails_diaplay(thumbnails_page_no * MAX_PREVIEW_THUMBNAILS);
 
     sprintf(text_buffer, "%hd/%hd", (uint8_t)((OPTION(gallery_picture_idx) < images_taken()) ? (OPTION(gallery_picture_idx) + 1) : 0), (uint8_t)images_taken());
+#if defined(NINTENDO)
     menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_A " select " ICON_START "/" ICON_SELECT " for menus");
+#elif defined(SEGA)
+    menu_text_out(0, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, " " ICON_A " select " ICON_START " for menu");
+#endif
     menu_text_out(HELP_CONTEXT_WIDTH, 17, IMAGE_SLOTS_USED_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
@@ -295,11 +299,14 @@ uint8_t UPDATE_state_thumbnails(void) BANKED {
         memset(selected_images, 0, sizeof(selected_images));
 
         refresh_screen();
-    } else if (KEY_PRESSED(J_MAIN_MENU)) {
+    }
+#if defined(NINTENDO)
+    else if (KEY_PRESSED(J_MAIN_MENU)) {
         // run Main Menu
         hide_sprites_range(0, MAX_HARDWARE_SPRITES);
         if (!menu_main_execute()) refresh_screen();
     }
+#endif
     hide_sprites_range(move_metasprite(hand_cursor[cursor_anim], HAND_CURSOR_BASE_TILE, 0, ((cx << 2) + 2) << 3, ((cy << 2) + 1) << 3), MAX_HARDWARE_SPRITES);
     if ((sys_time & 0x07) == 0) cursor_anim = ++cursor_anim & 0x03;
     return TRUE;
