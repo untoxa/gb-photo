@@ -53,7 +53,7 @@ static void refresh_screen(void) {
     vwf_set_colors(DMG_WHITE, DMG_BLACK);
     screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
     screen_load_picture(0, 0, logo_WIDTH / logo_TILE_W, logo_HEIGHT / logo_TILE_H, logo_map, logo_tiles, BANK(logo));
-    screen_text_render(0, 16, " (c) 2022..2024, Toxa");
+    screen_text_render(0, 16, " (c) 2022..2025, Toxa");
     screen_text_render(0, 17, version_string);
     sync_vblank();
     screen_restore_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT);
