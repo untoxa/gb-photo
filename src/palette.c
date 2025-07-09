@@ -57,12 +57,8 @@ void palette_reload(void) BANKED {
 
         const palette_entry_t * pal = cgb_palette + (OPTION(cgb_palette_idx) % LENGTH(cgb_palette));
         memcpy(BkgPalette, pal, sizeof(palette_entry_t));
-#if defined(NINTENDO)
         memcpy(&SprPalette[0].c1, pal, sizeof(palette_entry_t) - sizeof(SprPalette[0].c0));
         SprPalette[1].c2 = pal->c0; SprPalette[1].c3 = pal->c2;
-#elif defined(SEGA)
-        SprPalette[0].c1 = pal->c3; SprPalette[0].c2 = pal->c0; ; SprPalette[0].c3 = pal->c2;
-#endif
     } else {
         DMG_palette[0] = DMG_PALETTE(DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY, DMG_BLACK);
         DMG_palette[1] = DMG_PALETTE(DMG_BLACK, DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY);
