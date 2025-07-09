@@ -65,12 +65,15 @@ jobs:
           ls -la gb-photo/build
           ls -la gb-photo/build/duck
           ls -la gb-photo/build/gbc
+          ls -la gb-photo/build/gg
           # Remove debug artifacts
           rm -f gb-photo/build/duck/*.noi gb-photo/build/duck/*.map gb-photo/build/duck/*.sym gb-photo/build/duck/*.ihx
           rm -f gb-photo/build/gbc/*.noi gb-photo/build/gbc/*.map gb-photo/build/gbc/*.sym gb-photo/build/gbc/*.ihx
+          rm -f gb-photo/build/gg/*.noi gb-photo/build/gg/*.map gb-photo/build/gg/*.sym gb-photo/build/gg/*.ihx
           ls -la gb-photo/build
           ls -la gb-photo/build/duck
           ls -la gb-photo/build/gbc
+          ls -la gb-photo/build/gg
           # Don't use zip in linux since github will created a double nested zip
           # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
 
