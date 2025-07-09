@@ -58,7 +58,7 @@ jobs:
 
 
       # ==== Packaging ====
-      - name: Package build Linux/MacOS
+      - name: Package build Linux
         if: (matrix.name == 'Linux-x64')
         shell: bash
         run: |
