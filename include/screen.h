@@ -25,18 +25,14 @@ BANKREF_EXTERN(module_display_off)
 BANKREF_EXTERN(module_display_on)
 
 extern const uint8_t * const screen_tile_addresses[DEVICE_SCREEN_HEIGHT];
-extern const uint8_t screen_tile_map[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH];
-#if defined(SEGA)
-extern const uint8_t screen_tile_attr[DEVICE_SCREEN_HEIGHT * DEVICE_SCREEN_WIDTH];
-#endif
+extern const uint8_t screen_tile_map[];
 
 inline void screen_set_tile_xy(uint8_t x, uint8_t y, uint8_t tile) {
-#if defined(SEGA)
-    VBK_REG = 1;
-    set_bkg_tile_xy(x, y, 0);
-    VBK_REG = 0;
-#endif
+#if defined(NINTENDO)
     set_bkg_tile_xy(x, y, tile);
+#elif defined(SEGA)
+    set_attributed_tile_xy(x, y, tile);
+#endif
 }
 
 inline uint8_t screen_clear_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t color) {
@@ -47,11 +43,7 @@ inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 #if defined(NINTENDO)
     return (w) ? set_bkg_submap(x, y, w, h, screen_tile_map, DEVICE_SCREEN_WIDTH), w : w;
 #elif defined(SEGA)
-    if (w) {
-        set_bkg_submap(x, y, w, h, screen_tile_map, DEVICE_SCREEN_WIDTH);
-        set_bkg_submap_attributes(x, y, w, h, screen_tile_attr, DEVICE_SCREEN_WIDTH);
-    }
-    return w;
+    return (w) ? set_tile_submap(x, y, w, h, DEVICE_SCREEN_WIDTH, screen_tile_map), w : w;
 #endif
 }
 
