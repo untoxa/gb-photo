@@ -76,7 +76,12 @@ lbl:
         ret
     __endasm;
 #else
-    __asm__("ret");
+    __asm
+        pop hl
+        dec sp
+        pop af
+        jp (hl)
+    __endasm;
 #endif
 }
 
