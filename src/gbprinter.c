@@ -47,12 +47,17 @@ static uint8_t printer_tile_num;
 uint8_t printer_completion = 0;
 far_ptr_t printer_progress_handler = {0, NULL};
 
+#if defined(NINTENDO)
 uint8_t printer_send_receive(uint8_t b) {
     SB_REG = b;
     SC_REG = (OPTION(print_fast)) ? START_TRANSFER_FAST : START_TRANSFER;
     while (SC_REG & 0x80);
     return SB_REG;
 }
+#elif defined(SEGA)
+uint8_t sio_send_byte(uint8_t data);
+#define printer_send_receive(a) sio_send_byte(a)
+#endif
 
 uint8_t printer_send_byte(uint8_t b) {
     return (uint8_t)(printer_status = ((printer_status << 8) | printer_send_receive(b)));
@@ -196,6 +201,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
 }
 
 uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t sh, uint8_t centered) BANKED {
+#if defined(NINTENDO)
     static uint8_t error;
 
     // call printer progress: zero progress
@@ -255,4 +261,8 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
         printer_completion = PRN_MAX_PROGRESS, call_far(&printer_progress_handler);
     }
     return PRINTER_SEND_COMMAND(PRN_PKT_STATUS);
+#elif defined(SEGA)
+    sx; sy; sw; sh; centered;
+    return PRN_STATUS_CANCELLED;
+#endif
 }
