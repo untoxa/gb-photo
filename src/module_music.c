@@ -24,10 +24,11 @@ uint8_t music_paused = FALSE;
 uint8_t INIT_module_music(void) BANKED {
     music_init();
     CRITICAL {
-        music_setup_timer_ex(_is_CPU_FAST);
 #if defined(NINTENDO)
+        music_setup_timer_ex(_is_CPU_FAST);
         add_low_priority_TIM(music_play_isr);
 #elif defined(SEGA)
+	music_setup_vblank();
         add_VBL(music_play_isr);
 #endif
     }

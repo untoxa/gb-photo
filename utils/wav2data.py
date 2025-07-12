@@ -41,7 +41,7 @@ def main(argv=None):
 
     with wave.open(str(infilename), mode="rb") as f:
         p = f.getparams()
-        if (p.nchannels == 1) and (p.sampwidth == 1) and (p.framerate >= 8000) and (p.framerate <= 8192) and (p.comptype == 'NONE'):
+        if (p.nchannels == 1) and (p.sampwidth == 1) and (((p.framerate >= 8000) and (p.framerate <= 8192)) or (p.framerate == 1920)) and (p.comptype == 'NONE'):
             data = f.readframes(p.nframes)
             c = 0
             cnt = 0;
