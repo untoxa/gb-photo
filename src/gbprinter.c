@@ -55,8 +55,8 @@ uint8_t printer_send_receive(uint8_t b) {
     return SB_REG;
 }
 #elif defined(SEGA)
-uint8_t sio_send_byte(uint8_t data);
-#define printer_send_receive(a) sio_send_byte(a)
+uint8_t sio_exchange_byte(uint8_t data);
+#define printer_send_receive(a) sio_exchange_byte(a)
 #endif
 
 uint8_t printer_send_byte(uint8_t b) {
