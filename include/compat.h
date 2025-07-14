@@ -40,6 +40,24 @@ __REG _current_rom;
 
 #elif defined(SEGA)
 
+// link cable definitions
+// DPC0 = MISO
+// DPC1 = MOSI
+// DPC6 = CLK
+
+#define GGEXT_B_NINIT   7
+
+#define LINK_PIN_CLK    6
+#define LINK_PIN_MOSI   1
+#define LINK_PIN_MISO   0
+#define LINK_CLK        0b01000000
+#define LINK_MOSI       0b00000010
+#define LINK_MISO       0b00000001
+
+#define LINK_SLAVE      0b11000001
+#define LINK_MASTER     0b00000001
+
+
 #define GB_TO_GG_ADAPTER 0
 
 #if (GB_TO_GG_ADAPTER != 0)

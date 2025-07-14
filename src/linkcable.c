@@ -17,7 +17,30 @@ static const uint8_t LNK_DATA_HDR[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT 
 static const uint8_t LNK_DATA_FTR[]  = { PRN_LE(0), PRN_LE(0) };
 
 #if defined(SEGA)
-uint8_t sio_exchange_byte(uint8_t data);
+void sio_transmit_byte(uint8_t data) NAKED {
+    data;
+    __asm
+        ld e, #LINK_MASTER
+        ld c, #_GG_EXT_CTL
+        out (c), e
+        ld c, #_GG_EXT_7BIT
+        ld h, #LINK_MISO
+        ld l, #LINK_CLK
+        rlca
+        rlca
+        ld e, a
+        .rept 8
+            ld a, e
+            and h
+            or l
+            out (c), a
+            and h
+            rlc e
+            out (c), a
+        .endm
+        ret
+    __endasm;
+}
 #endif
 
 void linkcable_send_string(const uint8_t * data, uint8_t len) {
@@ -28,7 +51,7 @@ void linkcable_send_string(const uint8_t * data, uint8_t len) {
         SC_REG = START_TRANSFER_FAST;
         while (SC_REG & 0x80);
 #elif defined(SEGA)
-        sio_exchange_byte(*data++);
+        sio_transmit_byte(*data++);
 #endif
     }
 }
@@ -87,7 +110,7 @@ void linkcable_send_block(const uint8_t * image, uint8_t bank) NONBANKED {
     uint8_t __save = CURRENT_ROM_BANK;
     CAMERA_SWITCH_ROM(bank);
     for (uint16_t i = CAMERA_IMAGE_SIZE; (i); --i)
-        sio_exchange_byte(*image++);
+        sio_transmit_byte(*image++);
     CAMERA_SWITCH_ROM(__save);
 }
 #endif

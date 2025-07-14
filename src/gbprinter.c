@@ -11,6 +11,7 @@
 #include "states.h"
 #include "globals.h"
 #include "joy.h"
+#include "screen.h"
 
 #include "state_camera.h"
 
@@ -55,8 +56,101 @@ uint8_t printer_send_receive(uint8_t b) {
     return SB_REG;
 }
 #elif defined(SEGA)
-uint8_t sio_exchange_byte(uint8_t data);
-#define printer_send_receive(a) sio_exchange_byte(a)
+// DPC0 = MISO
+// DPC1 = MOSI
+// DPC6 = CLK
+uint8_t printer_send_receive(uint8_t data) NAKED {
+    data;
+    __asm
+        ld e, #LINK_MASTER
+        ld c, #_GG_EXT_CTL
+        out (c), e
+        ld c, #_GG_EXT_7BIT
+        out (c), e
+        ld b, #8
+1$:
+        rlca
+        rl e
+        rl e
+        res GGEXT_B_NINIT, e
+        set LINK_PIN_CLK, e
+        out (c), e
+        res LINK_PIN_CLK, e
+        out (c), e
+        in e, (c)
+        rrca
+        srl e
+        rla
+        djnz 1$
+        ret
+    __endasm;
+}
+uint16_t get_vram_word(uint8_t * sour) NAKED {
+    sour;
+    __asm
+        ex de, hl
+        ld hl, #__shadow_OAM_OFF
+        inc (hl)
+
+        ld c, #_VDP_CMD
+        ld a, e
+        di
+        out (c), e
+        ei
+        out (c), d
+
+        ld c, #_VDP_DATA
+
+        in e, (c)
+        jr 1$
+1$:
+        nop
+        in d, (c)
+
+        ld hl, #__shadow_OAM_OFF
+        dec (hl)
+        ret
+    __endasm;
+}
+void get_vram_2bpp_tile(uint8_t * dest, uint8_t * sour) NAKED {
+    dest; sour;
+    __asm
+        ex de, hl
+        ld b, h
+        ld c, l
+        ld hl, #__shadow_OAM_OFF
+        inc (hl)
+
+        ld a, c
+        di
+        out (_VDP_CMD), a
+        ld a, b
+        ei
+        out (_VDP_CMD), a
+
+        ex de, hl
+        ld e, #8
+        ld c, #_VDP_DATA
+1$:
+        ld b, #2
+2$:
+        ini
+        jr nz, 2$
+        nop
+        in a, (_VDP_DATA)
+        jr 3$
+3$:
+        nop
+        in a, (_VDP_DATA)
+        dec e
+        jr nz, 1$
+
+        ld hl, #__shadow_OAM_OFF
+        dec (hl)
+
+        ret
+    __endasm;
+}
 #endif
 
 uint8_t printer_send_byte(uint8_t b) {
@@ -132,7 +226,7 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
 
     banked_memcpy(&current_frame, frame, sizeof(current_frame), frame_bank);
 
-    uint8_t tile_data[16], rows = ((current_frame.height >> 1) << 1), pkt_count = 0;
+    uint8_t tile_data[0x10], rows = ((current_frame.height >> 1) << 1), pkt_count = 0;
 
     if ((rows >> 1) == 0) return PRN_STATUS_OK;
 
@@ -201,13 +295,12 @@ uint8_t gbprinter_print_image(const uint8_t * image, uint8_t image_bank, const f
 }
 
 uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t sh, uint8_t centered) BANKED {
-#if defined(NINTENDO)
     static uint8_t error;
 
     // call printer progress: zero progress
     printer_completion = 0, call_far(&printer_progress_handler);
 
-    uint8_t tile_data[16], rows = ((sh & 0x01) ? (sh + 1) : sh), pkt_count = 0, x_ofs = (centered) ? ((PRN_TILE_WIDTH - sw) >> 1) : 0;
+    uint8_t tile_data[0x10], rows = ((sh & 0x01) ? (sh + 1) : sh), pkt_count = 0, x_ofs = (centered) ? ((PRN_TILE_WIDTH - sw) >> 1) : 0;
 
     printer_tile_num = 0;
 
@@ -215,9 +308,15 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
         uint8_t * map_addr = get_bkg_xy_addr(sx, y + sy);
         for (uint8_t x = 0; x != PRN_TILE_WIDTH; x++) {
             if ((x >= x_ofs) && (x < (x_ofs + sw)) && (y < sh))  {
+#if defined(NINTENDO)
                 uint8_t tile = get_vram_byte(map_addr++);
-                uint8_t * source = (((y + sy) > 11) || (tile > 127)) ? _VRAM8000 : _VRAM9000;
+                uint8_t * source = (((y + sy) > 11) || (tile > 127)) ? TILE_BANK_1 : (TILE_BANK_0 + 0x800);
                 vmemcpy(tile_data, source + ((uint16_t)tile << 4), sizeof(tile_data));
+#elif defined(SEGA)
+                uint16_t tile = get_vram_word(map_addr);
+                map_addr += 2;
+                get_vram_2bpp_tile(tile_data, TILE_BANK_0 + (tile << 5));
+#endif
             } else memset(tile_data, 0x00, sizeof(tile_data));
             if (printer_print_tile(tile_data)) {
                 pkt_count++;
@@ -261,8 +360,4 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
         printer_completion = PRN_MAX_PROGRESS, call_far(&printer_progress_handler);
     }
     return PRINTER_SEND_COMMAND(PRN_PKT_STATUS);
-#elif defined(SEGA)
-    sx; sy; sw; sh; centered;
-    return PRN_STATUS_CANCELLED;
-#endif
 }
