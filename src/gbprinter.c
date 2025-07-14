@@ -59,7 +59,7 @@ uint8_t printer_send_receive(uint8_t b) {
 // DPC0 = MISO
 // DPC1 = MOSI
 // DPC6 = CLK
-uint8_t printer_send_receive(uint8_t data) NAKED {
+uint8_t printer_send_receive(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) {
     data;
     __asm
         ld e, #LINK_MASTER
@@ -76,7 +76,17 @@ uint8_t printer_send_receive(uint8_t data) NAKED {
         set LINK_PIN_CLK, e
         out (c), e
         res LINK_PIN_CLK, e
+
+        ld d, b
+        ld b, #15
+2$:     djnz 2$
+
         out (c), e
+
+        ld b, #8
+3$:     djnz 3$
+        ld b, d
+
         in e, (c)
         rrca
         srl e
@@ -313,7 +323,7 @@ uint8_t gbprinter_print_screen_rect(uint8_t sx, uint8_t sy, uint8_t sw, uint8_t 
                 uint8_t * source = (((y + sy) > 11) || (tile > 127)) ? TILE_BANK_1 : (TILE_BANK_0 + 0x800);
                 vmemcpy(tile_data, source + ((uint16_t)tile << 4), sizeof(tile_data));
 #elif defined(SEGA)
-                uint16_t tile = get_vram_word(map_addr);
+                uint16_t tile = get_vram_word(map_addr) & 0x01ff;
                 map_addr += 2;
                 get_vram_2bpp_tile(tile_data, TILE_BANK_0 + (tile << 5));
 #endif
