@@ -32,9 +32,8 @@ void sio_transmit_byte(uint8_t data) NAKED {
         .rept 8
             ld a, e
             and h
-            or l
             out (c), a
-            and h
+            or l
             rlc e
             out (c), a
         .endm
