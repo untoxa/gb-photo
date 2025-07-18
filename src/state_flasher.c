@@ -490,22 +490,18 @@ static void refresh_screen(void) {
 }
 
 void flasher_show_icon(void) {
-#if defined(NINTENDO)
     fade_out_modal();
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
     screen_clear_rect(0, 0, DEVICE_SCREEN_WIDTH, DEVICE_SCREEN_HEIGHT, WHITE_ON_BLACK);
-    banked_vmemcpy(_VRAM, flash_tiles, sizeof(flash_tiles), BANK(flash));
+    banked_vmemcpy(TILE_BANK_1, flash_tiles, sizeof(flash_tiles), BANK(flash));
     hide_sprites_range(move_metasprite(flasher, 0, 0, (DEVICE_SCREEN_PX_WIDTH - 32) >> 1, (DEVICE_SCREEN_PX_HEIGHT - 32) >> 1), MAX_HARDWARE_SPRITES);
     fade_in_modal();
-#endif
 }
 void flasher_hide_icon(void) {
-#if defined(NINTENDO)
     fade_out_modal();
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
     refresh_screen();
     fade_in_modal();
-#endif
 }
 
 
