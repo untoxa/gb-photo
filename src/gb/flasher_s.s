@@ -204,7 +204,7 @@ flash_routine_table:
 b_save_sram_banks = 255
 .globl b_save_sram_banks
 _save_sram_banks::
-        ldhl    sp, #6
+        ldhl    sp, #.BANKOV
         ld      a, (hl)                         ; a = flash_type
 
         ldhl    sp, #0
@@ -272,6 +272,7 @@ _save_sram_banks::
         pop     hl
         ld      sp, hl
 
+        ld      a, e
         ret
 
 ; FLASH erase sector routines
@@ -389,7 +390,7 @@ erase_routine_table:
 b_erase_flash = 255
 .globl b_erase_flash
 _erase_flash::
-        ldhl    sp, #6
+        ldhl    sp, #.BANKOV
         ld      a, (hl)                         ; a = flash_type
 
         ldhl    sp, #0
@@ -434,4 +435,5 @@ _erase_flash::
         pop     hl
         ld      sp, hl
 
+        ld      a, e
         ret

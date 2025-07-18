@@ -31,7 +31,7 @@ _save_sram_bank_count::
 _HDR_flash_data_routine:
         di
 
-        ldh     a, (__current_rom)
+        ld      a, (__current_rom)
         push    af                              ; save current bank
 
         ld      a, c
@@ -102,10 +102,9 @@ _HDR_flash_data_routine:
         .wb     #_rRAMG_MBC5, #0x0A             ; enable SRAM back
 
         pop     af
-        ld      (_rROMB0_MBC5), a                ; restore ROM bank
+        ld      (_rROMB0_MBC5), a               ; restore ROM bank
 
-        xor     a
-        ldh     (rIF), a
+        in      a, (.VDP_STAT)                  ; cancel pending interrupts
         ei
         ret
 _end_HDR_flash_data_routine:
@@ -114,7 +113,7 @@ _end_HDR_flash_data_routine:
 _IG_flash_data_routine:
         di
 
-        ldh     a, (__current_rom)
+        ld      a, (__current_rom)
         push    af                              ; save current bank
 
         ld      a, c
@@ -185,10 +184,9 @@ _IG_flash_data_routine:
         .wb     #_rRAMG_MBC5, #0x0A             ; enable SRAM back
 
         pop     af
-        ld      (_rROMB0_MBC5), a                ; restore ROM bank
+        ld      (_rROMB0_MBC5), a               ; restore ROM bank
 
-        xor     a
-        ldh     (rIF), a
+        in      a, (.VDP_STAT)                  ; cancel pending interrupts
         ei
         ret
 _end_IG_flash_data_routine:
@@ -204,10 +202,12 @@ flash_routine_table:
 b_save_sram_banks = 255
 .globl b_save_sram_banks
 _save_sram_banks::
-        ldhl    sp, #.BANKOV
+        ld      hl, #.BANKOV
+        add     hl, sp
         ld      a, (hl)                         ; a = flash_type
 
-        ldhl    sp, #0
+        ld      hl, #0
+        add     hl, sp
         ld      d, h
         ld      e, l                            ; de = sp
 
@@ -225,7 +225,8 @@ _save_sram_banks::
         ld      b, (hl)                         ; bc = routine
         inc     hl
 
-        ld      a, (hl+)
+        ld      a, (hl)
+        inc     hl
         ld      h, (hl)
         ld      l, a                            ; hl = negative offset
 
@@ -240,8 +241,10 @@ _save_sram_banks::
 
         ld      d, b
         ld      e, c
+        ex      de, hl
+        ld      b, #0
         ld      c, a
-        rst     0x30                            ; copy up to 256 bytes in C from DE to HL
+        ldir                                    ; copy up to 256 bytes in C from DE to HL
 
         ld      a, (_save_sram_bank_count)
         ld      e, #0
@@ -256,7 +259,7 @@ _save_sram_banks::
         push    hl                              ; restore routine address into hl
 
         push    bc
-        rst     0x20                            ; call routine
+        CALL_HL                                 ; call routine
         pop     bc
 
         ld      a, e
@@ -280,7 +283,7 @@ _save_sram_banks::
 _HDR_erase_flash_sector_routine:
         di
 
-        ldh     a, (__current_rom)
+        ld      a, (__current_rom)
         push    af                              ; save current bank
 
         .wb     #_rRAMG_MBC5, #0x00             ; disable SRAM
@@ -320,10 +323,9 @@ _HDR_erase_flash_sector_routine:
         .wb     #_rRAMG_MBC5, #0x0A             ; enable SRAM back
 
         pop     af
-        ld      (_rROMB0_MBC5), a                ; restore bank
+        ld      (_rROMB0_MBC5), a               ; restore bank
 
-        xor     a
-        ldh     (rIF), a
+        in      a, (.VDP_STAT)                  ; cancel pending interrupts
         ei
         ret
 _end_HDR_erase_flash_sector_routine:
@@ -331,7 +333,7 @@ _end_HDR_erase_flash_sector_routine:
 _IG_erase_flash_sector_routine:
         di
 
-        ldh     a, (#__current_rom)
+        ld      a, (#__current_rom)
         push    af                              ; save current bank
 
         .wb     #_rRAMG_MBC5, #0x00             ; disable SRAM
@@ -371,10 +373,9 @@ _IG_erase_flash_sector_routine:
         .wb     #_rRAMG_MBC5, #0x0A             ; enable SRAM back
 
         pop     af
-        ld      (_rROMB0_MBC5), a                ; restore bank
+        ld      (_rROMB0_MBC5), a               ; restore bank
 
-        xor     a
-        ldh     (rIF), a
+        in      a, (.VDP_STAT)                  ; cancel pending interrupts
         ei
         ret
 _end_IG_erase_flash_sector_routine:
@@ -390,10 +391,12 @@ erase_routine_table:
 b_erase_flash = 255
 .globl b_erase_flash
 _erase_flash::
-        ldhl    sp, #.BANKOV
+        ld      hl, #.BANKOV
+        add     hl, sp
         ld      a, (hl)                         ; a = flash_type
 
-        ldhl    sp, #0
+        ld      hl, #0
+        add     hl, sp
         ld      d, h
         ld      e, l                            ; de = sp
 
@@ -411,7 +414,8 @@ _erase_flash::
         ld      b, (hl)                         ; bc = routine
         inc     hl
 
-        ld      a, (hl+)
+        ld      a, (hl)
+        inc     hl
         ld      h, (hl)
         ld      l, a                            ; hl = negative offset
 
@@ -426,11 +430,13 @@ _erase_flash::
 
         ld      d, b
         ld      e, c
+        ex      de, hl
+        ld      b, #0
         ld      c, a
-        rst     0x30                            ; copy up to 256 bytes in C from DE to HL
+        ldir                                    ; copy up to 256 bytes in C from DE to HL
 
         pop     hl
-        rst     0x20                            ; call routine on stack using call hl
+        CALL_HL                                 ; call routine on stack using call hl
 
         pop     hl
         ld      sp, hl

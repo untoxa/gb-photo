@@ -43,15 +43,9 @@ typedef struct item_coord_t {
     uint8_t x, y;
 } item_coord_t;
 
-#if defined(NINTENDO)
 extern uint8_t save_rom_bank;
 extern uint8_t save_sram_bank_offset;
 extern uint8_t save_sram_bank_count;
-#elif defined(SEGA)
-uint8_t save_rom_bank;
-uint8_t save_sram_bank_offset;
-uint8_t save_sram_bank_count;
-#endif
 
 inline uint8_t slot_to_sector(uint8_t slot, uint8_t ofs) {
     return ((((slot) + 1) << 3) + (ofs << 2));
@@ -62,18 +56,7 @@ inline void flasher_show_progressbar(uint8_t x, uint8_t value, uint8_t size) {
     menu_text_out(x, 17, HELP_CONTEXT_WIDTH, WHITE_ON_BLACK, ITEM_DEFAULT, text_buffer);
 }
 
-#if defined(NINTENDO)
-uint8_t erase_flash(uint8_t cart_type) OLDCALL BANKED;                // erases FLASH sector: 64K or 4 banks
-uint8_t save_sram_banks(uint8_t cart_type) OLDCALL BANKED;            // copies up to count SRAM banks to FLASH
-#elif defined(SEGA)
-inline uint8_t erase_flash(uint8_t cart_type) {
-    cart_type;
-    return FALSE;
-}
-inline uint8_t save_sram_banks(uint8_t cart_type) {
-    cart_type;
-    return FALSE;
-}
-#endif
+uint8_t erase_flash(uint8_t cart_type) BANKED;                // erases FLASH sector: 64K or 4 banks
+uint8_t save_sram_banks(uint8_t cart_type) BANKED;            // copies up to count SRAM banks to FLASH
 
 #endif
