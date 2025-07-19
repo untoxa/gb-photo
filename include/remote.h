@@ -15,19 +15,7 @@ inline uint8_t remote_joypad(void) {
     return remote_keys;
 }
 
-#if defined(NINTENDO)
-
 uint8_t remote_activate(uint8_t value) BANKED;
 uint8_t INIT_module_remote(void) BANKED;
-
-#else
-
-inline uint8_t remote_activate(uint8_t value) {
-    value;
-    return REMOTE_DISABLED;
-}
-uint8_t INIT_module_remote(void) BANKED;
-
-#endif
 
 #endif

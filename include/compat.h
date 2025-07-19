@@ -45,7 +45,10 @@ __REG _current_rom;
 // DPC1 = MOSI
 // DPC6 = CLK
 
-#define GGEXT_B_NINIT   7
+#ifndef GGEXT_NINT
+#define GGEXT_NINT      0b10000000
+#endif
+#define GGEXT_B_NNIT    7
 
 #define LINK_PIN_CLK    6
 #define LINK_PIN_MOSI   1
@@ -54,8 +57,8 @@ __REG _current_rom;
 #define LINK_MOSI       0b00000010
 #define LINK_MISO       0b00000001
 
-#define LINK_SLAVE      0b11000001
-#define LINK_MASTER     0b00000001
+#define LINK_SLAVE      0b01000001
+#define LINK_MASTER     0b10000001
 
 
 #define GB_TO_GG_ADAPTER 0

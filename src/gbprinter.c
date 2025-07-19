@@ -73,7 +73,7 @@ uint8_t printer_send_receive(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) 
         rl e
         rl e
 
-        res GGEXT_B_NINIT, e
+        set GGEXT_B_NNIT, e
         res LINK_PIN_CLK, e
         out (c), e
 
