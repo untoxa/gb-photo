@@ -44,7 +44,6 @@ __asm
         ld (hl), a
         jp nz, 4$
 
-        ld hl, #_remote_keys
         ld a, (_sio_value)  ; 0bS0IPXXXX S-stop, I-identifier, P-parity, XXXX - 4 button bits
         ld e, a
 
@@ -63,23 +62,32 @@ __asm
         and #1
         jp nz, 1$           ; check parity bit (result must be 0 when parity matches)
 
-        bit 1, e
-        jp nz, 2$
-
         ld a, #0xf0
         and e
         .rept 4
             rlca
         .endm
-        ld e, a
-        ld a, #0xf0
+
+        bit 1, e
+        jp nz, 2$
+
+        ld hl, #pad
+        ld d, #0xf0
         jp 3$
 2$:
-        ld a, #0xf0
-        and e
-        ld e, a
-        ld a, #0x0f
+        ld hl, #btn
+        ld d, #0x0f
 3$:
+        add l
+        ld l, a
+        adc h
+        sub l
+        ld h, a
+        ld e, (hl)
+
+        ld a, d
+
+        ld hl, #_remote_keys
         and (hl)
         or e
         ld (hl), a
@@ -88,7 +96,7 @@ __asm
 1$:
         xor a
         ld (_sio_counter), a
-        ld (hl), a
+        ld (_remote_keys), a
         ld (_remote_watchdog), a
 
 4$:
@@ -101,6 +109,11 @@ __asm
         pop hl
         pop af
         retn
+
+pad:    .db 0b00000000, 0b00001000, 0b00000100, 0b00001100, 0b00000001, 0b00001001, 0b00000101, 0b00001101
+        .db 0b00000010, 0b00001010, 0b00000110, 0b00001110, 0b00000011, 0b00001011, 0b00000111, 0b00001111
+btn:    .db 0b00000000, 0b00100000, 0b00010000, 0b00110000, 0b10000000, 0b10100000, 0b10010000, 0b10110000
+        .db 0b01000000, 0b01100000, 0b01010000, 0b01110000, 0b11000000, 0b11100000, 0b11010000, 0b11110000
 __endasm;
 }
 
