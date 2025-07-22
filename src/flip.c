@@ -43,44 +43,34 @@ uint8_t * copy_data_row_flipped_xy(uint8_t * dest, const uint8_t * sour) NAKED {
     __endasm;
 #else
     __asm
-        .ez80
-
-        push ix
-
-        ld ixh, d
-        ld ixl, e
-
-        ex de, hl
-        ld hl, #((CAMERA_IMAGE_TILE_WIDTH - 1) << 4)
+        ld b, d
+        ld c, e
+        ld de, #((CAMERA_IMAGE_TILE_WIDTH << 4) - 2)
         add hl, de
-        ex de, hl
-        ld iyh, d
-        ld iyl, e
-
-        ld hl, #_hflip_loop
-        ld (hl), #CAMERA_IMAGE_TILE_WIDTH
-        ld d, #>_flip_recode_table
+        ld a, #CAMERA_IMAGE_TILE_WIDTH
 1$:
-        .irp idy, 0,2,4,6,8,10,12,14
-            .irp idx, 0,1
-                ld e, 14-idy+idx(ix)
+        ld (#_hflip_loop), a
+
+        .rept 8
+            ld d, #>_flip_recode_table
+            .rept 2
+                ld a, (bc)
+                inc bc
+                ld e, a
                 ld a, (de)
-                ld idy+idx(iy), a
+                ld (hl), a
+                inc hl
             .endm
+            ld de, #-4
+            add hl, de
         .endm
 
-        ld bc, #CAMERA_IMAGE_TILE_WIDTH
-        add ix, bc
-        ld bc, #-CAMERA_IMAGE_TILE_WIDTH
-        add iy, bc
-
-        dec (hl)
+        ld a, (#_hflip_loop)
+        dec a
         jp nz, 1$
 
-        ld d, ixh
-        ld e, ixl
-
-        pop ix
+        ld d, b
+        ld e, c
         ret
     __endasm;
 #endif
@@ -115,42 +105,32 @@ uint8_t * copy_data_row_flipped_x(uint8_t * dest, const uint8_t * sour) NAKED {
     __endasm;
 #else
     __asm
-        .ez80
-
-        push ix
-
-        ld ixh, d
-        ld ixl, e
-
-        ex de, hl
-        ld hl, #((CAMERA_IMAGE_TILE_WIDTH - 1) << 4)
+        ld b, d
+        ld c, e
+        ld de, #((CAMERA_IMAGE_TILE_WIDTH - 1) << 4)
         add hl, de
-        ex de, hl
-        ld iyh, d
-        ld iyl, e
-
-        ld hl, #_hflip_loop
-        ld (hl), #CAMERA_IMAGE_TILE_WIDTH
-        ld d, #>_flip_recode_table
+        ld a, #CAMERA_IMAGE_TILE_WIDTH
 1$:
-        .irp idx, 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
-            ld e, idx(ix)
+        ld (#_hflip_loop), a
+
+        ld d, #>_flip_recode_table
+        .rept 16
+            ld a, (bc)
+            inc bc
+            ld e, a
             ld a, (de)
-            ld idx(iy), a
+            ld (hl), a
+            inc hl
         .endm
+        ld de, #-32
+        add hl, de
 
-        ld bc, #CAMERA_IMAGE_TILE_WIDTH
-        add ix, bc
-        ld bc, #-CAMERA_IMAGE_TILE_WIDTH
-        add iy, bc
-
-        dec (hl)
+        ld a, (#_hflip_loop)
+        dec a
         jp nz, 1$
 
-        ld d, ixh
-        ld e, ixl
-
-        pop ix
+        ld d, b
+        ld e, c
         ret
     __endasm;
 #endif
