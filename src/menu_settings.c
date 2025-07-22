@@ -294,7 +294,9 @@ const menu_item_t SettingsMenuItems[] = {
         .onPaint = onSettingsMenuItemPaint,
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_PRINT_FAST
-    }, {
+    }
+#if defined(NINTENDO)
+    , {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 1, .ofs_y = 10, .width = 13,
         .id = idSettingsIRRemoteShutter,
@@ -331,6 +333,7 @@ const menu_item_t SettingsMenuItems[] = {
         .onGetProps = onSettingsMenuItemProps,
         .result = ACTION_SETTINGS_ALT_BORDER
     }
+#endif
 };
 const menu_t GlobalSettingsMenu = {
     .x = 2, .y = 1, .width = 15, .height = LENGTH(SettingsMenuItems) + 2,
@@ -444,8 +447,8 @@ uint8_t onSettingsMenuItemProps(const struct menu_t * menu, const struct menu_it
             return ITEM_DISABLED;
 #endif
         case idSettingsCGBPalette:
-            return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idSettingsPrintFast:
+            return (_is_COLOR) ? ITEM_DEFAULT : ITEM_DISABLED;
         case idSettingsIRRemoteShutter:
         case idSettingsEnableDMA:
 #if defined(NINTENDO)

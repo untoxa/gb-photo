@@ -59,7 +59,7 @@ uint8_t printer_send_receive(uint8_t b) {
 // DPC0 = MISO
 // DPC1 = MOSI
 // DPC6 = CLK
-uint8_t printer_send_receive(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) {
+uint8_t link_exchange(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) {
     data;
     __asm
         ld e, #LINK_MASTER
@@ -96,6 +96,38 @@ uint8_t printer_send_receive(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) 
         ret
     __endasm;
 }
+uint8_t link_exchange_fast(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) {
+    data;
+    __asm
+        ld e, #LINK_MASTER
+        ld c, #_GG_EXT_CTL
+        out (c), e
+        ld c, #_GG_EXT_7BIT
+        out (c), e
+        ld b, #8
+1$:
+        rlca
+        rl e
+        rl e
+
+        set GGEXT_B_NNIT, e
+        res LINK_PIN_CLK, e
+        out (c), e
+        set LINK_PIN_CLK, e
+        out (c), e
+        in e, (c)
+
+        rrca
+        srl e
+        rla
+        djnz 1$
+        ret
+    __endasm;
+}
+inline uint8_t printer_send_receive(uint8_t data) {
+    return (OPTION(print_fast)) ? link_exchange_fast(data) : link_exchange(data);
+}
+
 uint16_t get_vram_word(uint8_t * sour) NAKED {
     sour;
     __asm
