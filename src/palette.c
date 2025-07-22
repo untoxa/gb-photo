@@ -25,31 +25,6 @@ static palette_entry_t cgb_palette[] = {
     COLOR_PALETTE(RGB8(254,218,27),  RGB8(223,121,37),  RGB8(182,0,119),   RGB8(56,41,119) )   // My Friend from Bavaria
 };
 
-#if defined(NINTENDO)
-void palette_cgb_zero(uint8_t reg) NAKED {
-    reg;
-__asm
-        ld c, a
-        ld a, #0x80
-        ldh (c), a
-        inc c
-
-        ld b, #(8 * 4 * 2)
-1$:
-        ldh a, (_STAT_REG)
-        bit STATF_B_BUSY, a
-        jr nz, 1$
-        xor a
-        ldh (c), a
-
-        dec b
-        jr nz, 1$
-
-        ret
-__endasm;
-}
-#endif
-
 void palette_reload(void) BANKED {
     if (_is_COLOR) {
         memset(BkgPalette, 0, sizeof(BkgPalette));
@@ -67,22 +42,22 @@ void palette_reload(void) BANKED {
 }
 
 uint8_t INIT_module_palette(void) BANKED {
-    palette_reload();
 #if defined(NINTENDO)
     BGP_REG = DMG_PALETTE(DMG_BLACK, DMG_BLACK, DMG_BLACK, DMG_BLACK);
     OBP0_REG = DMG_PALETTE(DMG_BLACK, DMG_BLACK, DMG_BLACK, DMG_BLACK);
     OBP1_REG = DMG_PALETTE(DMG_BLACK, DMG_BLACK, DMG_BLACK, DMG_BLACK);
 #endif
     if (_is_COLOR) {
+        memset(BkgPalette, 0, sizeof(BkgPalette));
+        memset(SprPalette, 0, sizeof(SprPalette));
 #if defined(NINTENDO)
-        palette_cgb_zero(BCPS_REG_ADDR);
-        palette_cgb_zero(OCPS_REG_ADDR);
+        set_bkg_palette(0, N_PALETTES, (void *)BkgPalette);
+        set_sprite_palette(0, N_PALETTES, (void *)SprPalette);
 #elif defined(SEGA)
-        for (uint8_t i = 0; i != 16; i++) {
-            set_palette_entry(0, i, 0);
-            set_palette_entry(1, i, 0);
-        }
+        set_palette(0, 1, (void *)BkgPalette);
+        set_palette(1, 1, (void *)SprPalette);
 #endif
     }
+    palette_reload();
     return 0;
 }
