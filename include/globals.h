@@ -55,6 +55,7 @@ extern uint8_t text_buffer[MAX_TEXT_BUFFER_SIZE];   // temporary buffer for rend
 // define modules: initialization order is important
 #define MODULES \
 _MODULE(module_detect_system)\
+_MODULE(module_flip)\
 _MODULE(module_load_save)\
 _MODULE(module_protected)\
 _MODULE(module_sgb_assets)\
