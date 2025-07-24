@@ -20,6 +20,11 @@ Photo! is also compatible with [mGBA](https://mgba.io/), [BGB](https://bgb.bircd
 
 Example of use: Photo! working on a GB Boy Colour and remotely controlled from a Game Boy Color with a serial cable.
 
+# Photo! on a MegaDuck with a Game Boy Mini Camera
+![Showcase](doc/Images/Showcase_MegaDuck_combined.jpg)
+
+The Mega Duck build of Photo! can be used when flashable Game Boy Cameras are connected via a cartridge slot adapter.
+
 # User Manual in brief
 
 The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features same slow transfer rate and a default "color" palette, as the original camera. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
