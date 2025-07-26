@@ -25,13 +25,14 @@ __asm
 7$:
 	ex de, hl
 
-        ld a, (_MAP_FRAME1)         ; save bank and switch
+        ld a, (__current_rom)       ; save bank and switch
         ld e, a
         ld a, (_sfx_play_bank)
         inc a                       ; SFX_STOP_BANK ?
         ret z                       ; return FALSE
         dec a
-        ld (_MAP_FRAME1), a
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ld d, #0x0f
         ld a, (hl)
@@ -57,7 +58,8 @@ __asm
         ld (_sfx_play_sample), hl   ; save current position
 
         ld a, e                     ; restore bank
-        ld (_MAP_FRAME1), a
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ld a, b                     ; result in a
 

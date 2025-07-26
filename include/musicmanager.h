@@ -6,7 +6,9 @@
 
 #include "sfxplayer.h"
 
+#define SOUND_ENABLE
 //#define MUSIC_ENABLE
+
 #define MUSIC_MODULE void
 
 // SFX priority constants: concurrent effect will play only if its priority level is higher or equal

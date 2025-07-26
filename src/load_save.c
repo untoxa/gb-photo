@@ -71,7 +71,7 @@ inline void save_wait_sram(void) {
 #if defined(CAMERA_EMULATE_CAPTURE)
     CAM_REG_CAPTURE &= ~CAM00F_CAPTURING;
 #else
-while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
+    while (CAM_REG_CAPTURE & CAM00F_CAPTURING);
 #endif
 }
 

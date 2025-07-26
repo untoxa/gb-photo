@@ -20,20 +20,23 @@ _vwf_memcpy::
         dec sp
         ex (sp), iy
 
-        ld  a, (.MAP_FRAME1)
-        ld  (#__save), a
-        ld  a, iyh
-        ld (.MAP_FRAME1), a
+
+        ld a, (__current_rom)
+        ld (#__save), a
+        ld a, iyh
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ldir
 
-        ld  a, (#__save)
-        ld  (.MAP_FRAME1),a
+        ld a, (#__save)
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
         ret
 
 ; UBYTE vwf_read_banked_ubyte(const void * src, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_read_banked_ubyte::
-        ld  a, (.MAP_FRAME1)
+        ld  a, (__current_rom)
         ld  (#__save), a
 
         pop hl
@@ -42,19 +45,21 @@ _vwf_read_banked_ubyte::
         ex (sp), hl
 
         ld a, h
-        ld (.MAP_FRAME1), a
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ex de, hl
         ld l, (hl)
 
-        ld  a, (#__save)
-        ld (.MAP_FRAME1), a
+        ld a, (#__save)
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
         ret
 
 ; void vwf_print_shift_char_right(void * dest, const void * src, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_print_shift_char_right::
-        ld  a, (.MAP_FRAME1)
-        ld  (#__save), a
+        ld a, (__current_rom)
+        ld (#__save), a
 
         pop hl
         pop de
@@ -63,7 +68,8 @@ _vwf_print_shift_char_right::
         ex (sp), hl
 
         ld a, h
-        ld (.MAP_FRAME1), a
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ex de, hl
         ld d, b
@@ -98,14 +104,15 @@ _vwf_print_shift_char_right::
         dec b
         jr nz, 3$
 
-        ld  a, (#__save)
-        ld (.MAP_FRAME1), a
+        ld a, (#__save)
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ret
 
 ; void vwf_print_shift_char_left(void * dest, const void * src, UBYTE bank) __sdcccall(0) __z88dk_callee;
 _vwf_print_shift_char_left::
-        ld  a, (.MAP_FRAME1)
+        ld  a, (__current_rom)
         ld  (#__save), a
 
         pop hl
@@ -115,7 +122,8 @@ _vwf_print_shift_char_left::
         ex (sp), hl
 
         ld a, h
-        ld (.MAP_FRAME1), a
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ex de, hl
         ld d, b
@@ -149,21 +157,22 @@ _vwf_print_shift_char_left::
         dec b
         jr nz, 3$
 
-        ld  a, (#__save)
-        ld (.MAP_FRAME1), a
+        ld a, (#__save)
+        ld (__current_rom), a
+        ld (_rROMB0_MBC5), a
 
         ret
 
 _vwf_swap_tiles::
-        ld      de, #_vwf_tile_data
-        ld      hl, #(_vwf_tile_data + 8)
+        ld de, #_vwf_tile_data
+        ld hl, #(_vwf_tile_data + 8)
         .rept 8
             ldi
         .endm
-        ld      h, d
-        ld      l, e
-        ld      (hl), #0
-        inc     de
+        ld h, d
+        ld l, e
+        ld (hl), #0
+        inc de
         .rept 7
             ldi
         .endm

@@ -60,29 +60,13 @@ __REG _current_rom;
 #define LINK_SLAVE      0b01000001
 #define LINK_MASTER     0b10000001
 
-
-#define GB_TO_GG_ADAPTER 0
-
-#if (GB_TO_GG_ADAPTER != 0)
-
-// MBC5 support on the Master System / Game Gear
 __BYTE_REG _current_rom;
 #define CURRENT_ROM_BANK _current_rom
 #define CAMERA_ENABLE_RAM (rRAMG_MBC5 = 0x0A)
 #define CAMERA_DISABLE_RAM (rRAMG_MBC5 = 0x00)
 #define CAMERA_SWITCH_RAM(b) (rRAMB_MBC5 = (b))
 #define CAMERA_SWITCH_ROM(b) (CURRENT_ROM_BANK = (b), rROMB0_MBC5 = (b))
-
-#else
-
-#define CURRENT_ROM_BANK CURRENT_BANK
-#define CAMERA_ENABLE_RAM ENABLE_RAM
-#define CAMERA_DISABLE_RAM DISABLE_RAM
-#define CAMERA_SWITCH_RAM(b) RAM_CONTROL=((b)?RAM_CONTROL|RAMCTL_BANK:RAM_CONTROL&(~RAMCTL_BANK))
-#define CAMERA_SWITCH_ROM(b) SWITCH_ROM(b)
-#define CAMERA_EMULATE_CAPTURE
-
-#endif
+//#define CAMERA_EMULATE_CAPTURE
 
 inline void sync_vblank(void) {
     vsync();

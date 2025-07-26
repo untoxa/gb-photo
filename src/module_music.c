@@ -22,6 +22,7 @@ uint8_t music_paused = FALSE;
 
 // initialize the music/SFX driver
 uint8_t INIT_module_music(void) BANKED {
+#if defined(SOUND_ENABLE)
     music_init();
     CRITICAL {
 #if defined(NINTENDO)
@@ -36,5 +37,6 @@ uint8_t INIT_module_music(void) BANKED {
     set_interrupts(IE_REG | TIM_IFLAG);
 #endif
     music_load(BANK(song), &song), music_pause(music_paused = TRUE);
+#endif
     return 0;
 }
