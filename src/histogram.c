@@ -8,7 +8,7 @@
 #include "systemhelpers.h"
 #include "state_camera.h"
 
-#define XY2PTR(X,Y) (last_seen + ((Y) * 16 * 16) + (X * 16))
+#define XY2PTR(X,Y) (last_seen + ((Y) * 16 * CAMERA_IMAGE_TILE_WIDTH) + (X * 16))
 
 static const uint8_t * const histogram_points_center[] = {
         XY2PTR( 6,  4), XY2PTR( 9,  4),
@@ -71,7 +71,7 @@ uint16_t calculate_tile(uint8_t * data) NAKED {
     __asm
         ld h, d
         ld l, e
-        ld de, #_bit_count_table
+        ld d, #>_bit_count_table
         ld bc, #0
 
         .rept 8
@@ -100,7 +100,31 @@ uint16_t calculate_tile(uint8_t * data) NAKED {
     __endasm;
 #else
     __asm
+        ld b, #>_bit_count_table
         ld de, #0
+
+        .rept 8
+            ld c, (hl)
+            inc l
+
+            ld a, (bc)          ; add with weight 1
+            add e
+            ld e, a
+            adc d
+            sub e
+            ld d, a
+
+            ld c, (hl)
+            inc l
+
+            ld a, (bc)          ; add with weight 2
+            add a
+            add e
+            ld e, a
+            adc d
+            sub e
+            ld d, a
+        .endm
         ret
     __endasm;
 #endif
