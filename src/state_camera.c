@@ -24,7 +24,6 @@
 #include "counter.h"
 #include "protected.h"
 #include "histogram.h"
-#include "math.h"
 #include "scrollbar.h"
 #include "ir.h"
 #include "sd.h"

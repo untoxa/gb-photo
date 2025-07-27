@@ -2,7 +2,6 @@
 
 #include "fade.h"
 #include "palette.h"
-#include "math.h"
 
 #define PAL_RED(C)   (((C)      ) & 0x0Fu)
 #define PAL_GREEN(C) (((C) >>  4) & 0x0Fu)
