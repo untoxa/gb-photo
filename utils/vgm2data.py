@@ -195,6 +195,9 @@ def parse_psg(inf, outf, options):
                     # write terminate sequence and exit
                     outf.write(bytes("0x00\n};\n", "ascii"))
                     break;
+        elif (data == b'\x4f'):
+            # Game Gear PSG stereo, write dd to port 0x06
+            inf.seek(1, 1)
         else:
             print("ERROR: unsupported command 0x{:02x}".format(unpack('B', data)[0]))
             sys.exit(1)

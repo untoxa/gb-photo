@@ -96,7 +96,7 @@ DEPS = $(DEPENDANT:%.o=%.d)
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/sounds/%.vgm $$(wildcard $(RESDIR)/audio/$(PLAT)/sounds/%.vgm.meta)
-	$(PYTHON) utils/vgm2data.py -5 -w -3 `cat <$<.meta 2>/dev/null` -o $@ $<
+	$(PYTHON) utils/vgm2data.py `cat <$<.meta 2>/dev/null` -o $@ $<
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/audio/$(PLAT)/sounds/%.sav $$(wildcard $(RESDIR)/audio/$(PLAT)/sounds/%.sav.meta)
