@@ -11,77 +11,35 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}  
-    strategy:
-      matrix:       
-        include:
-          - os: ubuntu-latest
-            name: Linux-x64
+    runs-on: ubuntu-latest
     steps:
+      - name: Check out Source
+        uses: actions/checkout@v4
 
-      # ==== OS Specific Dependencies ====
       - name: Linux Depends
-        if: matrix.name == 'Linux-x64'
         run: |
           # Pull the latest GBDK-2020
           curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/latest/download/gbdk-linux64.tar.gz
           tar xvfz gbdk-linux64.tar.gz
+          echo "GBDK_HOME=$(pwd)/gbdk" >> $GITHUB_ENV
           python -m pip install --upgrade Pillow
           # python -m pip install --upgrade wave
 
-      # ==== Build Steps ====
-      - name: Check out Source
-        uses: actions/checkout@v4
-        with:
-          path: gb-photo
-          submodules: false
-
-      # ==== Pre-Build: Set environment vars ====
-      # Needs to be in a separate step than build so that setting the environment var takes effect
-      #
-      - name: Pre-Build Linux
-        if: (matrix.name == 'Linux-x64')
-        shell: bash
-        run: |
-          echo "BUILD_PACKAGE_FILENAME=gb_photo.zip" >> $GITHUB_ENV
-
-
-      # ==== Build ====
       - name: Build GBDK-2020 Linux
-        if: (matrix.name == 'Linux-x64')
-        shell: bash
         run: |
-          export GBDK_HOME=`pwd`/gbdk/
-          cd gb-photo
           make
-          cd ..
+        env:
+          GBDK_HOME: ${{ env.GBDK_HOME }}
 
-
-      # ==== Packaging ====
       - name: Package build Linux
-        if: (matrix.name == 'Linux-x64')
-        shell: bash
         run: |
-          ls -la gb-photo/build
-          ls -la gb-photo/build/duck
-          ls -la gb-photo/build/gbc
-          ls -la gb-photo/build/gg
-          # Remove debug artifacts
-          rm -f gb-photo/build/duck/*.noi gb-photo/build/duck/*.map gb-photo/build/duck/*.sym gb-photo/build/duck/*.ihx
-          rm -f gb-photo/build/gbc/*.noi gb-photo/build/gbc/*.map gb-photo/build/gbc/*.sym gb-photo/build/gbc/*.ihx
-          rm -f gb-photo/build/gg/*.noi gb-photo/build/gg/*.map gb-photo/build/gg/*.sym gb-photo/build/gg/*.ihx
-          ls -la gb-photo/build
-          ls -la gb-photo/build/duck
-          ls -la gb-photo/build/gbc
-          ls -la gb-photo/build/gg
-          # Don't use zip in linux since github will created a double nested zip
-          # 7z a ${{ env.BUILD_PACKAGE_FILENAME }} *.gb
+          find ./build -name "*.noi" -type f -delete
+          find ./build -name "*.map" -type f -delete
+          find ./build -name "*.ihx" -type f -delete
 
       - name: Store build
-        if: (matrix.name == 'Linux-x64')
         uses: actions/upload-artifact@v4
         with:
           name: GB Photo! ROM Build
-          # path: gb-photo/build/gb/${{ env.BUILD_PACKAGE_FILENAME }}
-          path: gb-photo/build
+          path: ./build
           retention-days: 90
