@@ -37,7 +37,7 @@ LCCFLAGS += -Wl-j -Wl-w -Wm-yoA -Wm-ya16 -autobank -Wb-ext=.rel
 # LCCFLAGS += -debug # Uncomment to enable debug output
 # LCCFLAGS += -v     # Uncomment for lcc verbose output
 
-CFLAGS = -Iinclude -Iinclude/$(PORT) -Iinclude/$(PLAT) -I$(RESDIR) -Iobj/$(EXT) -Wf"--disable-warning 110"
+CFLAGS = -Iinclude -Iinclude/$(PORT) -Iinclude/$(PLAT) -I$(RESDIR) -Iobj/$(EXT)
 
 BRANCH      = $(shell git rev-parse --abbrev-ref HEAD)/$(EXT)
 VERSION     = $(shell cat version)
@@ -45,6 +45,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # Optimization
+CFLAGS      += -Wf"--disable-warning 110"
 #CFLAGS      += -Wf"--max-allocs-per-node 50000"
 
 # You can set the name of the ROM file here
