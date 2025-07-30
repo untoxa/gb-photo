@@ -27,6 +27,11 @@ Example of use: Photo! working on a GB Boy Colour and remotely controlled from a
 
 The Mega Duck build of Photo! can be used when flashable Game Boy Cameras are connected via a cartridge slot adapter.
 
+# Photo! on a Game Gear with a Game Boy Mini Camera and the GameBoy-to-GameGear adapter prototype:
+![Showcase](doc/Images/Showcase_GameGear.jpg)
+
+The Game Gear build of Photo! can be used when flashable Game Boy Cameras are connected via a cartridge slot adapter.
+
 # User Manual in brief
 
 The repo contains two sets of roms. One set is compiled for DMG Game boy and Game Boy Pocket and basically features same slow transfer rate and a default "color" palette, as the original camera. The set compiled for Game Boy Color is able to feature Double Speed Mode, very high baudrate transfer mode and features several palettes. The two sets come with a remote control rom allowing to use another Game Boy as controller via the serial cable. You can flash the remote control rom on any flashable cart, it will be compatible. 
