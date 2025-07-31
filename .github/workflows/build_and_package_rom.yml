@@ -13,10 +13,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Source
+      - name: Check out the project source
         uses: actions/checkout@v4
 
-      - name: Linux Depends
+      - name: Install build dependencies
         run: |
           # Pull the latest GBDK-2020
           curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/latest/download/gbdk-linux64.tar.gz
@@ -25,19 +25,19 @@ jobs:
           python -m pip install --upgrade Pillow
           # python -m pip install --upgrade wave
 
-      - name: Build GBDK-2020 Linux
+      - name: Build the project
         run: |
           make
         env:
           GBDK_HOME: ${{ env.GBDK_HOME }}
 
-      - name: Package build Linux
+      - name: Remove unnecessary artifacts
         run: |
           find ./build -name "*.noi" -type f -delete
           find ./build -name "*.map" -type f -delete
           find ./build -name "*.ihx" -type f -delete
 
-      - name: Store build
+      - name: Upload the artifacts
         uses: actions/upload-artifact@v4
         with:
           name: GB Photo! ROM Build
