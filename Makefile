@@ -45,7 +45,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # Optimization
-CFLAGS      += -Wf"--disable-warning 110"
+CFLAGS      += -Wf--disable-warning=110
 #CFLAGS      += -Wf"--max-allocs-per-node 50000"
 
 # You can set the name of the ROM file here
