@@ -179,6 +179,7 @@ $(OBJDIR)/list.lk: $(RESOBJ) $(OBJS)
 # Link the compiled object files into a .gb ROM file
 $(BINS): $(OBJDIR)/list.lk
 	$(LCC) $(LCCFLAGS) -o $(BINDIR)/$(PROJECTNAME).$(EXT) -Wl-f$^
+	$(PYTHON) utils/romfixer.py -e gg $(BINDIR)/$(PROJECTNAME).$(EXT)
 	cp assets/photo.sav $(BINDIR)/photo.sav
 
 remote:
