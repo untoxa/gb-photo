@@ -29,7 +29,7 @@ LCCFLAGS_gb      = $(LIBRARIES) -Wl-b_DATA=0xCEA0 -Wl-yt0xFC -Wm-ys -Wm-yn"$(PRO
 LCCFLAGS_gbc     = $(LCCFLAGS_gb) -Wm-yc 
 LCCFLAGS_duck    = $(LIBRARIES) -Wl-b_DATA=0xCEA0 -Wl-yt0xFC
 LCCFLAGS_sms     =
-LCCFLAGS_gg      = -Wb-reserve=1:10 -Wl-b_DATA=0xCEC0
+LCCFLAGS_gg      = -Wb-reserve=1:10 -Wl-b_CODE=0x0150 -Wl-b_DATA=0xCEC0
 
 LCCFLAGS += -m$(PORT):$(PLAT) $(LCCFLAGS_$(EXT)) -Wl-g_shadow_OAM=0xCE00 -Wm-yS # This adds the current platform specific LCC Flags
 
@@ -45,7 +45,7 @@ COMMIT      = $(shell git rev-parse --short HEAD)
 CFLAGS      += -DBRANCH=$(BRANCH) -DVERSION=$(VERSION) -DCOMMIT=$(COMMIT)
 
 # Optimization
-CFLAGS      += -Wf--disable-warning=110
+CFLAGS      += -Wf--disable-warning=110 -Wf--disable-warning=126
 #CFLAGS      += -Wf"--max-allocs-per-node 50000"
 
 # You can set the name of the ROM file here
