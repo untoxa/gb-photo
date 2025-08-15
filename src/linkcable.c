@@ -17,24 +17,22 @@ static const uint8_t LNK_DATA_HDR[]  = { PRN_LE(PRN_MAGIC), PRN_LE(PRN_CMD_INIT 
 static const uint8_t LNK_DATA_FTR[]  = { PRN_LE(0), PRN_LE(0) };
 
 #if defined(SEGA)
-void sio_transmit_byte(uint8_t data) NAKED {
+void sio_transmit_byte(uint8_t data) NONBANKED NAKED PRESERVES_REGS(iyh, iyl, d, e, h, l) {
     data;
     __asm
-        ld e, #LINK_MASTER
+        ld b, #LINK_MASTER
         ld c, #_GG_EXT_CTL
-        out (c), e
+        out (c), b
         ld c, #_GG_EXT_7BIT
-        ld h, #LINK_MISO
-        ld l, #LINK_CLK
         rlca
         rlca
-        ld e, a
+        ld b, a
         .rept 8
-            ld a, e
-            and h
+            ld a, b
+            and #LINK_MISO
             out (c), a
-            or l
-            rlc e
+            or #LINK_CLK
+            rlc b
             out (c), a
         .endm
         ret
