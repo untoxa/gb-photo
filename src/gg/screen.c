@@ -84,6 +84,7 @@ __asm
         inc de
         ld a, (de)
         nop
+        nop
         out (c), a
         inc de
         xor a
@@ -92,6 +93,7 @@ __asm
         out (c), a
         jr 6$
 6$:
+        nop
         nop
         out (c), a
         dec b
@@ -154,6 +156,7 @@ static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
             ld a, 0 (iy)
             out (_VDP_DATA), a
             ld a, 1 (iy)
+            nop
             out (_VDP_DATA), a
             ld a, 0 (iy)
             xor a
@@ -177,6 +180,7 @@ static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
         ld a, 0 (iy)
         out (_VDP_DATA), a
         ld a, 1 (iy)
+        nop
         out (_VDP_DATA), a
         ld a, 0 (iy)
         xor a
@@ -218,9 +222,11 @@ static void screen_clear_thumbnail_row(uint8_t * dest, uint16_t fill) {
             push hl
             pop hl
             out (c), b
+            nop
             push hl
             pop hl
             out (c), b
+            nop
             push hl
             pop hl
             out (c), b
@@ -240,9 +246,11 @@ static void screen_clear_thumbnail_row(uint8_t * dest, uint16_t fill) {
         push hl
         pop hl
         out (c), b
+        nop
         push hl
         pop hl
         out (c), b
+        nop
         push hl
         pop hl
         out (c), b
