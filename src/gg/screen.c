@@ -79,25 +79,26 @@ __asm
 1$:
         ld b, #8
 3$:
-        ld a, (de)
-        out (c), a
-        inc de
-        ld a, (de)
-        nop
-        nop
-        out (c), a
-        inc de
-        xor a
-        jr 5$
-5$:
-        out (c), a
-        jr 6$
-6$:
-        nop
-        nop
-        out (c), a
-        dec b
-        jr nz, 3$
+        ld a, (de)              ; 7 cycles
+        out (c), a              ; 12 cycles; total 35
+
+        inc de                  ; 6 cycles
+        ld a, (de)              ; 7 cycles
+        nop                     ; 4 cycles
+        out (c), a              ; 12 cycles; total 29
+
+        inc de                  ; 6 cycles
+        xor a                   ; 4 cycles
+        jr .+2                  ; 12 cycles
+        out (c), a              ; 12 cycles; total 34
+
+        nop                     ; 4 cycles
+        nop                     ; 4 cycles
+        jr .+2                  ; 12 cycles
+        out (c), a              ; 12 cycles; total 32
+
+        dec b                   ; 4 cycles
+        jr nz, 3$               ; 12 cycles
 2$:
         dec h
         jp  nz, 1$
@@ -153,17 +154,18 @@ static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
         ld iyl, e
 
         .rept 3
-            ld a, 0 (iy)
-            out (_VDP_DATA), a
-            ld a, 1 (iy)
-            nop
-            out (_VDP_DATA), a
-            ld a, 0 (iy)
-            xor a
-            out (_VDP_DATA), a
-            ld a, 0 (iy)
-            xor a
-            out (_VDP_DATA), a
+            ld a, 0 (iy)        ; 19 cycles
+            out (_VDP_DATA), a  ; 11 cycles; total 30
+
+            ld a, 1 (iy)        ; 19 cycles
+            out (_VDP_DATA), a  ; 11 cycles; total 30
+
+            xor a               ; 4 cycles
+            ld b, 0 (iy)        ; 19 cycles
+            out (_VDP_DATA), a  ; 11 cycles; total 34
+
+            ld b, 0 (iy)        ; 19 cycles
+            out (_VDP_DATA), a  ; 11 cycles; total 30
 
             ld de, #16
             add iy, de
@@ -177,17 +179,17 @@ static void screen_copy_thumbnail_row(uint8_t * dest, const uint8_t * sour) {
             out (c), h
         .endm
 
-        ld a, 0 (iy)
-        out (_VDP_DATA), a
-        ld a, 1 (iy)
-        nop
-        out (_VDP_DATA), a
-        ld a, 0 (iy)
-        xor a
-        out (_VDP_DATA), a
-        ld a, 0 (iy)
-        xor a
-        out (_VDP_DATA), a
+        ld a, 0 (iy)            ; 19 cycles
+        out (_VDP_DATA), a      ; 11 cycles; total 30
+
+        ld a, 1 (iy)            ; 19 cycles
+        out (_VDP_DATA), a      ; 11 cycles; total 30
+
+        ld b, 0 (iy)            ; 19 cycles
+        out (_VDP_DATA), a      ; 11 cycles; total 30
+
+        ld b, 0 (iy)            ; 19 cycles
+        out (_VDP_DATA), a      ; 11 cycles; total 30
 
         ld hl, #__shadow_OAM_OFF
         dec (hl)
@@ -217,19 +219,21 @@ static void screen_clear_thumbnail_row(uint8_t * dest, uint16_t fill) {
         out (_VDP_CMD), a
 
         .rept 3
-            out (c), b
-            xor a
-            push hl
-            pop hl
-            out (c), b
-            nop
-            push hl
-            pop hl
-            out (c), b
-            nop
-            push hl
-            pop hl
-            out (c), b
+            nop                 ; 4 cycles
+            jr .+2              ; 12 cycles
+            out (c), b          ; 12 cycles; total 28
+
+            nop                 ; 4 cycles
+            jr .+2              ; 12 cycles
+            out (c), b          ; 12 cycles; total 28
+
+            nop                 ; 4 cycles
+            jr .+2              ; 12 cycles
+            out (c), b          ; 12 cycles; total 28
+
+            nop                 ; 4 cycles
+            jr .+2              ; 12 cycles
+            out (c), b          ; 12 cycles; total 28
 
             ld de, #32
             add hl, de
@@ -241,19 +245,21 @@ static void screen_clear_thumbnail_row(uint8_t * dest, uint16_t fill) {
             out (_VDP_CMD), a
         .endm
 
-        out (c), b
-        xor a
-        push hl
-        pop hl
-        out (c), b
-        nop
-        push hl
-        pop hl
-        out (c), b
-        nop
-        push hl
-        pop hl
-        out (c), b
+        nop                     ; 4 cycles
+        jr .+2                  ; 12 cycles
+        out (c), b              ; 12 cycles; total 28
+
+        nop                     ; 4 cycles
+        jr .+2                  ; 12 cycles
+        out (c), b              ; 12 cycles; total 28
+
+        nop                     ; 4 cycles
+        jr .+2                  ; 12 cycles
+        out (c), b              ; 12 cycles; total 28
+
+        nop                     ; 4 cycles
+        jr .+2                  ; 12 cycles
+        out (c), b              ; 12 cycles; total 28
 
         ld hl, #__shadow_OAM_OFF
         dec (hl)
