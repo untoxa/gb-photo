@@ -41,6 +41,12 @@ uint8_t * userinfo_get_username(uint8_t * buf) BANKED {
     for (uint8_t i = 0, *src = cam_owner_data.user_info.user_name; i != sizeof(cam_owner_data.user_info.user_name); i++, src++) {
         *dest++ = ((*src < 0x50) || (*src > 0xdf)) ? ' ' : character_array[(*src - 0x50)];
     }
+    while (dest > buf) {
+        if (*(--dest) != ' ') {
+            ++dest;
+            break;
+        }
+    };
     *dest = 0;
     return buf;
 }
@@ -70,4 +76,32 @@ uint8_t * userinfo_get_birthdate(uint8_t * buf) BANKED {
 uint8_t userinfo_get_gender(void) BANKED {
     CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
     return ((cam_owner_data.user_info.gender_blood & 0x03) != 0x03) ? cam_owner_data.user_info.gender_blood & 0x03 : 0;
+}
+
+void userinfo_set_username(uint8_t * buf) BANKED {
+    CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
+    memset(cam_owner_data.user_info.user_name, 0x55 + 0x50, sizeof(cam_owner_data.user_info.user_name));
+
+    uint8_t len = strlen(buf);
+    if (len > sizeof(cam_owner_data.user_info.user_name)) len = sizeof(cam_owner_data.user_info.user_name);
+
+    for (uint8_t *src = buf, *dest = cam_owner_data.user_info.user_name; src != buf + len;  src++, dest++) {
+        if (*src != ' ') {
+            for (uint8_t i = 0; i != sizeof(character_array); i++) {
+                if (*src == character_array[i]) {
+                    *dest = i + 0x50;
+                    break;
+                }
+            }
+        }
+    }
+
+    protected_owner_info_write();
+}
+
+void userinfo_set_gender(uint8_t gender) BANKED {
+    CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
+    cam_owner_data.user_info.gender_blood = gender & 0x03;
+
+    protected_owner_info_write();
 }

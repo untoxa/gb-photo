@@ -21,6 +21,7 @@
 #include "menu_codes.h"
 #include "menu_yesno.h"
 #include "menu_spinedit.h"
+#include "menu_edit.h"
 
 #include "sound_menu_alter.h"
 
@@ -414,6 +415,27 @@ const menu_t AutoexpAreaSubMenu = {
 };
 
 
+static uint8_t spinedit_gender_value = 0;
+const spinedit_value_names_t GenderSpinEditNames[N_GENDER_TYPES] = {
+    { .value = gender_type_not_set,     .name = " not set\t" },
+    { .value = gender_type_male,        .name = " male\t\t"  },
+    { .value = gender_type_female,      .name = " female\t"  }
+};
+const spinedit_params_t GenderSpinEditParams = {
+    .caption = "Gender:",
+    .min_value = 0,
+    .max_value = MAX_INDEX(GenderSpinEditNames),
+    .value = &spinedit_gender_value,
+    .names = GenderSpinEditNames,
+    .last_name = LAST_ITEM(GenderSpinEditNames)
+};
+const uint8_t * const GenderNames[N_GENDER_TYPES] = {
+    [gender_type_not_set]    = "not set",
+    [gender_type_male]       = "male",
+    [gender_type_female]     = "felame"
+};
+
+
 static uint8_t spinedit_dither_value = 0;
 const spinedit_value_names_t DitherSpinEditNames[N_DITHER_TYPES] = {
     { .value = dither_type_Off,         .name = " Off\t\t"   },
@@ -449,6 +471,7 @@ const uint8_t * const DitherNames[N_DITHER_TYPES] = {
 };
 
 
+uint8_t onTranslateSubResultUserInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onShowUserInfo(const struct menu_t * self, uint8_t * param);
 uint8_t * onUserInfoItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
 uint8_t onUserInfoMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self);
@@ -465,54 +488,64 @@ const menu_item_t UserInfoMenuItems[] = {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 5, .ofs_y = 3, .width = 10,
         .id = idPopupCameraOwnerName,
-        .caption = " %s",
+        .caption = "%s",
         .onPaint = onUserInfoItemPaint,
         .onGetProps = onUserInfoMenuItemProps,
-        .result = ACTION_NONE
+        .result = ACTION_OWNER_INFO_NAME
     }, {
-        .sub = NULL, .sub_params = NULL,
+        .sub = &SpinEditMenu, .sub_params = (uint8_t *)&GenderSpinEditParams,
         .ofs_x = 5, .ofs_y = 4, .width = 10,
         .id = idPopupCameraOwnerGender,
-        .caption = " %s",
+        .caption = "%s",
         .onPaint = onUserInfoItemPaint,
         .onGetProps = onUserInfoMenuItemProps,
-        .result = ACTION_NONE
+        .result = ACTION_OWNER_INFO_GENDER
     }, {
         .sub = NULL, .sub_params = NULL,
         .ofs_x = 5, .ofs_y = 5, .width = 10,
         .id = idPopupCameraOwnerBirth,
-        .caption = " %s",
+        .caption = "%s",
         .onPaint = onUserInfoItemPaint,
         .onGetProps = onUserInfoMenuItemProps,
-        .result = ACTION_NONE
+        .result = ACTION_OWNER_INFO_BIRTH
     }
 };
 const menu_t UserInfoMenu = {
     .x = 2, .y = 4, .width = 16, .height = 9,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = UserInfoMenuItems, .last_item = LAST_ITEM(UserInfoMenuItems),
-    .onShow = onShowUserInfo, .onTranslateKey = NULL, .onTranslateSubResult = NULL
+    .onShow = onShowUserInfo, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultUserInfo
 };
+uint8_t onTranslateSubResultUserInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
+    menu;
+    switch (self->id) {
+        case idPopupCameraOwnerGender:
+            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
+        default:
+            break;
+    }
+    return value;
+}
 uint8_t onUserInfoMenuItemProps(const struct menu_t * menu, const struct menu_item_t * self) {
     menu; self;
     switch (self->id) {
         case idPopupCameraOwnerName:
         case idPopupCameraOwnerGender:
+            return ITEM_TEXT_CENTERED;
         case idPopupCameraOwnerBirth:
-            return ITEM_DISABLED;
+            return ITEM_DISABLED | ITEM_TEXT_CENTERED;
         default:
             return ITEM_TEXT_CENTERED;
     }
 }
 uint8_t * onUserInfoItemPaint(const struct menu_t * menu, const struct menu_item_t * self) {
     menu;
-    static const uint8_t * const genders[] = {"not set", "male", "female"};
     switch (self->id) {
         case idPopupCameraOwnerName:
             sprintf(text_buffer, self->caption, userinfo_get_username(text_buffer_extra));
             break;
         case idPopupCameraOwnerGender:
-            sprintf(text_buffer, self->caption, genders[userinfo_get_gender()]);
+            sprintf(text_buffer, self->caption, GenderNames[userinfo_get_gender()]);
             break;
         case idPopupCameraOwnerBirth:
             sprintf(text_buffer, self->caption, userinfo_get_birthdate(text_buffer_extra));
@@ -527,9 +560,12 @@ uint8_t onShowUserInfo(const menu_t * self, uint8_t * param) {
     param;
     menu_draw_frame(self);
     menu_draw_shadow(self);
+
+    spinedit_gender_value = userinfo_get_gender();
+    if (spinedit_gender_value >= N_GENDER_TYPES) spinedit_gender_value = 0;
+
     menu_text_out(self->x +  1, self->y,      14, BLACK_ON_WHITE, ITEM_TEXT_CENTERED, "User information:");
     menu_text_out(self->x +  1, self->y +  2,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "UserID:");
-    menu_text_out(self->x +  5, self->y +  2, 11, BLACK_ON_WHITE, ITEM_TEXT_CENTERED, userinfo_get_userid(text_buffer_extra));
     menu_text_out(self->x +  1, self->y +  3,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Name:");
     menu_text_out(self->x +  1, self->y +  4,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Gender:");
     menu_text_out(self->x +  1, self->y +  5,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Birth:");
@@ -618,6 +654,20 @@ static const menu_item_t * camera_popup_last_selection = NULL;
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     switch (self->id) {
+        case idPopupCameraOwnerInfo:
+            switch (value) {
+                case ACTION_OWNER_INFO_NAME:
+                    if (Edit(userinfo_get_username(text_buffer_extra), sizeof(cam_owner_data.user_info.user_name)) == MENU_RESULT_OK) {
+                        userinfo_set_username(text_buffer_extra);
+                    }
+                    return ACTION_SET_OWNER_INFO;
+                case ACTION_OWNER_INFO_GENDER:
+                    userinfo_set_gender(spinedit_gender_value);
+                    return ACTION_SET_OWNER_INFO;
+                default:
+                    break;
+            }
+            break;
         case idPopupCameraDither:
         case idPopupCameraRestore:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
@@ -726,23 +776,25 @@ uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_aeb_exp_step = OPTION(aeb_overexp_step);
     spinedit_dither_value = SETTING(dithering);
     uint8_t menu_result;
-    switch (menu_result = menu_execute(&CameraPopupMenu, NULL, camera_popup_last_selection)) {
-        case ACTION_TRIGGER_TIMER:
-            OPTION(shutter_timer) = spinedit_timer_value;
-            break;
-        case ACTION_TRIGGER_INTERVAL:
-            OPTION(shutter_counter) = spinedit_counter_value;
-            break;
-        case ACTION_TRIGGER_AEB:
-            OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
-            OPTION(aeb_overexp_step) = spinedit_aeb_exp_step;
-            break;
-        case ACTION_SET_DITHERING:
-            SETTING(dithering) = spinedit_dither_value;
-            break;
-        default:
-            break;
-    }
+    do {
+        switch (menu_result = menu_execute(&CameraPopupMenu, NULL, camera_popup_last_selection)) {
+            case ACTION_TRIGGER_TIMER:
+                OPTION(shutter_timer) = spinedit_timer_value;
+                break;
+            case ACTION_TRIGGER_INTERVAL:
+                OPTION(shutter_counter) = spinedit_counter_value;
+                break;
+            case ACTION_TRIGGER_AEB:
+                OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
+                OPTION(aeb_overexp_step) = spinedit_aeb_exp_step;
+                break;
+            case ACTION_SET_DITHERING:
+                SETTING(dithering) = spinedit_dither_value;
+                break;
+            default:
+                break;
+        }
+    } while (menu_result == ACTION_SET_OWNER_INFO);
     return menu_result;
 }
 

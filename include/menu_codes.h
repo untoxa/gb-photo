@@ -102,6 +102,11 @@
 #define ACTION_AUTOEXP_BOTTOM       113
 #define ACTION_AUTOEXP_LEFT         114
 
+// userinfo actions
+#define ACTION_OWNER_INFO_NAME      120
+#define ACTION_OWNER_INFO_GENDER    121
+#define ACTION_OWNER_INFO_BIRTH     122
+
 // global actions
 #define ACTION_MAIN_MENU            150
 #define ACTION_ABOUT                151
