@@ -165,6 +165,13 @@ uint16_t protected_checksum(uint8_t * address, uint8_t length) {
     return (uint16_t)(bxor << 8) | bsum;
 }
 
+void protected_owner_info_write(void) BANKED {
+    CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
+    cam_owner_data.magic = block_magic;
+    cam_owner_data.magic.crc = protected_checksum((uint8_t *)&cam_owner_data.user_info, sizeof(cam_owner_data.user_info));
+    cam_owner_data_echo = cam_owner_data;
+}
+
 static inline cam_image_metadata_block_t * cam_image_metadata(uint8_t slot) {
     return ((slot & 1) ? &image_second_meta : &image_first_meta);
 }
@@ -304,7 +311,7 @@ uint8_t INIT_module_sysmessages(void) BANKED {
         menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, "data by the original camera ROM.");
         y++;
         for (uint8_t i = protected_status, * const *ptr = repair_messages; (i); i >>= 1, ptr++) {
-            menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, *ptr);
+            if (i & 0x01) menu_text_out(0, y++, 0, WHITE_ON_BLACK, ITEM_DEFAULT, *ptr);
         }
     }
     if (camera_settings_reset) {

@@ -39,6 +39,7 @@ void protected_generate_thumbnail(uint8_t slot) BANKED;
 void protected_lastseen_to_slot(uint8_t slot, camera_flip_e flip) BANKED;
 uint8_t protected_metadata_read(uint8_t slot, uint8_t * dest, uint8_t size) BANKED;
 uint8_t protected_metadata_write(uint8_t slot, uint8_t * dest, uint8_t size) BANKED;
+void protected_owner_info_write(void) BANKED;
 void protected_image_owner_write(uint8_t slot) BANKED;
 
 #endif
