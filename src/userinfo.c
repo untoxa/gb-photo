@@ -23,7 +23,19 @@ static const uint8_t character_array[] = {
     '6', '7', '8', '9', '/', ':', '~', '"', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' '
 };
 
+extern uint32_t SHADOW;
 uint8_t * userinfo_get_userid(uint8_t * buf) BANKED {
+    CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
+    if (cam_owner_data.user_info.user_id == 0) {
+        cam_owner_data.user_info.user_id = SHADOW ^ sys_time;
+        for (uint8_t i = 0, *src = &cam_owner_data.user_info.user_id; i != 4; i++, src++) {
+            uint8_t a = *src & 0x0f, b = *src >> 4;
+            if (a > 10) a -= 10;
+            if (b > 10) b -= 10;
+            *src = (++b << 4) | ++a;
+        }
+        protected_owner_info_write();
+    }
     CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
     strcpy(buf, "GB-");
     uint8_t *dest = buf + 3;

@@ -581,6 +581,7 @@ uint8_t onShowUserInfo(const menu_t * self, uint8_t * param) {
 
     menu_text_out(self->x +  1, self->y,      14, BLACK_ON_WHITE, ITEM_TEXT_CENTERED, "User information:");
     menu_text_out(self->x +  1, self->y +  2,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "UserID:");
+    menu_text_out(self->x +  5, self->y +  2, 10, BLACK_ON_WHITE, ITEM_TEXT_CENTERED, userinfo_get_userid(text_buffer));
     menu_text_out(self->x +  1, self->y +  3,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Name:");
     menu_text_out(self->x +  1, self->y +  4,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Gender:");
     menu_text_out(self->x +  1, self->y +  5,  0, BLACK_ON_WHITE, ITEM_DEFAULT,       "Birth:");
