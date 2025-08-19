@@ -471,6 +471,7 @@ const uint8_t * const DitherNames[N_DITHER_TYPES] = {
 };
 
 
+uint8_t onExecuteUserInfo(const struct menu_t * menu, const struct menu_item_t * selection);
 uint8_t onTranslateSubResultUserInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value);
 uint8_t onShowUserInfo(const struct menu_t * self, uint8_t * param);
 uint8_t * onUserInfoItemPaint(const struct menu_t * menu, const struct menu_item_t * self);
@@ -514,13 +515,27 @@ const menu_t UserInfoMenu = {
     .x = 2, .y = 4, .width = 16, .height = 9,
     .cancel_mask = J_B, .cancel_result = MENU_RESULT_OK,
     .items = UserInfoMenuItems, .last_item = LAST_ITEM(UserInfoMenuItems),
-    .onShow = onShowUserInfo, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultUserInfo
+    .onShow = onShowUserInfo, .onTranslateKey = NULL, .onTranslateSubResult = onTranslateSubResultUserInfo, .onExecute = onExecuteUserInfo
 };
+uint8_t onExecuteUserInfo(const struct menu_t * menu, const struct menu_item_t * selection) {
+    menu;
+    switch (selection->id) {
+        case idPopupCameraOwnerName:
+            if (Edit(userinfo_get_username(text_buffer_extra), sizeof(cam_owner_data.user_info.user_name)) == MENU_RESULT_OK) {
+                userinfo_set_username(text_buffer_extra);
+            }
+            return MENU_RESULT_RETURN;
+        default:
+            break;
+    }
+    return selection->result;
+}
 uint8_t onTranslateSubResultUserInfo(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     switch (self->id) {
         case idPopupCameraOwnerGender:
-            return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
+            if (value == MENU_RESULT_YES) userinfo_set_gender(spinedit_gender_value);
+            return MENU_RESULT_RETURN;
         default:
             break;
     }
@@ -654,20 +669,6 @@ static const menu_item_t * camera_popup_last_selection = NULL;
 uint8_t onTranslateSubResultCameraPopup(const struct menu_t * menu, const struct menu_item_t * self, uint8_t value) {
     menu;
     switch (self->id) {
-        case idPopupCameraOwnerInfo:
-            switch (value) {
-                case ACTION_OWNER_INFO_NAME:
-                    if (Edit(userinfo_get_username(text_buffer_extra), sizeof(cam_owner_data.user_info.user_name)) == MENU_RESULT_OK) {
-                        userinfo_set_username(text_buffer_extra);
-                    }
-                    return ACTION_SET_OWNER_INFO;
-                case ACTION_OWNER_INFO_GENDER:
-                    userinfo_set_gender(spinedit_gender_value);
-                    return ACTION_SET_OWNER_INFO;
-                default:
-                    break;
-            }
-            break;
         case idPopupCameraDither:
         case idPopupCameraRestore:
             return (value == MENU_RESULT_YES) ? self->result : MENU_RESULT_NO;
@@ -776,25 +777,23 @@ uint8_t menu_popup_camera_execute(void) BANKED {
     spinedit_aeb_exp_step = OPTION(aeb_overexp_step);
     spinedit_dither_value = SETTING(dithering);
     uint8_t menu_result;
-    do {
-        switch (menu_result = menu_execute(&CameraPopupMenu, NULL, camera_popup_last_selection)) {
-            case ACTION_TRIGGER_TIMER:
-                OPTION(shutter_timer) = spinedit_timer_value;
-                break;
-            case ACTION_TRIGGER_INTERVAL:
-                OPTION(shutter_counter) = spinedit_counter_value;
-                break;
-            case ACTION_TRIGGER_AEB:
-                OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
-                OPTION(aeb_overexp_step) = spinedit_aeb_exp_step;
-                break;
-            case ACTION_SET_DITHERING:
-                SETTING(dithering) = spinedit_dither_value;
-                break;
-            default:
-                break;
-        }
-    } while (menu_result == ACTION_SET_OWNER_INFO);
+    switch (menu_result = menu_execute(&CameraPopupMenu, NULL, camera_popup_last_selection)) {
+        case ACTION_TRIGGER_TIMER:
+            OPTION(shutter_timer) = spinedit_timer_value;
+            break;
+        case ACTION_TRIGGER_INTERVAL:
+            OPTION(shutter_counter) = spinedit_counter_value;
+            break;
+        case ACTION_TRIGGER_AEB:
+            OPTION(aeb_overexp_count) = spinedit_aeb_overexp_count;
+            OPTION(aeb_overexp_step) = spinedit_aeb_exp_step;
+            break;
+        case ACTION_SET_DITHERING:
+            SETTING(dithering) = spinedit_dither_value;
+            break;
+        default:
+            break;
+    }
     return menu_result;
 }
 
