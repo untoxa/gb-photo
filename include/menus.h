@@ -7,6 +7,7 @@ typedef struct menu_t;
 typedef struct menu_item_t;
 
 #define MENU_RESULT_NONE        0
+#define MENU_RESULT_RETURN      1
 
 #define MENU_FLAGS_NONE         0x00
 #define MENU_FLAGS_INVERSE      0x01
@@ -58,6 +59,7 @@ typedef struct menu_t {
     idle_handler_t * onHelpContext;
     menu_translate_t * onTranslateKey;
     menu_translate_t * onTranslateSubResult;
+    idle_handler_t * onExecute;
 } menu_t;
 
 void menu_text_out(uint8_t x, uint8_t y, uint8_t w, uint8_t c, uint8_t props, const uint8_t * text);

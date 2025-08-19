@@ -146,7 +146,14 @@ uint8_t menu_execute(const menu_t * menu, uint8_t * param, const menu_item_t * s
             if (selection->sub) {
                 result = menu_execute(selection->sub, selection->sub_params, NULL);
                 if (menu->onTranslateSubResult) result = menu->onTranslateSubResult(menu, selection, result);
+            } else if (menu->onExecute) {
+                result = menu->onExecute(menu, selection);
             } else result = selection->result;
+            if (result == MENU_RESULT_RETURN) {
+                menu_redraw(menu, param, selection);
+                JOYPAD_RESET();
+                result =  MENU_RESULT_NONE;
+            }
         } else if (KEY_PRESSED(menu->cancel_mask)) {
             result = menu->cancel_result;
         }

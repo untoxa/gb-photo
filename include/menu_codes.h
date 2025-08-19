@@ -2,7 +2,8 @@
 #define __MENU_CODES_H_INCLUDE__
 
 // #define MENU_RESULT_NONE            0    // defined in menus.h
-#define MENU_RESULT_CLOSE           1
+// #define MENU_RESULT_RETURN          1    // defined in menus.h
+#define MENU_RESULT_CLOSE           2
 
 // default actions
 #define ACTION_NONE MENU_RESULT_CLOSE
