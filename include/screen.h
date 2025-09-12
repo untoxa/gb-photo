@@ -40,10 +40,10 @@ inline uint8_t screen_clear_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uin
 }
 
 inline uint8_t screen_restore_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-#if defined(NINTENDO)
-    return (w) ? set_bkg_submap(x, y, w, h, screen_tile_map, DEVICE_SCREEN_WIDTH), w : w;
-#elif defined(SEGA)
+#if (__GBDK_VERSION < 450) && defined(SEGA)
     return (w) ? set_tile_submap(x, y, w, h, DEVICE_SCREEN_WIDTH, screen_tile_map), w : w;
+#else 
+    return (w) ? set_tile_submap(x, y, w, h, screen_tile_map, DEVICE_SCREEN_WIDTH), w : w;
 #endif
 }
 
