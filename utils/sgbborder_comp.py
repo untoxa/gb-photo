@@ -3,18 +3,26 @@ import sys
 from pathlib import Path
 from optparse import OptionParser
 
+len_mask    = 0x3F;
+token_mask  = 0xC0;
+
+token_byte  = 0x00
+token_word  = 0x40
+token_str   = 0x80
+token_trash = 0xC0
+
 def gbcompress(data):
     outbuf = bytearray()
     inbuf = bytearray(data)
-    
+
     position = 0
 
     size_in = len(data)
     if size_in >= 0x10000:
-        return None
-    
+        return outbuf
+
     trash_len = 0;
-        
+
     while (position < size_in):
 
         # Check for rle8
@@ -38,12 +46,12 @@ def gbcompress(data):
                     break;
         else:
             rle_u16_len = 0;
-        
+
         # Check for matching sequences starting at current position against all previous data beginning at start up to 63 bytes max
         rle_str_back_offset = 0;
         rle_str_len = 0;
         rle_str_start = 0;
-        
+
         while (rle_str_start < position):
             rle_str_len_work = 0;
 
@@ -63,39 +71,39 @@ def gbcompress(data):
         # Write out any rle data if it's ready
         if ((rle_u8_len > 2) and (rle_u8_len > rle_u16_len) and (rle_u8_len > rle_str_len)):
             if (trash_len > 0):
-                outbuf.append(((trash_len - 1) & 0x3F) | 0xC0)
+                outbuf.append(((trash_len - 1) & len_mask) | token_trash)
                 outbuf.extend(bytearray(data[position-trash_len:position]))
                 trash_len = 0
 
-            outbuf.append((rle_u8_len - 1) & 0x3F)
+            outbuf.append(((rle_u8_len - 1) & len_mask) | token_byte)
             outbuf.append(rle_u8_match)
 
             position += rle_u8_len
-        elif ((rle_u16_len > 2) and ((rle_u16_len*2) > rle_str_len)):
+        elif ((rle_u16_len > 2) and ((rle_u16_len * 2) > rle_str_len)):
             if (trash_len > 0):
-                outbuf.append(((trash_len - 1) & 0x3F) | 0xC0)
+                outbuf.append(((trash_len - 1) & len_mask) | token_trash)
                 outbuf.extend(bytearray(data[position-trash_len:position]))
                 trash_len = 0
 
-            outbuf.append(((rle_u16_len - 1) & 0x3F) | 0x40)
+            outbuf.append(((rle_u16_len - 1) & len_mask) | token_word)
             outbuf.append((rle_u16_match >> 8) & 0xff)
             outbuf.append(rle_u16_match & 0xff)
 
             position += rle_u16_len * 2
         elif (rle_str_len > 3):
             if (trash_len > 0):
-                outbuf.append(((trash_len - 1) & 0x3F) | 0xC0)
+                outbuf.append(((trash_len - 1) & len_mask) | token_trash)
                 outbuf.extend(bytearray(data[position-trash_len:position]))
                 trash_len = 0
 
             tmpofs = (rle_str_back_offset ^ 0xFFFF) + 1;
-            outbuf.append(((rle_str_len - 1) & 0x3F) | 0x80)            
+            outbuf.append(((rle_str_len - 1) & len_mask) | token_str)
             outbuf.append(tmpofs & 0xff)
             outbuf.append((tmpofs >> 8) & 0xff)
 
             position += rle_str_len
         elif (trash_len >= 64):
-            outbuf.append(((trash_len - 1) & 0x3F) | 0xC0)
+            outbuf.append(((trash_len - 1) & len_mask) | token_trash)
             outbuf.extend(bytearray(data[position-trash_len:position]))
             trash_len = 0
         else:
@@ -104,13 +112,13 @@ def gbcompress(data):
 
     # Write ramaining uncompressed data
     if (trash_len > 0):
-        outbuf.append(((trash_len - 1) & 0x3F) | 0xC0)
+        outbuf.append(((trash_len - 1) & len_mask) | token_trash)
         outbuf.extend(bytearray(data[position-trash_len:position]))
         trash_len = 0
-        
+
     # Write terminator
     outbuf.append(0x00)
-    
+
     return outbuf
 
 def write_array(f, ident, data):
@@ -182,5 +190,6 @@ def main(argv=None):
                     outh.write(bytes("#define size_{:s}{:d} 0\n\n".format(infilename.stem, i), "ascii"))
                 
                 narg += 1
+
 if __name__=='__main__':
     main()
