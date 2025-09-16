@@ -35,6 +35,8 @@
 typedef struct border_descriptor_t {
     const uint8_t * tiles;
     size_t tiles_size;
+    const uint8_t * tiles_ex;
+    size_t tiles_ex_size;
     const uint8_t * map;
     size_t map_size;
     const uint8_t * palettes;

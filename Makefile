@@ -14,12 +14,14 @@ endif
 
 LCC = $(GBDK_HOME_UNIX)/bin/lcc
 PNG2ASSET = $(GBDK_HOME_UNIX)/bin/png2asset
+GBCOMPRESS = $(GBDK_HOME_UNIX)/bin/gbcompress
 
 # Set platforms to build here, spaced separated. (These are in the separate Makefile.targets)
 # They can also be built/cleaned individually: "make gg" and "make gg-clean"
 # Possible are: gb gbc pocket sms gg
 #TARGETS = gb gbc pocket sms gg megaduck
 #TARGETS = gg
+#TARGETS = gbc
 TARGETS = gbc megaduck gg
 
 LIBRARIES =
@@ -134,7 +136,8 @@ $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/backgrounds/%.png $$(wildcard $(RESDIR)/gfx
 
 .SECONDEXPANSION:
 $(OBJDIR)/%.c:	$(RESDIR)/gfx/$(PLAT)/borders/%.png $$(wildcard $(RESDIR)/gfx/$(PLAT)/borders/%.png.meta)
-	$(PNG2ASSET) $< -c $@ -map `cat <$<.meta 2>/dev/null`
+	$(PNG2ASSET) $< -c $@ -bin -map `cat <$<.meta 2>/dev/null`
+	$(PYTHON) utils/sgbborder_comp.py -o $@ -i $(basename $(notdir $@)) $(basename $@)_palettes.bin $(basename $@)_tiles.bin $(basename $@)_map.bin
 
 #always rebuild
 .PHONY: $(ALWAYS) remote

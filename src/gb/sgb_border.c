@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include <gbdk/platform.h>
+#include <gbdk/gbdecompress.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -22,6 +23,13 @@
 
 static unsigned char map_buf[2];
 static border_descriptor_t border_desc;
+
+void gb_decompress_sprite_banked_data(uint8_t first_tile, const uint8_t * sour, uint8_t bank) NONBANKED {
+    uint8_t save = CURRENT_ROM_BANK;
+    CAMERA_SWITCH_ROM(bank);
+    gb_decompress_sprite_data(first_tile, sour);
+    CAMERA_SWITCH_ROM(save);
+}
 
 void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED {
     banked_memcpy(&border_desc, desc, sizeof(border_desc), bank);
@@ -48,16 +56,16 @@ void set_sgb_border(const border_descriptor_t * desc, uint8_t bank) BANKED {
 
 
     // transfer tile data
-    banked_vmemcpy(_VRAM8000, (uint8_t *)border_desc.tiles, MIN(border_desc.tiles_size, 0x1000), border_desc.bank);
+    gb_decompress_sprite_banked_data(0, (uint8_t *)border_desc.tiles, border_desc.bank);
     SGB_TRANSFER(map_buf, (SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK0);
-    if (border_desc.tiles_size > 0x1000) {
-        banked_vmemcpy(_VRAM8000, (uint8_t *)(border_desc.tiles + 0x1000), border_desc.tiles_size - 0x1000, border_desc.bank);
+    if (border_desc.tiles_ex_size) {
+        gb_decompress_sprite_banked_data(0, (uint8_t *)border_desc.tiles_ex, border_desc.bank);
         SGB_TRANSFER(map_buf, (SGB_CHR_TRN << 3) | 1, SGB_CHR_BLOCK1);
     }
 
     // transfer map and palettes
-    banked_vmemcpy(_VRAM8000, (uint8_t *)border_desc.map, border_desc.map_size, border_desc.bank);
-    banked_vmemcpy(_VRAM8800, (uint8_t *)border_desc.palettes, border_desc.palettes_size, border_desc.bank);
+    gb_decompress_sprite_banked_data(0, (uint8_t *)border_desc.map, border_desc.bank);
+    gb_decompress_sprite_banked_data(128, (uint8_t *)border_desc.palettes, border_desc.bank);
     SGB_TRANSFER(map_buf, (SGB_PCT_TRN << 3) | 1, 0);
 
     // clear SCREEN

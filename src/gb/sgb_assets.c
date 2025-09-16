@@ -11,14 +11,11 @@
 #include "gbcamera.h"
 #include "state_camera.h"
 
-#if defined(NINTENDO)
 #include "camera_sgb_border.h"
 #include "camera_sgb_border_default.h"
-#endif
 
 BANKREF(module_sgb_assets)
 
-#if defined(NINTENDO)
 static const uint8_t sgb_palette_gray[] = {
     SGB_PKT(SGB_PAL_01),
     SNES_LE(SNES_WHITE), SNES_LE(SNES_LIGHTGRAY), SNES_LE(SNES_DARKGRAY), SNES_LE(SNES_BLACK),
@@ -34,26 +31,26 @@ static const uint8_t * const sgb_palettes[] = { sgb_palette_gray, sgb_palette_re
 
 static const border_descriptor_t sgb_borders[] = {
     {
-        .tiles = camera_sgb_border_default_tiles,       .tiles_size = sizeof(camera_sgb_border_default_tiles),
-        .map = camera_sgb_border_default_map,           .map_size = sizeof(camera_sgb_border_default_map),
-        .palettes = camera_sgb_border_default_palettes, .palettes_size = sizeof(camera_sgb_border_default_palettes),
-        .bank = BANK(camera_sgb_border_default)
+        .tiles    = camera_sgb_border_default_tiles0,    .tiles_size    = size_camera_sgb_border_default_tiles0,
+        .tiles_ex = camera_sgb_border_default_tiles1,    .tiles_ex_size = size_camera_sgb_border_default_tiles1,
+        .map      = camera_sgb_border_default_map0,      .map_size      = size_camera_sgb_border_default_map0,
+        .palettes = camera_sgb_border_default_palettes0, .palettes_size = size_camera_sgb_border_default_palettes0,
+        .bank     = BANK(camera_sgb_border_default)
     }, {
-        .tiles = camera_sgb_border_tiles,               .tiles_size = sizeof(camera_sgb_border_tiles),
-        .map = camera_sgb_border_map,                   .map_size = sizeof(camera_sgb_border_map),
-        .palettes = camera_sgb_border_palettes,         .palettes_size = sizeof(camera_sgb_border_palettes),
-        .bank = BANK(camera_sgb_border)
+        .tiles    = camera_sgb_border_tiles0,            .tiles_size    = size_camera_sgb_border_tiles0,
+        .tiles_ex = camera_sgb_border_tiles1,            .tiles_ex_size = size_camera_sgb_border_tiles1,
+        .map      = camera_sgb_border_map0,              .map_size      = size_camera_sgb_border_map0,
+        .palettes = camera_sgb_border_palettes0,         .palettes_size = size_camera_sgb_border_palettes0,
+        .bank     = BANK(camera_sgb_border)
     }
 };
 
 inline void sgb_assets_set_palette(uint8_t palette_index) {
     sgb_transfer((uint8_t *)sgb_palettes[palette_index]);
 }
-#endif
 
 // load the SGB borders and palettes if SGB detected
 uint8_t INIT_module_sgb_assets(void) BANKED {
-#if defined(NINTENDO)
     if (_is_SUPER) {
         CAMERA_SWITCH_RAM(CAMERA_BANK_REGISTERS);
         if (OPTION(fancy_sgb_border)) {
@@ -64,6 +61,5 @@ uint8_t INIT_module_sgb_assets(void) BANKED {
             sgb_assets_set_palette(SGB_PALETTE_GRAY);
         }
     }
-#endif
     return 0;
 }
