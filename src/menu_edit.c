@@ -16,6 +16,7 @@
 
 #include "misc_assets.h"
 #include "keyboard.h"
+#include "keyboard_caps.h"
 #include "cursors.h"
 #include "hand_cursor.h"
 
@@ -66,29 +67,29 @@ typedef struct box_t {
     uint8_t left, top, right, bottom;
 } box_t;
 #define BOX(X, Y, W, H) {(X), (Y), ((X) + (W)), ((Y) + (H))}
-#define BTN(X, Y) {(X), (Y), ((X) + 8), ((Y) + 8)}
+#define BTN(X, Y) {(X), (Y), ((X) + 8), ((Y) + 9)}
 
 static const box_t button_map[] = {
-    BTN(0,  0), BTN(10,  0), BTN(20,  0), BTN(30,  0), BTN(40,  0), BTN(50,  0), BTN(60,  0), BTN(70,  0), BTN(80,  0), BTN(90,  0), BTN(100,  0), BTN(110,  0), BTN(120,  0), BTN(130,  0),
-    BTN(6, 11), BTN(16, 11), BTN(26, 11), BTN(36, 11), BTN(46, 11), BTN(56, 11), BTN(66, 11), BTN(76, 11), BTN(86, 11), BTN(96, 11), BTN(106, 11), BTN(116, 11),
-    BTN(8, 22), BTN(18, 22), BTN(28, 22), BTN(38, 22), BTN(48, 22), BTN(58, 22), BTN(68, 22), BTN(78, 22), BTN(88, 22), BTN(98, 22), BTN(108, 22),
-    BTN(0, 33), BTN(10, 33), BTN(20, 33), BTN(30, 33), BTN(40, 33), BTN(50, 33), BTN(60, 33), BTN(70, 33), BTN(80, 33), BTN(90, 33), BTN(100, 33),
-    BOX(110, 33, 28, 8),                      // space
-    BOX(126, 11, 12, 11), BOX(118, 22, 20, 8) // return
+    BTN(3,  0), BTN(13,  0), BTN(23,  0), BTN(33,  0), BTN(43,  0), BTN(53,  0), BTN(63,  0), BTN(73,  0), BTN(83,  0), BTN(93,  0), BTN(103,  0), BTN(113,  0), BTN(123,  0), BTN(133,  0),
+    BTN(7, 12), BTN(17, 12), BTN(27, 12), BTN(37, 12), BTN(47, 12), BTN(57, 12), BTN(67, 12), BTN(77, 12), BTN(87, 12), BTN(97, 12), BTN(107, 12), BTN(117, 12),
+    BTN(0, 24), BTN(10, 24), BTN(20, 24), BTN(30, 24), BTN(40, 24), BTN(50, 24), BTN(60, 24), BTN(70, 24), BTN(80, 24), BTN(90, 24), BTN(100, 24), BTN(110, 24), BTN(120, 24),
+    BTN(4, 36), BTN(14, 36), BTN(24, 36), BTN(34, 36), BTN(44, 36), BTN(54, 36), BTN(64, 36), BTN(74, 36), BTN(84, 36), BTN(94, 36), BTN(104, 36), BTN(114, 36),
+    BOX(124, 36, 18, 9),                      // space
+    BOX(127, 12, 12, 11), BOX(130, 24, 20, 9) // return
 };
 static const uint8_t lower_case[] = {
-    '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0',  '-',  '=', 0x5c, 0x08,
-    'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',  'o',  'p',  '[',  ']',
-    'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',  0x27,
-    0x0f, 'z',  'x',  'c',  'v',  'b',  'n',  'm',  ',',  '.',  '/',
+    '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0', 0xdf,  '{',  '}', 0x08,
+    'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',  'o',  'p', 0xfc,  '+',
+    0x0f, 'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l', 0xf6,  0xe4, '#',
+    '<',  'z',  'x',  'c',  'v',  'b',  'n',  'm',  ',',  '.',  '-',  '\\',
     ' ',
     0x0d, 0x0d
 };
 static const uint8_t upper_case[] = {
-    '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0',  '-',  '=', 0x5c, 0x08,
-    'Q',  'W',  'E',  'R',  'T',  'Y',  'U',  'I',  'O',  'P',  '[',  ']',
-    'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ';',  0x27,
-    0x0f, 'Z',  'X',  'C',  'V',  'B',  'N',  'M',  ',',  '.',  '/',
+    '!',  '"', 0xa3,  '$',  '%',  '&',  '/',  '(',  ')',  '=',  '?',  '[',  ']', 0x08,
+    'Q',  'W',  'E',  'R',  'T',  'Y',  'U',  'I',  'O',  'P',  '[',  '*',
+    0x0f, 'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ';', 0xd6, 0xc4,
+    '>',  'Z',  'X',  'C',  'V',  'B',  'N',  'M',  ';',  ':',  '_',  '/',
     ' ',
     0x0d, 0x0d
 };
@@ -102,7 +103,7 @@ uint8_t get_keyboard_input(uint8_t x, uint8_t y, bool shift) {
 }
 
 uint8_t onIdleEdit(const struct menu_t * menu, const struct menu_item_t * selection) {
-    menu; selection;
+    selection;
     static uint8_t len, letter;
 
     hide_sprites_range(move_metasprite(hand_cursor, HAND_CURSOR_BASE_TILE, 0, edit_pointer_x, edit_pointer_y), MAX_HARDWARE_SPRITES);
@@ -120,7 +121,17 @@ uint8_t onIdleEdit(const struct menu_t * menu, const struct menu_item_t * select
             case 0x0d:
                 return MENU_RESULT_OK;
             case 0x0f:
-                edit_shift_state = !edit_shift_state;
+                if (edit_shift_state = !edit_shift_state) {
+                    screen_load_image_banked(menu->x + ((menu->width - (keyboard_caps_WIDTH / keyboard_caps_TILE_W)) >> 1), menu->y + 2,
+                                             keyboard_caps_WIDTH / keyboard_caps_TILE_W, keyboard_caps_HEIGHT / keyboard_caps_TILE_H,
+                                             keyboard_caps_tiles, BANK(keyboard_caps)
+                                            );
+                } else {
+                    screen_load_image_banked(menu->x + ((menu->width - (keyboard_WIDTH / keyboard_TILE_W)) >> 1), menu->y + 2,
+                                             keyboard_WIDTH / keyboard_TILE_W, keyboard_HEIGHT / keyboard_TILE_H,
+                                             keyboard_tiles, BANK(keyboard)
+                                            );
+                }
                 break;
             default:
                 if ((len = strlen(edit_text)) < edit_max_len) {
@@ -139,10 +150,10 @@ uint8_t onIdleEdit(const struct menu_t * menu, const struct menu_item_t * select
 uint8_t onShowEdit(const menu_t * self, uint8_t * param) {
     edit_text = param;
 
-    edit_lim_left = edit_pointer_x = ((self->x + 1) << 3) + 3;
-    edit_lim_right = ((self->x + self->width - 1) << 3) - 3;
-    edit_lim_top = edit_pointer_y = ((self->y + 2) << 3) + 3;
-    edit_lim_bottom = ((self->y + self->height) << 3) - 4;
+    edit_lim_left = edit_pointer_x = ((self->x + 1) << 3);
+    edit_lim_right = ((self->x + self->width - 1) << 3) - 1;
+    edit_lim_top = edit_pointer_y = ((self->y + 2) << 3);
+    edit_lim_bottom = ((self->y + self->height) << 3) - 2;
 
     menu_draw_frame(self);
     screen_load_image_banked(self->x + ((self->width - (keyboard_WIDTH / keyboard_TILE_W)) >> 1), self->y + 2, keyboard_WIDTH / keyboard_TILE_W, keyboard_HEIGHT / keyboard_TILE_H, keyboard_tiles, BANK(keyboard));
