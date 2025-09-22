@@ -19,7 +19,7 @@ jobs:
       - name: Install build dependencies
         run: |
           # Pull GBDK-2020
-#          curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/latest/download/gbdk-linux64.tar.gz
+          # curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/latest/download/gbdk-linux64.tar.gz
           curl -Lo gbdk-linux64.tar.gz https://github.com/gbdk-2020/gbdk-2020/releases/download/gbdk-next/gbdk-linux64.tar.gz
           tar xvfz gbdk-linux64.tar.gz
           echo "GBDK_HOME=$(pwd)/gbdk" >> $GITHUB_ENV
