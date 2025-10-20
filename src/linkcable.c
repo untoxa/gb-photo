@@ -29,7 +29,7 @@ void sio_transmit_byte(uint8_t data) NONBANKED NAKED PRESERVES_REGS(iyh, iyl, d,
         ld b, a
         .rept 8
             ld a, b
-            and #LINK_MISO
+            and #LINK_MOSI
             out (c), a
             or #LINK_CLK
             rlc b
