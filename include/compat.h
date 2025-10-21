@@ -48,7 +48,6 @@ __REG _current_rom;
 #ifndef GGEXT_NINT
 #define GGEXT_NINT      0b10000000
 #endif
-#define GGEXT_B_NNIT    7
 
 #define LINK_PIN_CLK    6
 #define LINK_PIN_MOSI   1

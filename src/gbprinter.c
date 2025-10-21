@@ -66,14 +66,12 @@ uint8_t link_exchange(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) {
         ld c, #_GG_EXT_CTL
         out (c), e
         ld c, #_GG_EXT_7BIT
-        out (c), e
         ld b, #8
 1$:
         rlca
         rl e
         rl e
 
-        set GGEXT_B_NNIT, e
         res LINK_PIN_CLK, e
         out (c), e
 
@@ -103,14 +101,12 @@ uint8_t link_exchange_fast(uint8_t data) NAKED PRESERVES_REGS(h, l, iyh, iyl) {
         ld c, #_GG_EXT_CTL
         out (c), e
         ld c, #_GG_EXT_7BIT
-        out (c), e
         ld b, #8
 1$:
         rlca
         rl e
         rl e
 
-        set GGEXT_B_NNIT, e
         res LINK_PIN_CLK, e
         out (c), e
         set LINK_PIN_CLK, e
