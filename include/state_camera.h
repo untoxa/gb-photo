@@ -21,6 +21,11 @@
 BANKREF_EXTERN(state_camera)
 
 typedef enum {
+    set_off = 0,
+    set_on
+} switch_e;
+
+typedef enum {
     camera_mode_manual,
     camera_mode_assisted,
     camera_mode_auto,
@@ -99,29 +104,29 @@ typedef struct shutter_sound_t {
 } shutter_sound_t;
 
 typedef struct camera_state_options_t {
-    camera_mode_e camera_mode       : 4;
-    trigger_mode_e trigger_mode     : 4;
-    after_action_e after_action     : 4;
-    shutter_sound_e shutter_sound   : 4;
+    camera_mode_e camera_mode        : 4;
+    trigger_mode_e trigger_mode      : 4;
+    after_action_e after_action      : 4;
+    shutter_sound_e shutter_sound    : 4;
     uint8_t gallery_picture_idx;
     uint8_t print_frame_idx;
-    bool print_fast                 : 1;
-    bool fancy_sgb_border           : 1;
-    bool show_grid                  : 1;
-    bool save_confirm               : 1;
-    bool ir_remote_shutter          : 1;
-    bool boot_to_camera_mode        : 1;
-    bool double_speed               : 1;
+    switch_e print_fast              : 1;
+    switch_e fancy_sgb_border        : 1;
+    switch_e show_grid               : 1;
+    switch_e save_confirm            : 1;
+    switch_e ir_remote_shutter       : 1;
+    switch_e boot_to_camera_mode     : 1;
+    switch_e double_speed            : 1;
     uint8_t shutter_timer;
     uint8_t shutter_counter;
-    uint8_t cgb_palette_idx         : 4;
-    bool display_exposure           : 1;
-    bool enable_DMA                 : 1;
-    camera_flip_e flip_live_view    : 2;
+    uint8_t cgb_palette_idx          : 4;
+    switch_e display_exposure        : 1;
+    switch_e enable_DMA              : 1;
+    camera_flip_e flip_live_view     : 2;
     uint8_t aeb_overexp_count;
     uint8_t aeb_overexp_step;
-    autoexp_area_e autoexp_area     : 4;
-    cart_type_e cart_type           : 4;
+    autoexp_area_e autoexp_area      : 4;
+    cart_type_e cart_type            : 4;
 } camera_state_options_t;
 
 #define OPTION(OPT) camera_state.OPT
@@ -146,11 +151,11 @@ typedef struct camera_mode_settings_t {
     uint8_t current_contrast;
     uint8_t edge_operation;
     int16_t current_brightness;
-    uint8_t dithering           : 4;
-    bool ditheringHighLight     : 1;
-    bool invertOutput           : 1;
-    bool edge_exclusive         : 1;
-    bool cpu_fast               : 1;
+    uint8_t dithering                : 4;
+    switch_e ditheringHighLight      : 1;
+    switch_e invertOutput            : 1;
+    switch_e edge_exclusive          : 1;
+    switch_e cpu_fast                : 1;
 } camera_mode_settings_t;
 
 typedef struct image_metadata_t {
