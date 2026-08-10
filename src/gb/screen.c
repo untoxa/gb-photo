@@ -92,8 +92,8 @@ lbl:
 }
 
 inline const uint8_t * DMA_HBL_TRANSFER(uint8_t tiles, const uint8_t * sour, const uint8_t * dest) {
-    rHDMA1 = (uint8_t)((uint16_t)sour >> 8), rHDMA2 = (uint8_t)sour;
-    rHDMA3 = (uint8_t)((uint16_t)dest >> 8), rHDMA4 = (uint8_t)dest;
+    rHDMA1 = (uint8_t)((uint16_t)sour >> 8), rHDMA2 = (uint8_t)((uint16_t)sour);
+    rHDMA3 = (uint8_t)((uint16_t)dest >> 8), rHDMA4 = (uint8_t)((uint16_t)dest);
     rHDMA5 = (tiles - 1) | HDMA5F_MODE_HBL;
     return sour + ((uint16_t)tiles << 4);
 }

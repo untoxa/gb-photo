@@ -5,9 +5,9 @@
 
 #include "state_camera.h"
 
-#define HISTOGRAM_TARGET_VALUE ((int16_t)&__histogram_target_value)
-#define HISTOGRAM_MAX_VALUE ((int16_t)&__histogram_max_value)
-#define HISTOGRAM_POINTS_COUNT ((uint8_t)&__histogram_points_count)
+#define HISTOGRAM_TARGET_VALUE ((uint16_t)&__histogram_target_value)
+#define HISTOGRAM_MAX_VALUE ((uint16_t)&__histogram_max_value)
+#define HISTOGRAM_POINTS_COUNT ((uint8_t)((uint16_t)&__histogram_points_count))
 
 extern void __histogram_target_value;
 extern void __histogram_max_value;
