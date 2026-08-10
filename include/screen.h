@@ -11,14 +11,8 @@
 
 #define TO_TILE_ADDRESS(BASE, NO) ((BASE) + ((NO) << DEVICE_TILE_SIZE_BITS))
 
-#if defined(NINTENDO)
-#define TILE_BANK_0 _VRAM8800
-#define TILE_BANK_1 _VRAM8000
-#elif defined(SEGA)
-static uint8_t AT(0x4000) TILE_BANK_0[];
-static uint8_t AT(0x6000) TILE_BANK_1[];
-#endif
-
+extern uint8_t TILE_BANK_0[];
+extern uint8_t TILE_BANK_1[];
 
 BANKREF_EXTERN(module_screen)
 BANKREF_EXTERN(module_display_off)
