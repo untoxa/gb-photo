@@ -148,12 +148,12 @@ $(OBJDIR)/%.o:	$(OBJDIR)/%.c
 
 # Compile .c files in "res/" to .o object files
 $(OBJDIR)/%.o:	$(RESDIR)/%.c
-	$(LCC) -Wf-MMD $(CFLAGS) -c -o $@ $<
+	$(LCC) -Wf-MMD -Wf-Wp-MP $(CFLAGS) -c -o $@ $<
 
 
 # Compile .c files in "src/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/%.c
-	$(LCC) -Wf-MMD $(CFLAGS) $(filter -Wf-ba%, $(subst .d,-Wf-ba,$(suffix $(<:%.c=%)))) -c -o $@ $<
+	$(LCC) -Wf-MMD -Wf-Wp-MP $(CFLAGS) $(filter -Wf-ba%, $(subst .d,-Wf-ba,$(suffix $(<:%.c=%)))) -c -o $@ $<
 
 # Compile .s assembly files in "src/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/%.s
@@ -162,7 +162,7 @@ $(OBJDIR)/%.o:	$(SRCDIR)/%.s
 
 # Compile .c files in "src/<platform>/" to .o object files
 $(OBJDIR)/%.o:	$(SRCPLAT)/%.c
-	$(LCC) -Wf-MMD $(CFLAGS) -c -o $@ $<
+	$(LCC) -Wf-MMD -Wf-Wp-MP $(CFLAGS) -c -o $@ $<
 
 # Compile .s assembly files in "src/<platform>/" to .o object files
 $(OBJDIR)/%.o:	$(SRCPLAT)/%.s
@@ -171,7 +171,7 @@ $(OBJDIR)/%.o:	$(SRCPLAT)/%.s
 
 # Compile .c files in "src/<target>/" to .o object files
 $(OBJDIR)/%.o:	$(SRCPORT)/%.c
-	$(LCC) -Wf-MMD $(CFLAGS) -c -o $@ $<
+	$(LCC) -Wf-MMD -Wf-Wp-MP $(CFLAGS) -c -o $@ $<
 
 # Compile .s assembly files in "src/<target>/" to .o object files
 $(OBJDIR)/%.o:	$(SRCPORT)/%.s
