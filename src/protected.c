@@ -235,6 +235,10 @@ const uint8_t default_calibration[] = {125, 125, 124, 126, 124, 125, 124, 122, 1
 
 uint8_t protected_status = PROTECTED_CORRECT;
 
+static void fill_inc(uint8_t * array, uint8_t size) {
+    for (uint8_t i = 0; (i < size); *array++ = i++);
+}
+
 uint8_t INIT_module_protected(void) BANKED {
     CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
     if (prot_album_crc.crc != protected_checksum(&prot_album, ALBUM_LENGTH)) {
@@ -245,7 +249,7 @@ uint8_t INIT_module_protected(void) BANKED {
         protected_status |= PROTECTED_REPAIR_ALBUM;
     }
     if (prot_vector_crc.crc != protected_checksum(&prot_vector, VECTOR_LENGTH)) {
-        for (uint8_t * ptr = &prot_vector, i = 0; (i != VECTOR_LENGTH); *ptr++ = i++);
+        fill_inc(&prot_vector, VECTOR_LENGTH);
         prot_vector_crc = block_magic;
         prot_vector_crc.crc = protected_checksum(&prot_vector, VECTOR_LENGTH);
         memcpy(&prot_vector_echo, &prot_vector, PROTECTED_BLOCK_SIZE(VECTOR_LENGTH));
