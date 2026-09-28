@@ -235,50 +235,46 @@ const uint8_t default_calibration[] = {125, 125, 124, 126, 124, 125, 124, 122, 1
 
 uint8_t protected_status = PROTECTED_CORRECT;
 
+typedef void fill_func_t(uint8_t *, uint8_t);
+
 static void fill_inc(uint8_t * array, uint8_t size) {
     for (uint8_t i = 0; (i < size); *array++ = i++);
+}
+static void fill_zero(uint8_t * array, uint8_t size) {
+    memset(array, 0, size);
+}
+
+bool check_and_try_repair(uint8_t * block, uint16_t size, fill_func_t * init) {
+    static bool res;
+    static uint8_t * echo;
+    static cam_magic_struct_t * checksum;
+    // check for the main block crc
+    echo = block + PROTECTED_BLOCK_SIZE(size);
+    checksum = block + size;
+    if (checksum->crc == protected_checksum(block, size)) return false;
+    // check for the echo block crc
+    checksum = echo + size;
+    if (res = (checksum->crc != protected_checksum(echo, size))) {
+        // if echo is faulty, reset echo using the init() function
+        if (init) init(echo, size);
+        *checksum = block_magic;
+        checksum->crc = protected_checksum(echo, size);
+    }
+    // copy echo into the main block
+    memcpy(block, echo, PROTECTED_BLOCK_SIZE(size));
+    return res;
 }
 
 uint8_t INIT_module_protected(void) BANKED {
     CAMERA_SWITCH_RAM(CAMERA_BANK_LAST_SEEN);
-    if (prot_album_crc.crc != protected_checksum(&prot_album, ALBUM_LENGTH)) {
-        memset(&prot_album, 0, ALBUM_LENGTH);
-        prot_album_crc = block_magic;
-        prot_album_crc.crc = protected_checksum(&prot_album, ALBUM_LENGTH);
-        memcpy(&prot_album_echo, &prot_album, PROTECTED_BLOCK_SIZE(ALBUM_LENGTH));
-        protected_status |= PROTECTED_REPAIR_ALBUM;
-    }
-    if (prot_vector_crc.crc != protected_checksum(&prot_vector, VECTOR_LENGTH)) {
-        fill_inc(&prot_vector, VECTOR_LENGTH);
-        prot_vector_crc = block_magic;
-        prot_vector_crc.crc = protected_checksum(&prot_vector, VECTOR_LENGTH);
-        memcpy(&prot_vector_echo, &prot_vector, PROTECTED_BLOCK_SIZE(VECTOR_LENGTH));
-        protected_status |= PROTECTED_REPAIR_VECTOR;
-    }
+    if (check_and_try_repair(&prot_album,  ALBUM_LENGTH,  fill_zero)) protected_status |= PROTECTED_REPAIR_ALBUM;
+    if (check_and_try_repair(&prot_vector, VECTOR_LENGTH, fill_inc))  protected_status |= PROTECTED_REPAIR_VECTOR;
     CAMERA_SWITCH_RAM(CAMERA_BANK_OWNER_DATA);
-    if (prot_owner_crc.crc != protected_checksum(&prot_owner, OWNER_LENGTH)) {
-        memset(&prot_owner, 0, OWNER_LENGTH);
-        prot_owner_crc = block_magic;
-        prot_owner_crc.crc = protected_checksum(&prot_owner, OWNER_LENGTH);
-        memcpy(&prot_owner_echo, &prot_owner, PROTECTED_BLOCK_SIZE(OWNER_LENGTH));
-        protected_status |= PROTECTED_REPAIR_OWNER;
-    }
+    if (check_and_try_repair(&prot_owner,  OWNER_LENGTH,  fill_zero)) protected_status |= PROTECTED_REPAIR_OWNER;
     for (uint8_t i = 1; i != 16; i++) {
         CAMERA_SWITCH_RAM(i);
-        if (image0_owner_crc.crc != protected_checksum(&image0_owner, IMAGE0_OWNER_LENGTH)) {
-            memset(&image0_owner, 0, IMAGE0_OWNER_LENGTH);
-            image0_owner_crc = block_magic;
-            image0_owner_crc.crc = protected_checksum(&image0_owner, IMAGE0_OWNER_LENGTH);
-            memcpy(&image0_owner_echo, &image0_owner, PROTECTED_BLOCK_SIZE(IMAGE0_OWNER_LENGTH));
-            protected_status |= PROTECTED_REPAIR_META;
-        }
-        if (image1_owner_crc.crc != protected_checksum(&image1_owner, IMAGE1_OWNER_LENGTH)) {
-            memset(&image1_owner, 0, IMAGE1_OWNER_LENGTH);
-            image1_owner_crc = block_magic;
-            image1_owner_crc.crc = protected_checksum(&image1_owner, IMAGE1_OWNER_LENGTH);
-            memcpy(&image1_owner_echo, &image1_owner, PROTECTED_BLOCK_SIZE(IMAGE1_OWNER_LENGTH));
-            protected_status |= PROTECTED_REPAIR_META;
-        }
+        if (check_and_try_repair(&image0_owner, IMAGE0_OWNER_LENGTH, fill_zero)) protected_status |= PROTECTED_REPAIR_META;
+        if (check_and_try_repair(&image1_owner, IMAGE1_OWNER_LENGTH, fill_zero)) protected_status |= PROTECTED_REPAIR_META;
     }
     if (protected_status != PROTECTED_CORRECT) {
         CAMERA_SWITCH_RAM(CALIBRATION_BANK);
